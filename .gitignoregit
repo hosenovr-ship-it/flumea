@@ -1,0 +1,1 @@
+*.apk rm -r --cached build
