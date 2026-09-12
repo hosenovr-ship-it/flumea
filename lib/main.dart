@@ -1,140 +1,66 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'login_screen.dart';
 
 void main() {
   runApp(const FlumeaApp());
-}
-
-class FlumeaApp extends StatelessWidget {
-  const FlumeaApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'FLUMEA',
-      home: const WelcomeScreen(),
-    );
   }
-}
 
-class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({super.key});
+  class FlumeaApp extends StatelessWidget {
+    const FlumeaApp({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFFF1FBFA),
-                Color(0xFFE2F5F0),
-                Color(0xFFCDEDE5),
-              ],
-            ),
-          ),
-          child: SafeArea(
-            child: Column(
-              children: [
-                const Spacer(),
+      @override
+        Widget build(BuildContext context) {
+            return MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                        title: 'FLUMEA',
+                              home: const WelcomeScreen(),
+                                  );
+                                    }
+                                    }
 
-                const Text(
-                  '≋',
-                  style: TextStyle(
-                    fontSize: 90,
-                    color: Color(0xFF08B878),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                                    class WelcomeScreen extends StatefulWidget {
+                                      const WelcomeScreen({super.key});
 
-                const Text(
-                  'FLUMEA',
-                  textDirection: TextDirection.ltr,
-                  style: TextStyle(
-                    fontSize: 40,
-                    letterSpacing: 8,
-                    color: Color(0xFF14204A),
-                  ),
-                ),
+                                        @override
+                                          State<WelcomeScreen> createState() => _WelcomeScreenState();
+                                          }
 
-                const SizedBox(height: 45),
+                                          class _WelcomeScreenState extends State<WelcomeScreen> {
+                                            @override
+                                              void initState() {
+                                                  super.initState();
 
-                const Text(
-                  'مساعدك اليومي الذكي',
-                  style: TextStyle(
-                    fontSize: 27,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF14204A),
-                  ),
-                ),
+                                                      Timer(const Duration(seconds: 2), () {
+                                                            if (!mounted) return;
 
-                const SizedBox(height: 12),
+                                                                  Navigator.of(context).pushReplacement(
+                                                                          PageRouteBuilder(
+                                                                                    pageBuilder: (context, animation, secondaryAnimation) {
+                                                                                                return const LoginScreen();
+                                                                                                          },
+                                                                                                                    transitionsBuilder:
+                                                                                                                                  (context, animation, secondaryAnimation, child) {
+                                                                                                                                              return FadeTransition(
+                                                                                                                                                            opacity: animation,
+                                                                                                                                                                          child: child,
+                                                                                                                                                                                      );
+                                                                                                                                                                                                },
+                                                                                                                                                                                                          transitionDuration: const Duration(milliseconds: 600),
+                                                                                                                                                                                                                  ),
+                                                                                                                                                                                                                        );
+                                                                                                                                                                                                                            });
+                                                                                                                                                                                                                              }
 
-                const Text(
-                  'للتخطيط، التنفيذ والمراجعة',
-                  style: TextStyle(
-                    fontSize: 19,
-                    color: Color(0xFF34405D),
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                const Text(
-                  'مع تسجيل الطعام كجزء من يومك.',
-                  style: TextStyle(
-                    fontSize: 17,
-                    color: Color(0xFF34405D),
-                  ),
-                ),
-
-                const Spacer(),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 34),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 62,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF08B878),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: const Text(
-                        'ابدأ رحلتك',
-                        style: TextStyle(
-                          fontSize: 21,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-
-                const Text(
-                  'لديك حساب؟  تسجيل الدخول',
-                  style: TextStyle(
-                    fontSize: 17,
-                    color: Color(0xFF34405D),
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+                                                                                                                                                                                                                                @override
+                                                                                                                                                                                                                                  Widget build(BuildContext context) {
+                                                                                                                                                                                                                                      return Scaffold(
+                                                                                                                                                                                                                                            body: SizedBox.expand(
+                                                                                                                                                                                                                                                    child: Image.asset(
+                                                                                                                                                                                                                                                              'assets/icons/images/welcome_background.png',
+                                                                                                                                                                                                                                                                        fit: BoxFit.cover,
+                                                                                                                                                                                                                                                                                ),
+                                                                                                                                                                                                                                                                                      ),
+                                                                                                                                                                                                                                                                                          );
+                                                                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                                                                            }
