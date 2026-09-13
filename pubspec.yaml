@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   supabase_flutter: ^2.17.2
   font_awesome_flutter: ^11.0.0
+  flutter_any_logo: ^1.1.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -96,3 +97,4 @@ flutter_launcher_icons:
   ios: true
   image_path: "flumea_logo.png"
   min_sdk_android: 21
+  adaptive_icon_foreground_inset: 20
