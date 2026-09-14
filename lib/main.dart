@@ -1,9 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'login_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://mmmypwmdzkjmsdhmjdfd.supabase.co',
+    anonKey: 'sb_publishable_RlA_bgKUcEqSRli1CzJTHA_-6g3mOxs',
+  );
+
   runApp(const FlumeaApp());
 }
 
@@ -32,18 +40,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   void initState() {
     super.initState();
 
-    // إخفاء الوقت والواي فاي والبطارية أثناء شاشة الترحيب
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.immersiveSticky,
-    );
-
     Timer(const Duration(seconds: 2), () {
       if (!mounted) return;
-
-      // إعادة واجهة النظام قبل الانتقال لتسجيل الدخول
-      SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.edgeToEdge,
-      );
 
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
