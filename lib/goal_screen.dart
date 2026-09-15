@@ -15,25 +15,25 @@ class _GoalScreenState extends State<GoalScreen> {
       'icon': Icons.spa_outlined,
       'title': 'زيادة الإنتاجية وتنظيم يومي',
       'subtitle': 'أنجز أكثر وركز على ما يهم',
-      'color': const Color(0xFF18B77A),
+      'color': Color(0xFF18B77A),
     },
     {
       'icon': Icons.fitness_center_outlined,
       'title': 'تحسين الصحة واللياقة',
       'subtitle': 'الرياضة، التغذية والنوم',
-      'color': const Color(0xFFFF7428),
+      'color': Color(0xFFFF7428),
     },
     {
       'icon': Icons.check_circle_outline,
       'title': 'بناء عادات أفضل',
       'subtitle': 'عادات يومية إيجابية',
-      'color': const Color(0xFFF2A817),
+      'color': Color(0xFFF2A817),
     },
     {
       'icon': Icons.home_outlined,
       'title': 'تحقيق أهداف طويلة المدى',
       'subtitle': 'الدراسة، العمل، المال وغيرها',
-      'color': const Color(0xFF2585E8),
+      'color': Color(0xFF2585E8),
     },
   ];
 
@@ -57,96 +57,85 @@ class _GoalScreenState extends State<GoalScreen> {
           child: Column(
             children: [
               // =========================
-              // شريط التقدم وزر الرجوع
+              // الشريط العلوي
               // =========================
               Padding(
                 padding: const EdgeInsets.fromLTRB(22, 22, 22, 0),
-                child: Row(
-                  children: [
-                    // زر الرجوع
-                    SizedBox(
-                      width: 42,
-                      height: 42,
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        icon: const Icon(
-                          Icons.arrow_back_ios_new,
-                          size: 23,
-                          color: Color(0xFF102A4C),
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Row(
+                    children: [
+                      // زر الرجوع - اليسار
+                      SizedBox(
+                        width: 42,
+                        height: 42,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(
+                            Icons.arrow_back_ios_new,
+                            size: 23,
+                            color: Color(0xFF102A4C),
+                          ),
                         ),
                       ),
-                    ),
 
-                    const SizedBox(width: 14),
+                      const SizedBox(width: 14),
 
-                    // شريط التقدم
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF18B77A),
-                                borderRadius: BorderRadius.circular(20),
+                      // شريط التقدم - من اليسار إلى اليمين
+                      Expanded(
+                        child: Row(
+                          children: [
+                            // المرحلة الحالية
+                            Expanded(
+                              child: Container(
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF18B77A),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            width: 14,
-                            height: 14,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFE0E4EA),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Container(
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE0E4EA),
-                                borderRadius: BorderRadius.circular(20),
+
+                            const SizedBox(width: 8),
+
+                            // النقطة الثانية
+                            Container(
+                              width: 14,
+                              height: 14,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFE0E4EA),
+                                shape: BoxShape.circle,
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            width: 14,
-                            height: 14,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFE0E4EA),
-                              shape: BoxShape.circle,
+
+                            const SizedBox(width: 8),
+
+                            // المرحلة الأخيرة
+                            Expanded(
+                              child: Container(
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE0E4EA),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
                             ),
-                          ),
-],
-),
-),
-],
-),
-),
-),
-                        
-                            
-    
-  
-
-
-
-                    
-                  
-        
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
+
+              const SizedBox(height: 36),
 
               // =========================
               // العنوان
               // =========================
-              const SizedBox(height: 36),
-
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 25),
                 child: Text(
@@ -176,7 +165,7 @@ class _GoalScreenState extends State<GoalScreen> {
               const SizedBox(height: 27),
 
               // =========================
-              // بطاقات الأهداف
+              // الأهداف
               // =========================
               Expanded(
                 child: ListView.builder(
@@ -185,18 +174,23 @@ class _GoalScreenState extends State<GoalScreen> {
                   itemCount: goals.length,
                   itemBuilder: (context, index) {
                     final goal = goals[index];
+
                     final bool isSelected =
                         selectedGoals.contains(index);
 
-                    final Color goalColor = goal['color'] as Color;
+                    final Color goalColor =
+                        goal['color'] as Color;
 
                     return GestureDetector(
                       onTap: () => toggleGoal(index),
                       child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
+                        duration:
+                            const Duration(milliseconds: 180),
                         curve: Curves.easeOut,
-                        margin: const EdgeInsets.only(bottom: 13),
-                        padding: const EdgeInsets.symmetric(
+                        margin:
+                            const EdgeInsets.only(bottom: 13),
+                        padding:
+                            const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 18,
                         ),
@@ -204,7 +198,8 @@ class _GoalScreenState extends State<GoalScreen> {
                           color: isSelected
                               ? const Color(0xFFF5FFFB)
                               : Colors.white,
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius:
+                              BorderRadius.circular(18),
                           border: Border.all(
                             color: isSelected
                                 ? const Color(0xFF18B77A)
@@ -213,7 +208,8 @@ class _GoalScreenState extends State<GoalScreen> {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.025),
+                              color: Colors.black
+                                  .withValues(alpha: 0.025),
                               blurRadius: 8,
                               offset: const Offset(0, 3),
                             ),
@@ -222,66 +218,13 @@ class _GoalScreenState extends State<GoalScreen> {
                         child: Row(
                           children: [
                             // =========================
-                            // الأيقونة
-                            // =========================
-                            Container(
-                              width: 52,
-                              height: 52,
-                              decoration: BoxDecoration(
-                                color: goalColor.withValues(alpha: 0.10),
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: Icon(
-                                goal['icon'] as IconData,
-                                color: goalColor,
-                                size: 30,
-                              ),
-                            ),
-
-                            const SizedBox(width: 15),
-
-                            // =========================
-                            // النص
-                            // =========================
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    goal['title'] as String,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w800,
-                                      color: Color(0xFF102A4C),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    goal['subtitle'] as String,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 13.5,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xFF9AA4B2),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(width: 10),
-
-                            // =========================
-                            // دائرة الاختيار
+                            // دائرة الاختيار - اليسار
                             // =========================
                             AnimatedContainer(
-                              duration: const Duration(milliseconds: 180),
-                              width: 25,
-                              height: 25,
+                              duration:
+                                  const Duration(milliseconds: 180),
+                              width: 34,
+                              height: 34,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: isSelected
@@ -298,9 +241,71 @@ class _GoalScreenState extends State<GoalScreen> {
                                   ? const Icon(
                                       Icons.check,
                                       color: Colors.white,
-                                      size: 17,
+                                      size: 20,
                                     )
                                   : null,
+                            ),
+
+                            const SizedBox(width: 14),
+
+                            // =========================
+                            // النص
+                            // =========================
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    goal['title'] as String,
+                                    maxLines: 1,
+                                    overflow:
+                                        TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 17,
+                                      fontWeight:
+                                          FontWeight.w800,
+                                      color:
+                                          Color(0xFF102A4C),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    goal['subtitle'] as String,
+                                    maxLines: 1,
+                                    overflow:
+                                        TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 13.5,
+                                      fontWeight:
+                                          FontWeight.w500,
+                                      color:
+                                          Color(0xFF9AA4B2),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(width: 12),
+
+                            // =========================
+                            // الأيقونة - اليمين
+                            // =========================
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: goalColor
+                                    .withValues(alpha: 0.10),
+                                borderRadius:
+                                    BorderRadius.circular(15),
+                              ),
+                              child: Icon(
+                                goal['icon'] as IconData,
+                                color: goalColor,
+                                size: 30,
+                              ),
                             ),
                           ],
                         ),
@@ -314,7 +319,12 @@ class _GoalScreenState extends State<GoalScreen> {
               // زر التالي
               // =========================
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                padding: const EdgeInsets.fromLTRB(
+                  20,
+                  8,
+                  20,
+                  20,
+                ),
                 child: SizedBox(
                   width: double.infinity,
                   height: 58,
@@ -322,11 +332,12 @@ class _GoalScreenState extends State<GoalScreen> {
                     onPressed: selectedGoals.isEmpty
                         ? null
                         : () {
-                            // سنربط هذا الزر بالصفحة رقم 4
-                            // بعد الانتهاء من تصميمها.
+                            // سنربطه بالصفحة 4
+                            // بعد تجهيزها.
                           },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF08B477),
+                      backgroundColor:
+                          const Color(0xFF08B477),
                       disabledBackgroundColor:
                           const Color(0xFFE1E6E9),
                       foregroundColor: Colors.white,
@@ -334,7 +345,8 @@ class _GoalScreenState extends State<GoalScreen> {
                           const Color(0xFF9AA4B2),
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(17),
+                        borderRadius:
+                            BorderRadius.circular(17),
                       ),
                     ),
                     child: const Text(
