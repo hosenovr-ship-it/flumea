@@ -15,25 +15,25 @@ class _GoalScreenState extends State<GoalScreen> {
       'icon': Icons.spa_outlined,
       'title': 'زيادة الإنتاجية وتنظيم يومي',
       'subtitle': 'أنجز أكثر وركز على ما يهم',
-      'color': Color(0xFF18A878),
+      'color': const Color(0xFF18B77A),
     },
     {
-      'icon': Icons.local_fire_department_outlined,
+      'icon': Icons.fitness_center_outlined,
       'title': 'تحسين الصحة واللياقة',
       'subtitle': 'الرياضة، التغذية والنوم',
-      'color': Color(0xFFFF7A2F),
+      'color': const Color(0xFFFF7428),
     },
     {
-      'icon': Icons.emoji_events_outlined,
+      'icon': Icons.check_circle_outline,
       'title': 'بناء عادات أفضل',
       'subtitle': 'عادات يومية إيجابية',
-      'color': Color(0xFFF2B84B),
+      'color': const Color(0xFFF2A817),
     },
     {
       'icon': Icons.home_outlined,
       'title': 'تحقيق أهداف طويلة المدى',
       'subtitle': 'الدراسة، العمل، المال وغيرها',
-      'color': Color(0xFF4A90E2),
+      'color': const Color(0xFF2585E8),
     },
   ];
 
@@ -56,60 +56,70 @@ class _GoalScreenState extends State<GoalScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              // شريط التقدم + زر الرجوع
+              // =========================
+              // شريط التقدم وزر الرجوع
+              // =========================
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+                padding: const EdgeInsets.fromLTRB(22, 22, 22, 0),
                 child: Row(
                   children: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new,
-                        color: Color(0xFF102A4C),
-                        size: 20,
+                    // زر الرجوع
+                    SizedBox(
+                      width: 42,
+                      height: 42,
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new,
+                          size: 23,
+                          color: Color(0xFF102A4C),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 10),
 
+                    const SizedBox(width: 14),
+
+                    // شريط التقدم
                     Expanded(
                       child: Row(
                         children: [
                           Expanded(
                             child: Container(
-                              height: 5,
+                              height: 6,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF18A878),
-                                borderRadius: BorderRadius.circular(10),
+                                color: const Color(0xFF18B77A),
+                                borderRadius: BorderRadius.circular(20),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 8),
                           Container(
-                            width: 10,
-                            height: 10,
+                            width: 14,
+                            height: 14,
                             decoration: const BoxDecoration(
-                              color: Color(0xFFD9DEE5),
+                              color: Color(0xFFE0E4EA),
                               shape: BoxShape.circle,
                             ),
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Container(
-                              height: 5,
+                              height: 6,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFD9DEE5),
-                                borderRadius: BorderRadius.circular(10),
+                                color: const Color(0xFFE0E4EA),
+                                borderRadius: BorderRadius.circular(20),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 8),
                           Container(
-                            width: 10,
-                            height: 10,
+                            width: 14,
+                            height: 14,
                             decoration: const BoxDecoration(
-                              color: Color(0xFFD9DEE5),
+                              color: Color(0xFFE0E4EA),
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -120,38 +130,45 @@ class _GoalScreenState extends State<GoalScreen> {
                 ),
               ),
 
-              const SizedBox(height: 28),
-
+              // =========================
               // العنوان
+              // =========================
+              const SizedBox(height: 36),
+
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 25),
                 child: Text(
                   'ما هدفك الأساسي من استخدام\nFLUMEA؟',
                   textAlign: TextAlign.center,
                   style: TextStyle(
+                    fontSize: 27,
+                    height: 1.35,
+                    fontWeight: FontWeight.w800,
                     color: Color(0xFF102A4C),
-                    fontSize: 23,
-                    fontWeight: FontWeight.bold,
-                    height: 1.5,
                   ),
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
 
               const Text(
                 'يمكنك اختيار أكثر من هدف',
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Color(0xFF9AA3AE),
-                  fontSize: 15,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF9AA4B2),
                 ),
               ),
 
-              const SizedBox(height: 22),
+              const SizedBox(height: 27),
 
-              // الخيارات
+              // =========================
+              // بطاقات الأهداف
+              // =========================
               Expanded(
                 child: ListView.builder(
+                  physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   itemCount: goals.length,
                   itemBuilder: (context, index) {
@@ -159,53 +176,61 @@ class _GoalScreenState extends State<GoalScreen> {
                     final bool isSelected =
                         selectedGoals.contains(index);
 
+                    final Color goalColor = goal['color'] as Color;
+
                     return GestureDetector(
                       onTap: () => toggleGoal(index),
                       child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        margin: const EdgeInsets.only(bottom: 12),
+                        duration: const Duration(milliseconds: 180),
+                        curve: Curves.easeOut,
+                        margin: const EdgeInsets.only(bottom: 13),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
-                          vertical: 13,
+                          vertical: 18,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(13),
+                          color: isSelected
+                              ? const Color(0xFFF5FFFB)
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(18),
                           border: Border.all(
                             color: isSelected
-                                ? const Color(0xFF18A878)
-                                : const Color(0xFFE1E5EA),
-                            width: isSelected ? 1.5 : 1,
+                                ? const Color(0xFF18B77A)
+                                : const Color(0xFFE7E9ED),
+                            width: isSelected ? 2 : 1.2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.03),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
+                              color: Colors.black.withValues(alpha: 0.025),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
                             ),
                           ],
                         ),
                         child: Row(
                           children: [
+                            // =========================
                             // الأيقونة
+                            // =========================
                             Container(
-                              width: 42,
-                              height: 42,
+                              width: 52,
+                              height: 52,
                               decoration: BoxDecoration(
-                                color: (goal['color'] as Color)
-                                    .withOpacity(0.10),
-                                borderRadius: BorderRadius.circular(11),
+                                color: goalColor.withValues(alpha: 0.10),
+                                borderRadius: BorderRadius.circular(15),
                               ),
                               child: Icon(
                                 goal['icon'] as IconData,
-                                color: goal['color'] as Color,
-                                size: 25,
+                                color: goalColor,
+                                size: 30,
                               ),
                             ),
 
-                            const SizedBox(width: 13),
+                            const SizedBox(width: 15),
 
+                            // =========================
                             // النص
+                            // =========================
                             Expanded(
                               child: Column(
                                 crossAxisAlignment:
@@ -213,45 +238,55 @@ class _GoalScreenState extends State<GoalScreen> {
                                 children: [
                                   Text(
                                     goal['title'] as String,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
-                                      color: Color(0xFF25364D),
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF102A4C),
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 6),
                                   Text(
                                     goal['subtitle'] as String,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
-                                      color: Color(0xFF9AA3AE),
-                                      fontSize: 12,
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xFF9AA4B2),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
 
-                            // علامة الاختيار
-                            Container(
-                              width: 22,
-                              height: 22,
+                            const SizedBox(width: 10),
+
+                            // =========================
+                            // دائرة الاختيار
+                            // =========================
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              width: 25,
+                              height: 25,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: isSelected
-                                    ? const Color(0xFF18A878)
+                                    ? const Color(0xFF18B77A)
                                     : Colors.white,
                                 border: Border.all(
                                   color: isSelected
-                                      ? const Color(0xFF18A878)
-                                      : const Color(0xFFD0D5DB),
-                                  width: 1.5,
+                                      ? const Color(0xFF18B77A)
+                                      : const Color(0xFFD5DAE1),
+                                  width: 1.7,
                                 ),
                               ),
                               child: isSelected
                                   ? const Icon(
                                       Icons.check,
                                       color: Colors.white,
-                                      size: 15,
+                                      size: 17,
                                     )
                                   : null,
                             ),
@@ -263,35 +298,38 @@ class _GoalScreenState extends State<GoalScreen> {
                 ),
               ),
 
+              // =========================
               // زر التالي
+              // =========================
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 18),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                 child: SizedBox(
                   width: double.infinity,
-                  height: 52,
+                  height: 58,
                   child: ElevatedButton(
                     onPressed: selectedGoals.isEmpty
                         ? null
                         : () {
-                            // سنربطه بالصفحة رقم 4 لاحقًا
+                            // سنربط هذا الزر بالصفحة رقم 4
+                            // بعد الانتهاء من تصميمها.
                           },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF18A878),
+                      backgroundColor: const Color(0xFF08B477),
                       disabledBackgroundColor:
-                          const Color(0xFFE0E5E9),
+                          const Color(0xFFE1E6E9),
                       foregroundColor: Colors.white,
                       disabledForegroundColor:
-                          const Color(0xFF9AA3AE),
+                          const Color(0xFF9AA4B2),
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(17),
                       ),
                     ),
                     child: const Text(
                       'التالي',
                       style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
