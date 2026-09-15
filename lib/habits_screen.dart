@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'food_screen.dart';
 class HabitsScreen extends StatefulWidget {
   const HabitsScreen({super.key});
 
@@ -344,8 +344,13 @@ class _HabitsScreenState extends State<HabitsScreen> {
                     onPressed: selectedHabits.isEmpty
                         ? null
                         : () {
-                            // سنربط الصفحة رقم 6 هنا
-                            // بعد الانتهاء من تصميمها.
+                            Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => const FoodScreen(),
+  ),
+);
+                            
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF08B477),
