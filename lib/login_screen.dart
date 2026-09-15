@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
+import 'goal_screen.dart';
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
@@ -242,7 +242,12 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
 
         _showMessage('تم تسجيل الدخول بنجاح ✅');
 
-        Navigator.pop(context);
+        Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(
+    builder: (context) => const GoalScreen(),
+  ),
+);
       } else {
         final response =
             await Supabase.instance.client.auth.signUp(
