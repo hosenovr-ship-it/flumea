@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'organize_screen.dart';
 class GoalScreen extends StatefulWidget {
   const GoalScreen({super.key});
 
@@ -330,11 +330,20 @@ class _GoalScreenState extends State<GoalScreen> {
                   height: 58,
                   child: ElevatedButton(
                     onPressed: selectedGoals.isEmpty
-                        ? null
-                        : () {
-                            // سنربطه بالصفحة 4
-                            // بعد تجهيزها.
-                          },
+    ? null
+    : () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const OrganizeScreen(),
+          ),
+        );
+      },
+                        
+                        
+                        
+                            
+                          
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
                           const Color(0xFF08B477),
