@@ -12,7 +12,7 @@ class FoodScreen extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              // شريط التقدم
+              // سهم الرجوع فقط — بدون شريط التقدم
               Padding(
                 padding: const EdgeInsets.fromLTRB(28, 24, 28, 0),
                 child: Row(
@@ -30,60 +30,6 @@ class FoodScreen extends StatelessWidget {
                         Icons.arrow_back_ios_new,
                         color: Color(0xFF102A4C),
                         size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 18),
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE0E4EA),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            width: 15,
-                            height: 15,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF18B77A),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Container(
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF18B77A),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            width: 15,
-                            height: 15,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF18B77A),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Container(
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF18B77A),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                          ),
-                        ],
                       ),
                     ),
                   ],
@@ -109,6 +55,7 @@ class FoodScreen extends StatelessWidget {
 
               const SizedBox(height: 14),
 
+              // الوصف
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 25),
                 child: Text(
@@ -124,7 +71,7 @@ class FoodScreen extends StatelessWidget {
 
               const SizedBox(height: 28),
 
-              // صورة توضيحية للطعام
+              // صورة/رسم الطعام
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 30),
