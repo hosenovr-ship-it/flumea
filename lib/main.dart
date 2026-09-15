@@ -8,7 +8,7 @@ Future<void> main() async {
 
   await Supabase.initialize(
     url: 'https://mmmypwmdzkjmsdhmjdfd.supabase.co',
-    anonKey: 'sb_publishable_RlA_bgKUcEqSRli1CzJTHA_-6g3mOxs',
+    publishableKey: 'sb_publishable_RlA_bgKUcEqSRli1CzJTHA_-6g3mOxs',
   );
 
   runApp(const FlumeaApp());
