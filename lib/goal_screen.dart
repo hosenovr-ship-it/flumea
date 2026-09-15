@@ -123,11 +123,23 @@ class _GoalScreenState extends State<GoalScreen> {
                               shape: BoxShape.circle,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+],
+),
+),
+],
+),
+),
+),
+                        
+                            
+    
+  
+
+
+
+                    
+                  
+        
               ),
 
               // =========================
