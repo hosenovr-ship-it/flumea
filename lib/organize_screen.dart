@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'habits_screen.dart';
 class OrganizeScreen extends StatefulWidget {
   const OrganizeScreen({super.key});
 
@@ -279,7 +279,12 @@ class _OrganizeScreenState extends State<OrganizeScreen> {
                     onPressed: selectedItems.isEmpty
                         ? null
                         : () {
-                            // سنربط الصفحة بالصفحة التالية لاحقًا
+                            Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => const HabitsScreen(),
+  ),
+);
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF08B477),
