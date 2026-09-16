@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'daily_times_screen.dart';
 class FoodScreen extends StatelessWidget {
   const FoodScreen({super.key});
 
@@ -129,8 +129,14 @@ class FoodScreen extends StatelessWidget {
                         height: 60,
                         child: OutlinedButton(
                           onPressed: () {
-                            // سنربطه بالصفحة التالية لاحقًا
-                          },
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const DailyTimesScreen(),
+    ),
+  );
+},
+                        
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF102A4C),
                             side: const BorderSide(
