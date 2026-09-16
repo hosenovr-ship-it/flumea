@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'ai_assistant_screen.dart';
 class DailyTimesScreen extends StatefulWidget {
   const DailyTimesScreen({super.key});
 
@@ -332,8 +332,15 @@ class _DailyTimesScreenState extends State<DailyTimesScreen> {
                     height: 60,
                     child: ElevatedButton(
                       onPressed: () {
-                        // الصفحة التالية سنربطها لاحقًا
-                      },
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const AiAssistantScreen(),
+    ),
+  );
+},
+                        
+                      
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF08B477),
                         foregroundColor: Colors.white,
