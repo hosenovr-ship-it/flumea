@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'ready_screen.dart';
 class AiAssistantScreen extends StatefulWidget {
   const AiAssistantScreen({super.key});
 
@@ -227,8 +227,15 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                     height: 62,
                     child: ElevatedButton(
                       onPressed: () {
-                        // سنربط زر التالي بالصفحة التالية لاحقًا
-                      },
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const ReadyScreen(),
+    ),
+  );
+},
+                      
+                      
                       style: ElevatedButton.styleFrom(
                         backgroundColor: green,
                         foregroundColor: Colors.white,
