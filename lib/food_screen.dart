@@ -14,7 +14,7 @@ class FoodScreen extends StatelessWidget {
             children: [
               // سهم الرجوع فقط
               Padding(
-                padding: const EdgeInsets.fromLTRB(28, 24, 28, 0),
+                padding: const EdgeInsets.fromLTRB(0, 24, 28, 0),
                 child: Row(
                   children: [
                     IconButton(
