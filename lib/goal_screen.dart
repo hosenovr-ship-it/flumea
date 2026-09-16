@@ -82,54 +82,7 @@ class _GoalScreenState extends State<GoalScreen> {
                         ),
                       ),
 
-                      const SizedBox(width: 14),
-
-                      // شريط التقدم - من اليسار إلى اليمين
-                      Expanded(
-                        child: Row(
-                          children: [
-                            // المرحلة الحالية
-                            Expanded(
-                              child: Container(
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF18B77A),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(width: 8),
-
-                            // النقطة الثانية
-                            Container(
-                              width: 14,
-                              height: 14,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFE0E4EA),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-
-                            const SizedBox(width: 8),
-
-                            // المرحلة الأخيرة
-                            Expanded(
-                              child: Container(
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFE0E4EA),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+                    
 
               const SizedBox(height: 36),
 
