@@ -69,9 +69,11 @@ class _OrganizeScreenState extends State<OrganizeScreen> {
           child: Column(
             children: [
               // شريط التقدم
-              Padding(
-                padding: const EdgeInsets.fromLTRB(22, 22, 22, 0),
-                child: Row(
+    Padding(
+  padding: const EdgeInsets.fromLTRB(22, 22, 22, 0),
+  child: Directionality(
+    textDirection: TextDirection.ltr,
+    child: Row(
                   children: [
                     SizedBox(
                       width: 42,
@@ -91,7 +93,7 @@ class _OrganizeScreenState extends State<OrganizeScreen> {
                     ],
 ),
 ),
-
+),
               const SizedBox(height: 34),
 
               // العنوان
