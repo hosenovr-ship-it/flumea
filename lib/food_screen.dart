@@ -69,18 +69,7 @@ class FoodScreen extends StatelessWidget {
 
               const SizedBox(height: 28),
 
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: Center(
-                    child: Image.asset(
-                      'food_tracking.png',
-                      width: double.infinity,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-              ),
+              
 
               Padding(
                 padding: const EdgeInsets.fromLTRB(25, 8, 25, 24),
