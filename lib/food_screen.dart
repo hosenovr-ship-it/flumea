@@ -12,7 +12,7 @@ class FoodScreen extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              // سهم الرجوع فقط — بدون شريط التقدم
+              // سهم الرجوع فقط
               Padding(
                 padding: const EdgeInsets.fromLTRB(28, 24, 28, 0),
                 child: Row(
@@ -38,7 +38,6 @@ class FoodScreen extends StatelessWidget {
 
               const SizedBox(height: 38),
 
-              // العنوان
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 25),
                 child: Text(
@@ -55,7 +54,6 @@ class FoodScreen extends StatelessWidget {
 
               const SizedBox(height: 14),
 
-              // الوصف
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 25),
                 child: Text(
@@ -71,80 +69,19 @@ class FoodScreen extends StatelessWidget {
 
               const SizedBox(height: 28),
 
-              // صورة/رسم الطعام
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 30),
                   child: Center(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          width: 290,
-                          height: 290,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF7FBF8),
-                            borderRadius: BorderRadius.circular(145),
-                          ),
-                        ),
-
-                        const Icon(
-                          Icons.ramen_dining_outlined,
-                          size: 175,
-                          color: Color(0xFF18B77A),
-                        ),
-
-                        Positioned(
-                          right: 0,
-                          bottom: 20,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 18,
-                              vertical: 14,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(
-                                    alpha: 0.08,
-                                  ),
-                                  blurRadius: 18,
-                                  offset: const Offset(0, 7),
-                                ),
-                              ],
-                            ),
-                            child: const Column(
-                              children: [
-                                Text(
-                                  '520',
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF102A4C),
-                                  ),
-                                ),
-                                SizedBox(height: 2),
-                                Text(
-                                  'سعرة حرارية',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFFA0A8B3),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: Image.asset(
+                      'food_tracking.png',
+                      width: double.infinity,
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),
               ),
 
-              // الأزرار
               Padding(
                 padding: const EdgeInsets.fromLTRB(25, 8, 25, 24),
                 child: Column(
