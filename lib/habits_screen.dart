@@ -75,8 +75,10 @@ class _HabitsScreenState extends State<HabitsScreen> {
             children: [
               // شريط التقدم
               Padding(
-                padding: const EdgeInsets.fromLTRB(28, 24, 28, 0),
-                child: Row(
+  padding: const EdgeInsets.fromLTRB(28, 24, 28, 0),
+  child: Directionality(
+    textDirection: TextDirection.ltr,
+    child: Row(
                   children: [
                     SizedBox(
                       width: 28,
@@ -93,47 +95,12 @@ class _HabitsScreenState extends State<HabitsScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 28),
+                    ],
+),
+),
+),
+                    
 
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: Container(
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF18B77A),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            width: 14,
-                            height: 14,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF18B77A),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            flex: 2,
-                            child: Container(
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE0E4EA),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
 
               const SizedBox(height: 38),
 
