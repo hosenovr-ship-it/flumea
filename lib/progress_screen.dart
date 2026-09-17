@@ -709,5 +709,120 @@ Text(
                   
                   
                   
-                    
+class _Legend extends StatelessWidget {
+  final Color color;
+  final String title;
+  final String value;
+
+  const _Legend({
+    required this.color,
+    required this.title,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              title,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFF102A4C),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0xFF7B8798),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LineChartPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final gridPaint = Paint()
+      ..color = const Color(0xFFE8EEF4)
+      ..strokeWidth = 1;
+
+    final linePaint = Paint()
+      ..color = const Color(0xFF1976D2)
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final fillPaint = Paint()
+      ..color = const Color(0xFF1976D2).withValues(alpha: 0.08)
+      ..style = PaintingStyle.fill;
+
+    for (int i = 1; i < 5; i++) {
+      final y = size.height * i / 5;
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y),
+        gridPaint,
+      );
+    }
+
+    final points = [
+      Offset(0, size.height * 0.72),
+      Offset(size.width * 0.16, size.height * 0.62),
+      Offset(size.width * 0.33, size.height * 0.67),
+      Offset(size.width * 0.50, size.height * 0.45),
+      Offset(size.width * 0.66, size.height * 0.52),
+      Offset(size.width * 0.83, size.height * 0.30),
+      Offset(size.width, size.height * 0.36),
+    ];
+
+    final path = Path()..moveTo(points.first.dx, points.first.dy);
+
+    for (int i = 1; i < points.length; i++) {
+      path.lineTo(points[i].dx, points[i].dy);
+    }
+
+    final fillPath = Path.from(path)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+
+    canvas.drawPath(fillPath, fillPaint);
+    canvas.drawPath(path, linePaint);
+
+    final dotPaint = Paint()
+      ..color = const Color(0xFF1976D2)
+      ..style = PaintingStyle.fill;
+
+    for (final point in points) {
+      canvas.drawCircle(point, 4, dotPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+}                    
   
