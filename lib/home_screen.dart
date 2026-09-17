@@ -141,7 +141,7 @@ class HomeScreen extends StatelessWidget {
                       Text(
                         'استمر، أنت على الطريق الصحيح! ✨',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.85),
+                          color: Colors.white.withValues(alpha: 0.85),
                           fontSize: 15,
                         ),
                       ),
@@ -352,7 +352,7 @@ class _ProgressItem extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.75),
+            color: Colors.white.withValues(alpha: 0.75),
             fontSize: 12,
           ),
         ),
