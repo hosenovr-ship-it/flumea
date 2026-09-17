@@ -3,15 +3,8 @@ import 'account_screen.dart';
 import 'plan_screen.dart';
 import 'progress_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-int _selectedIndex = 0;  
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +16,7 @@ int _selectedIndex = 0;
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: const Color(0xFFF8FAFC),
+
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
@@ -127,9 +121,9 @@ int _selectedIndex = 0;
                         ),
                       ),
                       const SizedBox(height: 22),
-                      Row(
+                      const Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: const [
+                        children: [
                           _ProgressItem(
                             icon: Icons.track_changes,
                             value: '3/5',
@@ -166,7 +160,7 @@ int _selectedIndex = 0;
                   title: 'خطة اليوم',
                   icon: Icons.calendar_month_rounded,
                   child: Column(
-                    children: [
+                    children: const [
                       _TaskItem(
                         time: '9:00 ص',
                         title: 'دراسة 3 ساعات',
@@ -235,7 +229,9 @@ int _selectedIndex = 0;
                         ),
                       ),
                     ),
+
                     const SizedBox(width: 14),
+
                     Expanded(
                       child: _SmallCard(
                         title: 'طعامك اليوم',
@@ -325,94 +321,104 @@ int _selectedIndex = 0;
             ),
           ),
         ),
-      
-    bottomNavigationBar: SafeArea(
-  child: Container(
-    height: 72,
-    decoration: const BoxDecoration(
-      color: Colors.white,
-      border: Border(
-        top: BorderSide(
-          color: Color(0xFFE5E9EE),
-        ),
-      ),
-    ),
-    child: Row(
-      children: [
-        Expanded(
-          child: _NavItem(
-            icon: Icons.person_outline,
-            label: 'الحساب',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AccountScreen(),
+
+        // شريط التنقل السفلي
+        bottomNavigationBar: SafeArea(
+          child: Container(
+            height: 72,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                top: BorderSide(
+                  color: Color(0xFFE5E9EE),
                 ),
-              );
-            },
-          ),
-        ),
-        Expanded(
-          child: _NavItem(
-            icon: Icons.insights_outlined,
-            label: 'التقدم',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ProgressScreen(),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _NavItem(
+                    icon: Icons.person_outline,
+                    label: 'الحساب',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AccountScreen(),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              );
-            },
-          ),
-        ),
-        SizedBox(
-          width: 70,
-          child: Center(
-            child: Container(
-              width: 54,
-              height: 54,
-              decoration: const BoxDecoration(
-                color: Color(0xFF18B56A),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.add,
-                color: Colors.white,
-                size: 30,
-              ),
+
+                Expanded(
+                  child: _NavItem(
+                    icon: Icons.insights_outlined,
+                    label: 'التقدم',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProgressScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                SizedBox(
+                  width: 70,
+                  child: Center(
+                    child: Container(
+                      width: 54,
+                      height: 54,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF18B56A),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                    ),
+                  ),
+                ),
+
+                Expanded(
+                  child: _NavItem(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'الخطة',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PlanScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                Expanded(
+                  child: _NavItem(
+                    icon: Icons.home_rounded,
+                    label: 'الرئيسية',
+                    selected: true,
+                    onTap: () {},
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-        Expanded(
-          child: _NavItem(
-            icon: Icons.calendar_today_outlined,
-            label: 'الخطة',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const PlanScreen(),
-                ),
-              );
-            },
-          ),
-        ),
-        Expanded(
-          child: _NavItem(
-            icon: Icons.home_rounded,
-            label: 'الرئيسية',
-            selected: true,
-            onTap: () {},
-          ),
-        ),
-      ],
-    ),
-  ),
-
+      ),
+    );
   }
 }
+
+
+// ==================== تقدم اليوم ====================
 
 class _ProgressItem extends StatelessWidget {
   final IconData icon;
@@ -454,6 +460,9 @@ class _ProgressItem extends StatelessWidget {
     );
   }
 }
+
+
+// ==================== بطاقة القسم ====================
 
 class _SectionCard extends StatelessWidget {
   final String title;
@@ -512,6 +521,9 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
+
+// ==================== المهمة ====================
+
 class _TaskItem extends StatelessWidget {
   final String time;
   final String title;
@@ -548,6 +560,7 @@ class _TaskItem extends StatelessWidget {
               ),
             ),
           ),
+
           Icon(
             completed
                 ? Icons.check_box_rounded
@@ -556,7 +569,9 @@ class _TaskItem extends StatelessWidget {
                 ? const Color(0xFF18B56A)
                 : const Color(0xFFB5BDC7),
           ),
+
           const SizedBox(width: 10),
+
           Expanded(
             child: Text(
               title,
@@ -570,7 +585,9 @@ class _TaskItem extends StatelessWidget {
               ),
             ),
           ),
+
           const SizedBox(width: 8),
+
           Text(
             category,
             style: const TextStyle(
@@ -583,6 +600,9 @@ class _TaskItem extends StatelessWidget {
     );
   }
 }
+
+
+// ==================== البطاقة الصغيرة ====================
 
 class _SmallCard extends StatelessWidget {
   final String title;
@@ -631,96 +651,4 @@ class _SmallCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           child,
-        ],
-      ),
-    );
-  }
-}
-
-class _HabitItem extends StatelessWidget {
-  final String icon;
-  final String title;
-  final bool completed;
-
-  const _HabitItem({
-    required this.icon,
-    required this.title,
-    this.completed = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 7),
-      child: Row(
-        children: [
-          Text(icon),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              title,
-              textAlign: TextAlign.right,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF102A4C),
-              ),
-            ),
-          ),
-          Icon(
-            completed
-                ? Icons.check_circle
-                : Icons.radio_button_unchecked,
-            size: 20,
-            color: completed
-                ? const Color(0xFF18B56A)
-                : const Color(0xFFB5BDC7),
-          ),
-        ],
-      ),
-    );
-  }
-}
-class _NavItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool selected;
-
-  const _NavItem({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.selected = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 24,
-            color: selected
-                ? const Color(0xFF18B56A)
-                : const Color(0xFF7B8798),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight:
-                  selected ? FontWeight.w700 : FontWeight.w500,
-              color: selected
-                  ? const Color(0xFF18B56A)
-                  : const Color(0xFF7B8798),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+   
