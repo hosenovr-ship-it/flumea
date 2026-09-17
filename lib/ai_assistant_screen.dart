@@ -209,7 +209,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                     icon: Icons.smart_toy_rounded,
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 34),
 
                   // تفصيلي أكثر
                   buildAssistantCard(
@@ -219,7 +219,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                     icon: Icons.smart_toy_rounded,
                   ),
 
-                  const SizedBox(height: 38),
+                  const SizedBox(height: 52),
 
                   // زر التالي
                   SizedBox(
