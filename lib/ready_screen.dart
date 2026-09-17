@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'home_screen.dart';
 class ReadyScreen extends StatelessWidget {
   const ReadyScreen({super.key});
 
@@ -217,8 +217,15 @@ class ReadyScreen extends StatelessWidget {
                     height: 64,
                     child: ElevatedButton(
                       onPressed: () {
-                        // سنربطه بالصفحة الرئيسية لاحقًا
-                      },
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const HomeScreen(),
+    ),
+  );
+},
+                        
+                      
                       style: ElevatedButton.styleFrom(
                         backgroundColor: green,
                         foregroundColor: Colors.white,
