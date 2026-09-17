@@ -651,4 +651,9 @@ class _SmallCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           child,
+                  ],
+      ),
+    );
+  }
+}
    
