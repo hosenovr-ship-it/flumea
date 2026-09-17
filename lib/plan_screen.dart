@@ -598,5 +598,259 @@ class PlanScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
             ),
             child: Text(
-              tag,
+  tag,
+  style: const TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.w700,
+    color: Color(0xFF66758A),
+  ),
+),
+),
+const SizedBox(width: 8),
+Expanded(
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        title,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w800,
+          color: complete
+              ? const Color(0xFF9AA5B1)
+              : const Color(0xFF102A4C),
+        ),
+      ),
+      const SizedBox(height: 4),
+      Text(
+        subtitle,
+        style: const TextStyle(
+          fontSize: 11,
+          color: Color(0xFF66758A),
+        ),
+      ),
+    ],
+  ),
+),
+const SizedBox(width: 8),
+Icon(
+  complete
+      ? Icons.check_circle
+      : Icons.radio_button_unchecked,
+  color: complete
+      ? const Color(0xFF20C7B7)
+      : const Color(0xFFB8C1CC),
+  size: 22,
+),
+],
+),
+);
+}
+
+Widget _weeklyGoals() {
+  return Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(
+        color: const Color(0xFFE5E9EE),
+      ),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'الأهداف الأسبوعية',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF102A4C),
+          ),
+        ),
+        const SizedBox(height: 14),
+        _goalRow('إكمال المهام', '5 / 7'),
+        _goalRow('الالتزام بالعادات', '4 / 7'),
+      ],
+    ),
+  );
+}
+
+Widget _dailyHabits() {
+  return Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(
+        color: const Color(0xFFE5E9EE),
+      ),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'العادات اليومية',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF102A4C),
+          ),
+        ),
+        const SizedBox(height: 14),
+        _habitRow('قراءة 20 دقيقة', true),
+        _habitRow('تمرين 30 دقيقة', false),
+      ],
+    ),
+  );
+}
+
+Widget _goalRow(String title, String value) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0xFF66758A),
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF102A4C),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _habitRow(String title, bool completed) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0xFF66758A),
+            ),
+          ),
+        ),
+        Icon(
+          completed
+              ? Icons.check_circle
+              : Icons.radio_button_unchecked,
+          size: 20,
+          color: completed
+              ? const Color(0xFF20C7B7)
+              : const Color(0xFFB8C1CC),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _bottomNavigation({
+  required Color navy,
+  required Color blue,
+  required Color cyan,
+}) {
+  return Container(
+    height: 72,
+    decoration: const BoxDecoration(
+      color: Colors.white,
+      border: Border(
+        top: BorderSide(
+          color: Color(0xFFE5E9EE),
+        ),
+      ),
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          child: _PlanNavItem(
+            icon: Icons.person_outline,
+            label: 'الحساب',
+            color: navy,
+          ),
+        ),
+        Expanded(
+          child: _PlanNavItem(
+            icon: Icons.show_chart_rounded,
+            label: 'التقدم',
+            color: blue,
+          ),
+        ),
+        Expanded(
+          child: _PlanNavItem(
+            icon: Icons.calendar_month_rounded,
+            label: 'الخطة',
+            color: cyan,
+            selected: true,
+          ),
+        ),
+        Expanded(
+          child: _PlanNavItem(
+            icon: Icons.home_outlined,
+            label: 'الرئيسية',
+            color: navy,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _PlanNavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final bool selected;
+
+  const _PlanNavItem({
+    required this.icon,
+    required this.label,
+    required this.color,
+    this.selected = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          icon,
+          size: 23,
+          color: selected
+              ? color
+              : const Color(0xFF7B8798),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight:
+                selected ? FontWeight.w700 : FontWeight.w500,
+            color: selected
+                ? color
+                : const Color(0xFF7B8798),
+          ),
+        ),
+      ],
+    );
+  }
+}
+              
           
