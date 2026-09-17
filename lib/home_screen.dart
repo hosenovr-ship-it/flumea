@@ -656,4 +656,47 @@ class _SmallCard extends StatelessWidget {
     );
   }
 }
-   
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool selected;
+
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.selected = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 24,
+            color: selected
+                ? const Color(0xFF18B56A)
+                : const Color(0xFF7B8798),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight:
+                  selected ? FontWeight.w700 : FontWeight.w500,
+              color: selected
+                  ? const Color(0xFF18B56A)
+                  : const Color(0xFF7B8798),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}   
