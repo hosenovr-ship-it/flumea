@@ -101,9 +101,16 @@ class FoodScreen extends StatelessWidget {
                         width: double.infinity,
                         height: 60,
                         child: ElevatedButton(
-                          onPressed: () {
-                            // سنربطه بالصفحة التالية لاحقًا
-                          },
+                        onPressed: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const DailyTimesScreen(),
+    ),
+  );
+},
+                          
+                          
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF08B477),
                             foregroundColor: Colors.white,
