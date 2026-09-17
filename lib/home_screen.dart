@@ -325,7 +325,7 @@ int _selectedIndex = 0;
             ),
           ),
         ),
-      ),
+      
     bottomNavigationBar: SafeArea(
   child: Container(
     height: 72,
