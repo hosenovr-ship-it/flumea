@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 import 'account_screen.dart';
-class HomeScreen extends StatelessWidget {
+import 'plan_screen.dart';
+import 'progress_screen.dart';
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+int _selectedIndex = 0;  
 
   @override
   Widget build(BuildContext context) {
@@ -316,7 +326,91 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
+    bottomNavigationBar: SafeArea(
+  child: Container(
+    height: 72,
+    decoration: const BoxDecoration(
+      color: Colors.white,
+      border: Border(
+        top: BorderSide(
+          color: Color(0xFFE5E9EE),
+        ),
+      ),
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          child: _NavItem(
+            icon: Icons.person_outline,
+            label: 'الحساب',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AccountScreen(),
+                ),
+              );
+            },
+          ),
+        ),
+        Expanded(
+          child: _NavItem(
+            icon: Icons.insights_outlined,
+            label: 'التقدم',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ProgressScreen(),
+                ),
+              );
+            },
+          ),
+        ),
+        SizedBox(
+          width: 70,
+          child: Center(
+            child: Container(
+              width: 54,
+              height: 54,
+              decoration: const BoxDecoration(
+                color: Color(0xFF18B56A),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+                size: 30,
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: _NavItem(
+            icon: Icons.calendar_today_outlined,
+            label: 'الخطة',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PlanScreen(),
+                ),
+              );
+            },
+          ),
+        ),
+        Expanded(
+          child: _NavItem(
+            icon: Icons.home_rounded,
+            label: 'الرئيسية',
+            selected: true,
+            onTap: () {},
+          ),
+        ),
+      ],
+    ),
+  ),
+),
   }
 }
 
@@ -580,6 +674,50 @@ class _HabitItem extends StatelessWidget {
             color: completed
                 ? const Color(0xFF18B56A)
                 : const Color(0xFFB5BDC7),
+          ),
+        ],
+      ),
+    );
+  }
+}
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool selected;
+
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.selected = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 24,
+            color: selected
+                ? const Color(0xFF18B56A)
+                : const Color(0xFF7B8798),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight:
+                  selected ? FontWeight.w700 : FontWeight.w500,
+              color: selected
+                  ? const Color(0xFF18B56A)
+                  : const Color(0xFF7B8798),
+            ),
           ),
         ],
       ),
