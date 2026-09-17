@@ -678,8 +678,33 @@ class ProgressScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  title,
-                  textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    color: navy,
+  title,
+  textAlign: TextAlign.right,
+  style: const TextStyle(
+    color: navy,
+    fontSize: 16,
+    fontWeight: FontWeight.w800,
+  ),
+),
+const SizedBox(height: 5),
+Text(
+  subtitle,
+  textAlign: TextAlign.right,
+  style: const TextStyle(
+    color: Color(0xFF7B8798),
+    fontSize: 12,
+  ),
+),
+],
+),
+),
+],
+),
+);
+}
+}
+                  
+                  
+                  
+                    
   
