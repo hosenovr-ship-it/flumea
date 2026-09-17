@@ -9,7 +9,10 @@ class ProgressScreen extends StatelessWidget {
   static const Color lightBlue = Color(0xFFEAF4FF);
   static const Color lightGreen = Color(0xFFEAF9F2);
   static const Color lightYellow = Color(0xFFFFF8E8);
-
+  static const TextStyle _smallText = TextStyle(
+  fontSize: 11,
+  color: Color(0xFF7B8798),
+);
   @override
   Widget build(BuildContext context) {
     return Directionality(
