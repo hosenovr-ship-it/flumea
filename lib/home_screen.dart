@@ -656,6 +656,55 @@ class _SmallCard extends StatelessWidget {
     );
   }
 }
+
+  class _HabitItem extends StatelessWidget {
+  final String icon;
+  final String title;
+  final bool completed;
+
+  const _HabitItem({
+    required this.icon,
+    required this.title,
+    this.completed = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Text(
+            icon,
+            style: const TextStyle(fontSize: 18),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: completed
+                    ? const Color(0xFF7B8798)
+                    : const Color(0xFF102A4C),
+              ),
+            ),
+          ),
+          Icon(
+            completed
+                ? Icons.check_circle
+                : Icons.radio_button_unchecked,
+            size: 20,
+            color: completed
+                ? const Color(0xFF18B56A)
+                : const Color(0xFFB5BDC7),
+          ),
+        ],
+      ),
+    );
+  }
+  }
 class _NavItem extends StatelessWidget {
   final IconData icon;
   final String label;
