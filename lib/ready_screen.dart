@@ -209,7 +209,7 @@ class ReadyScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 52),
 
                   // زر ابدأ الآن
                   SizedBox(
