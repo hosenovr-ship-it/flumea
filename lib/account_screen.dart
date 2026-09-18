@@ -430,8 +430,7 @@ Widget _navItem(
             active ? activeIcon : icon,
             color: active
                 ? AccountScreen.teal
-: AccountScreen.navy,
-                
+                : AccountScreen.navy,
             size: 27,
           ),
           const SizedBox(height: 4),
@@ -439,16 +438,17 @@ Widget _navItem(
             title,
             style: TextStyle(
               color: active
-    ? AccountScreen.teal
-    : AccountScreen.navy,
+                  ? AccountScreen.teal
+                  : AccountScreen.navy,
               fontSize: 12,
-              fontWeight:
-                  active ? FontWeight.bold : FontWeight.w500,
+              fontWeight: active
+                  ? FontWeight.bold
+                  : FontWeight.w500,
             ),
           ),
         ],
       ),
     ),
   );
-}  
+}
 
