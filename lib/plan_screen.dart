@@ -628,7 +628,7 @@ class PlanScreen extends StatelessWidget {
               vertical: 6,
             ),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.10),
+              color: tagColor.withValues(alpha: 0.10),
               borderRadius:
                   BorderRadius.circular(14),
             ),
