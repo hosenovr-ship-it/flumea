@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'bottom_navigation.dart';
 class PlanScreen extends StatelessWidget {
   const PlanScreen({super.key});
 
@@ -50,11 +50,9 @@ class PlanScreen extends StatelessWidget {
             ),
           ),
         ),
-        bottomNavigationBar: _bottomNavigation(
-          navy: navy,
-          blue: blue,
-          cyan: cyan,
-        ),
+        bottomNavigationBar: const FlumeaBottomNavigation(
+  selectedIndex: 1,
+),
       ),
     );
   }
