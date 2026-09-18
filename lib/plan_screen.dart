@@ -584,7 +584,17 @@ class PlanScreen extends StatelessWidget {
     required Color tagColor,
     required bool completed,
   }) {
-    return Container(
+    return StatefulBuilder(
+  builder: (context, setState) {
+    bool isCompleted = completed;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          isCompleted = !isCompleted;
+        });
+      },
+      child: Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 14,
         vertical: 12,
@@ -654,10 +664,10 @@ class PlanScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
-                    color: completed
+                    color: isCompleted
                         ? const Color(0xFF9AA5B1)
                         : const Color(0xFF102A4C),
-                    decoration: completed
+                    decoration: isCompleted
                         ? TextDecoration.lineThrough
                         : TextDecoration.none,
                   ),
@@ -678,18 +688,19 @@ class PlanScreen extends StatelessWidget {
           const SizedBox(width: 8),
 
           Icon(
-            completed
+            isCompleted
                 ? Icons.check_circle
                 : Icons.radio_button_unchecked,
             size: 22,
-            color: completed
+            color: isCompleted
                 ? const Color(0xFF20C7B7)
                 : const Color(0xFFB8C1CC),
-          ),
-        ],
-      ),
-    );
-  }
+            ],
+  ),
+    ),
+  },
+);
+          }
 
   // =========================================================
   // WEEKLY GOALS
