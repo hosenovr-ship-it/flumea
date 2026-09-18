@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'bottom_navigation.dart';
-import 'account_screen.dart';
-import 'plan_screen.dart';
-import 'progress_screen.dart';
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
