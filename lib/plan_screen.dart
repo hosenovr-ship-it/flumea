@@ -584,9 +584,10 @@ class PlanScreen extends StatelessWidget {
     required Color tagColor,
     required bool completed,
   }) {
-    return StatefulBuilder(
+  bool isCompleted = completed;
+
+return StatefulBuilder(
   builder: (context, setState) {
-    bool isCompleted = completed;
 
     return GestureDetector(
       onTap: () {
