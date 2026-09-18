@@ -322,7 +322,7 @@ class PlanScreen extends StatelessWidget {
           width: 43,
           height: 43,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.10),
+            color: color.withValues(alpha: 0.10)
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -628,7 +628,7 @@ class PlanScreen extends StatelessWidget {
               vertical: 6,
             ),
             decoration: BoxDecoration(
-              color: tagColor.withOpacity(0.10),
+              color: tagColor.withValues(alpha: 0.10)
               borderRadius:
                   BorderRadius.circular(14),
             ),
