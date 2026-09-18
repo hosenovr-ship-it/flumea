@@ -390,7 +390,7 @@ class AccountScreen extends StatelessWidget {
       ),
     );
   }
-
+}
   
 
 Widget _navItem(
