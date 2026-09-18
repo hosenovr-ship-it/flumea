@@ -695,10 +695,14 @@ class PlanScreen extends StatelessWidget {
             color: isCompleted
                 ? const Color(0xFF20C7B7)
                 : const Color(0xFFB8C1CC),
-                ],
-  ),
+                ),
+],
+),
+),
 );
-          }
+},
+);
+  }
 
   // =========================================================
   // WEEKLY GOALS
