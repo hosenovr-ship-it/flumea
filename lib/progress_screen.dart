@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'bottom_navigation.dart';
 class ProgressScreen extends StatelessWidget {
   const ProgressScreen({super.key});
 
@@ -141,101 +141,8 @@ class ProgressScreen extends StatelessWidget {
         ),
 
         // شريط التنقل السفلي
-        bottomNavigationBar: Container(
-  height: 72,
-  decoration: const BoxDecoration(
-    color: Colors.white,
-    border: Border(
-      top: BorderSide(
-        color: Color(0xFFE5E9EE),
-      ),
-    ),
-  ),
-  child: Row(
-    children: [
-      Expanded(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.person_outline,
-              size: 23,
-              color: Color(0xFF102A4C),
-            ),
-            SizedBox(height: 4),
-            Text(
-              'الحساب',
-              style: TextStyle(
-                fontSize: 11,
-                color: Color(0xFF102A4C),
-              ),
-            ),
-          ],
-        ),
-      ),
-      Expanded(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.show_chart_rounded,
-              size: 23,
-              color: Color(0xFF1478D4),
-            ),
-            SizedBox(height: 4),
-            Text(
-              'التقدم',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF1478D4),
-              ),
-            ),
-          ],
-        ),
-      ),
-      Expanded(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.calendar_month_outlined,
-              size: 23,
-              color: Color(0xFF20C7B7),
-            ),
-            SizedBox(height: 4),
-            Text(
-              'الخطة',
-              style: TextStyle(
-                fontSize: 11,
-                color: Color(0xFF20C7B7),
-              ),
-            ),
-          ],
-        ),
-      ),
-      Expanded(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.home_outlined,
-              size: 23,
-              color: Color(0xFF102A4C),
-            ),
-            SizedBox(height: 4),
-            Text(
-              'الرئيسية',
-              style: TextStyle(
-                fontSize: 11,
-                color: Color(0xFF102A4C),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ],
-  ),
+        bottomNavigationBar: const FlumeaBottomNavigation(
+  selectedIndex: 2,
 ),
       ),
     );
