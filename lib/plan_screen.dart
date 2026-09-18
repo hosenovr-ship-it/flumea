@@ -740,4 +740,285 @@ class PlanScreen extends StatelessWidget {
             '4/5',
             0.8,
             const Color(0xFF1478D4),
-       
+                 _goalRow(
+            'الرياضة',
+            '3/4',
+            0.75,
+            const Color(0xFF20C7B7),
+          ),
+
+          _goalRow(
+            'القراءة',
+            '2/3',
+            0.66,
+            const Color(0xFF8E44AD),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _goalRow(
+    String title,
+    String value,
+    double progress,
+    Color color,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 13),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF52647A),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: const Color(0xFFE8EDF3),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // =========================================================
+  // DAILY HABITS
+  // =========================================================
+
+  Widget _dailyHabits() {
+    return Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFE5E9EE),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.repeat,
+                size: 21,
+                color: Color(0xFF102A4C),
+              ),
+              const SizedBox(width: 6),
+              const Expanded(
+                child: Text(
+                  'عادات اليوم',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF102A4C),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          _habitRow(
+            'شرب الماء',
+            Icons.water_drop_outlined,
+            true,
+          ),
+
+          _habitRow(
+            'الرياضة',
+            Icons.fitness_center_outlined,
+            false,
+          ),
+
+          _habitRow(
+            'القراءة',
+            Icons.menu_book_outlined,
+            true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _habitRow(
+    String title,
+    IconData icon,
+    bool completed,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 11),
+      child: Row(
+        children: [
+          Icon(
+            completed
+                ? Icons.check_circle
+                : Icons.radio_button_unchecked,
+            size: 19,
+            color: completed
+                ? const Color(0xFF20C7B7)
+                : const Color(0xFFB8C1CC),
+          ),
+          const SizedBox(width: 7),
+          Expanded(
+            child: Text(
+              title,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: completed
+                    ? const Color(0xFF66758A)
+                    : const Color(0xFF102A4C),
+              ),
+            ),
+          ),
+          Icon(
+            icon,
+            size: 18,
+            color: const Color(0xFF7B8798),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // =========================================================
+  // BOTTOM NAVIGATION
+  // =========================================================
+
+  Widget _bottomNavigation({
+    required Color navy,
+    required Color blue,
+    required Color cyan,
+  }) {
+    return Container(
+      height: 72,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: const Border(
+          top: BorderSide(
+            color: Color(0xFFE5E9EE),
+          ),
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x12000000),
+            blurRadius: 12,
+            offset: Offset(0, -3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _PlanNavItem(
+              icon: Icons.person_outline,
+              label: 'الحساب',
+              color: navy,
+            ),
+          ),
+
+          Expanded(
+            child: _PlanNavItem(
+              icon: Icons.show_chart_rounded,
+              label: 'التقدم',
+              color: blue,
+            ),
+          ),
+
+          Expanded(
+            child: _PlanNavItem(
+              icon: Icons.calendar_month_rounded,
+              label: 'الخطة',
+              color: cyan,
+              selected: true,
+            ),
+          ),
+
+          Expanded(
+            child: _PlanNavItem(
+              icon: Icons.home_outlined,
+              label: 'الرئيسية',
+              color: navy,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// =============================================================
+// PLAN NAV ITEM
+// =============================================================
+
+class _PlanNavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final bool selected;
+
+  const _PlanNavItem({
+    required this.icon,
+    required this.label,
+    required this.color,
+    this.selected = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final Color itemColor = selected
+        ? color
+        : const Color(0xFF7B8798);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          icon,
+          size: 23,
+          color: itemColor,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: selected
+                ? FontWeight.w700
+                : FontWeight.w500,
+            color: itemColor,
+          ),
+        ),
+      ],
+    );
+  }
+}
