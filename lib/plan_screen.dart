@@ -832,9 +832,7 @@ class _PlanNavItem extends StatelessWidget {
         Icon(
           icon,
           size: 23,
-          color: selected
-              ? color
-              : const Color(0xFF7B8798),
+          color: selected ? color : const Color(0xFF7B8798),
         ),
         const SizedBox(height: 4),
         Text(
@@ -843,9 +841,7 @@ class _PlanNavItem extends StatelessWidget {
             fontSize: 11,
             fontWeight:
                 selected ? FontWeight.w700 : FontWeight.w500,
-            color: selected
-                ? color
-                : const Color(0xFF7B8798),
+            color: selected ? color : const Color(0xFF7B8798),
           ),
         ),
       ],
