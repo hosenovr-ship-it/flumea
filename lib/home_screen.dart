@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'bottom_navigation.dart';
 import 'account_screen.dart';
 import 'plan_screen.dart';
 import 'progress_screen.dart';
@@ -323,99 +324,13 @@ class HomeScreen extends StatelessWidget {
         ),
 
         // شريط التنقل السفلي
-        bottomNavigationBar: SafeArea(
-          child: Container(
-            height: 72,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                top: BorderSide(
-                  color: Color(0xFFE5E9EE),
-                ),
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _NavItem(
-                    icon: Icons.person_outline,
-                    label: 'الحساب',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AccountScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                Expanded(
-                  child: _NavItem(
-                    icon: Icons.insights_outlined,
-                    label: 'التقدم',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ProgressScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                SizedBox(
-                  width: 70,
-                  child: Center(
-                    child: Container(
-                      width: 54,
-                      height: 54,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF18B56A),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.add,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                  ),
-                ),
-
-                Expanded(
-                  child: _NavItem(
-                    icon: Icons.calendar_today_outlined,
-                    label: 'الخطة',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const PlanScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                Expanded(
-                  child: _NavItem(
-                    icon: Icons.home_rounded,
-                    label: 'الرئيسية',
-                    selected: true,
-                    onTap: () {},
-                  ),
-                ),
-              ],
-            ),
+        bottomNavigationBar: const FlumeaBottomNavigation(
+  selectedIndex: 0,
           ),
-        ),
-      ),
+                ),
     );
   }
-}
+      }
 
 
 // ==================== تقدم اليوم ====================
