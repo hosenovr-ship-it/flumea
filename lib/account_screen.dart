@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'bottom_navigation.dart';
 import 'home_screen.dart';
 import 'plan_screen.dart';
 import 'progress_screen.dart';
@@ -274,7 +275,9 @@ class AccountScreen extends StatelessWidget {
         ),
 
         // ===== Bottom Navigation =====
-        bottomNavigationBar: _bottomNavigation(context),
+        bottomNavigationBar: const FlumeaBottomNavigation(
+  selectedIndex: 3,
+),
       ),
     );
   }
