@@ -31,7 +31,7 @@ class PlanScreen extends StatelessWidget {
                 _buildSummary(navy, blue, cyan),
                 const SizedBox(height: 14),
 
-                _buildTasks(navy, blue, cyan),
+                _buildTasks(context, navy, blue, cyan),
                 const SizedBox(height: 14),
 
                 Row(
@@ -402,10 +402,11 @@ class PlanScreen extends StatelessWidget {
   // =========================================================
 
   Widget _buildTasks(
-    Color navy,
-    Color blue,
-    Color cyan,
-  ) {
+  BuildContext context,
+  Color navy,
+  Color blue,
+  Color cyan,
+) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
