@@ -539,7 +539,25 @@ class PlanScreen extends StatelessWidget {
 
           Padding(
             padding: const EdgeInsets.all(14),
-            child: Container(
+            child: GestureDetector(
+  onTap: () {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('إضافة مهمة جديدة'),
+          content: const Text('هنا سنضيف تفاصيل المهمة.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('إغلاق'),
+            ),
+          ],
+        );
+      },
+    );
+  },
+  child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(
                 vertical: 12,
@@ -571,6 +589,7 @@ class PlanScreen extends StatelessWidget {
               ),
             ),
           ),
+            ),
         ],
       ),
     );
