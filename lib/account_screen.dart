@@ -393,5 +393,59 @@ class AccountScreen extends StatelessWidget {
 
   
 
-  
+Widget _navItem(
+  BuildContext context, {
+  required IconData icon,
+  required IconData activeIcon,
+  required String title,
+  required bool active,
+  required Widget page,
+}) {
+  return GestureDetector(
+    onTap: () {
+      if (!active) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => page,
+          ),
+        );
+      }
+    },
+    child: Container(
+      margin: const EdgeInsets.symmetric(
+        vertical: 8,
+        horizontal: 3,
+      ),
+      decoration: BoxDecoration(
+        color: active
+            ? const Color(0xFFE5F7F2)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            active ? activeIcon : icon,
+            color: active
+                ? teal
+                : navy,
+            size: 27,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(
+              color: active ? teal : navy,
+              fontSize: 12,
+              fontWeight:
+                  active ? FontWeight.bold : FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}  
     
