@@ -740,6 +740,7 @@ class PlanScreen extends StatelessWidget {
             '4/5',
             0.8,
             const Color(0xFF1478D4),
+            ),
                  _goalRow(
             'الرياضة',
             '3/4',
