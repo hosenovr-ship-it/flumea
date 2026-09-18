@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'home_screen.dart';
 import 'plan_screen.dart';
 import 'progress_screen.dart';
@@ -11,9 +12,6 @@ class FlumeaBottomNavigation extends StatelessWidget {
     super.key,
     required this.selectedIndex,
   });
-
-  // اللون التركوازي الموحد لكل الأقسام
-  static const Color turquoise = Color(0xFF20C7B7);
 
   void _navigate(BuildContext context, int index) {
     if (index == selectedIndex) return;
@@ -51,6 +49,8 @@ class FlumeaBottomNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const turquoise = Color(0xFF20C7B7);
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: SafeArea(
@@ -62,48 +62,57 @@ class FlumeaBottomNavigation extends StatelessWidget {
             border: Border(
               top: BorderSide(
                 color: Color(0xFFE5E9EE),
+                width: 1,
               ),
             ),
           ),
           child: Row(
             children: [
-              // الحساب
+              // 1️⃣ الرئيسية — أقصى اليمين
               Expanded(
                 child: _NavItem(
-                  icon: Icons.person_outline,
-                  label: 'الحساب',
-                  selected: selectedIndex == 3,
-                  onTap: () => _navigate(context, 3),
+                  icon: Icons.home_outlined,
+                  activeIcon: Icons.home,
+                  label: 'الرئيسية',
+                  selected: selectedIndex == 0,
+                  color: turquoise,
+                  onTap: () => _navigate(context, 0),
                 ),
               ),
 
-              // التقدم
+              // 2️⃣ الخطة
               Expanded(
                 child: _NavItem(
-                  icon: Icons.show_chart_rounded,
-                  label: 'التقدم',
-                  selected: selectedIndex == 2,
-                  onTap: () => _navigate(context, 2),
-                ),
-              ),
-
-              // الخطة
-              Expanded(
-                child: _NavItem(
-                  icon: Icons.calendar_month_rounded,
+                  icon: Icons.calendar_month_outlined,
+                  activeIcon: Icons.calendar_month,
                   label: 'الخطة',
                   selected: selectedIndex == 1,
+                  color: turquoise,
                   onTap: () => _navigate(context, 1),
                 ),
               ),
 
-              // الرئيسية
+              // 3️⃣ التقدم
               Expanded(
                 child: _NavItem(
-                  icon: Icons.home_rounded,
-                  label: 'الرئيسية',
-                  selected: selectedIndex == 0,
-                  onTap: () => _navigate(context, 0),
+                  icon: Icons.bar_chart_outlined,
+                  activeIcon: Icons.bar_chart,
+                  label: 'التقدم',
+                  selected: selectedIndex == 2,
+                  color: turquoise,
+                  onTap: () => _navigate(context, 2),
+                ),
+              ),
+
+              // 4️⃣ الحساب — أقصى اليسار
+              Expanded(
+                child: _NavItem(
+                  icon: Icons.person_outline,
+                  activeIcon: Icons.person,
+                  label: 'الحساب',
+                  selected: selectedIndex == 3,
+                  color: turquoise,
+                  onTap: () => _navigate(context, 3),
                 ),
               ),
             ],
@@ -116,23 +125,26 @@ class FlumeaBottomNavigation extends StatelessWidget {
 
 class _NavItem extends StatelessWidget {
   final IconData icon;
+  final IconData activeIcon;
   final String label;
   final bool selected;
+  final Color color;
   final VoidCallback onTap;
 
   const _NavItem({
     required this.icon,
+    required this.activeIcon,
     required this.label,
     required this.selected,
+    required this.color,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    const turquoise = Color(0xFF20C7B7);
-
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
       child: Center(
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
@@ -142,7 +154,7 @@ class _NavItem extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: selected
-                ? turquoise.withValues(alpha: 0.12)
+                ? color.withValues(alpha: 0.12)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(18),
           ),
@@ -150,9 +162,9 @@ class _NavItem extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                icon,
+                selected ? activeIcon : icon,
                 size: 24,
-                color: turquoise,
+                color: color,
               ),
               const SizedBox(height: 4),
               Text(
@@ -161,7 +173,7 @@ class _NavItem extends StatelessWidget {
                   fontSize: 11,
                   fontWeight:
                       selected ? FontWeight.w700 : FontWeight.w500,
-                  color: turquoise,
+                  color: color,
                 ),
               ),
             ],
