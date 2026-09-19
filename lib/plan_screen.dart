@@ -14,6 +14,8 @@ class _PlanScreenState extends State<PlanScreen> {
   static const Color cyan = Color(0xFF20C7B7);
   static const Color background = Color(0xFFF7FBFF);
 
+  int selectedDay = 0;
+
   final List<Map<String, dynamic>> tasks = [
     {
       'time': '6:00 ص',
@@ -193,33 +195,40 @@ class _PlanScreenState extends State<PlanScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 11,
-          ),
-          decoration: BoxDecoration(
-            color: const Color(0xFFEAF9F4),
-            borderRadius: BorderRadius.circular(28),
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'اليوم',
-                style: TextStyle(
-                  color: navy,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedDay = 0;
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 11,
+            ),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEAF9F4),
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'اليوم',
+                  style: TextStyle(
+                    color: navy,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              ),
-              SizedBox(width: 8),
-              Icon(
-                Icons.calendar_month_outlined,
-                color: navy,
-                size: 22,
-              ),
-            ],
+                SizedBox(width: 8),
+                Icon(
+                  Icons.calendar_month_outlined,
+                  color: navy,
+                  size: 22,
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -243,10 +252,17 @@ class _PlanScreenState extends State<PlanScreen> {
         children: List.generate(
           days.length,
           (index) => Expanded(
-            child: _dayBox(
-              days[index][0],
-              days[index][1],
-              index == 0,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedDay = index;
+                });
+              },
+              child: _dayBox(
+                days[index][0],
+                days[index][1],
+                selectedDay == index,
+              ),
             ),
           ),
         ),
@@ -260,7 +276,9 @@ class _PlanScreenState extends State<PlanScreen> {
     bool selected,
   ) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 3),
+      margin: const EdgeInsets.symmetric(
+        horizontal: 3,
+      ),
       decoration: BoxDecoration(
         color: selected
             ? blue
@@ -411,7 +429,9 @@ class _PlanScreenState extends State<PlanScreen> {
           width: 43,
           height: 43,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.10),
+            color: color.withValues(
+              alpha: 0.10,
+            ),
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -532,7 +552,8 @@ class _PlanScreenState extends State<PlanScreen> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding:
+                      const EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: 9,
                   ),
@@ -554,7 +575,8 @@ class _PlanScreenState extends State<PlanScreen> {
                         'الكل',
                         style: TextStyle(
                           color: navy,
-                          fontWeight: FontWeight.w700,
+                          fontWeight:
+                              FontWeight.w700,
                         ),
                       ),
                     ],
@@ -575,7 +597,8 @@ class _PlanScreenState extends State<PlanScreen> {
               onTap: _showAddTaskDialog,
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(
+                padding:
+                    const EdgeInsets.symmetric(
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
@@ -598,7 +621,8 @@ class _PlanScreenState extends State<PlanScreen> {
                       style: TextStyle(
                         color: blue,
                         fontSize: 16,
-                        fontWeight: FontWeight.w800,
+                        fontWeight:
+                            FontWeight.w800,
                       ),
                     ),
                   ],
@@ -610,145 +634,117 @@ class _PlanScreenState extends State<PlanScreen> {
       ),
     );
   }
-    Widget _taskCard(int index) {
-    final task = tasks[index];
-    final bool completed = task['completed'] == true;
-    final Color tagColor = task['color'] as Color;
-    final String tag = task['tag'].toString();
-    final String emoji = task['emoji'].toString();
-
-    return InkWell(
+    Widget _taskCard(Map<String, dynamic> task, int index) {
+    return GestureDetector(
       onTap: () {
         setState(() {
-          tasks[index]['completed'] = !completed;
+          tasks[index]['completed'] = !tasks[index]['completed'];
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 13,
-        ),
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: Color(0xFFEDF0F4),
-            ),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: const Color(0xFFE8E8E8),
           ),
         ),
         child: Row(
           children: [
-            Icon(
-              completed
-                  ? Icons.check_box
-                  : Icons.check_box_outline_blank,
-              color: completed
-                  ? blue
-                  : const Color(0xFFB8C1CC),
-              size: 27,
+            Container(
+              width: 25,
+              height: 25,
+              decoration: BoxDecoration(
+                color: task['completed']
+                    ? const Color(0xFF111111)
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: task['completed']
+                      ? const Color(0xFF111111)
+                      : const Color(0xFFD6D6D6),
+                  width: 1.5,
+                ),
+              ),
+              child: task['completed']
+                  ? const Icon(
+                      Icons.check,
+                      size: 17,
+                      color: Colors.white,
+                    )
+                  : null,
             ),
 
-            const SizedBox(width: 10),
+            const SizedBox(width: 12),
 
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    task['title'].toString(),
-                    textAlign: TextAlign.right,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    task['title'],
                     style: TextStyle(
                       fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: completed
-                          ? const Color(0xFF99A5B1)
-                          : navy,
-                      decoration: completed
+                      fontWeight: FontWeight.w700,
+                      decoration: task['completed']
                           ? TextDecoration.lineThrough
                           : TextDecoration.none,
+                      color: task['completed']
+                          ? Colors.grey
+                          : const Color(0xFF222222),
                     ),
                   ),
-
-                  const SizedBox(height: 4),
-
+                  const SizedBox(height: 5),
                   Text(
-                    task['subtitle'].toString(),
-                    textAlign: TextAlign.right,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    task['subtitle'],
                     style: const TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF66758A),
+                      fontSize: 12,
+                      color: Color(0xFF8A8A8A),
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(width: 14),
-
-            Container(
-              constraints: const BoxConstraints(
-                maxWidth: 105,
-              ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                color: tagColor.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    tag,
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: tagColor,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      task['tag'],
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF777777),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 5),
-                  Text(
-                    emoji,
-                    style: const TextStyle(
-                      fontSize: 14,
+                    const SizedBox(width: 6),
+                    Text(
+                      task['emoji'],
+                      style: const TextStyle(fontSize: 17),
                     ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(width: 18),
-
-            SizedBox(
-              width: 58,
-              child: Text(
-                task['time'].toString(),
-                textAlign: TextAlign.left,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF65758A),
-                  fontWeight: FontWeight.w600,
+                  ],
                 ),
-              ),
+                const SizedBox(height: 8),
+                Text(
+                  task['time'],
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF999999),
+                  ),
+                ),
+              ],
             ),
 
-            const SizedBox(width: 6),
+            const SizedBox(width: 8),
 
             const Icon(
-              Icons.more_vert,
-              color: Color(0xFF65758A),
-              size: 22,
+              Icons.more_horiz,
+              color: Color(0xFF999999),
+              size: 20,
             ),
           ],
         ),
@@ -758,420 +754,317 @@ class _PlanScreenState extends State<PlanScreen> {
 
   void _showAddTaskDialog() {
     final nameController = TextEditingController();
+    final descriptionController = TextEditingController();
     final timeController = TextEditingController();
     final categoryController = TextEditingController();
     final emojiController = TextEditingController();
-    final descriptionController = TextEditingController();
 
     showDialog(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
-          ),
-          title: const Text(
-            'إضافة مهمة جديدة',
-            textAlign: TextAlign.right,
-            style: TextStyle(
-              color: navy,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
+      builder: (context) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(22),
             ),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'ابدأ بخطوة صغيرة نحو هدفك الكبير',
-                  textAlign: TextAlign.right,
+            title: const Text(
+              'إضافة مهمة جديدة',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _dialogField(
+                    controller: nameController,
+                    label: 'اسم المهمة',
+                  ),
+                  const SizedBox(height: 10),
+                  _dialogField(
+                    controller: descriptionController,
+                    label: 'الوصف',
+                  ),
+                  const SizedBox(height: 10),
+                  _dialogField(
+                    controller: timeController,
+                    label: 'الوقت',
+                  ),
+                  const SizedBox(height: 10),
+                  _dialogField(
+                    controller: categoryController,
+                    label: 'التصنيف',
+                  ),
+                  const SizedBox(height: 10),
+                  _dialogField(
+                    controller: emojiController,
+                    label: 'الإيموجي',
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'إلغاء',
                   style: TextStyle(
-                    color: Color(0xFF7A8797),
-                    fontSize: 13,
+                    color: Colors.grey,
                   ),
                 ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    tasks.add({
+                      'time': timeController.text.isEmpty
+                          ? 'بدون وقت'
+                          : timeController.text,
+                      'title': nameController.text.isEmpty
+                          ? 'مهمة جديدة'
+                          : nameController.text,
+                      'subtitle': descriptionController.text.isEmpty
+                          ? 'مهمة جديدة'
+                          : descriptionController.text,
+                      'tag': categoryController.text.isEmpty
+                          ? 'عام'
+                          : categoryController.text,
+                      'emoji': emojiController.text.isEmpty
+                          ? '📝'
+                          : emojiController.text,
+                      'color': const Color(0xFF4F7CFF),
+                      'completed': false,
+                    });
+                  });
 
-                const SizedBox(height: 18),
-
-                TextField(
-                  controller: nameController,
-                  textAlign: TextAlign.right,
-                  decoration: InputDecoration(
-                    labelText: 'اسم المهمة *',
-                    prefixIcon: const Icon(
-                      Icons.edit_rounded,
-                      color: blue,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(16),
-                    ),
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF111111),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-
-                const SizedBox(height: 12),
-
-                TextField(
-                  controller: timeController,
-                  textAlign: TextAlign.right,
-                  decoration: InputDecoration(
-                    labelText: 'الوقت',
-                    prefixIcon: const Icon(
-                      Icons.access_time_rounded,
-                      color: Color(0xFFE85D6A),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(16),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                TextField(
-                  controller: categoryController,
-                  textAlign: TextAlign.right,
-                  decoration: InputDecoration(
-                    labelText: 'التصنيف',
-                    prefixIcon: const Icon(
-                      Icons.local_offer_rounded,
-                      color: Color(0xFFF0A51A),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(16),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                TextField(
-                  controller: emojiController,
-                  textAlign: TextAlign.right,
-                  decoration: InputDecoration(
-                    labelText: 'الإيموجي',
-                    prefixIcon: const Icon(
-                      Icons.emoji_emotions_outlined,
-                      color: Color(0xFF7567D9),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(16),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                TextField(
-                  controller: descriptionController,
-                  textAlign: TextAlign.right,
-                  maxLines: 3,
-                  maxLength: 100,
-                  decoration: InputDecoration(
-                    labelText: 'الوصف',
-                    prefixIcon: const Icon(
-                      Icons.description_outlined,
-                      color: Color(0xFFF4A90E),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(16),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+                child: const Text('إضافة'),
+              ),
+            ],
           ),
-          actionsPadding: const EdgeInsets.fromLTRB(
-            16,
-            0,
-            16,
-            14,
-          ),
-          actions: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.pop(dialogContext);
-                    },
-                    style: TextButton.styleFrom(
-                      backgroundColor:
-                          const Color(0xFFF0F3F8),
-                      padding:
-                          const EdgeInsets.symmetric(
-                        vertical: 14,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(18),
-                      ),
-                    ),
-                    child: const Text(
-                      'إلغاء',
-                      style: TextStyle(
-                        color: navy,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(width: 10),
-
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (nameController.text
-                          .trim()
-                          .isEmpty) {
-                        return;
-                      }
-
-                      final String category =
-                          categoryController.text
-                                  .trim()
-                                  .isEmpty
-                              ? 'مهمة'
-                              : categoryController.text
-                                  .trim();
-
-                      final String emoji =
-                          emojiController.text
-                                  .trim()
-                                  .isEmpty
-                              ? '📝'
-                              : emojiController.text
-                                  .trim();
-
-                      setState(() {
-                        tasks.add({
-                          'time':
-                              timeController.text
-                                      .trim()
-                                      .isEmpty
-                                  ? 'بدون وقت'
-                                  : timeController.text
-                                      .trim(),
-                          'title':
-                              nameController.text.trim(),
-                          'subtitle':
-                              descriptionController.text
-                                      .trim()
-                                      .isEmpty
-                                  ? 'مهمة جديدة'
-                                  : descriptionController
-                                      .text
-                                      .trim(),
-                          'tag': category,
-                          'emoji': emoji,
-                          'color': cyan,
-                          'completed': false,
-                        });
-                      });
-
-                      Navigator.pop(dialogContext);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          const Color(0xFF4169F1),
-                      foregroundColor: Colors.white,
-                      padding:
-                          const EdgeInsets.symmetric(
-                        vertical: 14,
-                      ),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(18),
-                      ),
-                    ),
-                    child: const Text(
-                      'إضافة المهمة +',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
         );
       },
     );
   }
-    Widget _buildWeeklyGoals() {
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFFE5E9EE),
+
+  Widget _dialogField({
+    required TextEditingController controller,
+    required String label,
+  }) {
+    return TextField(
+      controller: controller,
+      textDirection: TextDirection.rtl,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.flag_outlined,
-                size: 21,
-                color: navy,
-              ),
-              const SizedBox(width: 6),
-              const Expanded(
-                child: Text(
-                  'أهداف الأسبوع',
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: navy,
-                  ),
-                ),
-              ),
-            ],
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(
+            color: Color(0xFF111111),
           ),
-
-          const SizedBox(height: 14),
-
-          _goalRow(
-            'الدراسة',
-            '4/5',
-            0.8,
-            const Color(0xFF1478D4),
-          ),
-
-          _goalRow(
-            'الرياضة',
-            '3/4',
-            0.75,
-            cyan,
-          ),
-
-          _goalRow(
-            'القراءة',
-            '2/3',
-            0.66,
-            const Color(0xFFF8A44D),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _goalRow(
-    String title,
-    String value,
-    double progress,
-    Color color,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        bottom: 13,
+  Widget _buildWeeklyGoals() {
+    return Container(
+      margin: const EdgeInsets.only(top: 18),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: const Color(0xFFE8E8E8),
+        ),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: color,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                title,
-                textAlign: TextAlign.right,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: navy,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 6),
-
-          ClipRRect(
-            borderRadius:
-                BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 6,
-              backgroundColor:
-                  const Color(0xFFEFF2F6),
-              valueColor:
-                  AlwaysStoppedAnimation<Color>(
-                color,
-              ),
+          const Text(
+            'أهداف الأسبوع',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF222222),
             ),
           ),
+
+          const SizedBox(height: 16),
+
+          _goalRow(
+            icon: Icons.menu_book_rounded,
+            title: 'الدراسة',
+            current: 4,
+            total: 5,
+          ),
+
+          const SizedBox(height: 14),
+
+          _goalRow(
+            icon: Icons.fitness_center_rounded,
+            title: 'الرياضة',
+            current: 3,
+            total: 5,
+          ),
+
+          const SizedBox(height: 14),
+
+          _goalRow(
+            icon: Icons.auto_stories_rounded,
+            title: 'القراءة',
+            current: 6,
+            total: 7,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildDailyHabits() {
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFFE5E9EE),
+  Widget _goalRow({
+    required IconData icon,
+    required String title,
+    required int current,
+    required int total,
+  }) {
+    final double progress = current / total;
+
+    return Row(
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF4F4F4),
+            borderRadius: BorderRadius.circular(13),
+          ),
+          child: Icon(
+            icon,
+            color: const Color(0xFF222222),
+            size: 21,
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.stretch,
-        children: [
-          Row(
+
+        const SizedBox(width: 12),
+
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.repeat,
-                size: 21,
-                color: navy,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    '$current/$total',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF888888),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 6),
-              const Expanded(
-                child: Text(
-                  'عادات اليوم',
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: navy,
+
+              const SizedBox(height: 8),
+
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 7,
+                  backgroundColor: const Color(0xFFEDEDED),
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    Color(0xFF222222),
                   ),
                 ),
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+    Widget _buildDailyHabits() {
+    return Container(
+      margin: const EdgeInsets.only(top: 18),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: const Color(0xFFE8E8E8),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'عادات اليوم',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF222222),
+            ),
+          ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
 
-          ...List.generate(
-            habits.length,
-            (index) => _habitRow(index),
+          _habitRow(0),
+          const SizedBox(height: 10),
+          _habitRow(1),
+          const SizedBox(height: 10),
+          _habitRow(2),
+
+          const SizedBox(height: 16),
+
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _showAddHabitDialog,
+              icon: const Icon(
+                Icons.add,
+                size: 20,
+              ),
+              label: const Text(
+                'إضافة عادة جديدة',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF222222),
+                side: const BorderSide(
+                  color: Color(0xFFDCDCDC),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 13,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -1181,57 +1074,175 @@ class _PlanScreenState extends State<PlanScreen> {
   Widget _habitRow(int index) {
     final habit = habits[index];
 
-    final bool completed =
-        habit['completed'] == true;
-
-    return InkWell(
+    return GestureDetector(
       onTap: () {
         setState(() {
-          habits[index]['completed'] =
-              !completed;
+          habit['completed'] = !habit['completed'];
         });
       },
-      child: Padding(
-        padding: const EdgeInsets.only(
-          bottom: 11,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 12,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8F8F8),
+          borderRadius: BorderRadius.circular(15),
         ),
         child: Row(
           children: [
-            Icon(
-              completed
-                  ? Icons.check_circle
-                  : Icons.radio_button_unchecked,
-              size: 19,
-              color: completed
-                  ? cyan
-                  : const Color(0xFFB8C1CC),
+            Container(
+              width: 25,
+              height: 25,
+              decoration: BoxDecoration(
+                color: habit['completed']
+                    ? const Color(0xFF111111)
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: habit['completed']
+                      ? const Color(0xFF111111)
+                      : const Color(0xFFD6D6D6),
+                  width: 1.5,
+                ),
+              ),
+              child: habit['completed']
+                  ? const Icon(
+                      Icons.check,
+                      size: 17,
+                      color: Colors.white,
+                    )
+                  : null,
             ),
 
-            const SizedBox(width: 7),
+            const SizedBox(width: 12),
 
             Expanded(
               child: Text(
-                habit['title'].toString(),
-                textAlign: TextAlign.right,
+                habit['title'],
                 style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: completed
-                      ? const Color(0xFF66758A)
-                      : navy,
-                  decoration: completed
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  decoration: habit['completed']
                       ? TextDecoration.lineThrough
                       : TextDecoration.none,
+                  color: habit['completed']
+                      ? Colors.grey
+                      : const Color(0xFF222222),
                 ),
               ),
             ),
 
-            Icon(
-              habit['icon'] as IconData,
-              size: 18,
-              color: const Color(0xFF7B8798),
+            Text(
+              habit['emoji'],
+              style: const TextStyle(
+                fontSize: 20,
+              ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showAddHabitDialog() {
+    final nameController = TextEditingController();
+    final emojiController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(22),
+            ),
+            title: const Text(
+              'إضافة عادة جديدة',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _habitDialogField(
+                  controller: nameController,
+                  label: 'اسم العادة',
+                ),
+
+                const SizedBox(height: 10),
+
+                _habitDialogField(
+                  controller: emojiController,
+                  label: 'الإيموجي',
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'إلغاء',
+                  style: TextStyle(
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    habits.add({
+                      'title': nameController.text.isEmpty
+                          ? 'عادة جديدة'
+                          : nameController.text,
+                      'emoji': emojiController.text.isEmpty
+                          ? '⭐'
+                          : emojiController.text,
+                      'completed': false,
+                    });
+                  });
+
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF111111),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('إضافة'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _habitDialogField({
+    required TextEditingController controller,
+    required String label,
+  }) {
+    return TextField(
+      controller: controller,
+      textDirection: TextDirection.rtl,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(
+            color: Color(0xFF111111),
+          ),
         ),
       ),
     );
