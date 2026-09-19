@@ -19,7 +19,8 @@ class _PlanScreenState extends State<PlanScreen> {
       'time': '6:00 ص',
       'title': 'الاستيقاظ',
       'subtitle': 'ابدأ يومك بطاقة',
-      'tag': 'عادات ☀️',
+      'tag': 'عادات',
+      'emoji': '☀️',
       'color': cyan,
       'completed': true,
     },
@@ -27,7 +28,8 @@ class _PlanScreenState extends State<PlanScreen> {
       'time': '6:30 ص',
       'title': 'الرياضة',
       'subtitle': 'تمرين لمدة 45 دقيقة',
-      'tag': 'صحة 🏋️',
+      'tag': 'صحة',
+      'emoji': '🏋️',
       'color': Color(0xFFEF5350),
       'completed': false,
     },
@@ -35,7 +37,8 @@ class _PlanScreenState extends State<PlanScreen> {
       'time': '8:00 ص',
       'title': 'الإفطار',
       'subtitle': 'وجبة صحية ومتوازنة',
-      'tag': 'غذاء 🍽️',
+      'tag': 'غذاء',
+      'emoji': '🍽️',
       'color': Color(0xFFFFA726),
       'completed': false,
     },
@@ -43,7 +46,8 @@ class _PlanScreenState extends State<PlanScreen> {
       'time': '9:00 ص',
       'title': 'الدراسة',
       'subtitle': 'مذاكرة المواد المهمة',
-      'tag': 'تعليم 🎓',
+      'tag': 'تعليم',
+      'emoji': '🎓',
       'color': blue,
       'completed': true,
     },
@@ -51,7 +55,8 @@ class _PlanScreenState extends State<PlanScreen> {
       'time': '12:00 م',
       'title': 'المهام الشخصية',
       'subtitle': 'إنجاز الأعمال المطلوبة',
-      'tag': 'إنتاجية 💼',
+      'tag': 'إنتاجية',
+      'emoji': '💼',
       'color': Color(0xFFE57C72),
       'completed': false,
     },
@@ -59,7 +64,8 @@ class _PlanScreenState extends State<PlanScreen> {
       'time': '4:00 م',
       'title': 'القراءة',
       'subtitle': 'قراءة 30 دقيقة',
-      'tag': 'تطوير الذات 📖',
+      'tag': 'تطوير الذات',
+      'emoji': '📖',
       'color': Color(0xFF8E44AD),
       'completed': false,
     },
@@ -67,7 +73,17 @@ class _PlanScreenState extends State<PlanScreen> {
       'time': '7:00 م',
       'title': 'مراجعة اليوم',
       'subtitle': 'تقييم ما تم إنجازه',
-      'tag': 'مراجعة 📊',
+      'tag': 'مراجعة',
+      'emoji': '📊',
+      'color': cyan,
+      'completed': false,
+    },
+    {
+      'time': '8:00 م',
+      'title': 'كرة القدم',
+      'subtitle': 'مهمة جديدة',
+      'tag': 'رياضة',
+      'emoji': '⚽',
       'color': cyan,
       'completed': false,
     },
@@ -99,7 +115,12 @@ class _PlanScreenState extends State<PlanScreen> {
         backgroundColor: background,
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(18, 12, 18, 110),
+            padding: const EdgeInsets.fromLTRB(
+              18,
+              12,
+              18,
+              110,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -155,7 +176,7 @@ class _PlanScreenState extends State<PlanScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Icon(
+                  const Icon(
                     Icons.calendar_month_outlined,
                     color: navy,
                     size: 30,
@@ -179,6 +200,7 @@ class _PlanScreenState extends State<PlanScreen> {
 
   Widget _buildTodayButton() {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Container(
           padding: const EdgeInsets.symmetric(
@@ -324,7 +346,9 @@ class _PlanScreenState extends State<PlanScreen> {
                         const SizedBox(width: 7),
                         const Text(
                           '☀️',
-                          style: TextStyle(fontSize: 22),
+                          style: TextStyle(
+                            fontSize: 22,
+                          ),
                         ),
                       ],
                     ),
@@ -444,11 +468,14 @@ class _PlanScreenState extends State<PlanScreen> {
               strokeWidth: 7,
               backgroundColor: const Color(0xFFDDE4ED),
               valueColor:
-                  const AlwaysStoppedAnimation<Color>(cyan),
+                  const AlwaysStoppedAnimation<Color>(
+                cyan,
+              ),
             ),
           ),
           Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment:
+                MainAxisAlignment.center,
             children: [
               Text(
                 '$completed/${tasks.length}',
@@ -516,7 +543,8 @@ class _PlanScreenState extends State<PlanScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF0F4FA),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius:
+                        BorderRadius.circular(20),
                   ),
                   child: const Row(
                     children: [
@@ -530,7 +558,8 @@ class _PlanScreenState extends State<PlanScreen> {
                         'الكل',
                         style: TextStyle(
                           color: navy,
-                          fontWeight: FontWeight.w700,
+                          fontWeight:
+                              FontWeight.w700,
                         ),
                       ),
                     ],
@@ -539,27 +568,28 @@ class _PlanScreenState extends State<PlanScreen> {
               ],
             ),
           ),
-
           ...List.generate(
             tasks.length,
             (index) => _taskCard(index),
           ),
-
           Padding(
             padding: const EdgeInsets.all(14),
             child: GestureDetector(
               onTap: _showAddTaskDialog,
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(
+                padding:
+                    const EdgeInsets.symmetric(
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFEAF4FF),
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius:
+                      BorderRadius.circular(22),
                 ),
                 child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment:
+                      MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.add,
@@ -572,7 +602,8 @@ class _PlanScreenState extends State<PlanScreen> {
                       style: TextStyle(
                         color: blue,
                         fontSize: 16,
-                        fontWeight: FontWeight.w800,
+                        fontWeight:
+                            FontWeight.w800,
                       ),
                     ),
                   ],
@@ -587,13 +618,23 @@ class _PlanScreenState extends State<PlanScreen> {
 
   Widget _taskCard(int index) {
     final task = tasks[index];
-    final bool completed = task['completed'] == true;
-    final Color tagColor = task['color'] as Color;
+    final bool completed =
+        task['completed'] == true;
+
+    final Color tagColor =
+        task['color'] as Color;
+
+    final String tag =
+        task['tag']?.toString() ?? '';
+
+    final String emoji =
+        task['emoji']?.toString() ?? '';
 
     return InkWell(
       onTap: () {
         setState(() {
-          tasks[index]['completed'] = !completed;
+          tasks[index]['completed'] =
+              !completed;
         });
       },
       child: Container(
@@ -610,6 +651,7 @@ class _PlanScreenState extends State<PlanScreen> {
         ),
         child: Row(
           children: [
+            // أقصى اليمين: علامة الإنجاز
             Icon(
               completed
                   ? Icons.check_circle
@@ -617,44 +659,46 @@ class _PlanScreenState extends State<PlanScreen> {
               color: completed
                   ? cyan
                   : const Color(0xFFB8C1CC),
-              size: 22,
+              size: 24,
             ),
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 55,
-              child: Text(
-                task['time'],
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF65758A),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
+
+            const SizedBox(width: 9),
+
+            // اسم المهمة والوصف
             Expanded(
+              flex: 5,
               child: Column(
                 crossAxisAlignment:
                     CrossAxisAlignment.end,
                 children: [
                   Text(
-                    task['title'],
+                    task['title'].toString(),
                     textAlign: TextAlign.right,
+                    maxLines: 1,
+                    overflow:
+                        TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.w800,
+                      fontWeight:
+                          FontWeight.w800,
                       color: completed
-                          ? const Color(0xFF99A5B1)
+                          ? const Color(
+                              0xFF99A5B1,
+                            )
                           : navy,
                       decoration: completed
-                          ? TextDecoration.lineThrough
+                          ? TextDecoration
+                              .lineThrough
                           : TextDecoration.none,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    task['subtitle'],
+                    task['subtitle'].toString(),
                     textAlign: TextAlign.right,
+                    maxLines: 1,
+                    overflow:
+                        TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 11,
                       color: Color(0xFF66758A),
@@ -663,32 +707,89 @@ class _PlanScreenState extends State<PlanScreen> {
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 9,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                color: tagColor.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Text(
-                task['tag'],
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: tagColor,
+
+            const SizedBox(width: 12),
+
+            // التصنيف والإيموجي في منطقة مستقلة
+            SizedBox(
+              width: 86,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(
+                  horizontal: 7,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: tagColor.withValues(
+                    alpha: 0.10,
+                  ),
+                  borderRadius:
+                      BorderRadius.circular(14),
+                ),
+                child: Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        tag,
+                        textAlign:
+                            TextAlign.center,
+                        maxLines: 1,
+                        overflow:
+                            TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight:
+                              FontWeight.w700,
+                          color: tagColor,
+                                                ),
+                    ),
+                    if (emoji.isNotEmpty) ...[
+                      const SizedBox(width: 3),
+                      Text(
+                        emoji,
+                        style: const TextStyle(
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
+            ),
+
+            const SizedBox(width: 12),
+
+            SizedBox(
+              width: 55,
+              child: Text(
+                task['time'].toString(),
+                textAlign: TextAlign.left,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF65758A),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 6),
+
+            const Icon(
+              Icons.more_vert,
+              color: Color(0xFF65758A),
+              size: 22,
             ),
           ],
         ),
       ),
     );
   }
-    void _showAddTaskDialog() {
+
+  void _showAddTaskDialog() {
     final nameController = TextEditingController();
     final timeController = TextEditingController();
     final categoryController = TextEditingController();
@@ -733,13 +834,13 @@ class _PlanScreenState extends State<PlanScreen> {
                   textAlign: TextAlign.right,
                   decoration: InputDecoration(
                     labelText: 'اسم المهمة *',
-                    hintText: 'مثال: قراءة كتاب',
                     prefixIcon: const Icon(
                       Icons.edit_rounded,
                       color: blue,
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius:
+                          BorderRadius.circular(16),
                     ),
                   ),
                 ),
@@ -751,13 +852,13 @@ class _PlanScreenState extends State<PlanScreen> {
                   textAlign: TextAlign.right,
                   decoration: InputDecoration(
                     labelText: 'الوقت',
-                    hintText: 'مثال: 8:00 ص',
                     prefixIcon: const Icon(
                       Icons.access_time_rounded,
                       color: Color(0xFFE85D6A),
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius:
+                          BorderRadius.circular(16),
                     ),
                   ),
                 ),
@@ -769,13 +870,13 @@ class _PlanScreenState extends State<PlanScreen> {
                   textAlign: TextAlign.right,
                   decoration: InputDecoration(
                     labelText: 'التصنيف',
-                    hintText: 'مثال: دراسة',
                     prefixIcon: const Icon(
                       Icons.local_offer_rounded,
                       color: Color(0xFFF0A51A),
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius:
+                          BorderRadius.circular(16),
                     ),
                   ),
                 ),
@@ -787,13 +888,13 @@ class _PlanScreenState extends State<PlanScreen> {
                   textAlign: TextAlign.right,
                   decoration: InputDecoration(
                     labelText: 'الإيموجي',
-                    hintText: 'مثال: 📚',
                     prefixIcon: const Icon(
                       Icons.emoji_emotions_outlined,
                       color: Color(0xFF7567D9),
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius:
+                          BorderRadius.circular(16),
                     ),
                   ),
                 ),
@@ -807,13 +908,13 @@ class _PlanScreenState extends State<PlanScreen> {
                   maxLength: 100,
                   decoration: InputDecoration(
                     labelText: 'الوصف',
-                    hintText: 'أضف وصفًا مختصرًا للمهمة',
                     prefixIcon: const Icon(
                       Icons.description_outlined,
                       color: Color(0xFFF4A90E),
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius:
+                          BorderRadius.circular(16),
                     ),
                   ),
                 ),
@@ -837,10 +938,12 @@ class _PlanScreenState extends State<PlanScreen> {
                     style: TextButton.styleFrom(
                       backgroundColor:
                           const Color(0xFFF0F3F8),
-                      padding: const EdgeInsets.symmetric(
+                      padding:
+                          const EdgeInsets.symmetric(
                         vertical: 14,
                       ),
-                      shape: RoundedRectangleBorder(
+                      shape:
+                          RoundedRectangleBorder(
                         borderRadius:
                             BorderRadius.circular(18),
                       ),
@@ -850,12 +953,15 @@ class _PlanScreenState extends State<PlanScreen> {
                       style: TextStyle(
                         color: navy,
                         fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                        fontWeight:
+                            FontWeight.w700,
                       ),
                     ),
                   ),
                 ),
+
                 const SizedBox(width: 10),
+
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
@@ -885,7 +991,20 @@ class _PlanScreenState extends State<PlanScreen> {
                                       .text
                                       .trim(),
                           'tag':
-                              '${emojiController.text.trim().isEmpty ? '📝' : emojiController.text.trim()} ${categoryController.text.trim().isEmpty ? 'مهمة' : categoryController.text.trim()}',
+                              categoryController.text
+                                      .trim()
+                                      .isEmpty
+                                  ? 'مهمة'
+                                  : categoryController
+                                      .text
+                                      .trim(),
+                          'emoji':
+                              emojiController.text
+                                      .trim()
+                                      .isEmpty
+                                  ? '📝'
+                                  : emojiController.text
+                                      .trim(),
                           'color': cyan,
                           'completed': false,
                         });
@@ -897,11 +1016,13 @@ class _PlanScreenState extends State<PlanScreen> {
                       backgroundColor:
                           const Color(0xFF4169F1),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
+                      padding:
+                          const EdgeInsets.symmetric(
                         vertical: 14,
                       ),
                       elevation: 0,
-                      shape: RoundedRectangleBorder(
+                      shape:
+                          RoundedRectangleBorder(
                         borderRadius:
                             BorderRadius.circular(18),
                       ),
@@ -910,7 +1031,8 @@ class _PlanScreenState extends State<PlanScreen> {
                       'إضافة المهمة +',
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w800,
+                        fontWeight:
+                            FontWeight.w800,
                       ),
                     ),
                   ),
@@ -922,8 +1044,7 @@ class _PlanScreenState extends State<PlanScreen> {
       },
     );
   }
-
-  Widget _buildWeeklyGoals() {
+              Widget _buildWeeklyGoals() {
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
@@ -1017,14 +1138,17 @@ class _PlanScreenState extends State<PlanScreen> {
           ),
           const SizedBox(height: 6),
           ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius:
+                BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 6,
               backgroundColor:
                   const Color(0xFFEFF2F6),
               valueColor:
-                  AlwaysStoppedAnimation<Color>(color),
+                  AlwaysStoppedAnimation<Color>(
+                color,
+              ),
             ),
           ),
         ],
@@ -1043,7 +1167,8 @@ class _PlanScreenState extends State<PlanScreen> {
         ),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment:
+            CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
@@ -1084,11 +1209,13 @@ class _PlanScreenState extends State<PlanScreen> {
     return InkWell(
       onTap: () {
         setState(() {
-          habits[index]['completed'] = !completed;
+          habits[index]['completed'] =
+              !completed;
         });
       },
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 11),
+        padding:
+            const EdgeInsets.only(bottom: 11),
         child: Row(
           children: [
             Icon(
@@ -1127,4 +1254,4 @@ class _PlanScreenState extends State<PlanScreen> {
       ),
     );
   }
-}
+            }
