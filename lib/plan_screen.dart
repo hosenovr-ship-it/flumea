@@ -78,15 +78,6 @@ class _PlanScreenState extends State<PlanScreen> {
       'color': cyan,
       'completed': false,
     },
-    {
-      'time': '8:00 م',
-      'title': 'كرة القدم',
-      'subtitle': 'مهمة جديدة',
-      'tag': 'رياضة',
-      'emoji': '⚽',
-      'color': cyan,
-      'completed': false,
-    },
   ];
 
   final List<Map<String, dynamic>> habits = [
@@ -122,7 +113,8 @@ class _PlanScreenState extends State<PlanScreen> {
               110,
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment:
+                  CrossAxisAlignment.stretch,
               children: [
                 _buildHeader(),
                 const SizedBox(height: 14),
@@ -135,7 +127,8 @@ class _PlanScreenState extends State<PlanScreen> {
                 _buildTasks(),
                 const SizedBox(height: 14),
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: _buildWeeklyGoals(),
@@ -150,7 +143,8 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
         ),
-        bottomNavigationBar: const FlumeaBottomNavigation(
+        bottomNavigationBar:
+            const FlumeaBottomNavigation(
           selectedIndex: 1,
         ),
       ),
@@ -162,10 +156,12 @@ class _PlanScreenState extends State<PlanScreen> {
       children: [
         Expanded(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment:
+                CrossAxisAlignment.end,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment:
+                    MainAxisAlignment.end,
                 children: [
                   const Text(
                     'الخطة',
@@ -200,7 +196,6 @@ class _PlanScreenState extends State<PlanScreen> {
 
   Widget _buildTodayButton() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Container(
           padding: const EdgeInsets.symmetric(
@@ -268,12 +263,15 @@ class _PlanScreenState extends State<PlanScreen> {
     bool selected,
   ) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 3),
+      margin: const EdgeInsets.symmetric(
+        horizontal: 3,
+      ),
       decoration: BoxDecoration(
         color: selected
             ? blue
             : const Color(0xFFF5F8FC),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius:
+            BorderRadius.circular(16),
         border: Border.all(
           color: selected
               ? blue
@@ -281,7 +279,8 @@ class _PlanScreenState extends State<PlanScreen> {
         ),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment:
+            MainAxisAlignment.center,
         children: [
           Text(
             day,
@@ -311,18 +310,22 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   Widget _buildSummary() {
-    final completed = tasks.where(
-      (task) => task['completed'] == true,
-    ).length;
+    final completed = tasks
+        .where(
+          (task) => task['completed'] == true,
+        )
+        .length;
 
-    final remaining = tasks.length - completed;
+    final remaining =
+        tasks.length - completed;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFFEAF9F4),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius:
+            BorderRadius.circular(24),
       ),
       child: Column(
         children: [
@@ -330,23 +333,27 @@ class _PlanScreenState extends State<PlanScreen> {
             children: [
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.end,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment:
+                          MainAxisAlignment.end,
                       children: [
                         const Text(
                           'خطة اليوم',
                           style: TextStyle(
                             fontSize: 21,
-                            fontWeight: FontWeight.w800,
+                            fontWeight:
+                                FontWeight.w800,
                             color: navy,
                           ),
                         ),
                         const SizedBox(width: 7),
                         const Text(
                           '☀️',
-                          style: TextStyle(
+                          style:
+                              TextStyle(
                             fontSize: 22,
                           ),
                         ),
@@ -355,10 +362,12 @@ class _PlanScreenState extends State<PlanScreen> {
                     const SizedBox(height: 7),
                     const Text(
                       'خطوات صغيرة تصنع فرقاً كبيراً',
-                      textAlign: TextAlign.right,
+                      textAlign:
+                          TextAlign.right,
                       style: TextStyle(
                         fontSize: 13,
-                        color: Color(0xFF7B8798),
+                        color:
+                            Color(0xFF7B8798),
                       ),
                     ),
                   ],
@@ -417,7 +426,8 @@ class _PlanScreenState extends State<PlanScreen> {
           width: 43,
           height: 43,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.10),
+            color:
+                color.withValues(alpha: 0.10),
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -463,12 +473,15 @@ class _PlanScreenState extends State<PlanScreen> {
           SizedBox(
             width: 65,
             height: 65,
-            child: CircularProgressIndicator(
+            child:
+                CircularProgressIndicator(
               value: progress,
               strokeWidth: 7,
-              backgroundColor: const Color(0xFFDDE4ED),
+              backgroundColor:
+                  const Color(0xFFDDE4ED),
               valueColor:
-                  const AlwaysStoppedAnimation<Color>(
+                  const AlwaysStoppedAnimation<
+                      Color>(
                 cyan,
               ),
             ),
@@ -481,7 +494,8 @@ class _PlanScreenState extends State<PlanScreen> {
                 '$completed/${tasks.length}',
                 style: const TextStyle(
                   fontSize: 15,
-                  fontWeight: FontWeight.w800,
+                  fontWeight:
+                      FontWeight.w800,
                   color: navy,
                 ),
               ),
@@ -489,7 +503,8 @@ class _PlanScreenState extends State<PlanScreen> {
                 'مكتملة',
                 style: TextStyle(
                   fontSize: 9,
-                  color: Color(0xFF66758A),
+                  color:
+                      Color(0xFF66758A),
                 ),
               ),
             ],
@@ -504,7 +519,8 @@ class _PlanScreenState extends State<PlanScreen> {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius:
+            BorderRadius.circular(24),
         border: Border.all(
           color: const Color(0xFFE5EAF0),
         ),
@@ -512,7 +528,8 @@ class _PlanScreenState extends State<PlanScreen> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(
+            padding:
+                const EdgeInsets.fromLTRB(
               18,
               15,
               18,
@@ -531,25 +548,32 @@ class _PlanScreenState extends State<PlanScreen> {
                     'المهام اليوم',
                     style: TextStyle(
                       fontSize: 20,
-                      fontWeight: FontWeight.w800,
+                      fontWeight:
+                          FontWeight.w800,
                       color: navy,
                     ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding:
+                      const EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: 9,
                   ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF0F4FA),
+                  decoration:
+                      BoxDecoration(
+                    color:
+                        const Color(0xFFF0F4FA),
                     borderRadius:
-                        BorderRadius.circular(20),
+                        BorderRadius.circular(
+                      20,
+                    ),
                   ),
                   child: const Row(
                     children: [
                       Icon(
-                        Icons.keyboard_arrow_down,
+                        Icons
+                            .keyboard_arrow_down,
                         color: navy,
                         size: 21,
                       ),
@@ -573,7 +597,8 @@ class _PlanScreenState extends State<PlanScreen> {
             (index) => _taskCard(index),
           ),
           Padding(
-            padding: const EdgeInsets.all(14),
+            padding:
+                const EdgeInsets.all(14),
             child: GestureDetector(
               onTap: _showAddTaskDialog,
               child: Container(
@@ -582,10 +607,14 @@ class _PlanScreenState extends State<PlanScreen> {
                     const EdgeInsets.symmetric(
                   vertical: 14,
                 ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEAF4FF),
+                decoration:
+                    BoxDecoration(
+                  color:
+                      const Color(0xFFEAF4FF),
                   borderRadius:
-                      BorderRadius.circular(22),
+                      BorderRadius.circular(
+                    22,
+                  ),
                 ),
                 child: const Row(
                   mainAxisAlignment:
@@ -624,12 +653,6 @@ class _PlanScreenState extends State<PlanScreen> {
     final Color tagColor =
         task['color'] as Color;
 
-    final String tag =
-        task['tag']?.toString() ?? '';
-
-    final String emoji =
-        task['emoji']?.toString() ?? '';
-
     return InkWell(
       onTap: () {
         setState(() {
@@ -638,11 +661,13 @@ class _PlanScreenState extends State<PlanScreen> {
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(
+        padding:
+            const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 12,
         ),
-        decoration: const BoxDecoration(
+        decoration:
+            const BoxDecoration(
           border: Border(
             top: BorderSide(
               color: Color(0xFFEDF0F4),
@@ -651,32 +676,15 @@ class _PlanScreenState extends State<PlanScreen> {
         ),
         child: Row(
           children: [
-            // أقصى اليمين: علامة الإنجاز
-            Icon(
-              completed
-                  ? Icons.check_circle
-                  : Icons.radio_button_unchecked,
-              color: completed
-                  ? cyan
-                  : const Color(0xFFB8C1CC),
-              size: 24,
-            ),
-
-            const SizedBox(width: 9),
-
-            // اسم المهمة والوصف
             Expanded(
-              flex: 5,
               child: Column(
                 crossAxisAlignment:
                     CrossAxisAlignment.end,
                 children: [
                   Text(
                     task['title'].toString(),
-                    textAlign: TextAlign.right,
-                    maxLines: 1,
-                    overflow:
-                        TextOverflow.ellipsis,
+                    textAlign:
+                        TextAlign.right,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight:
@@ -689,74 +697,71 @@ class _PlanScreenState extends State<PlanScreen> {
                       decoration: completed
                           ? TextDecoration
                               .lineThrough
-                          : TextDecoration.none,
+                          : TextDecoration
+                              .none,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     task['subtitle'].toString(),
-                    textAlign: TextAlign.right,
-                    maxLines: 1,
-                    overflow:
-                        TextOverflow.ellipsis,
+                    textAlign:
+                        TextAlign.right,
                     style: const TextStyle(
                       fontSize: 11,
-                      color: Color(0xFF66758A),
+                      color:
+                          Color(0xFF66758A),
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(width: 12),
+            const SizedBox(width: 18),
 
-            // التصنيف والإيموجي في منطقة مستقلة
-            SizedBox(
-              width: 86,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(
-                  horizontal: 7,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: tagColor.withValues(
-                    alpha: 0.10,
-                  ),
-                  borderRadius:
-                      BorderRadius.circular(14),
-                ),
-                child: Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.center,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        tag,
-                        textAlign:
-                            TextAlign.center,
-                        maxLines: 1,
-                        overflow:
-                            TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight:
-                              FontWeight.w700,
-                          color: tagColor,
-                                                ),
-                    ),
-                    Text(
-  emoji,
-  style: const TextStyle(
-    fontSize: 13,
-  ),
-),
-                  ],
-                ),
+            Container(
+              constraints:
+                  const BoxConstraints(
+                minWidth: 62,
               ),
-            ),
-
-            const SizedBox(width: 12),
+              padding:
+                  const EdgeInsets.symmetric(
+                horizontal: 9,
+                vertical: 6,
+              ),
+              decoration:
+                  BoxDecoration(
+                color: tagColor.withValues(
+                  alpha: 0.10,
+                ),
+                borderRadius:
+                    BorderRadius.circular(14),
+              ),
+              child: Row(
+                mainAxisSize:
+                    MainAxisSize.min,
+                mainAxisAlignment:
+                    MainAxisAlignment.center,
+                children: [
+                  Text(
+                    task['tag'].toString(),
+                    textAlign:
+                        TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight:
+                          FontWeight.w700,
+                      color: tagColor,
+                    ),
+                  ),
+                  const SizedBox(width: 3),
+                  Text(
+                    task['emoji'].toString(),
+                    style: const TextStyle(
+                       fontSize: 13,
+    ),
+  ],
+),
+                              const SizedBox(width: 18),
 
             SizedBox(
               width: 55,
@@ -784,15 +789,13 @@ class _PlanScreenState extends State<PlanScreen> {
         ),
       ),
     );
-  }
-
-  void _showAddTaskDialog() {
+            }
+              void _showAddTaskDialog() {
     final nameController = TextEditingController();
     final timeController = TextEditingController();
     final categoryController = TextEditingController();
+    final emojiController = TextEditingController();
     final descriptionController = TextEditingController();
-    final emojiController =
-        TextEditingController(text: '📝');
 
     showDialog(
       context: context,
@@ -836,8 +839,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       color: blue,
                     ),
                     border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                 ),
@@ -854,8 +856,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       color: Color(0xFFE85D6A),
                     ),
                     border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                 ),
@@ -872,8 +873,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       color: Color(0xFFF0A51A),
                     ),
                     border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                 ),
@@ -890,8 +890,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       color: Color(0xFF7567D9),
                     ),
                     border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                 ),
@@ -910,8 +909,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       color: Color(0xFFF4A90E),
                     ),
                     border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                 ),
@@ -935,14 +933,11 @@ class _PlanScreenState extends State<PlanScreen> {
                     style: TextButton.styleFrom(
                       backgroundColor:
                           const Color(0xFFF0F3F8),
-                      padding:
-                          const EdgeInsets.symmetric(
+                      padding: const EdgeInsets.symmetric(
                         vertical: 14,
                       ),
-                      shape:
-                          RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(18),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
                       ),
                     ),
                     child: const Text(
@@ -950,8 +945,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       style: TextStyle(
                         color: navy,
                         fontSize: 16,
-                        fontWeight:
-                            FontWeight.w700,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -962,46 +956,34 @@ class _PlanScreenState extends State<PlanScreen> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      if (nameController.text
-                          .trim()
-                          .isEmpty) {
+                      if (nameController.text.trim().isEmpty) {
                         return;
                       }
+
+                      final String category =
+                          categoryController.text.trim().isEmpty
+                              ? 'مهمة'
+                              : categoryController.text.trim();
+
+                      final String emoji =
+                          emojiController.text.trim().isEmpty
+                              ? '📝'
+                              : emojiController.text.trim();
 
                       setState(() {
                         tasks.add({
                           'time':
-                              timeController.text
-                                      .trim()
-                                      .isEmpty
+                              timeController.text.trim().isEmpty
                                   ? 'بدون وقت'
-                                  : timeController.text
-                                      .trim(),
+                                  : timeController.text.trim(),
                           'title':
                               nameController.text.trim(),
                           'subtitle':
-                              descriptionController.text
-                                      .trim()
-                                      .isEmpty
+                              descriptionController.text.trim().isEmpty
                                   ? 'مهمة جديدة'
-                                  : descriptionController
-                                      .text
-                                      .trim(),
-                          'tag':
-                              categoryController.text
-                                      .trim()
-                                      .isEmpty
-                                  ? 'مهمة'
-                                  : categoryController
-                                      .text
-                                      .trim(),
-                          'emoji':
-                              emojiController.text
-                                      .trim()
-                                      .isEmpty
-                                  ? '📝'
-                                  : emojiController.text
-                                      .trim(),
+                                  : descriptionController.text.trim(),
+                          'tag': category,
+                          'emoji': emoji,
                           'color': cyan,
                           'completed': false,
                         });
@@ -1013,23 +995,19 @@ class _PlanScreenState extends State<PlanScreen> {
                       backgroundColor:
                           const Color(0xFF4169F1),
                       foregroundColor: Colors.white,
-                      padding:
-                          const EdgeInsets.symmetric(
+                      padding: const EdgeInsets.symmetric(
                         vertical: 14,
                       ),
                       elevation: 0,
-                      shape:
-                          RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(18),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
                       ),
                     ),
                     child: const Text(
                       'إضافة المهمة +',
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight:
-                            FontWeight.w800,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
@@ -1041,7 +1019,8 @@ class _PlanScreenState extends State<PlanScreen> {
       },
     );
   }
-              Widget _buildWeeklyGoals() {
+
+  Widget _buildWeeklyGoals() {
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
@@ -1075,19 +1054,23 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             ],
           ),
+
           const SizedBox(height: 14),
+
           _goalRow(
             'الدراسة',
             '4/5',
             0.8,
             const Color(0xFF1478D4),
           ),
+
           _goalRow(
             'الرياضة',
             '3/4',
             0.75,
             cyan,
           ),
+
           _goalRow(
             'القراءة',
             '2/3',
@@ -1108,8 +1091,7 @@ class _PlanScreenState extends State<PlanScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 13),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
@@ -1133,19 +1115,18 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             ],
           ),
+
           const SizedBox(height: 6),
+
           ClipRRect(
-            borderRadius:
-                BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 6,
               backgroundColor:
                   const Color(0xFFEFF2F6),
               valueColor:
-                  AlwaysStoppedAnimation<Color>(
-                color,
-              ),
+                  AlwaysStoppedAnimation<Color>(color),
             ),
           ),
         ],
@@ -1164,8 +1145,7 @@ class _PlanScreenState extends State<PlanScreen> {
         ),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
@@ -1188,7 +1168,9 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             ],
           ),
+
           const SizedBox(height: 14),
+
           ...List.generate(
             habits.length,
             (index) => _habitRow(index),
@@ -1206,13 +1188,11 @@ class _PlanScreenState extends State<PlanScreen> {
     return InkWell(
       onTap: () {
         setState(() {
-          habits[index]['completed'] =
-              !completed;
+          habits[index]['completed'] = !completed;
         });
       },
       child: Padding(
-        padding:
-            const EdgeInsets.only(bottom: 11),
+        padding: const EdgeInsets.only(bottom: 11),
         child: Row(
           children: [
             Icon(
@@ -1224,10 +1204,12 @@ class _PlanScreenState extends State<PlanScreen> {
                   ? cyan
                   : const Color(0xFFB8C1CC),
             ),
+
             const SizedBox(width: 7),
+
             Expanded(
               child: Text(
-                habit['title'],
+                habit['title'].toString(),
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   fontSize: 11,
@@ -1241,8 +1223,9 @@ class _PlanScreenState extends State<PlanScreen> {
                 ),
               ),
             ),
+
             Icon(
-              habit['icon'],
+              habit['icon'] as IconData,
               size: 18,
               color: const Color(0xFF7B8798),
             ),
