@@ -407,193 +407,339 @@ class PlanScreen extends StatelessWidget {
   Color blue,
   Color cyan,
 ) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: const Color(0xFFE5EAF0),
+  final List<Map<String, dynamic>> tasks = [
+    {
+      'time': '6:00 ص',
+      'title': 'الاستيقاظ',
+      'subtitle': 'ابدأ يومك بطاقة',
+      'tag': 'عادات ☀️',
+      'tagColor': cyan,
+      'completed': true,
+    },
+    {
+      'time': '6:30 ص',
+      'title': 'الرياضة',
+      'subtitle': 'تمرين لمدة 45 دقيقة',
+      'tag': 'صحة 🏋️',
+      'tagColor': const Color(0xFFEF5350),
+      'completed': false,
+    },
+    {
+      'time': '8:00 ص',
+      'title': 'الإفطار',
+      'subtitle': 'وجبة صحية ومتوازنة',
+      'tag': 'غذاء 🍽️',
+      'tagColor': const Color(0xFFFFA726),
+      'completed': false,
+    },
+    {
+      'time': '9:00 ص',
+      'title': 'الدراسة',
+      'subtitle': 'مذاكرة المواد المهمة',
+      'tag': 'تعليم 🎓',
+      'tagColor': blue,
+      'completed': true,
+    },
+    {
+      'time': '12:00 م',
+      'title': 'المهام الشخصية',
+      'subtitle': 'إنجاز الأعمال المطلوبة',
+      'tag': 'إنتاجية 💼',
+      'tagColor': const Color(0xFFE57C72),
+      'completed': false,
+    },
+    {
+      'time': '4:00 م',
+      'title': 'القراءة',
+      'subtitle': 'قراءة 30 دقيقة',
+      'tag': 'تطوير الذات 📖',
+      'tagColor': const Color(0xFF8E44AD),
+      'completed': false,
+    },
+    {
+      'time': '7:00 م',
+      'title': 'مراجعة اليوم',
+      'subtitle': 'تقييم ما تم إنجازه',
+      'tag': 'مراجعة 📊',
+      'tagColor': cyan,
+      'completed': false,
+    },
+  ];
+
+  return StatefulBuilder(
+    builder: (context, setState) {
+      return Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: const Color(0xFFE5EAF0),
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              18,
-              15,
-              18,
-              10,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.format_list_bulleted,
-                  color: navy,
-                  size: 27,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'المهام اليوم',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: navy,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 9,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF0F4FA),
-                    borderRadius:
-                        BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.keyboard_arrow_down,
-                        color: navy,
-                        size: 21,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'الكل',
-                        style: TextStyle(
-                          color: navy,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          _task(
-            time: '6:00 ص',
-            title: 'الاستيقاظ',
-            subtitle: 'ابدأ يومك بطاقة',
-            tag: 'عادات ☀️',
-            tagColor: cyan,
-            completed: true,
-          ),
-
-          _task(
-            time: '6:30 ص',
-            title: 'الرياضة',
-            subtitle: 'تمرين لمدة 45 دقيقة',
-            tag: 'صحة 🏋️',
-            tagColor: const Color(0xFFEF5350),
-            completed: false,
-          ),
-
-          _task(
-            time: '8:00 ص',
-            title: 'الإفطار',
-            subtitle: 'وجبة صحية ومتوازنة',
-            tag: 'غذاء 🍴',
-            tagColor: const Color(0xFFFFA726),
-            completed: false,
-          ),
-
-          _task(
-            time: '9:00 ص',
-            title: 'الدراسة',
-            subtitle: 'مذاكرة المواد المهمة',
-            tag: 'تعليم 🎓',
-            tagColor: blue,
-            completed: true,
-          ),
-
-          _task(
-            time: '12:00 م',
-            title: 'المهام الشخصية',
-            subtitle: 'إنجاز الأعمال المطلوبة',
-            tag: 'إنتاجية 💼',
-            tagColor: const Color(0xFF7E57C2),
-            completed: false,
-          ),
-
-          _task(
-            time: '4:00 م',
-            title: 'القراءة',
-            subtitle: 'قراءة 30 دقيقة',
-            tag: 'تطوير الذات 📖',
-            tagColor: const Color(0xFF8E44AD),
-            completed: false,
-          ),
-
-          _task(
-            time: '7:00 م',
-            title: 'مراجعة اليوم',
-            subtitle: 'تقييم ما تم إنجازه',
-            tag: 'مراجعة 📊',
-            tagColor: cyan,
-            completed: false,
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(14),
-            child: GestureDetector(
-  onTap: () {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('إضافة مهمة جديدة'),
-          content: const Text('هنا سنضيف تفاصيل المهمة.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('إغلاق'),
-            ),
-          ],
-        );
-      },
-    );
-  },
-  child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                vertical: 12,
-              ),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEAF4FF),
-                borderRadius:
-                    BorderRadius.circular(22),
-              ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 15, 18, 10),
               child: Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.add,
-                    color: blue,
-                    size: 24,
+                    Icons.format_list_bulleted,
+                    color: navy,
+                    size: 27,
                   ),
-                  const SizedBox(width: 5),
-                  Text(
-                    'إضافة مهمة جديدة',
-                    style: TextStyle(
-                      color: blue,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'المهام اليوم',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: navy,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 9,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0F4FA),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.keyboard_arrow_down,
+                          color: navy,
+                          size: 21,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'الكل',
+                          style: TextStyle(
+                            color: navy,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ),
+
+            ...tasks.map(
+              (task) => _task(
+                time: task['time'],
+                title: task['title'],
+                subtitle: task['subtitle'],
+                tag: task['tag'],
+                tagColor: task['tagColor'],
+                completed: task['completed'],
+              ),
             ),
-        ],
-      ),
-    );
+
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: GestureDetector(
+                onTap: () {
+                  final nameController = TextEditingController();
+                  final timeController = TextEditingController();
+                  final categoryController = TextEditingController();
+                  final descriptionController = TextEditingController();
+
+                  String selectedEmoji = '📝';
+
+                  showDialog(
+                    context: context,
+                    builder: (dialogContext) {
+                      return StatefulBuilder(
+                        builder: (dialogContext, dialogSetState) {
+                          return AlertDialog(
+                            title: const Text(
+                              'إضافة مهمة جديدة',
+                              textAlign: TextAlign.right,
+                            ),
+                            content: SingleChildScrollView(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  TextField(
+                                    controller: nameController,
+                                    textAlign: TextAlign.right,
+                                    decoration: const InputDecoration(
+                                      labelText: '📝 اسم المهمة',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+
+                                  TextField(
+                                    controller: timeController,
+                                    textAlign: TextAlign.right,
+                                    decoration: const InputDecoration(
+                                      labelText: '⏰ الوقت',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+
+                                  TextField(
+                                    controller: categoryController,
+                                    textAlign: TextAlign.right,
+                                    decoration: const InputDecoration(
+                                      labelText: '🏷️ التصنيف',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+
+                                  TextField(
+                                    controller: descriptionController,
+                                    textAlign: TextAlign.right,
+                                    maxLines: 2,
+                                    decoration: const InputDecoration(
+                                      labelText: '✏️ الوصف',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 14),
+
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      '😀 الإيموجي',
+                                      style: TextStyle(
+                                        color: navy,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+
+                                  Wrap(
+                                    spacing: 8,
+                                    children: [
+                                      '📝',
+                                      '📚',
+                                      '🏋️',
+                                      '💼',
+                                      '🎯',
+                                      '🍎',
+                                      '💡',
+                                      '🔥',
+                                      '⭐',
+                                      '🚀',
+                                    ].map(
+                                      (emoji) {
+                                        return ChoiceChip(
+                                          label: Text(
+                                            emoji,
+                                            style: const TextStyle(
+                                              fontSize: 20,
+                                            ),
+                                          ),
+                                          selected:
+                                              selectedEmoji == emoji,
+                                          onSelected: (_) {
+                                            dialogSetState(() {
+                                              selectedEmoji = emoji;
+                                            });
+                                          },
+                                        );
+                                      },
+                                    ).toList(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(dialogContext);
+                                },
+                                child: const Text('إلغاء'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  if (nameController.text.trim().isEmpty) {
+                                    return;
+                                  }
+
+                                  setState(() {
+                                    tasks.add({
+                                      'time':
+                                          timeController.text.trim().isEmpty
+                                              ? 'بدون وقت'
+                                              : timeController.text.trim(),
+                                      'title':
+                                          '$selectedEmoji ${nameController.text.trim()}',
+                                      'subtitle':
+                                          descriptionController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? 'مهمة جديدة'
+                                              : descriptionController.text
+                                                  .trim(),
+                                      'tag':
+                                          categoryController.text
+                                                  .trim()
+                                                  .isEmpty
+                                              ? 'عام 📌'
+                                              : categoryController.text
+                                                  .trim(),
+                                      'tagColor': cyan,
+                                      'completed': false,
+                                    });
+                                  });
+
+                                  Navigator.pop(dialogContext);
+                                },
+                                child: const Text('➕ إضافة المهمة'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEAF4FF),
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.add,
+                        color: blue,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        'إضافة مهمة جديدة',
+                        style: TextStyle(
+                          color: blue,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
   }
 
   Widget _task({
