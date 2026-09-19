@@ -781,10 +781,11 @@ class PlanScreen extends StatelessWidget {
                               descriptionController.text.trim().isEmpty
                                   ? 'مهمة جديدة'
                                   : descriptionController.text.trim(),
-                          'tag': '${emojiController.text.trim().isEmpty ?
-                            '📝' : emojiController.text.trim()} $
-                            {categoryController.text.trim().isEmpty ? 
-                              '📚' : categoryController.text.trim()}',
+                          'tag':
+    "${emojiController.text.trim().isEmpty ? '📝' : emojiController.text.trim()} ${categoryController.text.trim().isEmpty ? '📚' : categoryController.text.trim()}",
+                            
+                            
+                              
                           'tagColor': cyan,
                           'completed': false,
                         });
