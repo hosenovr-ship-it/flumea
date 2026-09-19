@@ -821,7 +821,7 @@ class PlanScreen extends StatelessWidget {
 );
 },
 );
-                  
+   },               
           
                 child: Container(
                   width: double.infinity,
@@ -846,16 +846,13 @@ class PlanScreen extends StatelessWidget {
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
                         ),
-                      ),
-                    ],
-                  ),
-            ),
-          ],
-        ),
-      );
-    },
-  );
-  }
+),
+],
+),
+),
+),
+),
+),
 
   Widget _task({
     required String time,
