@@ -152,7 +152,8 @@ class _PlanScreenState extends State<PlanScreen> {
               110,
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment:
+                  CrossAxisAlignment.stretch,
               children: [
                 _buildHeader(),
                 const SizedBox(height: 14),
@@ -165,7 +166,8 @@ class _PlanScreenState extends State<PlanScreen> {
                 _buildTasks(),
                 const SizedBox(height: 14),
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: _buildWeeklyGoals(),
@@ -180,7 +182,8 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
         ),
-        bottomNavigationBar: const FlumeaBottomNavigation(
+        bottomNavigationBar:
+            const FlumeaBottomNavigation(
           selectedIndex: 1,
         ),
       ),
@@ -192,10 +195,12 @@ class _PlanScreenState extends State<PlanScreen> {
       children: [
         Expanded(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment:
+                CrossAxisAlignment.end,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment:
+                    MainAxisAlignment.end,
                 children: [
                   const Text(
                     'الخطة',
@@ -230,7 +235,8 @@ class _PlanScreenState extends State<PlanScreen> {
 
   Widget _buildTodayButton() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment:
+          MainAxisAlignment.end,
       children: [
         GestureDetector(
           onTap: () {
@@ -239,13 +245,15 @@ class _PlanScreenState extends State<PlanScreen> {
             });
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(
+            padding:
+                const EdgeInsets.symmetric(
               horizontal: 20,
               vertical: 11,
             ),
             decoration: BoxDecoration(
               color: const Color(0xFFEAF9F4),
-              borderRadius: BorderRadius.circular(28),
+              borderRadius:
+                  BorderRadius.circular(28),
             ),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
@@ -315,12 +323,16 @@ class _PlanScreenState extends State<PlanScreen> {
     bool selected,
   ) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 3),
+      margin:
+          const EdgeInsets.symmetric(
+        horizontal: 3,
+      ),
       decoration: BoxDecoration(
         color: selected
             ? blue
             : const Color(0xFFF5F8FC),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius:
+            BorderRadius.circular(16),
         border: Border.all(
           color: selected
               ? blue
@@ -328,7 +340,8 @@ class _PlanScreenState extends State<PlanScreen> {
         ),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment:
+            MainAxisAlignment.center,
         children: [
           Text(
             day,
@@ -356,8 +369,7 @@ class _PlanScreenState extends State<PlanScreen> {
       ),
     );
   }
-
-  Widget _buildSummary() {
+    Widget _buildSummary() {
     final completed = tasks.where(
       (task) => _safeBool(task['completed']),
     ).length;
@@ -586,36 +598,6 @@ class _PlanScreenState extends State<PlanScreen> {
                     ),
                   ),
                 ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 9,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF0F4FA),
-                    borderRadius:
-                        BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.keyboard_arrow_down,
-                        color: navy,
-                        size: 21,
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'الكل',
-                        style: TextStyle(
-                          color: navy,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
@@ -670,7 +652,8 @@ class _PlanScreenState extends State<PlanScreen> {
       ),
     );
   }
-    Widget _taskCard(
+
+  Widget _taskCard(
     Map<String, dynamic> task,
     int index,
   ) {
@@ -705,61 +688,65 @@ class _PlanScreenState extends State<PlanScreen> {
     final Color color =
         _safeColor(task['color']);
 
-    return GestureDetector(
-      onTap: () {
-        if (index < 0 || index >= tasks.length) {
-          return;
-        }
-
-        setState(() {
-          final current =
-              _safeBool(tasks[index]['completed']);
-
-          tasks[index]['completed'] = !current;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: Color(0xFFE8EDF2),
-            ),
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 14,
+      ),
+      decoration: const BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: Color(0xFFE8EDF2),
           ),
         ),
-        child: Row(
-          children: [
-            Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: completed
+                  ? blue
+                  : Colors.white,
+              borderRadius:
+                  BorderRadius.circular(6),
+              border: Border.all(
                 color: completed
                     ? blue
-                    : Colors.white,
-                borderRadius:
-                    BorderRadius.circular(6),
-                border: Border.all(
-                  color: completed
-                      ? blue
-                      : const Color(0xFFB8C2CE),
-                  width: 2,
-                ),
+                    : const Color(0xFFB8C2CE),
+                width: 2,
               ),
-              child: completed
-                  ? const Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 20,
-                    )
-                  : null,
             ),
+            child: completed
+                ? const Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 20,
+                  )
+                : null,
+          ),
 
-            const SizedBox(width: 12),
+          const SizedBox(width: 12),
 
-            Expanded(
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (index < 0 ||
+                    index >= tasks.length) {
+                  return;
+                }
+
+                setState(() {
+                  final current =
+                      _safeBool(
+                    tasks[index]['completed'],
+                  );
+
+                  tasks[index]['completed'] =
+                      !current;
+                });
+              },
               child: Column(
                 crossAxisAlignment:
                     CrossAxisAlignment.end,
@@ -851,50 +838,103 @@ class _PlanScreenState extends State<PlanScreen> {
                 ],
               ),
             ),
+          ),
 
-            const SizedBox(width: 12),
+          const SizedBox(width: 12),
 
-            SizedBox(
-              width: 58,
-              child: Text(
-                time,
-                textAlign: TextAlign.left,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF52647A),
-                  fontWeight: FontWeight.w600,
-                ),
+          SizedBox(
+            width: 58,
+            child: Text(
+              time,
+              textAlign: TextAlign.left,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFF52647A),
+                fontWeight: FontWeight.w600,
               ),
             ),
+          ),
 
-            const SizedBox(width: 5),
+          const SizedBox(width: 5),
 
-            const Icon(
-              Icons.more_vert,
-              color: Color(0xFF6E7A88),
-              size: 22,
-            ),
-          ],
-        ),
+          _buildTaskMenu(index),
+        ],
       ),
     );
   }
 
-  void _showAddTaskDialog() {
-    final nameController =
-        TextEditingController();
+  Widget _buildTaskMenu(int index) {
+    return PopupMenuButton<String>(
+      tooltip: 'خيارات المهمة',
+      padding: EdgeInsets.zero,
+      icon: const Icon(
+        Icons.more_vert,
+        color: Color(0xFF6E7A88),
+        size: 22,
+      ),
+      onSelected: (value) {
+        if (index < 0 || index >= tasks.length) {
+          return;
+        }
 
-    final descriptionController =
-        TextEditingController();
+        if (value == 'reset') {
+          setState(() {
+            tasks[index]['completed'] = false;
+          });
+        }
 
-    final timeController =
-        TextEditingController();
-
-    final categoryController =
-        TextEditingController();
-
-    final emojiController =
-        TextEditingController();
+        if (value == 'delete') {
+          setState(() {
+            tasks.removeAt(index);
+          });
+        }
+      },
+      itemBuilder: (context) {
+        return [
+          const PopupMenuItem<String>(
+            value: 'reset',
+            child: Row(
+              mainAxisAlignment:
+                  MainAxisAlignment.end,
+              children: [
+                Text(
+                  'إعادة المهمة 🔄',
+                  style: TextStyle(
+                    color: navy,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const PopupMenuItem<String>(
+            value: 'delete',
+            child: Row(
+              mainAxisAlignment:
+                  MainAxisAlignment.end,
+              children: [
+                Text(
+                  'حذف المهمة 🗑️',
+                  style: TextStyle(
+                    color: Color(0xFFD64545),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ];
+      },
+    );
+  }
+    void _showAddTaskDialog() {
+    final nameController = TextEditingController();
+    final descriptionController = TextEditingController();
+    final timeController = TextEditingController();
+    final categoryController = TextEditingController();
+    final emojiController = TextEditingController();
 
     showDialog(
       context: context,
@@ -904,8 +944,7 @@ class _PlanScreenState extends State<PlanScreen> {
           child: AlertDialog(
             backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(28),
+              borderRadius: BorderRadius.circular(28),
             ),
             title: const Text(
               'إضافة مهمة جديدة',
@@ -928,7 +967,6 @@ class _PlanScreenState extends State<PlanScreen> {
                       fontSize: 13,
                     ),
                   ),
-
                   const SizedBox(height: 18),
 
                   _dialogField(
@@ -948,8 +986,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   const SizedBox(height: 12),
 
                   _dialogField(
-                    controller:
-                        categoryController,
+                    controller: categoryController,
                     label: 'التصنيف',
                     icon: Icons.local_offer_outlined,
                   ),
@@ -959,41 +996,29 @@ class _PlanScreenState extends State<PlanScreen> {
                   _dialogField(
                     controller: emojiController,
                     label: 'الإيموجي',
-                    icon:
-                        Icons.sentiment_satisfied_alt,
+                    icon: Icons.sentiment_satisfied_alt,
                   ),
 
                   const SizedBox(height: 12),
 
                   TextField(
-                    controller:
-                        descriptionController,
+                    controller: descriptionController,
                     maxLines: 3,
                     maxLength: 100,
                     textAlign: TextAlign.right,
-                    decoration:
-                        InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'الوصف',
                       alignLabelWithHint: true,
                       prefixIcon: const Icon(
                         Icons.description_outlined,
                         color: Color(0xFFE5AA27),
                       ),
-                      border:
-                          OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(
-                          18,
-                        ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
                       ),
-                      focusedBorder:
-                          OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(
-                          18,
-                        ),
-                        borderSide:
-                            const BorderSide(
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide: const BorderSide(
                           color: blue,
                           width: 2,
                         ),
@@ -1003,8 +1028,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 ],
               ),
             ),
-            actionsPadding:
-                const EdgeInsets.fromLTRB(
+            actionsPadding: const EdgeInsets.fromLTRB(
               16,
               0,
               16,
@@ -1016,25 +1040,17 @@ class _PlanScreenState extends State<PlanScreen> {
                   Expanded(
                     child: TextButton(
                       onPressed: () {
-                        Navigator.pop(
-                          dialogContext,
-                        );
+                        Navigator.pop(dialogContext);
                       },
                       style: TextButton.styleFrom(
                         backgroundColor:
-                            const Color(
-                          0xFFF1F4F8,
-                        ),
-                        padding:
-                            const EdgeInsets.symmetric(
+                            const Color(0xFFF1F4F8),
+                        padding: const EdgeInsets.symmetric(
                           vertical: 14,
                         ),
-                        shape:
-                            RoundedRectangleBorder(
+                        shape: RoundedRectangleBorder(
                           borderRadius:
-                              BorderRadius.circular(
-                            18,
-                          ),
+                              BorderRadius.circular(18),
                         ),
                       ),
                       child: const Text(
@@ -1042,8 +1058,7 @@ class _PlanScreenState extends State<PlanScreen> {
                         style: TextStyle(
                           color: navy,
                           fontSize: 16,
-                          fontWeight:
-                              FontWeight.w800,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
@@ -1055,28 +1070,23 @@ class _PlanScreenState extends State<PlanScreen> {
                     child: ElevatedButton(
                       onPressed: () {
                         final name =
-                            nameController.text
-                                .trim();
+                            nameController.text.trim();
 
                         if (name.isEmpty) {
                           return;
                         }
 
                         final time =
-                            timeController.text
-                                .trim();
+                            timeController.text.trim();
 
                         final category =
-                            categoryController.text
-                                .trim();
+                            categoryController.text.trim();
 
                         final emoji =
-                            emojiController.text
-                                .trim();
+                            emojiController.text.trim();
 
                         final description =
-                            descriptionController.text
-                                .trim();
+                            descriptionController.text.trim();
 
                         setState(() {
                           tasks.add({
@@ -1099,34 +1109,25 @@ class _PlanScreenState extends State<PlanScreen> {
                           });
                         });
 
-                        Navigator.pop(
-                          dialogContext,
-                        );
+                        Navigator.pop(dialogContext);
                       },
-                      style:
-                          ElevatedButton.styleFrom(
+                      style: ElevatedButton.styleFrom(
                         backgroundColor: blue,
-                        foregroundColor:
-                            Colors.white,
-                        padding:
-                            const EdgeInsets.symmetric(
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
                           vertical: 14,
                         ),
                         elevation: 0,
-                        shape:
-                            RoundedRectangleBorder(
+                        shape: RoundedRectangleBorder(
                           borderRadius:
-                              BorderRadius.circular(
-                            18,
-                          ),
+                              BorderRadius.circular(18),
                         ),
                       ),
                       child: const Text(
                         'إضافة المهمة +',
                         style: TextStyle(
                           fontSize: 16,
-                          fontWeight:
-                              FontWeight.w800,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
@@ -1155,13 +1156,10 @@ class _PlanScreenState extends State<PlanScreen> {
           color: blue,
         ),
         border: OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18),
         ),
-        focusedBorder:
-            OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(18),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
           borderSide: const BorderSide(
             color: blue,
             width: 2,
@@ -1176,19 +1174,16 @@ class _PlanScreenState extends State<PlanScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(
           color: const Color(0xFFE5EAF0),
         ),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            mainAxisAlignment:
-                MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               const Text(
                 'أهداف الأسبوع',
@@ -1244,14 +1239,12 @@ class _PlanScreenState extends State<PlanScreen> {
     int total,
     Color color,
   ) {
-    final progress =
-        total <= 0
-            ? 0.0
-            : (current / total).clamp(0.0, 1.0);
+    final progress = total <= 0
+        ? 0.0
+        : (current / total).clamp(0.0, 1.0);
 
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           mainAxisAlignment:
@@ -1279,8 +1272,7 @@ class _PlanScreenState extends State<PlanScreen> {
         const SizedBox(height: 7),
 
         ClipRRect(
-          borderRadius:
-              BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(10),
           child: LinearProgressIndicator(
             value: progress,
             minHeight: 7,
@@ -1295,7 +1287,8 @@ class _PlanScreenState extends State<PlanScreen> {
       ],
     );
   }
-    Widget _buildDailyHabits() {
+
+  Widget _buildDailyHabits() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1374,12 +1367,10 @@ class _PlanScreenState extends State<PlanScreen> {
                 side: const BorderSide(
                   color: Color(0xFFD9E1EA),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   vertical: 11,
                 ),
-                shape:
-                    RoundedRectangleBorder(
+                shape: RoundedRectangleBorder(
                   borderRadius:
                       BorderRadius.circular(14),
                 ),
@@ -1492,13 +1483,9 @@ class _PlanScreenState extends State<PlanScreen> {
       ),
     );
   }
-
-  void _showAddHabitDialog() {
-    final nameController =
-        TextEditingController();
-
-    final emojiController =
-        TextEditingController();
+    void _showAddHabitDialog() {
+    final nameController = TextEditingController();
+    final emojiController = TextEditingController();
 
     showDialog(
       context: context,
@@ -1508,8 +1495,7 @@ class _PlanScreenState extends State<PlanScreen> {
           child: AlertDialog(
             backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(24),
             ),
             title: const Text(
               'إضافة عادة جديدة',
@@ -1528,19 +1514,15 @@ class _PlanScreenState extends State<PlanScreen> {
                   label: 'اسم العادة',
                   icon: Icons.edit_outlined,
                 ),
-
                 const SizedBox(height: 12),
-
                 _habitDialogField(
                   controller: emojiController,
                   label: 'الإيموجي',
-                  icon:
-                      Icons.sentiment_satisfied_alt,
+                  icon: Icons.sentiment_satisfied_alt,
                 ),
               ],
             ),
-            actionsPadding:
-                const EdgeInsets.fromLTRB(
+            actionsPadding: const EdgeInsets.fromLTRB(
               16,
               0,
               16,
@@ -1552,50 +1534,37 @@ class _PlanScreenState extends State<PlanScreen> {
                   Expanded(
                     child: TextButton(
                       onPressed: () {
-                        Navigator.pop(
-                          dialogContext,
-                        );
+                        Navigator.pop(dialogContext);
                       },
                       style: TextButton.styleFrom(
                         backgroundColor:
-                            const Color(
-                          0xFFF1F4F8,
-                        ),
-                        padding:
-                            const EdgeInsets.symmetric(
+                            const Color(0xFFF1F4F8),
+                        padding: const EdgeInsets.symmetric(
                           vertical: 13,
                         ),
-                        shape:
-                            RoundedRectangleBorder(
+                        shape: RoundedRectangleBorder(
                           borderRadius:
-                              BorderRadius.circular(
-                            16,
-                          ),
+                              BorderRadius.circular(16),
                         ),
                       ),
                       child: const Text(
                         'إلغاء',
                         style: TextStyle(
                           color: navy,
-                          fontWeight:
-                              FontWeight.w800,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
                   ),
-
                   const SizedBox(width: 10),
-
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
                         final name =
-                            nameController.text
-                                .trim();
+                            nameController.text.trim();
 
                         final emoji =
-                            emojiController.text
-                                .trim();
+                            emojiController.text.trim();
 
                         setState(() {
                           habits.add({
@@ -1605,39 +1574,29 @@ class _PlanScreenState extends State<PlanScreen> {
                             'emoji': emoji.isEmpty
                                 ? '⭐'
                                 : emoji,
-                            'icon':
-                                Icons.star_outline,
+                            'icon': Icons.star_outline,
                             'completed': false,
                           });
                         });
 
-                        Navigator.pop(
-                          dialogContext,
-                        );
+                        Navigator.pop(dialogContext);
                       },
-                      style:
-                          ElevatedButton.styleFrom(
+                      style: ElevatedButton.styleFrom(
                         backgroundColor: blue,
-                        foregroundColor:
-                            Colors.white,
-                        padding:
-                            const EdgeInsets.symmetric(
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
                           vertical: 13,
                         ),
                         elevation: 0,
-                        shape:
-                            RoundedRectangleBorder(
+                        shape: RoundedRectangleBorder(
                           borderRadius:
-                              BorderRadius.circular(
-                            16,
-                          ),
+                              BorderRadius.circular(16),
                         ),
                       ),
                       child: const Text(
                         'إضافة',
                         style: TextStyle(
-                          fontWeight:
-                              FontWeight.w800,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
@@ -1666,13 +1625,10 @@ class _PlanScreenState extends State<PlanScreen> {
           color: blue,
         ),
         border: OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16),
         ),
-        focusedBorder:
-            OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(16),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(
             color: blue,
             width: 2,
