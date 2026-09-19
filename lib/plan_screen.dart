@@ -745,15 +745,12 @@ class _PlanScreenState extends State<PlanScreen> {
                           color: tagColor,
                                                 ),
                     ),
-                    if (emoji.isNotEmpty) ...[
-                      const SizedBox(width: 3),
-                      Text(
-                        emoji,
-                        style: const TextStyle(
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
+                    Text(
+  emoji,
+  style: const TextStyle(
+    fontSize: 13,
+  ),
+),
                   ],
                 ),
               ),
