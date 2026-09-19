@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'bottom_navigation.dart';
 
 class PlanScreen extends StatefulWidget {
