@@ -817,10 +817,6 @@ class PlanScreen extends StatelessWidget {
             ),
           ],
         );
-      },
-    );
-  },
-),
           
                 child: Container(
                   width: double.infinity,
