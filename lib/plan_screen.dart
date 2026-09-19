@@ -817,8 +817,7 @@ class PlanScreen extends StatelessWidget {
             ),
           ],
         );
-        );
-},
+        },
 );
 },
 );
