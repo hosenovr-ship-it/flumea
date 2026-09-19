@@ -588,7 +588,7 @@ class _PlanScreenState extends State<PlanScreen> {
 
           ...List.generate(
             tasks.length,
-            (index) => _taskCard(index),
+            (index) => _taskCard(tasks[index], index),
           ),
 
           Padding(
