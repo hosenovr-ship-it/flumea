@@ -550,162 +550,277 @@ class PlanScreen extends StatelessWidget {
                   final categoryController = TextEditingController();
                   final descriptionController = TextEditingController();
 
-                  String selectedEmoji = '📝';
+                  final emojiController = TextEditingController(text: '📝');
 
-                  showDialog(
-                    context: context,
-                    builder: (dialogContext) {
-                      return StatefulBuilder(
-                        builder: (dialogContext, dialogSetState) {
-                          return AlertDialog(
-                            title: const Text(
-                              'إضافة مهمة جديدة',
-                              textAlign: TextAlign.right,
-                            ),
-                            content: SingleChildScrollView(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  TextField(
-                                    controller: nameController,
-                                    textAlign: TextAlign.right,
-                                    decoration: const InputDecoration(
-                                      labelText: '📝 اسم المهمة',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
+    showDialog(
+  context: context,
+  builder: (dialogContext) {
+    return StatefulBuilder(
+      builder: (dialogContext, dialogSetState) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(
+            22,
+            20,
+            22,
+            14,
+          ),
+          title: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEAF1FF),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.add_task_rounded,
+                  color: Color(0xFF2864E6),
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'إضافة مهمة جديدة',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    color: Color(0xFF102A4C),
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
 
-                                  TextField(
-                                    controller: timeController,
-                                    textAlign: TextAlign.right,
-                                    decoration: const InputDecoration(
-                                      labelText: '⏰ الوقت',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    'ابدأ بخطوة صغيرة نحو هدفك الكبير',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: Color(0xFF7A8797),
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
 
-                                  TextField(
-                                    controller: categoryController,
-                                    textAlign: TextAlign.right,
-                                    decoration: const InputDecoration(
-                                      labelText: '🏷️ التصنيف',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
+                const SizedBox(height: 18),
 
-                                  TextField(
-                                    controller: descriptionController,
-                                    textAlign: TextAlign.right,
-                                    maxLines: 2,
-                                    decoration: const InputDecoration(
-                                      labelText: '✏️ الوصف',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 14),
+                // اسم المهمة
+                TextField(
+                  controller: nameController,
+                  textAlign: TextAlign.right,
+                  decoration: InputDecoration(
+                    labelText: 'اسم المهمة *',
+                    hintText: 'مثال: قراءة كتاب',
+                    prefixIcon: const Icon(
+                      Icons.edit_rounded,
+                      color: Color(0xFF2864E6),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF2864E6),
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
 
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Text(
-                                      '😀 الإيموجي',
-                                      style: TextStyle(
-                                        color: navy,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
+                const SizedBox(height: 12),
 
-                                  Wrap(
-                                    spacing: 8,
-                                    children: [
-                                      '📝',
-                                      '📚',
-                                      '🏋️',
-                                      '💼',
-                                      '🎯',
-                                      '🍎',
-                                      '💡',
-                                      '🔥',
-                                      '⭐',
-                                      '🚀',
-                                    ].map(
-                                      (emoji) {
-                                        return ChoiceChip(
-                                          label: Text(
-                                            emoji,
-                                            style: const TextStyle(
-                                              fontSize: 20,
-                                            ),
-                                          ),
-                                          selected:
-                                              selectedEmoji == emoji,
-                                          onSelected: (_) {
-                                            dialogSetState(() {
-                                              selectedEmoji = emoji;
-                                            });
-                                          },
-                                        );
-                                      },
-                                    ).toList(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(dialogContext);
-                                },
-                                child: const Text('إلغاء'),
-                              ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  if (nameController.text.trim().isEmpty) {
-                                    return;
-                                  }
+                // الوقت
+                TextField(
+                  controller: timeController,
+                  textAlign: TextAlign.right,
+                  decoration: InputDecoration(
+                    labelText: 'الوقت *',
+                    hintText: 'اختر الوقت',
+                    prefixIcon: const Icon(
+                      Icons.access_time_rounded,
+                      color: Color(0xFFE85D6A),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
 
-                                  setState(() {
-                                    tasks.add({
-                                      'time':
-                                          timeController.text.trim().isEmpty
-                                              ? 'بدون وقت'
-                                              : timeController.text.trim(),
-                                      'title':
-                                          '$selectedEmoji ${nameController.text.trim()}',
-                                      'subtitle':
-                                          descriptionController.text
-                                                  .trim()
-                                                  .isEmpty
-                                              ? 'مهمة جديدة'
-                                              : descriptionController.text
-                                                  .trim(),
-                                      'tag':
-                                          categoryController.text
-                                                  .trim()
-                                                  .isEmpty
-                                              ? 'عام 📌'
-                                              : categoryController.text
-                                                  .trim(),
-                                      'tagColor': cyan,
-                                      'completed': false,
-                                    });
-                                  });
+                const SizedBox(height: 12),
 
-                                  Navigator.pop(dialogContext);
-                                },
-                                child: const Text('➕ إضافة المهمة'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
+                // التصنيف
+                TextField(
+                  controller: categoryController,
+                  textAlign: TextAlign.right,
+                  decoration: InputDecoration(
+                    labelText: 'التصنيف *',
+                    hintText: 'مثال: دراسة',
+                    prefixIcon: const Icon(
+                      Icons.local_offer_rounded,
+                      color: Color(0xFFF0A51A),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // الإيموجي
+                TextField(
+                  controller: emojiController,
+                  textAlign: TextAlign.right,
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                    labelText: 'الإيموجي',
+                    hintText: 'اختر أو اكتب إيموجي',
+                    prefixIcon: const Icon(
+                      Icons.emoji_emotions_outlined,
+                      color: Color(0xFF7567D9),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF7567D9),
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // الوصف
+                TextField(
+                  controller: descriptionController,
+                  textAlign: TextAlign.right,
+                  maxLines: 3,
+                  maxLength: 100,
+                  decoration: InputDecoration(
+                    labelText: 'الوصف',
+                    hintText: 'أضف وصفًا مختصرًا للمهمة (اختياري)',
+                    prefixIcon: const Icon(
+                      Icons.description_outlined,
+                      color: Color(0xFF4A90E2),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(dialogContext);
                     },
-                  );
-                },
+                    style: TextButton.styleFrom(
+                      backgroundColor: const Color(0xFFF0F3F8),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                    child: const Text(
+                      'إلغاء',
+                      style: TextStyle(
+                        color: Color(0xFF102A4C),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (nameController.text.trim().isEmpty) {
+                        return;
+                      }
+
+                      setState(() {
+                        tasks.add({
+                          'time':
+                              timeController.text.trim().isEmpty
+                                  ? 'بدون وقت'
+                                  : timeController.text.trim(),
+                          'title':
+                              nameController.text.trim(),
+                          'subtitle':
+                              descriptionController.text.trim().isEmpty
+                                  ? 'مهمة جديدة'
+                                  : descriptionController.text.trim(),
+                          'tag': '${emojiController.text.trim().isEmpty ?
+                            '📝' : emojiController.text.trim()} $
+                            {categoryController.text.trim().isEmpty ? 
+                              '📚' : categoryController.text.trim()}',
+                          'tagColor': cyan,
+                          'completed': false,
+                        });
+                      });
+
+                      Navigator.pop(dialogContext);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF4169F1),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 14,
+                      ),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                    child: const Text(
+                      'إضافة المهمة +',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  },
+),
+          
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 14),
