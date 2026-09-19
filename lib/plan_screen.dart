@@ -697,14 +697,6 @@ class _PlanScreenState extends State<PlanScreen> {
       task['subtitle'],
     );
 
-    final time = _safeString(
-      task['time'],
-    );
-
-    final tag = _safeString(
-      task['tag'],
-    );
-
     final emoji = _safeString(
       task['emoji'],
       fallback: '📌',
