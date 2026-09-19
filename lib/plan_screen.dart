@@ -1866,4 +1866,38 @@ class _PlanScreenState extends State<PlanScreen> {
         );
       },
     );
+    Widget _habitDialogField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+  }) {
+    return TextField(
+      controller: controller,
+      textAlign: TextAlign.right,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(
+          icon,
+          color: blue,
+        ),
+        filled: true,
+        fillColor: const Color(0xFFF7F9FC),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(
+            color: blue,
+            width: 1.5,
+          ),
+        ),
+      ),
+    );
+    }
   }
