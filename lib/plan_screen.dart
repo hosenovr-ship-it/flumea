@@ -100,6 +100,43 @@ class _PlanScreenState extends State<PlanScreen> {
     },
   ];
 
+  String _safeString(
+    dynamic value, {
+    String fallback = '',
+  }) {
+    if (value == null) {
+      return fallback;
+    }
+
+    final text = value.toString().trim();
+
+    if (text.isEmpty || text == 'null') {
+      return fallback;
+    }
+
+    return text;
+  }
+
+  Color _safeColor(dynamic value) {
+    if (value is Color) {
+      return value;
+    }
+
+    return blue;
+  }
+
+  IconData _safeIcon(dynamic value) {
+    if (value is IconData) {
+      return value;
+    }
+
+    return Icons.check_circle_outline;
+  }
+
+  bool _safeBool(dynamic value) {
+    return value == true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -251,20 +288,22 @@ class _PlanScreenState extends State<PlanScreen> {
       child: Row(
         children: List.generate(
           days.length,
-          (index) => Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  selectedDay = index;
-                });
-              },
-              child: _dayBox(
-                days[index][0],
-                days[index][1],
-                selectedDay == index,
+          (index) {
+            return Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedDay = index;
+                  });
+                },
+                child: _dayBox(
+                  days[index][0],
+                  days[index][1],
+                  selectedDay == index,
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -276,9 +315,7 @@ class _PlanScreenState extends State<PlanScreen> {
     bool selected,
   ) {
     return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 3,
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: 3),
       decoration: BoxDecoration(
         color: selected
             ? blue
@@ -322,7 +359,7 @@ class _PlanScreenState extends State<PlanScreen> {
 
   Widget _buildSummary() {
     final completed = tasks.where(
-      (task) => task['completed'] == true,
+      (task) => _safeBool(task['completed']),
     ).length;
 
     final remaining = tasks.length - completed;
@@ -429,9 +466,7 @@ class _PlanScreenState extends State<PlanScreen> {
           width: 43,
           height: 43,
           decoration: BoxDecoration(
-            color: color.withValues(
-              alpha: 0.10,
-            ),
+            color: color.withValues(alpha: 0.10),
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -478,7 +513,7 @@ class _PlanScreenState extends State<PlanScreen> {
             width: 65,
             height: 65,
             child: CircularProgressIndicator(
-              value: progress,
+              value: progress.clamp(0.0, 1.0),
               strokeWidth: 7,
               backgroundColor:
                   const Color(0xFFDDE4ED),
@@ -575,8 +610,7 @@ class _PlanScreenState extends State<PlanScreen> {
                         'الكل',
                         style: TextStyle(
                           color: navy,
-                          fontWeight:
-                              FontWeight.w700,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
@@ -588,7 +622,10 @@ class _PlanScreenState extends State<PlanScreen> {
 
           ...List.generate(
             tasks.length,
-            (index) => _taskCard(tasks[index], index),
+            (index) => _taskCard(
+              tasks[index],
+              index,
+            ),
           ),
 
           Padding(
@@ -621,8 +658,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       style: TextStyle(
                         color: blue,
                         fontSize: 16,
-                        fontWeight:
-                            FontWeight.w800,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
@@ -634,45 +670,89 @@ class _PlanScreenState extends State<PlanScreen> {
       ),
     );
   }
-    Widget _taskCard(Map<String, dynamic> task, int index) {
+    Widget _taskCard(
+    Map<String, dynamic> task,
+    int index,
+  ) {
+    final bool completed =
+        _safeBool(task['completed']);
+
+    final String title = _safeString(
+      task['title'],
+      fallback: 'مهمة جديدة',
+    );
+
+    final String subtitle = _safeString(
+      task['subtitle'],
+      fallback: 'مهمة جديدة',
+    );
+
+    final String time = _safeString(
+      task['time'],
+      fallback: 'بدون وقت',
+    );
+
+    final String tag = _safeString(
+      task['tag'],
+      fallback: 'عام',
+    );
+
+    final String emoji = _safeString(
+      task['emoji'],
+      fallback: '📝',
+    );
+
+    final Color color =
+        _safeColor(task['color']);
+
     return GestureDetector(
       onTap: () {
+        if (index < 0 || index >= tasks.length) {
+          return;
+        }
+
         setState(() {
-          tasks[index]['completed'] = !tasks[index]['completed'];
+          final current =
+              _safeBool(tasks[index]['completed']);
+
+          tasks[index]['completed'] = !current;
         });
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: const Color(0xFFE8E8E8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        decoration: const BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: Color(0xFFE8EDF2),
+            ),
           ),
         ),
         child: Row(
           children: [
             Container(
-              width: 25,
-              height: 25,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
-                color: task['completed']
-                    ? const Color(0xFF111111)
+                color: completed
+                    ? blue
                     : Colors.white,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius:
+                    BorderRadius.circular(6),
                 border: Border.all(
-                  color: task['completed']
-                      ? const Color(0xFF111111)
-                      : const Color(0xFFD6D6D6),
-                  width: 1.5,
+                  color: completed
+                      ? blue
+                      : const Color(0xFFB8C2CE),
+                  width: 2,
                 ),
               ),
-              child: task['completed']
+              child: completed
                   ? const Icon(
                       Icons.check,
-                      size: 17,
                       color: Colors.white,
+                      size: 20,
                     )
                   : null,
             ),
@@ -681,70 +761,118 @@ class _PlanScreenState extends State<PlanScreen> {
 
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    task['title'],
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      decoration: task['completed']
-                          ? TextDecoration.lineThrough
-                          : TextDecoration.none,
-                      color: task['completed']
-                          ? Colors.grey
-                          : const Color(0xFF222222),
-                    ),
+                  Row(
+                    mainAxisAlignment:
+                        MainAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          textAlign:
+                              TextAlign.right,
+                          maxLines: 1,
+                          overflow:
+                              TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight:
+                                FontWeight.w800,
+                            color: completed
+                                ? const Color(
+                                    0xFF9AA4AE,
+                                  )
+                                : navy,
+                            decoration: completed
+                                ? TextDecoration
+                                    .lineThrough
+                                : TextDecoration.none,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      Container(
+                        padding:
+                            const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: color.withValues(
+                            alpha: 0.10,
+                          ),
+                          borderRadius:
+                              BorderRadius.circular(18),
+                        ),
+                        child: Row(
+                          mainAxisSize:
+                              MainAxisSize.min,
+                          children: [
+                            Text(
+                              tag,
+                              style: TextStyle(
+                                color: color,
+                                fontSize: 11,
+                                fontWeight:
+                                    FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              emoji,
+                              style:
+                                  const TextStyle(
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 5),
+
+                  const SizedBox(height: 4),
+
                   Text(
-                    task['subtitle'],
+                    subtitle,
+                    textAlign: TextAlign.right,
+                    maxLines: 1,
+                    overflow:
+                        TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF8A8A8A),
+                      color: Color(0xFF7B8798),
                     ),
                   ),
                 ],
               ),
             ),
 
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      task['tag'],
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF777777),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      task['emoji'],
-                      style: const TextStyle(fontSize: 17),
-                    ),
-                  ],
+            const SizedBox(width: 12),
+
+            SizedBox(
+              width: 58,
+              child: Text(
+                time,
+                textAlign: TextAlign.left,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF52647A),
+                  fontWeight: FontWeight.w600,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  task['time'],
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF999999),
-                  ),
-                ),
-              ],
+              ),
             ),
 
-            const SizedBox(width: 8),
+            const SizedBox(width: 5),
 
             const Icon(
-              Icons.more_horiz,
-              color: Color(0xFF999999),
-              size: 20,
+              Icons.more_vert,
+              color: Color(0xFF6E7A88),
+              size: 22,
             ),
           ],
         ),
@@ -753,105 +881,257 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   void _showAddTaskDialog() {
-    final nameController = TextEditingController();
-    final descriptionController = TextEditingController();
-    final timeController = TextEditingController();
-    final categoryController = TextEditingController();
-    final emojiController = TextEditingController();
+    final nameController =
+        TextEditingController();
+
+    final descriptionController =
+        TextEditingController();
+
+    final timeController =
+        TextEditingController();
+
+    final categoryController =
+        TextEditingController();
+
+    final emojiController =
+        TextEditingController();
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
             backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(22),
+              borderRadius:
+                  BorderRadius.circular(28),
             ),
             title: const Text(
               'إضافة مهمة جديدة',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                color: navy,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
               ),
             ),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  const Text(
+                    'ابدأ بخطوة صغيرة نحو هدفك الكبير',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF7B8798),
+                      fontSize: 13,
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
                   _dialogField(
                     controller: nameController,
-                    label: 'اسم المهمة',
+                    label: 'اسم المهمة *',
+                    icon: Icons.edit_outlined,
                   ),
-                  const SizedBox(height: 10),
-                  _dialogField(
-                    controller: descriptionController,
-                    label: 'الوصف',
-                  ),
-                  const SizedBox(height: 10),
+
+                  const SizedBox(height: 12),
+
                   _dialogField(
                     controller: timeController,
                     label: 'الوقت',
+                    icon: Icons.access_time,
                   ),
-                  const SizedBox(height: 10),
+
+                  const SizedBox(height: 12),
+
                   _dialogField(
-                    controller: categoryController,
+                    controller:
+                        categoryController,
                     label: 'التصنيف',
+                    icon: Icons.local_offer_outlined,
                   ),
-                  const SizedBox(height: 10),
+
+                  const SizedBox(height: 12),
+
                   _dialogField(
                     controller: emojiController,
                     label: 'الإيموجي',
+                    icon:
+                        Icons.sentiment_satisfied_alt,
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  TextField(
+                    controller:
+                        descriptionController,
+                    maxLines: 3,
+                    maxLength: 100,
+                    textAlign: TextAlign.right,
+                    decoration:
+                        InputDecoration(
+                      labelText: 'الوصف',
+                      alignLabelWithHint: true,
+                      prefixIcon: const Icon(
+                        Icons.description_outlined,
+                        color: Color(0xFFE5AA27),
+                      ),
+                      border:
+                          OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(
+                          18,
+                        ),
+                      ),
+                      focusedBorder:
+                          OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(
+                          18,
+                        ),
+                        borderSide:
+                            const BorderSide(
+                          color: blue,
+                          width: 2,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
+            actionsPadding:
+                const EdgeInsets.fromLTRB(
+              16,
+              0,
+              16,
+              16,
+            ),
             actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text(
-                  'إلغاء',
-                  style: TextStyle(
-                    color: Colors.grey,
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pop(
+                          dialogContext,
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor:
+                            const Color(
+                          0xFFF1F4F8,
+                        ),
+                        padding:
+                            const EdgeInsets.symmetric(
+                          vertical: 14,
+                        ),
+                        shape:
+                            RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(
+                            18,
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        'إلغاء',
+                        style: TextStyle(
+                          color: navy,
+                          fontSize: 16,
+                          fontWeight:
+                              FontWeight.w800,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    tasks.add({
-                      'time': timeController.text.isEmpty
-                          ? 'بدون وقت'
-                          : timeController.text,
-                      'title': nameController.text.isEmpty
-                          ? 'مهمة جديدة'
-                          : nameController.text,
-                      'subtitle': descriptionController.text.isEmpty
-                          ? 'مهمة جديدة'
-                          : descriptionController.text,
-                      'tag': categoryController.text.isEmpty
-                          ? 'عام'
-                          : categoryController.text,
-                      'emoji': emojiController.text.isEmpty
-                          ? '📝'
-                          : emojiController.text,
-                      'color': const Color(0xFF4F7CFF),
-                      'completed': false,
-                    });
-                  });
 
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF111111),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  const SizedBox(width: 12),
+
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final name =
+                            nameController.text
+                                .trim();
+
+                        if (name.isEmpty) {
+                          return;
+                        }
+
+                        final time =
+                            timeController.text
+                                .trim();
+
+                        final category =
+                            categoryController.text
+                                .trim();
+
+                        final emoji =
+                            emojiController.text
+                                .trim();
+
+                        final description =
+                            descriptionController.text
+                                .trim();
+
+                        setState(() {
+                          tasks.add({
+                            'time': time.isEmpty
+                                ? 'بدون وقت'
+                                : time,
+                            'title': name,
+                            'subtitle':
+                                description.isEmpty
+                                    ? 'مهمة جديدة'
+                                    : description,
+                            'tag': category.isEmpty
+                                ? 'عام'
+                                : category,
+                            'emoji': emoji.isEmpty
+                                ? '📝'
+                                : emoji,
+                            'color': blue,
+                            'completed': false,
+                          });
+                        });
+
+                        Navigator.pop(
+                          dialogContext,
+                        );
+                      },
+                      style:
+                          ElevatedButton.styleFrom(
+                        backgroundColor: blue,
+                        foregroundColor:
+                            Colors.white,
+                        padding:
+                            const EdgeInsets.symmetric(
+                          vertical: 14,
+                        ),
+                        elevation: 0,
+                        shape:
+                            RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(
+                            18,
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        'إضافة المهمة +',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight:
+                              FontWeight.w800,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                child: const Text('إضافة'),
+                ],
               ),
             ],
           ),
@@ -863,19 +1143,28 @@ class _PlanScreenState extends State<PlanScreen> {
   Widget _dialogField({
     required TextEditingController controller,
     required String label,
+    required IconData icon,
   }) {
     return TextField(
       controller: controller,
-      textDirection: TextDirection.rtl,
+      textAlign: TextAlign.right,
       decoration: InputDecoration(
         labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+        prefixIcon: Icon(
+          icon,
+          color: blue,
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+        border: OutlineInputBorder(
+          borderRadius:
+              BorderRadius.circular(18),
+        ),
+        focusedBorder:
+            OutlineInputBorder(
+          borderRadius:
+              BorderRadius.circular(18),
           borderSide: const BorderSide(
-            color: Color(0xFF111111),
+            color: blue,
+            width: 2,
           ),
         ),
       ),
@@ -884,122 +1173,123 @@ class _PlanScreenState extends State<PlanScreen> {
 
   Widget _buildWeeklyGoals() {
     return Container(
-      margin: const EdgeInsets.only(top: 18),
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius:
+            BorderRadius.circular(22),
         border: Border.all(
-          color: const Color(0xFFE8E8E8),
+          color: const Color(0xFFE5EAF0),
         ),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'أهداف الأسبوع',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF222222),
-            ),
+          Row(
+            mainAxisAlignment:
+                MainAxisAlignment.end,
+            children: [
+              const Text(
+                'أهداف الأسبوع',
+                style: TextStyle(
+                  color: navy,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(width: 7),
+              const Icon(
+                Icons.flag_outlined,
+                color: navy,
+                size: 21,
+              ),
+            ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
 
           _goalRow(
-            icon: Icons.menu_book_rounded,
-            title: 'الدراسة',
-            current: 4,
-            total: 5,
+            'الدراسة',
+            4,
+            5,
+            blue,
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 15),
 
           _goalRow(
-            icon: Icons.fitness_center_rounded,
-            title: 'الرياضة',
-            current: 3,
-            total: 5,
+            'الرياضة',
+            3,
+            5,
+            cyan,
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 15),
 
           _goalRow(
-            icon: Icons.auto_stories_rounded,
-            title: 'القراءة',
-            current: 6,
-            total: 7,
+            'القراءة',
+            6,
+            7,
+            const Color(0xFF8E44AD),
           ),
         ],
       ),
     );
   }
 
-  Widget _goalRow({
-    required IconData icon,
-    required String title,
-    required int current,
-    required int total,
-  }) {
-    final double progress = current / total;
+  Widget _goalRow(
+    String title,
+    int current,
+    int total,
+    Color color,
+  ) {
+    final progress =
+        total <= 0
+            ? 0.0
+            : (current / total).clamp(0.0, 1.0);
 
-    return Row(
+    return Column(
+      crossAxisAlignment:
+          CrossAxisAlignment.stretch,
       children: [
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF4F4F4),
-            borderRadius: BorderRadius.circular(13),
-          ),
-          child: Icon(
-            icon,
-            color: const Color(0xFF222222),
-            size: 21,
-          ),
+        Row(
+          mainAxisAlignment:
+              MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '$current/$total',
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            Text(
+              title,
+              style: const TextStyle(
+                color: navy,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
 
-        const SizedBox(width: 12),
+        const SizedBox(height: 7),
 
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    '$current/$total',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF888888),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 8),
-
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 7,
-                  backgroundColor: const Color(0xFFEDEDED),
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    Color(0xFF222222),
-                  ),
-                ),
-              ),
-            ],
+        ClipRRect(
+          borderRadius:
+              BorderRadius.circular(10),
+          child: LinearProgressIndicator(
+            value: progress,
+            minHeight: 7,
+            backgroundColor:
+                const Color(0xFFE8EDF3),
+            valueColor:
+                AlwaysStoppedAnimation<Color>(
+              color,
+            ),
           ),
         ),
       ],
@@ -1007,36 +1297,62 @@ class _PlanScreenState extends State<PlanScreen> {
   }
     Widget _buildDailyHabits() {
     return Container(
-      margin: const EdgeInsets.only(top: 18),
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: const Color(0xFFE8E8E8),
+          color: const Color(0xFFE5EAF0),
         ),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'عادات اليوم',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF222222),
-            ),
+          Row(
+            mainAxisAlignment:
+                MainAxisAlignment.end,
+            children: [
+              const Text(
+                'عادات اليوم',
+                style: TextStyle(
+                  color: navy,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(width: 7),
+              const Icon(
+                Icons.check_circle_outline,
+                color: navy,
+                size: 21,
+              ),
+            ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
 
-          _habitRow(0),
-          const SizedBox(height: 10),
-          _habitRow(1),
-          const SizedBox(height: 10),
-          _habitRow(2),
+          if (habits.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: 10,
+              ),
+              child: Text(
+                'لا توجد عادات بعد',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFF7B8798),
+                  fontSize: 13,
+                ),
+              ),
+            )
+          else
+            ...List.generate(
+              habits.length,
+              (index) => _habitRow(index),
+            ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
 
           SizedBox(
             width: double.infinity,
@@ -1044,24 +1360,28 @@ class _PlanScreenState extends State<PlanScreen> {
               onPressed: _showAddHabitDialog,
               icon: const Icon(
                 Icons.add,
-                size: 20,
+                size: 19,
               ),
               label: const Text(
                 'إضافة عادة جديدة',
                 style: TextStyle(
-                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF222222),
+                foregroundColor: navy,
                 side: const BorderSide(
-                  color: Color(0xFFDCDCDC),
+                  color: Color(0xFFD9E1EA),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  vertical: 13,
+                padding:
+                    const EdgeInsets.symmetric(
+                  vertical: 11,
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                shape:
+                    RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(14),
                 ),
               ),
             ),
@@ -1072,71 +1392,99 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   Widget _habitRow(int index) {
+    if (index < 0 || index >= habits.length) {
+      return const SizedBox.shrink();
+    }
+
     final habit = habits[index];
+
+    final bool completed =
+        _safeBool(habit['completed']);
+
+    final String title = _safeString(
+      habit['title'],
+      fallback: 'عادة جديدة',
+    );
+
+    final IconData icon =
+        _safeIcon(habit['icon']);
 
     return GestureDetector(
       onTap: () {
+        if (index < 0 || index >= habits.length) {
+          return;
+        }
+
         setState(() {
-          habit['completed'] = !habit['completed'];
+          final current =
+              _safeBool(habits[index]['completed']);
+
+          habits[index]['completed'] = !current;
         });
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 12,
-        ),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8F8F8),
-          borderRadius: BorderRadius.circular(15),
+      child: Padding(
+        padding: const EdgeInsets.only(
+          bottom: 14,
         ),
         child: Row(
           children: [
             Container(
-              width: 25,
-              height: 25,
+              width: 27,
+              height: 27,
               decoration: BoxDecoration(
-                color: habit['completed']
-                    ? const Color(0xFF111111)
+                color: completed
+                    ? cyan
                     : Colors.white,
-                borderRadius: BorderRadius.circular(8),
+                shape: BoxShape.circle,
                 border: Border.all(
-                  color: habit['completed']
-                      ? const Color(0xFF111111)
-                      : const Color(0xFFD6D6D6),
-                  width: 1.5,
+                  color: completed
+                      ? cyan
+                      : const Color(0xFFB8C2CE),
+                  width: 2,
                 ),
               ),
-              child: habit['completed']
+              child: completed
                   ? const Icon(
                       Icons.check,
-                      size: 17,
                       color: Colors.white,
+                      size: 17,
                     )
                   : null,
             ),
 
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
 
             Expanded(
               child: Text(
-                habit['title'],
+                title,
+                textAlign: TextAlign.right,
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  decoration: habit['completed']
+                  color: completed
+                      ? const Color(0xFF9AA4AE)
+                      : navy,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  decoration: completed
                       ? TextDecoration.lineThrough
                       : TextDecoration.none,
-                  color: habit['completed']
-                      ? Colors.grey
-                      : const Color(0xFF222222),
                 ),
               ),
             ),
 
-            Text(
-              habit['emoji'],
-              style: const TextStyle(
-                fontSize: 20,
+            const SizedBox(width: 8),
+
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: const Color(0xFFEAF9F4),
+                borderRadius:
+                    BorderRadius.circular(10),
+              ),
+              child: Icon(
+                icon,
+                color: cyan,
+                size: 19,
               ),
             ),
           ],
@@ -1146,23 +1494,30 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   void _showAddHabitDialog() {
-    final nameController = TextEditingController();
-    final emojiController = TextEditingController();
+    final nameController =
+        TextEditingController();
+
+    final emojiController =
+        TextEditingController();
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
             backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(22),
+              borderRadius:
+                  BorderRadius.circular(24),
             ),
             title: const Text(
               'إضافة عادة جديدة',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                color: navy,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
               ),
             ),
             content: Column(
@@ -1171,53 +1526,123 @@ class _PlanScreenState extends State<PlanScreen> {
                 _habitDialogField(
                   controller: nameController,
                   label: 'اسم العادة',
+                  icon: Icons.edit_outlined,
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
 
                 _habitDialogField(
                   controller: emojiController,
                   label: 'الإيموجي',
+                  icon:
+                      Icons.sentiment_satisfied_alt,
                 ),
               ],
             ),
+            actionsPadding:
+                const EdgeInsets.fromLTRB(
+              16,
+              0,
+              16,
+              16,
+            ),
             actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text(
-                  'إلغاء',
-                  style: TextStyle(
-                    color: Colors.grey,
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pop(
+                          dialogContext,
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor:
+                            const Color(
+                          0xFFF1F4F8,
+                        ),
+                        padding:
+                            const EdgeInsets.symmetric(
+                          vertical: 13,
+                        ),
+                        shape:
+                            RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(
+                            16,
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        'إلغاء',
+                        style: TextStyle(
+                          color: navy,
+                          fontWeight:
+                              FontWeight.w800,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
 
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    habits.add({
-                      'title': nameController.text.isEmpty
-                          ? 'عادة جديدة'
-                          : nameController.text,
-                      'emoji': emojiController.text.isEmpty
-                          ? '⭐'
-                          : emojiController.text,
-                      'completed': false,
-                    });
-                  });
+                  const SizedBox(width: 10),
 
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF111111),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final name =
+                            nameController.text
+                                .trim();
+
+                        final emoji =
+                            emojiController.text
+                                .trim();
+
+                        setState(() {
+                          habits.add({
+                            'title': name.isEmpty
+                                ? 'عادة جديدة'
+                                : name,
+                            'emoji': emoji.isEmpty
+                                ? '⭐'
+                                : emoji,
+                            'icon':
+                                Icons.star_outline,
+                            'completed': false,
+                          });
+                        });
+
+                        Navigator.pop(
+                          dialogContext,
+                        );
+                      },
+                      style:
+                          ElevatedButton.styleFrom(
+                        backgroundColor: blue,
+                        foregroundColor:
+                            Colors.white,
+                        padding:
+                            const EdgeInsets.symmetric(
+                          vertical: 13,
+                        ),
+                        elevation: 0,
+                        shape:
+                            RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(
+                            16,
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        'إضافة',
+                        style: TextStyle(
+                          fontWeight:
+                              FontWeight.w800,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                child: const Text('إضافة'),
+                ],
               ),
             ],
           ),
@@ -1229,19 +1654,28 @@ class _PlanScreenState extends State<PlanScreen> {
   Widget _habitDialogField({
     required TextEditingController controller,
     required String label,
+    required IconData icon,
   }) {
     return TextField(
       controller: controller,
-      textDirection: TextDirection.rtl,
+      textAlign: TextAlign.right,
       decoration: InputDecoration(
         labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+        prefixIcon: Icon(
+          icon,
+          color: blue,
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+        border: OutlineInputBorder(
+          borderRadius:
+              BorderRadius.circular(16),
+        ),
+        focusedBorder:
+            OutlineInputBorder(
+          borderRadius:
+              BorderRadius.circular(16),
           borderSide: const BorderSide(
-            color: Color(0xFF111111),
+            color: blue,
+            width: 2,
           ),
         ),
       ),
