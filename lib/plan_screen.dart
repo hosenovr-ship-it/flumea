@@ -1866,6 +1866,7 @@ class _PlanScreenState extends State<PlanScreen> {
         );
       },
     );
+  }
     Widget _habitDialogField({
     required TextEditingController controller,
     required String label,
