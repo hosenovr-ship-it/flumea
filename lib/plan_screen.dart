@@ -2177,7 +2177,48 @@ Navigator.of(context).pop();
       ),
     );
   }
+// ============================================================
+// Supabase - تحديث حالة العادة
+// ============================================================
 
+Future<void> _toggleHabit(String id, bool completed) async {
+  if (id.isEmpty) {
+    return;
+  }
+
+  try {
+    await _habitService.updateHabit(
+      id: id,
+      completed: !completed,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    final index = habits.indexWhere(
+      (habit) => _safeString(habit['id']) == id,
+    );
+
+    if (index != -1) {
+      setState(() {
+        habits[index]['completed'] = !completed;
+      });
+    }
+  } catch (error) {
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'تعذر تحديث العادة: $error',
+        ),
+      ),
+    );
+  }
+}
   Widget _buildHabitRow({
     required String title,
     required IconData icon,
