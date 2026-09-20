@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'bottom_navigation.dart';
+import 'services/task_service.dart';
 
 class PlanScreen extends StatefulWidget {
   const PlanScreen({super.key});
@@ -14,73 +15,14 @@ class _PlanScreenState extends State<PlanScreen> {
   static const Color cyan = Color(0xFF20C7B7);
   static const Color background = Color(0xFFF7FBFF);
 
+  final TaskService _taskService = TaskService();
+
   int selectedDay = 0;
 
-  final List<Map<String, dynamic>> tasks = [
-    {
-      'time': '6:00 ص',
-      'title': 'الاستيقاظ',
-      'subtitle': 'ابدأ يومك بطاقة',
-      'tag': 'عادات',
-      'emoji': '☀️',
-      'color': cyan,
-      'completed': true,
-    },
-    {
-      'time': '6:30 ص',
-      'title': 'الرياضة',
-      'subtitle': 'تمرين لمدة 45 دقيقة',
-      'tag': 'صحة',
-      'emoji': '🏋️',
-      'color': Color(0xFFEF5350),
-      'completed': false,
-    },
-    {
-      'time': '8:00 ص',
-      'title': 'الإفطار',
-      'subtitle': 'وجبة صحية ومتوازنة',
-      'tag': 'غذاء',
-      'emoji': '🍽️',
-      'color': Color(0xFFFFA726),
-      'completed': true,
-    },
-    {
-      'time': '9:00 ص',
-      'title': 'الدراسة',
-      'subtitle': 'مذاكرة المواد المهمة',
-      'tag': 'تعليم',
-      'emoji': '🎓',
-      'color': blue,
-      'completed': true,
-    },
-    {
-      'time': '12:00 م',
-      'title': 'المهام الشخصية',
-      'subtitle': 'إنجاز الأعمال المطلوبة',
-      'tag': 'إنتاجية',
-      'emoji': '💼',
-      'color': Color(0xFFE57C72),
-      'completed': true,
-    },
-    {
-      'time': '4:00 م',
-      'title': 'القراءة',
-      'subtitle': 'قراءة 30 دقيقة',
-      'tag': 'تطوير الذات',
-      'emoji': '📖',
-      'color': Color(0xFF8E44AD),
-      'completed': true,
-    },
-    {
-      'time': '7:00 م',
-      'title': 'مراجعة اليوم',
-      'subtitle': 'تقييم ما تم إنجازه',
-      'tag': 'مراجعة',
-      'emoji': '📊',
-      'color': cyan,
-      'completed': true,
-    },
-  ];
+  bool _isLoadingTasks = true;
+  bool _isSavingTask = false;
+
+  List<Map<String, dynamic>> tasks = [];
 
   final List<Map<String, dynamic>> habits = [
     {
@@ -99,6 +41,12 @@ class _PlanScreenState extends State<PlanScreen> {
       'completed': true,
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTasks();
+  }
 
   String _safeString(
     dynamic value, {
@@ -122,6 +70,26 @@ class _PlanScreenState extends State<PlanScreen> {
       return value;
     }
 
+    final text = _safeString(value);
+
+    if (text.startsWith('#')) {
+      final hex = text.replaceFirst('#', '');
+
+      try {
+        if (hex.length == 6) {
+          return Color(
+            int.parse('FF$hex', radix: 16),
+          );
+        }
+
+        if (hex.length == 8) {
+          return Color(
+            int.parse(hex, radix: 16),
+          );
+        }
+      } catch (_) {}
+    }
+
     return blue;
   }
 
@@ -136,6 +104,341 @@ class _PlanScreenState extends State<PlanScreen> {
   bool _safeBool(dynamic value) {
     return value == true;
   }
+
+  // ============================================================
+  // SUPABASE - تحميل المهام
+  // ============================================================
+
+  Future<void> _loadTasks() async {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _isLoadingTasks = true;
+    });
+
+    try {
+      final loadedTasks = await _taskService.getTasks();
+
+      if (!mounted) {
+        return;
+      }
+
+      if (loadedTasks.isEmpty) {
+        await _createInitialTasks();
+      } else {
+        setState(() {
+          tasks = loadedTasks;
+          _isLoadingTasks = false;
+        });
+      }
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isLoadingTasks = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'تعذر تحميل المهام: $error',
+          ),
+        ),
+      );
+    }
+  }
+
+  // ============================================================
+  // إنشاء المهام التجريبية أول مرة فقط
+  // ============================================================
+
+  Future<void> _createInitialTasks() async {
+    final initialTasks = [
+      {
+        'time': '6:00 ص',
+        'title': 'الاستيقاظ',
+        'description': 'ابدأ يومك بطاقة',
+        'tag': 'عادات',
+        'emoji': '☀️',
+        'color': '#20C7B7',
+        'completed': true,
+      },
+      {
+        'time': '6:30 ص',
+        'title': 'الرياضة',
+        'description': 'تمرين لمدة 45 دقيقة',
+        'tag': 'صحة',
+        'emoji': '🏋️',
+        'color': '#EF5350',
+        'completed': false,
+      },
+      {
+        'time': '8:00 ص',
+        'title': 'الإفطار',
+        'description': 'وجبة صحية ومتوازنة',
+        'tag': 'غذاء',
+        'emoji': '🍽️',
+        'color': '#FFA726',
+        'completed': true,
+      },
+      {
+        'time': '9:00 ص',
+        'title': 'الدراسة',
+        'description': 'مذاكرة المواد المهمة',
+        'tag': 'تعليم',
+        'emoji': '🎓',
+        'color': '#1478D4',
+        'completed': true,
+      },
+      {
+        'time': '12:00 م',
+        'title': 'المهام الشخصية',
+        'description': 'إنجاز الأعمال المطلوبة',
+        'tag': 'إنتاجية',
+        'emoji': '💼',
+        'color': '#E57C72',
+        'completed': true,
+      },
+      {
+        'time': '4:00 م',
+        'title': 'القراءة',
+        'description': 'قراءة 30 دقيقة',
+        'tag': 'تطوير الذات',
+        'emoji': '📖',
+        'color': '#8E44AD',
+        'completed': true,
+      },
+      {
+        'time': '7:00 م',
+        'title': 'مراجعة اليوم',
+        'description': 'تقييم ما تم إنجازه',
+        'tag': 'مراجعة',
+        'emoji': '📊',
+        'color': '#20C7B7',
+        'completed': true,
+      },
+    ];
+
+    try {
+      final createdTasks = <Map<String, dynamic>>[];
+
+      for (final task in initialTasks) {
+        final created = await _taskService.addTask(
+          title: task['title'] as String,
+          description: task['description'] as String,
+          time: task['time'] as String,
+          tag: task['tag'] as String,
+          emoji: task['emoji'] as String,
+          color: task['color'] as String,
+          completed: task['completed'] as bool,
+        );
+
+        createdTasks.add(created);
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        tasks = createdTasks;
+        _isLoadingTasks = false;
+      });
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isLoadingTasks = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'تعذر إنشاء المهام الأولية: $error',
+          ),
+        ),
+      );
+    }
+  }
+    // ============================================================
+  // تحديث حالة المهمة في Supabase
+  // ============================================================
+
+  Future<void> _toggleTask(int index) async {
+    if (index < 0 || index >= tasks.length) {
+      return;
+    }
+
+    final task = tasks[index];
+    final id = _safeString(task['id']);
+
+    if (id.isEmpty) {
+      return;
+    }
+
+    final oldValue = _safeBool(
+      task['completed'],
+    );
+
+    final newValue = !oldValue;
+
+    setState(() {
+      tasks[index]['completed'] = newValue;
+    });
+
+    try {
+      await _taskService.updateTask(
+        id: id,
+        completed: newValue,
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        tasks[index]['completed'] = oldValue;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'تعذر تحديث المهمة: $error',
+          ),
+        ),
+      );
+    }
+  }
+
+  // ============================================================
+  // حذف المهمة من Supabase
+  // ============================================================
+
+  Future<void> _deleteTask(int index) async {
+    if (index < 0 || index >= tasks.length) {
+      return;
+    }
+
+    final task = tasks[index];
+    final id = _safeString(task['id']);
+
+    if (id.isEmpty) {
+      return;
+    }
+
+    final deletedTask =
+        Map<String, dynamic>.from(task);
+
+    setState(() {
+      tasks.removeAt(index);
+    });
+
+    try {
+      await _taskService.deleteTask(id);
+
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'تم حذف المهمة',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        tasks.insert(
+          index,
+          deletedTask,
+        );
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'تعذر حذف المهمة: $error',
+          ),
+        ),
+      );
+    }
+  }
+
+  // ============================================================
+  // إعادة المهمة
+  // ============================================================
+
+  Future<void> _resetTask(int index) async {
+    if (index < 0 || index >= tasks.length) {
+      return;
+    }
+
+    final id = _safeString(
+      tasks[index]['id'],
+    );
+
+    if (id.isEmpty) {
+      return;
+    }
+
+    final oldValue = _safeBool(
+      tasks[index]['completed'],
+    );
+
+    setState(() {
+      tasks[index]['completed'] = false;
+    });
+
+    try {
+      await _taskService.updateTask(
+        id: id,
+        completed: false,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'تمت إعادة المهمة',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        tasks[index]['completed'] = oldValue;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'تعذر إعادة المهمة: $error',
+          ),
+        ),
+      );
+    }
+  }
+
+  // ============================================================
+  // بداية واجهة الصفحة
+  // ============================================================
 
   @override
   Widget build(BuildContext context) {
@@ -190,6 +493,10 @@ class _PlanScreenState extends State<PlanScreen> {
     );
   }
 
+  // ============================================================
+  // رأس الصفحة
+  // ============================================================
+
   Widget _buildHeader() {
     return Row(
       children: [
@@ -206,7 +513,8 @@ class _PlanScreenState extends State<PlanScreen> {
                     'الخطة',
                     style: TextStyle(
                       fontSize: 30,
-                      fontWeight: FontWeight.w800,
+                      fontWeight:
+                          FontWeight.w800,
                       color: navy,
                     ),
                   ),
@@ -232,6 +540,10 @@ class _PlanScreenState extends State<PlanScreen> {
       ],
     );
   }
+
+  // ============================================================
+  // زر اليوم
+  // ============================================================
 
   Widget _buildTodayButton() {
     return Row(
@@ -263,7 +575,8 @@ class _PlanScreenState extends State<PlanScreen> {
                   style: TextStyle(
                     color: navy,
                     fontSize: 16,
-                    fontWeight: FontWeight.w800,
+                    fontWeight:
+                        FontWeight.w800,
                   ),
                 ),
                 SizedBox(width: 8),
@@ -279,6 +592,9 @@ class _PlanScreenState extends State<PlanScreen> {
       ],
     );
   }
+    // ============================================================
+  // أيام الأسبوع
+  // ============================================================
 
   Widget _buildDays() {
     const days = [
@@ -345,10 +661,12 @@ class _PlanScreenState extends State<PlanScreen> {
         children: [
           Text(
             day,
-            textAlign: TextAlign.center,
+            textAlign:
+                TextAlign.center,
             style: TextStyle(
               fontSize: 10,
-              fontWeight: FontWeight.w700,
+              fontWeight:
+                  FontWeight.w700,
               color: selected
                   ? Colors.white
                   : const Color(0xFF52647A),
@@ -359,7 +677,8 @@ class _PlanScreenState extends State<PlanScreen> {
             number,
             style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.w800,
+              fontWeight:
+                  FontWeight.w800,
               color: selected
                   ? Colors.white
                   : navy,
@@ -370,9 +689,15 @@ class _PlanScreenState extends State<PlanScreen> {
     );
   }
 
+  // ============================================================
+  // ملخص اليوم
+  // ============================================================
+
   Widget _buildSummary() {
     final completed = tasks.where(
-      (task) => _safeBool(task['completed']),
+      (task) => _safeBool(
+        task['completed'],
+      ),
     ).length;
 
     final remaining =
@@ -380,7 +705,8 @@ class _PlanScreenState extends State<PlanScreen> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding:
+          const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFFEAF9F4),
         borderRadius:
@@ -408,7 +734,9 @@ class _PlanScreenState extends State<PlanScreen> {
                             color: navy,
                           ),
                         ),
-                        const SizedBox(width: 7),
+                        const SizedBox(
+                          width: 7,
+                        ),
                         const Text(
                           '☀️',
                           style: TextStyle(
@@ -417,7 +745,9 @@ class _PlanScreenState extends State<PlanScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 7),
+                    const SizedBox(
+                      height: 7,
+                    ),
                     const Text(
                       'خطوات صغيرة تصنع فرقاً كبيراً',
                       textAlign:
@@ -433,7 +763,11 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+
+          const SizedBox(
+            height: 16,
+          ),
+
           Row(
             children: [
               Expanded(
@@ -464,7 +798,8 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
               Expanded(
                 child: _progressCircle(
-                  completed: completed,
+                  completed:
+                      completed,
                 ),
               ),
             ],
@@ -497,18 +832,25 @@ class _PlanScreenState extends State<PlanScreen> {
             size: 23,
           ),
         ),
-        const SizedBox(height: 5),
+
+        const SizedBox(
+          height: 5,
+        ),
+
         Text(
           number,
           style: const TextStyle(
             fontSize: 19,
-            fontWeight: FontWeight.w800,
+            fontWeight:
+                FontWeight.w800,
             color: navy,
           ),
         ),
+
         Text(
           title,
-          textAlign: TextAlign.center,
+          textAlign:
+              TextAlign.center,
           style: const TextStyle(
             fontSize: 10,
             color: Color(0xFF66758A),
@@ -529,20 +871,24 @@ class _PlanScreenState extends State<PlanScreen> {
       width: 70,
       height: 70,
       child: Stack(
-        alignment: Alignment.center,
+        alignment:
+            Alignment.center,
         children: [
           SizedBox(
             width: 65,
             height: 65,
             child:
                 CircularProgressIndicator(
-              value: progress.clamp(
+              value:
+                  progress.clamp(
                 0.0,
                 1.0,
               ),
               strokeWidth: 7,
               backgroundColor:
-                  const Color(0xFFDDE4ED),
+                  const Color(
+                0xFFDDE4ED,
+              ),
               valueColor:
                   const AlwaysStoppedAnimation<
                       Color>(
@@ -550,13 +896,15 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             ),
           ),
+
           Column(
             mainAxisAlignment:
                 MainAxisAlignment.center,
             children: [
               Text(
                 '$completed/${tasks.length}',
-                style: const TextStyle(
+                style:
+                    const TextStyle(
                   fontSize: 15,
                   fontWeight:
                       FontWeight.w800,
@@ -577,7 +925,11 @@ class _PlanScreenState extends State<PlanScreen> {
       ),
     );
   }
-    Widget _buildTasks() {
+    // ============================================================
+  // قسم المهام
+  // ============================================================
+
+  Widget _buildTasks() {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -610,7 +962,8 @@ class _PlanScreenState extends State<PlanScreen> {
                     'المهام اليوم',
                     style: TextStyle(
                       fontSize: 20,
-                      fontWeight: FontWeight.w800,
+                      fontWeight:
+                          FontWeight.w800,
                       color: navy,
                     ),
                   ),
@@ -619,18 +972,45 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
 
-          ...List.generate(
-            tasks.length,
-            (index) => _taskCard(
-              tasks[index],
-              index,
+          if (_isLoadingTasks)
+            const Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: 30,
+              ),
+              child: CircularProgressIndicator(
+                color: blue,
+              ),
+            )
+          else if (tasks.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: 25,
+                horizontal: 20,
+              ),
+              child: Text(
+                'لا توجد مهام بعد',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFF7B8798),
+                  fontSize: 14,
+                ),
+              ),
+            )
+          else
+            ...List.generate(
+              tasks.length,
+              (index) => _taskCard(
+                tasks[index],
+                index,
+              ),
             ),
-          ),
 
           Padding(
             padding: const EdgeInsets.all(14),
             child: GestureDetector(
-              onTap: _showAddTaskDialog,
+              onTap: _isSavingTask
+                  ? null
+                  : _showAddTaskDialog,
               child: Container(
                 width: double.infinity,
                 padding:
@@ -638,26 +1018,33 @@ class _PlanScreenState extends State<PlanScreen> {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEAF4FF),
+                  color: const Color(
+                    0xFFEAF4FF,
+                  ),
                   borderRadius:
                       BorderRadius.circular(22),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment:
                       MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.add,
+                      _isSavingTask
+                          ? Icons.hourglass_top
+                          : Icons.add,
                       color: blue,
                       size: 24,
                     ),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     Text(
-                      'إضافة مهمة جديدة',
-                      style: TextStyle(
+                      _isSavingTask
+                          ? 'جاري الحفظ...'
+                          : 'إضافة مهمة جديدة',
+                      style: const TextStyle(
                         color: blue,
                         fontSize: 16,
-                        fontWeight: FontWeight.w800,
+                        fontWeight:
+                            FontWeight.w800,
                       ),
                     ),
                   ],
@@ -670,50 +1057,67 @@ class _PlanScreenState extends State<PlanScreen> {
     );
   }
 
+  // ============================================================
+  // بطاقة المهمة
+  // ============================================================
+
   Widget _taskCard(
     Map<String, dynamic> task,
     int index,
   ) {
     final bool completed =
-        _safeBool(task['completed']);
+        _safeBool(
+      task['completed'],
+    );
 
-    final String title = _safeString(
+    final String title =
+        _safeString(
       task['title'],
       fallback: 'مهمة جديدة',
     );
 
-    final String subtitle = _safeString(
-      task['subtitle'],
+    final String subtitle =
+        _safeString(
+      task['description'],
       fallback: 'مهمة جديدة',
     );
 
-    final String time = _safeString(
+    final String time =
+        _safeString(
       task['time'],
       fallback: 'بدون وقت',
     );
 
-    final String tag = _safeString(
+    final String tag =
+        _safeString(
       task['tag'],
       fallback: 'عام',
     );
 
-    final String emoji = _safeString(
+    final String emoji =
+        _safeString(
       task['emoji'],
       fallback: '📝',
     );
 
     final Color color =
-        _safeColor(task['color']);
+        _safeColor(
+      task['color'],
+    );
 
     return Container(
-      padding: const EdgeInsets.symmetric(
+      padding:
+          const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 14,
       ),
-      decoration: const BoxDecoration(
+      decoration:
+          const BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: Color(0xFFE8EDF2),
+            color: Color(
+              0xFFE8EDF2,
+            ),
           ),
         ),
       ),
@@ -721,60 +1125,48 @@ class _PlanScreenState extends State<PlanScreen> {
         children: [
           GestureDetector(
             onTap: () {
-              if (index < 0 ||
-                  index >= tasks.length) {
-                return;
-              }
-
-              setState(() {
-                tasks[index]['completed'] =
-                    !_safeBool(
-                  tasks[index]['completed'],
-                );
-              });
+              _toggleTask(index);
             },
             child: Container(
               width: 28,
               height: 28,
-              decoration: BoxDecoration(
+              decoration:
+                  BoxDecoration(
                 color: completed
                     ? blue
                     : Colors.white,
                 borderRadius:
-                    BorderRadius.circular(6),
+                    BorderRadius.circular(
+                  6,
+                ),
                 border: Border.all(
                   color: completed
                       ? blue
-                      : const Color(0xFFB8C2CE),
+                      : const Color(
+                          0xFFB8C2CE,
+                        ),
                   width: 2,
                 ),
               ),
               child: completed
                   ? const Icon(
                       Icons.check,
-                      color: Colors.white,
+                      color:
+                          Colors.white,
                       size: 20,
                     )
                   : null,
             ),
           ),
 
-          const SizedBox(width: 12),
+          const SizedBox(
+            width: 12,
+          ),
 
           Expanded(
             child: GestureDetector(
               onTap: () {
-                if (index < 0 ||
-                    index >= tasks.length) {
-                  return;
-                }
-
-                setState(() {
-                  tasks[index]['completed'] =
-                      !_safeBool(
-                    tasks[index]['completed'],
-                  );
-                });
+                _toggleTask(index);
               },
               child: Column(
                 crossAxisAlignment:
@@ -792,7 +1184,8 @@ class _PlanScreenState extends State<PlanScreen> {
                           maxLines: 1,
                           overflow:
                               TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style:
+                              TextStyle(
                             fontSize: 16,
                             fontWeight:
                                 FontWeight.w800,
@@ -801,28 +1194,38 @@ class _PlanScreenState extends State<PlanScreen> {
                                     0xFF9AA4AE,
                                   )
                                 : navy,
-                            decoration: completed
-                                ? TextDecoration
-                                    .lineThrough
-                                : TextDecoration.none,
+                            decoration:
+                                completed
+                                    ? TextDecoration
+                                        .lineThrough
+                                    : TextDecoration
+                                        .none,
                           ),
                         ),
                       ),
 
-                      const SizedBox(width: 8),
+                      const SizedBox(
+                        width: 8,
+                      ),
 
                       Container(
                         padding:
-                            const EdgeInsets.symmetric(
+                            const EdgeInsets
+                                .symmetric(
                           horizontal: 10,
                           vertical: 6,
                         ),
-                        decoration: BoxDecoration(
-                          color: color.withValues(
+                        decoration:
+                            BoxDecoration(
+                          color:
+                              color.withValues(
                             alpha: 0.10,
                           ),
                           borderRadius:
-                              BorderRadius.circular(18),
+                              BorderRadius
+                                  .circular(
+                            18,
+                          ),
                         ),
                         child: Row(
                           mainAxisSize:
@@ -830,14 +1233,18 @@ class _PlanScreenState extends State<PlanScreen> {
                           children: [
                             Text(
                               tag,
-                              style: TextStyle(
+                              style:
+                                  TextStyle(
                                 color: color,
                                 fontSize: 11,
                                 fontWeight:
-                                    FontWeight.w800,
+                                    FontWeight
+                                        .w800,
                               ),
                             ),
-                            const SizedBox(width: 3),
+                            const SizedBox(
+                              width: 3,
+                            ),
                             Text(
                               emoji,
                               style:
@@ -851,17 +1258,22 @@ class _PlanScreenState extends State<PlanScreen> {
                     ],
                   ),
 
-                  const SizedBox(height: 4),
+                  const SizedBox(
+                    height: 4,
+                  ),
 
                   Text(
                     subtitle,
-                    textAlign: TextAlign.right,
+                    textAlign:
+                        TextAlign.right,
                     maxLines: 1,
                     overflow:
                         TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style:
+                        const TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF7B8798),
+                      color:
+                          Color(0xFF7B8798),
                     ),
                   ),
                 ],
@@ -869,22 +1281,30 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
 
-          const SizedBox(width: 12),
+          const SizedBox(
+            width: 12,
+          ),
 
           SizedBox(
             width: 58,
             child: Text(
               time,
-              textAlign: TextAlign.left,
-              style: const TextStyle(
+              textAlign:
+                  TextAlign.left,
+              style:
+                  const TextStyle(
                 fontSize: 13,
-                color: Color(0xFF52647A),
-                fontWeight: FontWeight.w600,
+                color:
+                    Color(0xFF52647A),
+                fontWeight:
+                    FontWeight.w600,
               ),
             ),
           ),
 
-          const SizedBox(width: 5),
+          const SizedBox(
+            width: 5,
+          ),
 
           _buildTaskMenu(index),
         ],
@@ -892,52 +1312,37 @@ class _PlanScreenState extends State<PlanScreen> {
     );
   }
 
-  Widget _buildTaskMenu(int index) {
+  // ============================================================
+  // قائمة خيارات المهمة
+  // ============================================================
+
+  Widget _buildTaskMenu(
+    int index,
+  ) {
     return PopupMenuButton<String>(
-      tooltip: 'خيارات المهمة',
-      padding: EdgeInsets.zero,
-      icon: const Icon(
+      tooltip:
+          'خيارات المهمة',
+      padding:
+          EdgeInsets.zero,
+      icon:
+          const Icon(
         Icons.more_vert,
-        color: Color(0xFF6E7A88),
+        color:
+            Color(0xFF6E7A88),
         size: 22,
       ),
-      onSelected: (value) {
-        if (index < 0 ||
-            index >= tasks.length) {
-          return;
-        }
-
+      onSelected:
+          (value) {
         if (value == 'reset') {
-          setState(() {
-            tasks[index]['completed'] = false;
-          });
-
-          ScaffoldMessenger.of(context)
-              .showSnackBar(
-            const SnackBar(
-              content: Text(
-                'تمت إعادة المهمة',
-              ),
-            ),
-          );
+          _resetTask(index);
         }
 
         if (value == 'delete') {
-          setState(() {
-            tasks.removeAt(index);
-          });
-
-          ScaffoldMessenger.of(context)
-              .showSnackBar(
-            const SnackBar(
-              content: Text(
-                'تم حذف المهمة',
-              ),
-            ),
-          );
+          _deleteTask(index);
         }
       },
-      itemBuilder: (context) {
+      itemBuilder:
+          (context) {
         return [
           const PopupMenuItem<String>(
             value: 'reset',
@@ -947,10 +1352,12 @@ class _PlanScreenState extends State<PlanScreen> {
               children: [
                 Text(
                   'إعادة المهمة 🔄',
-                  style: TextStyle(
+                  style:
+                      TextStyle(
                     color: navy,
                     fontSize: 14,
-                    fontWeight: FontWeight.w700,
+                    fontWeight:
+                        FontWeight.w700,
                   ),
                 ),
               ],
@@ -964,10 +1371,13 @@ class _PlanScreenState extends State<PlanScreen> {
               children: [
                 Text(
                   'حذف المهمة 🗑️',
-                  style: TextStyle(
-                    color: Color(0xFFD64545),
+                  style:
+                      TextStyle(
+                    color:
+                        Color(0xFFD64545),
                     fontSize: 14,
-                    fontWeight: FontWeight.w700,
+                    fontWeight:
+                        FontWeight.w700,
                   ),
                 ),
               ],
@@ -977,7 +1387,11 @@ class _PlanScreenState extends State<PlanScreen> {
       },
     );
   }
-    void _showAddTaskDialog() {
+    // ============================================================
+  // نافذة إضافة مهمة جديدة
+  // ============================================================
+
+  void _showAddTaskDialog() {
     final nameController =
         TextEditingController();
 
@@ -1055,7 +1469,8 @@ class _PlanScreenState extends State<PlanScreen> {
                   _dialogField(
                     controller:
                         timeController,
-                    label: 'الوقت',
+                    label:
+                        'الوقت',
                     icon:
                         Icons.access_time,
                   ),
@@ -1069,8 +1484,8 @@ class _PlanScreenState extends State<PlanScreen> {
                         categoryController,
                     label:
                         'التصنيف',
-                    icon: Icons
-                        .local_offer_outlined,
+                    icon:
+                        Icons.local_offer_outlined,
                   ),
 
                   const SizedBox(
@@ -1082,8 +1497,8 @@ class _PlanScreenState extends State<PlanScreen> {
                         emojiController,
                     label:
                         'الإيموجي',
-                    icon: Icons
-                        .sentiment_satisfied_alt,
+                    icon:
+                        Icons.sentiment_satisfied_alt,
                   ),
 
                   const SizedBox(
@@ -1198,68 +1613,116 @@ class _PlanScreenState extends State<PlanScreen> {
                   Expanded(
                     child:
                         ElevatedButton(
-                      onPressed: () {
-                        final name =
-                            nameController
-                                .text
-                                .trim();
+                      onPressed:
+                          _isSavingTask
+                              ? null
+                              : () async {
+                                  final name =
+                                      nameController
+                                          .text
+                                          .trim();
 
-                        if (name.isEmpty) {
-                          return;
-                        }
+                                  if (name.isEmpty) {
+                                    return;
+                                  }
 
-                        final time =
-                            timeController
-                                .text
-                                .trim();
+                                  final time =
+                                      timeController
+                                          .text
+                                          .trim();
 
-                        final category =
-                            categoryController
-                                .text
-                                .trim();
+                                  final category =
+                                      categoryController
+                                          .text
+                                          .trim();
 
-                        final emoji =
-                            emojiController
-                                .text
-                                .trim();
+                                  final emoji =
+                                      emojiController
+                                          .text
+                                          .trim();
 
-                        final description =
-                            descriptionController
-                                .text
-                                .trim();
+                                  final description =
+                                      descriptionController
+                                          .text
+                                          .trim();
 
-                        setState(() {
-                          tasks.add({
-                            'time':
-                                time.isEmpty
-                                    ? 'بدون وقت'
-                                    : time,
-                            'title':
-                                name,
-                            'subtitle':
-                                description
-                                        .isEmpty
-                                    ? 'مهمة جديدة'
-                                    : description,
-                            'tag':
-                                category.isEmpty
-                                    ? 'عام'
-                                    : category,
-                            'emoji':
-                                emoji.isEmpty
-                                    ? '📝'
-                                    : emoji,
-                            'color':
-                                blue,
-                            'completed':
-                                false,
-                          });
-                        });
+                                  setState(() {
+                                    _isSavingTask =
+                                        true;
+                                  });
 
-                        Navigator.pop(
-                          dialogContext,
-                        );
-                      },
+                                  try {
+                                    final newTask =
+                                        await _taskService
+                                            .addTask(
+                                      title: name,
+                                      description:
+                                          description,
+                                      time: time.isEmpty
+                                          ? 'بدون وقت'
+                                          : time,
+                                      tag: category.isEmpty
+                                          ? 'عام'
+                                          : category,
+                                      emoji: emoji.isEmpty
+                                          ? '📝'
+                                          : emoji,
+                                      color:
+                                          '#1478D4',
+                                      completed:
+                                          false,
+                                    );
+
+                                    if (!mounted) {
+                                      return;
+                                    }
+
+                                    setState(() {
+                                      tasks.add(
+                                        newTask,
+                                      );
+                                      _isSavingTask =
+                                          false;
+                                    });
+
+                                    Navigator.pop(
+                                      dialogContext,
+                                    );
+
+                                    ScaffoldMessenger
+                                        .of(
+                                      context,
+                                    ).showSnackBar(
+                                      const SnackBar(
+                                        content:
+                                            Text(
+                                          'تم حفظ المهمة بنجاح ✅',
+                                        ),
+                                      ),
+                                    );
+                                  } catch (error) {
+                                    if (!mounted) {
+                                      return;
+                                    }
+
+                                    setState(() {
+                                      _isSavingTask =
+                                          false;
+                                    });
+
+                                    ScaffoldMessenger
+                                        .of(
+                                      context,
+                                    ).showSnackBar(
+                                      SnackBar(
+                                        content:
+                                            Text(
+                                          'تعذر حفظ المهمة: $error',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
                       style:
                           ElevatedButton
                               .styleFrom(
@@ -1304,6 +1767,10 @@ class _PlanScreenState extends State<PlanScreen> {
     );
   }
 
+  // ============================================================
+  // حقول نافذة إضافة المهمة
+  // ============================================================
+
   Widget _dialogField({
     required TextEditingController
         controller,
@@ -1311,12 +1778,14 @@ class _PlanScreenState extends State<PlanScreen> {
     required IconData icon,
   }) {
     return TextField(
-      controller: controller,
+      controller:
+          controller,
       textAlign:
           TextAlign.right,
       decoration:
           InputDecoration(
-        labelText: label,
+        labelText:
+            label,
         prefixIcon:
             Icon(
           icon,
@@ -1345,15 +1814,23 @@ class _PlanScreenState extends State<PlanScreen> {
     );
   }
 
+  // ============================================================
+  // أهداف الأسبوع
+  // ============================================================
+
   Widget _buildWeeklyGoals() {
     return Container(
       padding:
-          const EdgeInsets.all(16),
+          const EdgeInsets.all(
+        16,
+      ),
       decoration:
           BoxDecoration(
         color: Colors.white,
         borderRadius:
-            BorderRadius.circular(22),
+            BorderRadius.circular(
+          22,
+        ),
         border: Border.all(
           color: const Color(
             0xFFE5EAF0,
@@ -1371,7 +1848,8 @@ class _PlanScreenState extends State<PlanScreen> {
             children: [
               const Text(
                 'أهداف الأسبوع',
-                style: TextStyle(
+                style:
+                    TextStyle(
                   color: navy,
                   fontSize: 17,
                   fontWeight:
@@ -1438,7 +1916,10 @@ class _PlanScreenState extends State<PlanScreen> {
         total <= 0
             ? 0.0
             : (current / total)
-                .clamp(0.0, 1.0);
+                .clamp(
+              0.0,
+              1.0,
+            );
 
     return Column(
       crossAxisAlignment:
@@ -1452,7 +1933,8 @@ class _PlanScreenState extends State<PlanScreen> {
           children: [
             Text(
               '$current/$total',
-              style: TextStyle(
+              style:
+                  TextStyle(
                 color: color,
                 fontSize: 12,
                 fontWeight:
@@ -1483,7 +1965,8 @@ class _PlanScreenState extends State<PlanScreen> {
           ),
           child:
               LinearProgressIndicator(
-            value: progress,
+            value:
+                progress,
             minHeight: 7,
             backgroundColor:
                 const Color(
@@ -1499,14 +1982,27 @@ class _PlanScreenState extends State<PlanScreen> {
       ],
     );
   }
-    Widget _buildDailyHabits() {
+    // ============================================================
+  // عادات اليوم
+  // ============================================================
+
+  Widget _buildDailyHabits() {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+      padding:
+          const EdgeInsets.all(
+        16,
+      ),
+      decoration:
+          BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius:
+            BorderRadius.circular(
+          22,
+        ),
         border: Border.all(
-          color: const Color(0xFFE5EAF0),
+          color: const Color(
+            0xFFE5EAF0,
+          ),
         ),
       ),
       child: Column(
@@ -1522,70 +2018,107 @@ class _PlanScreenState extends State<PlanScreen> {
                 style: TextStyle(
                   color: navy,
                   fontSize: 17,
-                  fontWeight: FontWeight.w800,
+                  fontWeight:
+                      FontWeight.w800,
                 ),
               ),
-              const SizedBox(width: 7),
+              const SizedBox(
+                width: 7,
+              ),
               const Icon(
-                Icons.check_circle_outline,
+                Icons.repeat,
                 color: navy,
                 size: 21,
               ),
             ],
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(
+            height: 16,
+          ),
 
-          if (habits.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: 10,
-              ),
-              child: Text(
-                'لا توجد عادات بعد',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color(0xFF7B8798),
-                  fontSize: 13,
-                ),
-              ),
-            )
-          else
-            ...List.generate(
-              habits.length,
-              (index) => _habitRow(index),
-            ),
+          ...List.generate(
+            habits.length,
+            (index) {
+              final habit =
+                  habits[index];
 
-          const SizedBox(height: 4),
+              final title =
+                  _safeString(
+                habit['title'],
+                'عادة',
+              );
 
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: _showAddHabitDialog,
-              icon: const Icon(
-                Icons.add,
-                size: 19,
-              ),
-              label: const Text(
-                'إضافة عادة جديدة',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: navy,
-                side: const BorderSide(
-                  color: Color(0xFFD9E1EA),
-                ),
+              final icon =
+                  _safeIcon(
+                habit['icon'],
+                Icons.check_circle_outline,
+              );
+
+              final completed =
+                  _safeBool(
+                habit['completed'],
+              );
+
+              return Padding(
                 padding:
-                    const EdgeInsets.symmetric(
-                  vertical: 11,
+                    EdgeInsets.only(
+                  bottom:
+                      index ==
+                              habits.length -
+                                  1
+                          ? 0
+                          : 10,
                 ),
-                shape:
-                    RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(14),
+                child:
+                    _buildHabitRow(
+                  title: title,
+                  icon: icon,
+                  completed:
+                      completed,
+                ),
+              );
+            },
+          ),
+
+          const SizedBox(
+            height: 14,
+          ),
+
+          OutlinedButton.icon(
+            onPressed:
+                _showAddHabitDialog,
+            icon: const Icon(
+              Icons.add,
+              size: 20,
+            ),
+            label: const Text(
+              'إضافة عادة',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight:
+                    FontWeight.w800,
+              ),
+            ),
+            style:
+                OutlinedButton.styleFrom(
+              foregroundColor:
+                  blue,
+              side:
+                  const BorderSide(
+                color: blue,
+                width: 1.3,
+              ),
+              padding:
+                  const EdgeInsets
+                      .symmetric(
+                vertical: 12,
+              ),
+              shape:
+                  RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(
+                  16,
                 ),
               ),
             ),
@@ -1595,165 +2128,179 @@ class _PlanScreenState extends State<PlanScreen> {
     );
   }
 
-  Widget _habitRow(int index) {
-    if (index < 0 ||
-        index >= habits.length) {
-      return const SizedBox.shrink();
-    }
-
-    final habit = habits[index];
-
-    final bool completed =
-        _safeBool(habit['completed']);
-
-    final String title = _safeString(
-      habit['title'],
-      fallback: 'عادة جديدة',
-    );
-
-    final IconData icon =
-        _safeIcon(habit['icon']);
-
-    return GestureDetector(
-      onTap: () {
-        if (index < 0 ||
-            index >= habits.length) {
-          return;
-        }
-
-        setState(() {
-          final current =
-              _safeBool(
-            habits[index]['completed'],
-          );
-
-          habits[index]['completed'] =
-              !current;
-        });
-      },
-      child: Padding(
-        padding: const EdgeInsets.only(
-          bottom: 14,
+  Widget _buildHabitRow({
+    required String title,
+    required IconData icon,
+    required bool completed,
+  }) {
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(
+        horizontal: 13,
+        vertical: 12,
+      ),
+      decoration:
+          BoxDecoration(
+        color: completed
+            ? const Color(
+                0xFFF1FBF9,
+              )
+            : const Color(
+                0xFFF8FAFC,
+              ),
+        borderRadius:
+            BorderRadius.circular(
+          17,
         ),
-        child: Row(
-          children: [
-            Container(
-              width: 27,
-              height: 27,
-              decoration: BoxDecoration(
+        border: Border.all(
+          color: completed
+              ? const Color(
+                  0xFFD5F0EB,
+                )
+              : const Color(
+                  0xFFE7ECF2,
+                ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration:
+                BoxDecoration(
+              color: completed
+                  ? cyan.withOpacity(
+                      0.12,
+                    )
+                  : blue.withOpacity(
+                      0.08,
+                    ),
+              shape:
+                  BoxShape.circle,
+            ),
+            child: Icon(
+              completed
+                  ? Icons.check
+                  : icon,
+              color: completed
+                  ? cyan
+                  : blue,
+              size: 20,
+            ),
+          ),
+
+          const SizedBox(
+            width: 12,
+          ),
+
+          Expanded(
+            child: Text(
+              title,
+              textAlign:
+                  TextAlign.right,
+              style: TextStyle(
+                color: navy,
+                fontSize: 14,
+                fontWeight:
+                    FontWeight.w700,
+                decoration:
+                    completed
+                        ? TextDecoration
+                            .lineThrough
+                        : null,
+                decorationColor:
+                    navy,
+              ),
+            ),
+          ),
+
+          const SizedBox(
+            width: 10,
+          ),
+
+          Container(
+            width: 23,
+            height: 23,
+            decoration:
+                BoxDecoration(
+              color: completed
+                  ? cyan
+                  : Colors.white,
+              borderRadius:
+                  BorderRadius.circular(
+                7,
+              ),
+              border: Border.all(
                 color: completed
                     ? cyan
-                    : Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: completed
-                      ? cyan
-                      : const Color(
-                          0xFFB8C2CE,
-                        ),
-                  width: 2,
-                ),
-              ),
-              child: completed
-                  ? const Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 17,
-                    )
-                  : null,
-            ),
-
-            const SizedBox(width: 10),
-
-            Expanded(
-              child: Text(
-                title,
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  color: completed
-                      ? const Color(
-                          0xFF9AA4AE,
-                        )
-                      : navy,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  decoration: completed
-                      ? TextDecoration.lineThrough
-                      : TextDecoration.none,
-                ),
+                    : const Color(
+                        0xFFB9C4D0,
+                      ),
+                width: 1.5,
               ),
             ),
-
-            const SizedBox(width: 8),
-
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: const Color(
-                  0xFFEAF9F4,
-                ),
-                borderRadius:
-                    BorderRadius.circular(10),
-              ),
-              child: Icon(
-                icon,
-                color: cyan,
-                size: 19,
-              ),
-            ),
-          ],
-        ),
+            child: completed
+                ? const Icon(
+                    Icons.check,
+                    color:
+                        Colors.white,
+                    size: 16,
+                  )
+                : null,
+          ),
+        ],
       ),
     );
   }
 
+  // ============================================================
+  // نافذة إضافة عادة
+  // ============================================================
+
   void _showAddHabitDialog() {
     final nameController =
-        TextEditingController();
-
-    final emojiController =
         TextEditingController();
 
     showDialog(
       context: context,
       builder: (dialogContext) {
         return Directionality(
-          textDirection: TextDirection.rtl,
+          textDirection:
+              TextDirection.rtl,
           child: AlertDialog(
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
+            backgroundColor:
+                Colors.white,
+            shape:
+                RoundedRectangleBorder(
               borderRadius:
-                  BorderRadius.circular(24),
+                  BorderRadius.circular(
+                28,
+              ),
             ),
             title: const Text(
               'إضافة عادة جديدة',
-              textAlign: TextAlign.center,
+              textAlign:
+                  TextAlign.center,
               style: TextStyle(
                 color: navy,
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
+                fontSize: 23,
+                fontWeight:
+                    FontWeight.w800,
               ),
             ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+            content:
                 _habitDialogField(
-                  controller: nameController,
-                  label: 'اسم العادة',
-                  icon: Icons.edit_outlined,
-                ),
-                const SizedBox(height: 12),
-                _habitDialogField(
-                  controller: emojiController,
-                  label: 'الإيموجي',
-                  icon: Icons
-                      .sentiment_satisfied_alt,
-                ),
-              ],
+              controller:
+                  nameController,
+              label:
+                  'اسم العادة',
+              icon:
+                  Icons.repeat,
             ),
             actionsPadding:
-                const EdgeInsets.fromLTRB(
+                const EdgeInsets
+                    .fromLTRB(
               16,
               0,
               16,
@@ -1763,13 +2310,16 @@ class _PlanScreenState extends State<PlanScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: TextButton(
+                    child:
+                        TextButton(
                       onPressed: () {
                         Navigator.pop(
                           dialogContext,
                         );
                       },
-                      style: TextButton.styleFrom(
+                      style:
+                          TextButton
+                              .styleFrom(
                         backgroundColor:
                             const Color(
                           0xFFF1F4F8,
@@ -1777,84 +2327,107 @@ class _PlanScreenState extends State<PlanScreen> {
                         padding:
                             const EdgeInsets
                                 .symmetric(
-                          vertical: 13,
+                          vertical: 14,
                         ),
                         shape:
                             RoundedRectangleBorder(
                           borderRadius:
-                              BorderRadius.circular(
-                            16,
+                              BorderRadius
+                                  .circular(
+                            18,
                           ),
                         ),
                       ),
-                      child: const Text(
+                      child:
+                          const Text(
                         'إلغاء',
-                        style: TextStyle(
+                        style:
+                            TextStyle(
                           color: navy,
+                          fontSize: 16,
                           fontWeight:
-                              FontWeight.w800,
+                              FontWeight
+                                  .w800,
                         ),
                       ),
                     ),
                   ),
 
-                  const SizedBox(width: 10),
+                  const SizedBox(
+                    width: 12,
+                  ),
 
                   Expanded(
-                    child: ElevatedButton(
+                    child:
+                        ElevatedButton(
                       onPressed: () {
                         final name =
                             nameController
                                 .text
                                 .trim();
 
-                        final emoji =
-                            emojiController
-                                .text
-                                .trim();
+                        if (name.isEmpty) {
+                          return;
+                        }
 
                         setState(() {
                           habits.add({
-                            'title': name.isEmpty
-                                ? 'عادة جديدة'
-                                : name,
-                            'emoji': emoji.isEmpty
-                                ? '⭐'
-                                : emoji,
+                            'title': name,
                             'icon':
-                                Icons.star_outline,
-                            'completed': false,
+                                Icons
+                                    .check_circle_outline,
+                            'completed':
+                                false,
                           });
                         });
 
                         Navigator.pop(
                           dialogContext,
                         );
+
+                        ScaffoldMessenger
+                            .of(
+                          context,
+                        ).showSnackBar(
+                          const SnackBar(
+                            content:
+                                Text(
+                              'تمت إضافة العادة ✅',
+                            ),
+                          ),
+                        );
                       },
                       style:
-                          ElevatedButton.styleFrom(
-                        backgroundColor: blue,
+                          ElevatedButton
+                              .styleFrom(
+                        backgroundColor:
+                            blue,
                         foregroundColor:
                             Colors.white,
                         padding:
                             const EdgeInsets
                                 .symmetric(
-                          vertical: 13,
+                          vertical: 14,
                         ),
                         elevation: 0,
                         shape:
                             RoundedRectangleBorder(
                           borderRadius:
-                              BorderRadius.circular(
-                            16,
+                              BorderRadius
+                                  .circular(
+                            18,
                           ),
                         ),
                       ),
-                      child: const Text(
+                      child:
+                          const Text(
                         'إضافة',
-                        style: TextStyle(
+                        style:
+                            TextStyle(
+                          fontSize: 16,
                           fontWeight:
-                              FontWeight.w800,
+                              FontWeight
+                                  .w800,
                         ),
                       ),
                     ),
@@ -1867,38 +2440,51 @@ class _PlanScreenState extends State<PlanScreen> {
       },
     );
   }
-    Widget _habitDialogField({
-    required TextEditingController controller,
+
+  // ============================================================
+  // حقل نافذة إضافة العادة
+  // ============================================================
+
+  Widget _habitDialogField({
+    required TextEditingController
+        controller,
     required String label,
     required IconData icon,
   }) {
     return TextField(
-      controller: controller,
-      textAlign: TextAlign.right,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(
+      controller:
+          controller,
+      textAlign:
+          TextAlign.right,
+      decoration:
+          InputDecoration(
+        labelText:
+            label,
+        prefixIcon:
+            Icon(
           icon,
           color: blue,
         ),
-        filled: true,
-        fillColor: const Color(0xFFF7F9FC),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+        border:
+            OutlineInputBorder(
+          borderRadius:
+              BorderRadius.circular(
+            18,
+          ),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(
+        focusedBorder:
+            OutlineInputBorder(
+          borderRadius:
+              BorderRadius.circular(
+            18,
+          ),
+          borderSide:
+              const BorderSide(
             color: blue,
-            width: 1.5,
+            width: 2,
           ),
         ),
       ),
     );
-    }
   }
+}
