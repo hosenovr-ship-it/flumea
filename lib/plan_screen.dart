@@ -268,6 +268,45 @@ final HabitService _habitService = HabitService();
       );
     }
   }
+  // ============================================================
+// Supabase - تحميل العادات
+// ============================================================
+
+Future<void> _loadHabits() async {
+  try {
+    final loadedHabits = await _habitService.getHabits();
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      habits.clear();
+
+      for (final habit in loadedHabits) {
+        habits.add({
+          'id': habit['id'],
+          'title': habit['name'] ?? '',
+          'description': habit['description'] ?? '',
+          'completed': habit['completed'] ?? false,
+          'icon': Icons.check_circle_outline,
+        });
+      }
+    });
+  } catch (error) {
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'تعذر تحميل العادات: $error',
+        ),
+      ),
+    );
+  }
+}
     // ============================================================
   // تحديث حالة المهمة في Supabase
   // ============================================================
