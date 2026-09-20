@@ -17,13 +17,11 @@ class _PlanScreenState extends State<PlanScreen> {
   static const Color background = Color(0xFFF7FBFF);
 
   final TaskService _taskService = TaskService();
-  final HabitService _habitService = HabitService();
-
+final HabitService _habitService = HabitService();
   int selectedDay = 0;
 
   bool _isLoadingTasks = true;
   bool _isSavingTask = false;
-  bool _isSavingHabit = false;
 
   List<Map<String, dynamic>> tasks = [];
 
@@ -270,147 +268,84 @@ class _PlanScreenState extends State<PlanScreen> {
       );
     }
   }
-
   // ============================================================
-  // Supabase - تحميل العادات
-  // ============================================================
+// Supabase - تحميل العادات
+// ============================================================
 
-  Future<void> _loadHabits() async {
-    try {
-      final loadedHabits = await _habitService.getHabits();
+Future<void> _loadHabits() async {
+  try {
+    final loadedHabits = await _habitService.getHabits();
 
-      if (!mounted) {
-        return;
-      }
+    if (!mounted) {
+      return;
+    }
 
-      if (loadedHabits.isEmpty) {
-        final initialHabits = [
-          {
-            'name': 'شرب الماء',
-            'description': '',
-          },
-          {
-            'name': 'الرياضة',
-            'description': '',
-          },
-          {
-            'name': 'القراءة',
-            'description': '',
-          },
-        ];
+    setState(() {
+      habits.clear();
 
-        final createdHabits = <Map<String, dynamic>>[];
-
-        for (final habit in initialHabits) {
-          final created = await _habitService.addHabit(
-            name: habit['name'] as String,
-            description: habit['description'] as String,
-            completed: false,
-          );
-
-          createdHabits.add(created);
-        }
-
-        if (!mounted) {
-          return;
-        }
-
-        setState(() {
-          habits.clear();
-
-          for (final habit in createdHabits) {
-            habits.add({
-              'id': habit['id'],
-              'title': habit['name'] ?? '',
-              'description': habit['description'] ?? '',
-              'completed': habit['completed'] ?? false,
-              'icon': _habitIconForName(
-                habit['name'] ?? '',
-              ),
-            });
-          }
+      for (final habit in loadedHabits) {
+        habits.add({
+          'id': habit['id'],
+          'title': habit['name'] ?? '',
+          'description': habit['description'] ?? '',
+          'completed': habit['completed'] ?? false,
+          'icon': Icons.check_circle_outline,
         });
-
-        return;
       }
+    });
+  } catch (error) {
+    if (!mounted) {
+      return;
+    }
 
-      setState(() {
-        habits.clear();
-
-        for (final habit in loadedHabits) {
-          habits.add({
-            'id': habit['id'],
-            'title': habit['name'] ?? '',
-            'description': habit['description'] ?? '',
-            'completed': habit['completed'] ?? false,
-            'icon': _habitIconForName(
-              habit['name'] ?? '',
-            ),
-          });
-        }
-      });
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر تحميل العادات: $error',
-          ),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'تعذر تحميل العادات: $error',
         ),
-      );
-    }
+      ),
+    );
   }
-
-  IconData _habitIconForName(String name) {
-    switch (name.trim()) {
-      case 'شرب الماء':
-        return Icons.water_drop_outlined;
-      case 'الرياضة':
-        return Icons.fitness_center_outlined;
-      case 'القراءة':
-        return Icons.menu_book_outlined;
-      default:
-        return Icons.check_circle_outline;
-    }
-  }
+}
     // ============================================================
-  // المهام - تغيير حالة المهمة
+  // تحديث حالة المهمة في Supabase
   // ============================================================
 
-  Future<void> _toggleTask(
-    String id,
-    bool completed,
-  ) async {
+  Future<void> _toggleTask(int index) async {
+    if (index < 0 || index >= tasks.length) {
+      return;
+    }
+
+    final task = tasks[index];
+    final id = _safeString(task['id']);
+
     if (id.isEmpty) {
       return;
     }
 
+    final oldValue = _safeBool(
+      task['completed'],
+    );
+
+    final newValue = !oldValue;
+
+    setState(() {
+      tasks[index]['completed'] = newValue;
+    });
+
     try {
       await _taskService.updateTask(
         id: id,
-        completed: !completed,
+        completed: newValue,
       );
-
-      if (!mounted) {
-        return;
-      }
-
-      final index = tasks.indexWhere(
-        (task) => _safeString(task['id']) == id,
-      );
-
-      if (index != -1) {
-        setState(() {
-          tasks[index]['completed'] = !completed;
-        });
-      }
     } catch (error) {
       if (!mounted) {
         return;
       }
+
+      setState(() {
+        tasks[index]['completed'] = oldValue;
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -423,15 +358,27 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   // ============================================================
-  // المهام - حذف مهمة
+  // حذف المهمة من Supabase
   // ============================================================
 
-  Future<void> _deleteTask(
-    String id,
-  ) async {
+  Future<void> _deleteTask(int index) async {
+    if (index < 0 || index >= tasks.length) {
+      return;
+    }
+
+    final task = tasks[index];
+    final id = _safeString(task['id']);
+
     if (id.isEmpty) {
       return;
     }
+
+    final deletedTask =
+        Map<String, dynamic>.from(task);
+
+    setState(() {
+      tasks.removeAt(index);
+    });
 
     try {
       await _taskService.deleteTask(id);
@@ -440,16 +387,10 @@ class _PlanScreenState extends State<PlanScreen> {
         return;
       }
 
-      setState(() {
-        tasks.removeWhere(
-          (task) => _safeString(task['id']) == id,
-        );
-      });
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'تم حذف المهمة 🗑️',
+            'تم حذف المهمة',
           ),
         ),
       );
@@ -457,6 +398,12 @@ class _PlanScreenState extends State<PlanScreen> {
       if (!mounted) {
         return;
       }
+            setState(() {
+        tasks.insert(
+          index,
+          deletedTask,
+        );
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -469,15 +416,29 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   // ============================================================
-  // المهام - إعادة المهمة إلى غير مكتملة
+  // إعادة المهمة
   // ============================================================
 
-  Future<void> _resetTask(
-    String id,
-  ) async {
+  Future<void> _resetTask(int index) async {
+    if (index < 0 || index >= tasks.length) {
+      return;
+    }
+
+    final id = _safeString(
+      tasks[index]['id'],
+    );
+
     if (id.isEmpty) {
       return;
     }
+
+    final oldValue = _safeBool(
+      tasks[index]['completed'],
+    );
+
+    setState(() {
+      tasks[index]['completed'] = false;
+    });
 
     try {
       await _taskService.updateTask(
@@ -489,20 +450,10 @@ class _PlanScreenState extends State<PlanScreen> {
         return;
       }
 
-      final index = tasks.indexWhere(
-        (task) => _safeString(task['id']) == id,
-      );
-
-      if (index != -1) {
-        setState(() {
-          tasks[index]['completed'] = false;
-        });
-      }
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'تمت إعادة المهمة 🔄',
+            'تمت إعادة المهمة',
           ),
         ),
       );
@@ -510,6 +461,10 @@ class _PlanScreenState extends State<PlanScreen> {
       if (!mounted) {
         return;
       }
+
+      setState(() {
+        tasks[index]['completed'] = oldValue;
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -522,792 +477,2035 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   // ============================================================
-  // المهام - إضافة مهمة جديدة
+  // بداية واجهة الصفحة
   // ============================================================
 
-  Future<void> _addTask({
-    required String title,
-    String description = '',
-    String time = '',
-    String tag = '',
-    String emoji = '📝',
-    String color = '#1478D4',
-  }) async {
-    if (title.trim().isEmpty) {
-      return;
-    }
-
-    if (_isSavingTask) {
-      return;
-    }
-
-    setState(() {
-      _isSavingTask = true;
-    });
-
-    try {
-      final newTask = await _taskService.addTask(
-        title: title.trim(),
-        description: description.trim(),
-        time: time.trim(),
-        tag: tag.trim(),
-        emoji: emoji.trim(),
-        color: color,
-        completed: false,
-      );
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        tasks.add(newTask);
-        _isSavingTask = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'تمت إضافة المهمة وحفظها ✅',
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: background,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              18,
+              12,
+              18,
+              110,
+            ),
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.stretch,
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 14),
+                _buildTodayButton(),
+                const SizedBox(height: 14),
+                _buildDays(),
+                const SizedBox(height: 14),
+                _buildSummary(),
+                const SizedBox(height: 14),
+                _buildTasks(),
+                const SizedBox(height: 14),
+                Row(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _buildWeeklyGoals(),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildDailyHabits(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-      );
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _isSavingTask = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر حفظ المهمة: $error',
-          ),
+        bottomNavigationBar:
+            const FlumeaBottomNavigation(
+          selectedIndex: 1,
         ),
-      );
-    }
+      ),
+    );
   }
 
   // ============================================================
-  // العادات - تغيير حالة العادة
+  // رأس الصفحة
   // ============================================================
 
-  Future<void> _toggleHabit(
-    String id,
-    bool completed,
-  ) async {
-    if (id.isEmpty) {
-      return;
-    }
-
-    try {
-      await _habitService.updateHabit(
-        id: id,
-        completed: !completed,
-      );
-
-      if (!mounted) {
-        return;
-      }
-
-      final index = habits.indexWhere(
-        (habit) => _safeString(habit['id']) == id,
-      );
-
-      if (index != -1) {
-        setState(() {
-          habits[index]['completed'] = !completed;
-        });
-      }
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر تحديث العادة: $error',
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.end,
+            children: [
+              Row(
+                mainAxisAlignment:
+                    MainAxisAlignment.end,
+                children: [
+                  const Text(
+                    'الخطة',
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight:
+                          FontWeight.w800,
+                      color: navy,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(
+                    Icons.calendar_month_outlined,
+                    color: navy,
+                    size: 30,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'نظم يومك وحقق أهدافك',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF7B8798),
+                ),
+              ),
+            ],
           ),
         ),
-      );
-    }
+      ],
+    );
   }
 
   // ============================================================
-  // العادات - حذف عادة
+  // زر اليوم
   // ============================================================
 
-  Future<void> _deleteHabit(
-    String id,
-  ) async {
-    if (id.isEmpty) {
-      return;
-    }
-
-    try {
-      await _habitService.deleteHabit(id);
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        habits.removeWhere(
-          (habit) => _safeString(habit['id']) == id,
-        );
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'تم حذف العادة 🗑️',
+  Widget _buildTodayButton() {
+    return Row(
+      mainAxisAlignment:
+          MainAxisAlignment.end,
+      children: [
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedDay = 0;
+            });
+          },
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 11,
+            ),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEAF9F4),
+              borderRadius:
+                  BorderRadius.circular(28),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'اليوم',
+                  style: TextStyle(
+                    color: navy,
+                    fontSize: 16,
+                    fontWeight:
+                        FontWeight.w800,
+                  ),
+                ),
+                SizedBox(width: 8),
+                Icon(
+                  Icons.calendar_month_outlined,
+                  color: navy,
+                  size: 22,
+                ),
+              ],
+            ),
           ),
         ),
-      );
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر حذف العادة: $error',
-          ),
-        ),
-      );
-    }
+      ],
+    );
   }
 
   // ============================================================
-  // العادات - إعادة العادة
+  // أيام الأسبوع
   // ============================================================
 
-  Future<void> _resetHabit(
-    String id,
-  ) async {
-    if (id.isEmpty) {
-      return;
-    }
-
-    try {
-      await _habitService.resetHabit(id);
-
-      if (!mounted) {
-        return;
-      }
-
-      final index = habits.indexWhere(
-        (habit) => _safeString(habit['id']) == id,
-      );
-
-      if (index != -1) {
-        setState(() {
-          habits[index]['completed'] = false;
-        });
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'تمت إعادة العادة 🔄',
-          ),
-        ),
-      );
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر إعادة العادة: $error',
-          ),
-        ),
-      );
-    }
-  }
-
-  // ============================================================
-  // العادات - إضافة عادة جديدة وحفظها في Supabase
-  // ============================================================
-
-  Future<void> _addHabit({
-    required String name,
-    String description = '',
-  }) async {
-    if (name.trim().isEmpty) {
-      return;
-    }
-
-    if (_isSavingHabit) {
-      return;
-    }
-
-    setState(() {
-      _isSavingHabit = true;
-    });
-
-    try {
-      final newHabit = await _habitService.addHabit(
-        name: name.trim(),
-        description: description.trim(),
-        completed: false,
-      );
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        habits.add({
-          'id': newHabit['id'],
-          'title': newHabit['name'] ?? name.trim(),
-          'description':
-              newHabit['description'] ?? description.trim(),
-          'completed':
-              newHabit['completed'] ?? false,
-          'icon': _habitIconForName(
-            newHabit['name'] ?? name.trim(),
-          ),
-        });
-
-        _isSavingHabit = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'تمت إضافة العادة وحفظها ✅',
-          ),
-        ),
-      );
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _isSavingHabit = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر حفظ العادة: $error',
-          ),
-        ),
-      );
-    }
-  }
-
-  // ============================================================
-  // الأيام
-  // ============================================================
-
-  List<String> _weekDays() {
-    return const [
-      'السبت',
-      'الأحد',
-      'الاثنين',
-      'الثلاثاء',
-      'الأربعاء',
-      'الخميس',
-      'الجمعة',
+  Widget _buildDays() {
+    const days = [
+      ['الأحد', '20'],
+      ['الاثنين', '21'],
+      ['الثلاثاء', '22'],
+      ['الأربعاء', '23'],
+      ['الخميس', '24'],
+      ['الجمعة', '25'],
+      ['السبت', '26'],
     ];
+
+    return SizedBox(
+      height: 82,
+      child: Row(
+        children: List.generate(
+          days.length,
+          (index) {
+            return Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedDay = index;
+                  });
+                },
+                child: _dayBox(
+                  days[index][0],
+                  days[index][1],
+                  selectedDay == index,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _dayBox(
+    String day,
+    String number,
+    bool selected,
+  ) {
+    return Container(
+      margin:
+          const EdgeInsets.symmetric(
+        horizontal: 3,
+      ),
+      decoration: BoxDecoration(
+        color: selected
+            ? blue
+            : const Color(0xFFF5F8FC),
+        borderRadius:
+            BorderRadius.circular(16),
+        border: Border.all(
+          color: selected
+              ? blue
+              : const Color(0xFFE7ECF2),
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment:
+            MainAxisAlignment.center,
+        children: [
+          Text(
+            day,
+            textAlign:
+                TextAlign.center,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight:
+                  FontWeight.w700,
+              color: selected
+                  ? Colors.white
+                  : const Color(0xFF52647A),
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            number,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight:
+                  FontWeight.w800,
+              color: selected
+                  ? Colors.white
+                  : navy,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // ============================================================
-  // حساب عدد المهام المكتملة
+  // ملخص اليوم
   // ============================================================
 
-  int _completedTasksCount() {
-    return tasks.where(
-      (task) => task['completed'] == true,
+  Widget _buildSummary() {
+    final completed = tasks.where(
+      (task) => _safeBool(
+        task['completed'],
+      ),
     ).length;
+
+    final remaining =
+        tasks.length - completed;
+
+    return Container(
+      width: double.infinity,
+      padding:
+          const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEAF9F4),
+        borderRadius:
+            BorderRadius.circular(24),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.end,
+                  children: [
+                    Row(
+                      mainAxisAlignment:
+                          MainAxisAlignment.end,
+                      children: [
+                        const Text(
+                          'خطة اليوم',
+                          style: TextStyle(
+                            fontSize: 21,
+                            fontWeight:
+                                FontWeight.w800,
+                            color: navy,
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 7,
+                        ),
+                        const Text(
+                          '☀️',
+                          style: TextStyle(
+                            fontSize: 22,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 7,
+                    ),
+                    const Text(
+                      'خطوات صغيرة تصنع فرقاً كبيراً',
+                      textAlign:
+                          TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color:
+                            Color(0xFF7B8798),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              _progressCircle(
+                completed: completed,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _summaryItem(
+                  Icons.check_circle_outline,
+                  '$completed',
+                  'مكتملة',
+                  const Color(0xFF2E8B70),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _summaryItem(
+                  Icons.pending_actions_outlined,
+                  '$remaining',
+                  'متبقية',
+                  const Color(0xFF6D7C91),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _summaryItem(
+                  Icons.list_alt_outlined,
+                  '${tasks.length}',
+                  'المهام',
+                  blue,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
-  // ============================================================
-  // حساب عدد العادات المكتملة
-  // ============================================================
-
-  int _completedHabitsCount() {
-    return habits.where(
-      (habit) => habit['completed'] == true,
-    ).length;
+  Widget _summaryItem(
+    IconData icon,
+    String number,
+    String title,
+    Color color,
+  ) {
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(
+        vertical: 11,
+        horizontal: 8,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(
+          0.78,
+        ),
+        borderRadius:
+            BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisAlignment:
+            MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 21,
+          ),
+          const SizedBox(width: 7),
+          Column(
+            children: [
+              Text(
+                number,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight:
+                      FontWeight.w800,
+                  color: color,
+                ),
+              ),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color:
+                      Color(0xFF7B8798),
+                  fontWeight:
+                      FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
-  // ============================================================
-  // إجمالي العناصر المكتملة
-  // ============================================================
+  Widget _progressCircle({
+    required int completed,
+  }) {
+    final total = tasks.length;
+    final progress = total == 0
+        ? 0.0
+        : completed / total;
 
-  int _completedTotalCount() {
-    return _completedTasksCount() +
-        _completedHabitsCount();
+    return SizedBox(
+      width: 78,
+      height: 78,
+      child: Stack(
+        alignment:
+            Alignment.center,
+        children: [
+          SizedBox(
+            width: 78,
+            height: 78,
+            child: CircularProgressIndicator(
+              value: progress,
+              strokeWidth: 7,
+              backgroundColor:
+                  const Color(0xFFD5EDE4),
+              valueColor:
+                  const AlwaysStoppedAnimation<
+                      Color>(
+                Color(0xFF2E8B70),
+              ),
+            ),
+          ),
+          Column(
+            mainAxisAlignment:
+                MainAxisAlignment.center,
+            children: [
+              Text(
+                '${(progress * 100).round()}%',
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight:
+                      FontWeight.w800,
+                  color: navy,
+                ),
+              ),
+              const Text(
+                'إنجاز',
+                style: TextStyle(
+                  fontSize: 10,
+                  color:
+                      Color(0xFF7B8798),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(
+            height: 16,
+          ),
+
+          Row(
+            children: [
+              Expanded(
+                child: _summaryItem(
+                  Icons.check_circle,
+                  '$completed',
+                  'مهام مكتملة',
+                  cyan,
+                ),
+              ),
+              Expanded(
+                child: _summaryItem(
+                  Icons.gps_fixed,
+                  '$remaining',
+                  'مهام متبقية',
+                  blue,
+                ),
+              ),
+              Expanded(
+                child: _summaryItem(
+                  Icons.local_fire_department,
+                  '17',
+                  'يوم نشط',
+                  const Color(
+                    0xFFEF5350,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: _progressCircle(
+                  completed:
+                      completed,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
-  // ============================================================
-  // إجمالي العناصر
-  // ============================================================
+  Widget _summaryItem(
+    IconData icon,
+    String number,
+    String title,
+    Color color,
+  ) {
+    return Column(
+      children: [
+        Container(
+          width: 43,
+          height: 43,
+          decoration: BoxDecoration(
+            color: color.withValues(
+              alpha: 0.10,
+            ),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            icon,
+            color: color,
+            size: 23,
+          ),
+        ),
 
-  int _totalItemsCount() {
-    return tasks.length + habits.length;
+        const SizedBox(
+          height: 5,
+        ),
+
+        Text(
+          number,
+          style: const TextStyle(
+            fontSize: 19,
+            fontWeight:
+                FontWeight.w800,
+            color: navy,
+          ),
+        ),
+
+        Text(
+          title,
+          textAlign:
+              TextAlign.center,
+          style: const TextStyle(
+            fontSize: 10,
+            color: Color(0xFF66758A),
+          ),
+        ),
+      ],
+    );
   }
 
-  // ============================================================
-  // نسبة الإنجاز
-  // ============================================================
+  Widget _progressCircle({
+    required int completed,
+  }) {
+    final progress = tasks.isEmpty
+        ? 0.0
+        : completed / tasks.length;
 
-  double _progressValue() {
-    final total = _totalItemsCount();
+    return SizedBox(
+      width: 70,
+      height: 70,
+      child: Stack(
+        alignment:
+            Alignment.center,
+        children: [
+          SizedBox(
+            width: 65,
+            height: 65,
+            child:
+                CircularProgressIndicator(
+              value:
+                  progress.clamp(
+                0.0,
+                1.0,
+              ),
+              strokeWidth: 7,
+              backgroundColor:
+                  const Color(
+                0xFFDDE4ED,
+              ),
+              valueColor:
+                  const AlwaysStoppedAnimation<
+                      Color>(
+                cyan,
+              ),
+            ),
+          ),
 
-    if (total == 0) {
-      return 0;
-    }
-
-    return _completedTotalCount() / total;
+          Column(
+            mainAxisAlignment:
+                MainAxisAlignment.center,
+            children: [
+              Text(
+                '$completed/${tasks.length}',
+                style:
+                    const TextStyle(
+                  fontSize: 15,
+                  fontWeight:
+                      FontWeight.w800,
+                  color: navy,
+                ),
+              ),
+              const Text(
+                'مكتملة',
+                style: TextStyle(
+                  fontSize: 9,
+                  color:
+                      Color(0xFF66758A),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
     // ============================================================
-  // تغيير اليوم المحدد
+  // قسم المهام
   // ============================================================
 
-  void _selectDay(int index) {
-    if (index < 0 || index >= 7) {
-      return;
-    }
+  Widget _buildTasks() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius:
+            BorderRadius.circular(24),
+        border: Border.all(
+          color: const Color(0xFFE5EAF0),
+        ),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              18,
+              15,
+              18,
+              10,
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.format_list_bulleted,
+                  color: navy,
+                  size: 27,
+                ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'المهام اليوم',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight:
+                          FontWeight.w800,
+                      color: navy,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
 
-    setState(() {
-      selectedDay = index;
-    });
+          if (_isLoadingTasks)
+            const Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: 30,
+              ),
+              child: CircularProgressIndicator(
+                color: blue,
+              ),
+            )
+          else if (tasks.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: 25,
+                horizontal: 20,
+              ),
+              child: Text(
+                'لا توجد مهام بعد',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFF7B8798),
+                  fontSize: 14,
+                ),
+              ),
+            )
+          else
+            ...List.generate(
+              tasks.length,
+              (index) => _taskCard(
+                tasks[index],
+                index,
+              ),
+            ),
+
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: GestureDetector(
+              onTap: _isSavingTask
+                  ? null
+                  : _showAddTaskDialog,
+              child: Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(
+                    0xFFEAF4FF,
+                  ),
+                  borderRadius:
+                      BorderRadius.circular(22),
+                ),
+                child: Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      _isSavingTask
+                          ? Icons.hourglass_top
+                          : Icons.add,
+                      color: blue,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      _isSavingTask
+                          ? 'جاري الحفظ...'
+                          : 'إضافة مهمة جديدة',
+                      style: const TextStyle(
+                        color: blue,
+                        fontSize: 16,
+                        fontWeight:
+                            FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // ============================================================
-  // نافذة إضافة مهمة
+  // بطاقة المهمة
+  // ============================================================
+
+  Widget _taskCard(
+    Map<String, dynamic> task,
+    int index,
+  ) {
+    final bool completed =
+        _safeBool(
+      task['completed'],
+    );
+
+    final String title =
+        _safeString(
+      task['title'],
+      fallback: 'مهمة جديدة',
+    );
+
+    final String subtitle =
+        _safeString(
+      task['description'],
+      fallback: 'مهمة جديدة',
+    );
+
+    final String time =
+        _safeString(
+      task['time'],
+      fallback: 'بدون وقت',
+    );
+
+    final String tag =
+        _safeString(
+      task['tag'],
+      fallback: 'عام',
+    );
+
+    final String emoji =
+        _safeString(
+      task['emoji'],
+      fallback: '📝',
+    );
+
+    final Color color =
+        _safeColor(
+      task['color'],
+    );
+
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 14,
+      ),
+      decoration:
+          const BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: Color(
+              0xFFE8EDF2,
+            ),
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () {
+              _toggleTask(index);
+            },
+            child: Container(
+              width: 28,
+              height: 28,
+              decoration:
+                  BoxDecoration(
+                color: completed
+                    ? blue
+                    : Colors.white,
+                borderRadius:
+                    BorderRadius.circular(
+                  6,
+                ),
+                border: Border.all(
+                  color: completed
+                      ? blue
+                      : const Color(
+                          0xFFB8C2CE,
+                        ),
+                  width: 2,
+                ),
+              ),
+              child: completed
+                  ? const Icon(
+                      Icons.check,
+                      color:
+                          Colors.white,
+                      size: 20,
+                    )
+                  : null,
+            ),
+          ),
+                    ),
+
+          const SizedBox(
+            width: 12,
+          ),
+
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                _toggleTask(index);
+              },
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    mainAxisAlignment:
+                        MainAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          textAlign:
+                              TextAlign.right,
+                          maxLines: 1,
+                          overflow:
+                              TextOverflow.ellipsis,
+                          style:
+                              TextStyle(
+                            fontSize: 16,
+                            fontWeight:
+                                FontWeight.w800,
+                            color: completed
+                                ? const Color(
+                                    0xFF9AA4AE,
+                                  )
+                                : navy,
+                            decoration:
+                                completed
+                                    ? TextDecoration
+                                        .lineThrough
+                                    : TextDecoration
+                                        .none,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(
+                        width: 8,
+                      ),
+
+                      Container(
+                        padding:
+                            const EdgeInsets
+                                .symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration:
+                            BoxDecoration(
+                          color:
+                              color.withValues(
+                            alpha: 0.10,
+                          ),
+                          borderRadius:
+                              BorderRadius
+                                  .circular(
+                            18,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize:
+                              MainAxisSize.min,
+                          children: [
+                            Text(
+                              tag,
+                              style:
+                                  TextStyle(
+                                color: color,
+                                fontSize: 11,
+                                fontWeight:
+                                    FontWeight
+                                        .w800,
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 3,
+                            ),
+                            Text(
+                              emoji,
+                              style:
+                                  const TextStyle(
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(
+                    height: 4,
+                  ),
+
+                  Text(
+                    subtitle,
+                    textAlign:
+                        TextAlign.right,
+                    maxLines: 1,
+                    overflow:
+                        TextOverflow.ellipsis,
+                    style:
+                        const TextStyle(
+                      fontSize: 12,
+                      color:
+                          Color(0xFF7B8798),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(
+            width: 12,
+          ),
+
+          SizedBox(
+            width: 58,
+            child: Text(
+              time,
+              textAlign:
+                  TextAlign.left,
+              style:
+                  const TextStyle(
+                fontSize: 13,
+                color:
+                    Color(0xFF52647A),
+                fontWeight:
+                    FontWeight.w600,
+              ),
+            ),
+          ),
+
+          const SizedBox(
+            width: 5,
+          ),
+
+          _buildTaskMenu(index),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // قائمة خيارات المهمة
+  // ============================================================
+
+  Widget _buildTaskMenu(
+    int index,
+  ) {
+    return PopupMenuButton<String>(
+      tooltip:
+          'خيارات المهمة',
+      padding:
+          EdgeInsets.zero,
+      icon:
+          const Icon(
+        Icons.more_vert,
+        color:
+            Color(0xFF6E7A88),
+        size: 22,
+      ),
+      onSelected:
+          (value) {
+        if (value == 'reset') {
+          _resetTask(index);
+        }
+
+        if (value == 'delete') {
+          _deleteTask(index);
+        }
+      },
+      itemBuilder:
+          (context) {
+        return [
+          const PopupMenuItem<String>(
+            value: 'reset',
+            child: Row(
+              mainAxisAlignment:
+                  MainAxisAlignment.end,
+              children: [
+                Text(
+                  'إعادة المهمة 🔄',
+                  style:
+                      TextStyle(
+                    color: navy,
+                    fontSize: 14,
+                    fontWeight:
+                        FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const PopupMenuItem<String>(
+            value: 'delete',
+            child: Row(
+              mainAxisAlignment:
+                  MainAxisAlignment.end,
+              children: [
+                Text(
+                  'حذف المهمة 🗑️',
+                  style:
+                      TextStyle(
+                    color:
+                        Color(0xFFD64545),
+                    fontSize: 14,
+                    fontWeight:
+                        FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ];
+      },
+    );
+  }
+    // ============================================================
+  // نافذة إضافة مهمة جديدة
   // ============================================================
 
   void _showAddTaskDialog() {
-    final titleController = TextEditingController();
-    final descriptionController =
-        TextEditingController();
-    final timeController =
-        TextEditingController();
-    final tagController =
+    final nameController =
         TextEditingController();
 
-    String selectedEmoji = '📝';
-    String selectedColor = '#1478D4';
+    final descriptionController =
+        TextEditingController();
+
+    final timeController =
+        TextEditingController();
+
+    final categoryController =
+        TextEditingController();
+
+    final emojiController =
+        TextEditingController();
 
     showDialog(
       context: context,
       builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (
-            context,
-            setDialogState,
-          ) {
-            return AlertDialog(
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(24),
+        return Directionality(
+          textDirection:
+              TextDirection.rtl,
+          child: AlertDialog(
+            backgroundColor:
+                Colors.white,
+            shape:
+                RoundedRectangleBorder(
+              borderRadius:
+                  BorderRadius.circular(28),
+            ),
+            title: const Text(
+              'إضافة مهمة جديدة',
+              textAlign:
+                  TextAlign.center,
+              style: TextStyle(
+                color: navy,
+                fontSize: 24,
+                fontWeight:
+                    FontWeight.w800,
               ),
-              title: const Text(
-                'إضافة مهمة',
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontWeight:
-                      FontWeight.bold,
-                  color: navy,
-                ),
+            ),
+            content:
+                SingleChildScrollView(
+              child: Column(
+                mainAxisSize:
+                    MainAxisSize.min,
+                children: [
+                  const Text(
+                    'ابدأ بخطوة صغيرة نحو هدفك الكبير',
+                    textAlign:
+                        TextAlign.center,
+                    style: TextStyle(
+                      color:
+                          Color(0xFF7B8798),
+                      fontSize: 13,
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: 18,
+                  ),
+
+                  _dialogField(
+                    controller:
+                        nameController,
+                    label:
+                        'اسم المهمة *',
+                    icon:
+                        Icons.edit_outlined,
+                  ),
+
+                  const SizedBox(
+                    height: 12,
+                  ),
+
+                  _dialogField(
+                    controller:
+                        timeController,
+                    label:
+                        'الوقت',
+                    icon:
+                        Icons.access_time,
+                  ),
+
+                  const SizedBox(
+                    height: 12,
+                  ),
+
+                  _dialogField(
+                    controller:
+                        categoryController,
+                    label:
+                        'التصنيف',
+                    icon:
+                        Icons.local_offer_outlined,
+                  ),
+
+                  const SizedBox(
+                    height: 12,
+                  ),
+
+                  _dialogField(
+                    controller:
+                        emojiController,
+                    label:
+                        'الإيموجي',
+                    icon:
+                        Icons.sentiment_satisfied_alt,
+                  ),
+
+                  const SizedBox(
+                    height: 12,
+                  ),
+
+                  TextField(
+                    controller:
+                        descriptionController,
+                    maxLines: 3,
+                    maxLength: 100,
+                    textAlign:
+                        TextAlign.right,
+                    decoration:
+                        InputDecoration(
+                      labelText:
+                          'الوصف',
+                      alignLabelWithHint:
+                          true,
+                      prefixIcon:
+                          const Icon(
+                        Icons
+                            .description_outlined,
+                        color:
+                            Color(0xFFE5AA27),
+                      ),
+                      border:
+                          OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius
+                                .circular(
+                          18,
+                        ),
+                      ),
+                      focusedBorder:
+                          OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius
+                                .circular(
+                          18,
+                        ),
+                        borderSide:
+                            const BorderSide(
+                          color: blue,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              content: SingleChildScrollView(
-                child: Directionality(
-                  textDirection:
-                      TextDirection.rtl,
-                  child: Column(
-                    mainAxisSize:
-                        MainAxisSize.min,
-                    children: [
-                      TextField(
-                        controller:
-                            titleController,
-                        textInputAction:
-                            TextInputAction.next,
-                        decoration:
-                            InputDecoration(
-                          labelText:
-                              'اسم المهمة',
-                          hintText:
-                              'مثال: قراءة كتاب',
-                          border:
-                              OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius
-                                    .circular(
-                              14,
-                            ),
+            ),
+            actionsPadding:
+                const EdgeInsets
+                    .fromLTRB(
+              16,
+              0,
+              16,
+                                    16,
+            ),
+            actions: [
+              Row(
+                children: [
+                  Expanded(
+                    child:
+                        TextButton(
+                      onPressed: () {
+                        Navigator.pop(
+                          dialogContext,
+                        );
+                      },
+                      style:
+                          TextButton
+                              .styleFrom(
+                        backgroundColor:
+                            const Color(
+                          0xFFF1F4F8,
+                        ),
+                        padding:
+                            const EdgeInsets
+                                .symmetric(
+                          vertical: 14,
+                        ),
+                        shape:
+                            RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius
+                                  .circular(
+                            18,
                           ),
                         ),
                       ),
-                      const SizedBox(
-                        height: 12,
-                      ),
-                      TextField(
-                        controller:
-                            descriptionController,
-                        textInputAction:
-                            TextInputAction.next,
-                        decoration:
-                            InputDecoration(
-                          labelText:
-                              'الوصف',
-                          hintText:
-                              'وصف مختصر للمهمة',
-                          border:
-                              OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius
-                                    .circular(
-                              14,
-                            ),
-                          ),
+                      child:
+                          const Text(
+                        'إلغاء',
+                        style:
+                            TextStyle(
+                          color: navy,
+                          fontSize: 16,
+                          fontWeight:
+                              FontWeight
+                                  .w800,
                         ),
                       ),
-                      const SizedBox(
-                        height: 12,
-                      ),
-                      TextField(
-                        controller:
-                            timeController,
-                        textInputAction:
-                            TextInputAction.next,
-                        decoration:
-                            InputDecoration(
-                          labelText:
-                              'الوقت',
-                          hintText:
-                              'مثال: 5:00 م',
-                          border:
-                              OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius
-                                    .circular(
-                              14,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 12,
-                      ),
-                      TextField(
-                        controller:
-                            tagController,
-                        decoration:
-                            InputDecoration(
-                          labelText:
-                              'التصنيف',
-                          hintText:
-                              'مثال: دراسة',
-                          border:
-                              OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius
-                                    .circular(
-                              14,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 18,
-                      ),
+                    ),
+                  ),
 
-                      Align(
-                        alignment:
-                            Alignment.centerRight,
-                        child: const Text(
-                          'اختر الرمز',
-                          style: TextStyle(
-                            fontWeight:
-                                FontWeight.bold,
-                            color: navy,
-                          ),
-                        ),
-                      ),
+                  const SizedBox(
+                    width: 12,
+                  ),
 
-                      const SizedBox(
-                        height: 10,
-                      ),
+                  Expanded(
+                    child:
+                        ElevatedButton(
+                      onPressed:
+                          _isSavingTask
+                              ? null
+                              : () async {
+                                  final name =
+                                      nameController
+                                          .text
+                                          .trim();
 
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          '📝',
-                          '📚',
-                          '🏋️',
-                          '🍽️',
-                          '💼',
-                          '📖',
-                          '🎯',
-                          '💡',
-                          '🧠',
-                          '☀️',
-                        ].map(
-                          (emoji) {
-                            final isSelected =
-                                selectedEmoji ==
-                                    emoji;
+                                  if (name.isEmpty) {
+                                    return;
+                                  }
 
-                            return GestureDetector(
-                              onTap: () {
-                                setDialogState(() {
-                                  selectedEmoji =
-                                      emoji;
-                                });
-                              },
-                              child:
-                                  AnimatedContainer(
-                                duration:
-                                    const Duration(
-                                  milliseconds:
-                                      180,
-                                ),
-                                width: 44,
-                                height: 44,
-                                alignment:
-                                    Alignment.center,
-                                decoration:
-                                    BoxDecoration(
-                                  color: isSelected
-                                      ? blue.withOpacity(
-                                          0.12,
-                                        )
-                                      : Colors.grey
-                                          .withOpacity(
-                                          0.08,
+                                  final time =
+                                      timeController
+                                          .text
+                                          .trim();
+
+                                  final category =
+                                      categoryController
+                                          .text
+                                          .trim();
+
+                                  final emoji =
+                                      emojiController
+                                          .text
+                                          .trim();
+
+                                  final description =
+                                      descriptionController
+                                          .text
+                                          .trim();
+
+                                  setState(() {
+                                    _isSavingTask =
+                                        true;
+                                  });
+
+                                  try {
+                                    final newTask =
+                                        await _taskService
+                                            .addTask(
+                                      title: name,
+                                      description:
+                                          description,
+                                      time: time.isEmpty
+                                          ? 'بدون وقت'
+                                          : time,
+                                      tag: category.isEmpty
+                                          ? 'عام'
+                                          : category,
+                                      emoji: emoji.isEmpty
+                                          ? '📝'
+                                          : emoji,
+                                      color:
+                                          '#1478D4',
+                                      completed:
+                                          false,
+                                    );
+
+                                    if (!mounted) {
+                                      return;
+                                    }
+
+                                    setState(() {
+                                      tasks.add(
+                                        newTask,
+                                      );
+                                      _isSavingTask =
+                                          false;
+                                    });
+
+                                    if (!mounted) {
+  return;
+}
+
+Navigator.of(context).pop();
+                                    
+
+                                    ScaffoldMessenger
+                                        .of(
+                                      context,
+                                    ).showSnackBar(
+                                      const SnackBar(
+                                        content:
+                                            Text(
+                                          'تم حفظ المهمة بنجاح ✅',
                                         ),
-                                  borderRadius:
-                                      BorderRadius
-                                          .circular(
-                                    12,
-                                  ),
-                                  border:
-                                      Border.all(
-                                    color:
-                                        isSelected
-                                            ? blue
-                                            : Colors
-                                                .transparent,
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: Text(
-                                  emoji,
-                                  style:
-                                      const TextStyle(
-                                    fontSize: 22,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ).toList(),
-                      ),
+                                      ),
+                                    );
+                                  } catch (error) {
+                                    if (!mounted) {
+                                      return;
+                                    }
 
-                      const SizedBox(
-                        height: 18,
-                      ),
+                                    setState(() {
+                                      _isSavingTask =
+                                          false;
+                                    });
 
-                      Align(
-                        alignment:
-                            Alignment.centerRight,
-                        child: const Text(
-                          'اختر اللون',
-                          style: TextStyle(
-                            fontWeight:
-                                FontWeight.bold,
-                            color: navy,
+                                    ScaffoldMessenger
+                                        .of(
+                                      context,
+                                    ).showSnackBar(
+                                      SnackBar(
+                                        content:
+                                            Text(
+                                          'تعذر حفظ المهمة: $error',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                      style:
+                          ElevatedButton
+                              .styleFrom(
+                        backgroundColor:
+                            blue,
+                        foregroundColor:
+                            Colors.white,
+                        padding:
+                            const EdgeInsets
+                                .symmetric(
+                          vertical: 14,
+                        ),
+                        elevation: 0,
+                        shape:
+                            RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius
+                                  .circular(
+                            18,
                           ),
                         ),
                       ),
-
-                      const SizedBox(
-                        height: 10,
-                      ),
-
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: [
-                          '#1478D4',
-                          '#20C7B7',
-                          '#EF5350',
-                          '#FFA726',
-                          '#8E44AD',
-                          '#E57C72',
-                        ].map(
-                          (color) {
-                            final isSelected =
-                                selectedColor ==
-                                    color;
-
-                            return GestureDetector(
-                              onTap: () {
-                                setDialogState(() {
-                                  selectedColor =
-                                      color;
-                                });
-                              },
-                              child:
-                                  AnimatedContainer(
-                                duration:
-                                    const Duration(
-                                  milliseconds:
-                                      180,
-                                ),
-                                width: 34,
-                                height: 34,
-                                decoration:
-                                    BoxDecoration(
-                                  color:
-                                      _safeColor(
-                                    color,
-                                  ),
-                                  shape:
-                                      BoxShape.circle,
-                                  border:
-                                      Border.all(
-                                    color:
-                                        isSelected
-                                            ? navy
-                                            : Colors
-                                                .transparent,
-                                    width: 2.5,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ).toList(),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-                            actionsPadding:
-                  const EdgeInsets.fromLTRB(
-                18,
-                0,
-                18,
-                18,
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(
-                      dialogContext,
-                    );
-                  },
-                  child: const Text(
-                    'إلغاء',
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: _isSavingTask
-                      ? null
-                      : () async {
-                          final title =
-                              titleController
-                                  .text
-                                  .trim();
-
-                          if (title.isEmpty) {
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'اكتب اسم المهمة أولاً',
-                                ),
-                              ),
-                            );
-                            return;
-                          }
-
-                          await _addTask(
-                            title: title,
-                            description:
-                                descriptionController
-                                    .text
-                                    .trim(),
-                            time:
-                                timeController
-                                    .text
-                                    .trim(),
-                            tag:
-                                tagController
-                                    .text
-                                    .trim(),
-                            emoji: selectedEmoji,
-                            color: selectedColor,
-                          );
-
-                          if (!mounted) {
-                            return;
-                          }
-
-                          Navigator.pop(
-                            dialogContext,
-                          );
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: blue,
-                    foregroundColor:
-                        Colors.white,
-                    elevation: 0,
-                    padding:
-                        const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    shape:
-                        RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(
-                        14,
-                      ),
-                    ),
-                  ),
-                  child: _isSavingTask
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child:
-                              CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          'إضافة',
-                          style: TextStyle(
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
+                      child:
+                          const Text(
+                        'إضافة المهمة +',
+                        style:
+                            TextStyle(
+                          fontSize: 16,
+                          fontWeight:
+                              FontWeight
+                                  .w800,
                         ),
-                ),
-              ],
-            );
-          },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         );
       },
+    );
+  }
+
+  // ============================================================
+  // حقول نافذة إضافة المهمة
+  // ============================================================
+
+  Widget _dialogField({
+    required TextEditingController
+        controller,
+    required String label,
+    required IconData icon,
+  }) {
+    return TextField(
+      controller:
+          controller,
+      textAlign:
+          TextAlign.right,
+      decoration:
+          InputDecoration(
+        labelText:
+            label,
+        prefixIcon:
+            Icon(
+          icon,
+          color: blue,
+        ),
+        border:
+            OutlineInputBorder(
+          borderRadius:
+              BorderRadius.circular(
+            18,
+          ),
+        ),
+        focusedBorder:
+            OutlineInputBorder(
+          borderRadius:
+              BorderRadius.circular(
+            18,
+          ),
+          borderSide:
+              const BorderSide(
+            color: blue,
+            width: 2,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // أهداف الأسبوع
+  // ============================================================
+
+  Widget _buildWeeklyGoals() {
+    return Container(
+      padding:
+          const EdgeInsets.all(
+        16,
+      ),
+      decoration:
+          BoxDecoration(
+        color: Colors.white,
+        borderRadius:
+            BorderRadius.circular(
+          22,
+        ),
+        border: Border.all(
+          color: const Color(
+            0xFFE5EAF0,
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment
+                .stretch,
+        children: [
+          Row(
+            mainAxisAlignment:
+                MainAxisAlignment.end,
+            children: [
+              const Text(
+                'أهداف الأسبوع',
+                style:
+                    TextStyle(
+                  color: navy,
+                  fontSize: 17,
+                  fontWeight:
+                      FontWeight.w800,
+                ),
+              ),
+              const SizedBox(
+                width: 7,
+              ),
+              const Icon(
+                Icons.flag_outlined,
+                color: navy,
+                size: 21,
+              ),
+            ],
+          ),
+
+          const SizedBox(
+            height: 18,
+          ),
+
+          _goalRow(
+            'الدراسة',
+            4,
+            5,
+            blue,
+          ),
+
+          const SizedBox(
+            height: 15,
+          ),
+
+          _goalRow(
+            'الرياضة',
+            3,
+            5,
+            cyan,
+          ),
+
+          const SizedBox(
+            height: 15,
+          ),
+
+          _goalRow(
+            'القراءة',
+            6,
+            7,
+            const Color(
+              0xFF8E44AD,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _goalRow(
+    String title,
+    int current,
+    int total,
+    Color color,
+  ) {
+    final progress =
+        total <= 0
+            ? 0.0
+            : (current / total)
+                .clamp(
+              0.0,
+              1.0,
+            );
+
+    return Column(
+      crossAxisAlignment:
+          CrossAxisAlignment
+              .stretch,
+      children: [
+        Row(
+          mainAxisAlignment:
+              MainAxisAlignment
+                  .spaceBetween,
+          children: [
+            Text(
+              '$current/$total',
+              style:
+                  TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight:
+                    FontWeight.w800,
+              ),
+            ),
+            Text(
+              title,
+              style:
+                  const TextStyle(
+                color: navy,
+                fontSize: 13,
+                fontWeight:
+                    FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+                const SizedBox(
+          height: 7,
+        ),
+
+        ClipRRect(
+          borderRadius:
+              BorderRadius.circular(
+            10,
+          ),
+          child:
+              LinearProgressIndicator(
+            value:
+                progress,
+            minHeight: 7,
+            backgroundColor:
+                const Color(
+              0xFFE8EDF3,
+            ),
+            valueColor:
+                AlwaysStoppedAnimation<
+                    Color>(
+              color,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+    // ============================================================
+  // عادات اليوم
+  // ============================================================
+
+  Widget _buildDailyHabits() {
+    return Container(
+      padding:
+          const EdgeInsets.all(
+        16,
+      ),
+      decoration:
+          BoxDecoration(
+        color: Colors.white,
+        borderRadius:
+            BorderRadius.circular(
+          22,
+        ),
+        border: Border.all(
+          color: const Color(
+            0xFFE5EAF0,
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment:
+                MainAxisAlignment.end,
+            children: [
+              const Text(
+                'عادات اليوم',
+                style: TextStyle(
+                  color: navy,
+                  fontSize: 17,
+                  fontWeight:
+                      FontWeight.w800,
+                ),
+              ),
+              const SizedBox(
+                width: 7,
+              ),
+              const Icon(
+                Icons.repeat,
+                color: navy,
+                size: 21,
+              ),
+            ],
+          ),
+
+          const SizedBox(
+            height: 16,
+          ),
+
+          ...List.generate(
+            habits.length,
+            (index) {
+              final habit =
+                  habits[index];
+
+              final title =
+                  _safeString(
+                habit['title'],
+            
+              );
+
+              final icon =
+                  _safeIcon(
+                habit['icon'],
+                
+              );
+
+              final completed =
+                  _safeBool(
+                habit['completed'],
+              );
+
+              return Padding(
+                padding:
+                    EdgeInsets.only(
+                  bottom:
+                      index ==
+                              habits.length -
+                                  1
+                          ? 0
+                          : 10,
+                ),
+                child:
+                    _buildHabitRow(
+    id: _safeString(habit['id']),
+    title: title,
+    icon: icon,
+    completed: completed,
+),
+                  
+                  
+                  
+                      
+               
+            
+              );
+            },
+          ),
+
+          const SizedBox(
+            height: 14,
+          ),
+
+          OutlinedButton.icon(
+            onPressed:
+                _showAddHabitDialog,
+            icon: const Icon(
+              Icons.add,
+              size: 20,
+            ),
+            label: const Text(
+              'إضافة عادة',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight:
+                    FontWeight.w800,
+              ),
+            ),
+            style:
+                OutlinedButton.styleFrom(
+              foregroundColor:
+                  blue,
+              side:
+                  const BorderSide(
+                color: blue,
+                width: 1.3,
+              ),
+              padding:
+                  const EdgeInsets
+                      .symmetric(
+                vertical: 12,
+              ),
+              shape:
+                  RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(
+                  16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+// ============================================================
+// Supabase - تحديث حالة العادة
+// ============================================================
+
+Future<void> _toggleHabit(String id, bool completed) async {
+  if (id.isEmpty) {
+    return;
+  }
+
+  try {
+    await _habitService.updateHabit(
+      id: id,
+      completed: !completed,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    final index = habits.indexWhere(
+      (habit) => _safeString(habit['id']) == id,
+    );
+
+    if (index != -1) {
+      setState(() {
+        habits[index]['completed'] = !completed;
+      });
+    }
+  } catch (error) {
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'تعذر تحديث العادة: $error',
+        ),
+      ),
+    );
+  }
+}
+  Widget _buildHabitRow({
+    required String title,
+    required IconData icon,
+    required bool completed,
+    required String id,
+  }) {
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(
+        horizontal: 13,
+        vertical: 12,
+      ),
+      decoration:
+          BoxDecoration(
+        color: completed
+            ? const Color(
+                0xFFF1FBF9,
+              )
+            : const Color(
+                0xFFF8FAFC,
+              ),
+        borderRadius:
+            BorderRadius.circular(
+          17,
+        ),
+        border: Border.all(
+          color: completed
+              ? const Color(
+                  0xFFD5F0EB,
+                )
+              : const Color(
+                  0xFFE7ECF2,
+                ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration:
+                BoxDecoration(
+              color: completed
+                  ? cyan.withValues(alpha: 0.12)
+                      
+                  
+                  : blue.withValues(alpha: 0.08)
+                      
+                    ,
+              shape:
+                  BoxShape.circle,
+            ),
+            child: Icon(
+              completed
+                  ? Icons.check
+                  : icon,
+              color: completed
+                  ? cyan
+                  : blue,
+              size: 20,
+            ),
+          ),
+
+          const SizedBox(
+            width: 12,
+          ),
+
+          Expanded(
+            child: Text(
+              title,
+              textAlign:
+                  TextAlign.right,
+              style: TextStyle(
+                color: navy,
+                fontSize: 14,
+                fontWeight:
+                    FontWeight.w700,
+                decoration:
+                    completed
+                        ? TextDecoration
+                            .lineThrough
+                        : null,
+                decorationColor:
+                    navy,
+              ),
+            ),
+          ),
+
+          const SizedBox(
+            width: 10,
+          ),
+
+          GestureDetector(
+  onTap: () => _toggleHabit(id, completed),
+  child: Container(
+            width: 23,
+            height: 23,
+            decoration:
+                BoxDecoration(
+              color: completed
+                  ? cyan
+                  : Colors.white,
+              borderRadius:
+                  BorderRadius.circular(
+                7,
+              ),
+              border: Border.all(
+                color: completed
+                    ? cyan
+                    : const Color(
+                        0xFFB9C4D0,
+                      ),
+                width: 1.5,
+              ),
+            ),
+            child: completed
+                ? const Icon(
+                    Icons.check,
+                    color:
+                        Colors.white,
+                    size: 16,
+                  )
+                : null,
+          ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -1319,453 +2517,229 @@ class _PlanScreenState extends State<PlanScreen> {
     final nameController =
         TextEditingController();
 
-    final descriptionController =
-        TextEditingController();
-
     showDialog(
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(24),
-          ),
-          title: const Text(
-            'إضافة عادة',
-            textAlign: TextAlign.right,
-            style: TextStyle(
-              fontWeight:
-                  FontWeight.bold,
-              color: navy,
-            ),
-          ),
-          content: Directionality(
-            textDirection:
-                TextDirection.rtl,
-            child: Column(
-              mainAxisSize:
-                  MainAxisSize.min,
-              children: [
-                TextField(
-                  controller:
-                      nameController,
-                  textInputAction:
-                      TextInputAction.next,
-                  decoration:
-                      InputDecoration(
-                    labelText:
-                        'اسم العادة',
-                    hintText:
-                        'مثال: شرب الماء',
-                    border:
-                        OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(
-                        14,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                TextField(
-                  controller:
-                      descriptionController,
-                  maxLines: 2,
-                  decoration:
-                      InputDecoration(
-                    labelText:
-                        'الوصف',
-                    hintText:
-                        'وصف مختصر للعادة',
-                    border:
-                        OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(
-                        14,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),.
-                    actionsPadding:
-              const EdgeInsets.fromLTRB(
-            18,
-            0,
-            18,
-            18,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(
-                  dialogContext,
-                );
-              },
-              child: const Text(
-                'إلغاء',
+        return Directionality(
+          textDirection:
+              TextDirection.rtl,
+          child: AlertDialog(
+            backgroundColor:
+                Colors.white,
+            shape:
+                RoundedRectangleBorder(
+              borderRadius:
+                  BorderRadius.circular(
+                28,
               ),
             ),
-            ElevatedButton(
-              onPressed: _isSavingHabit
-                  ? null
-                  : () async {
-                      final name =
-                          nameController
-                              .text
-                              .trim();
+            title: const Text(
+              'إضافة عادة جديدة',
+              textAlign:
+                  TextAlign.center,
+              style: TextStyle(
+                color: navy,
+                fontSize: 23,
+                fontWeight:
+                    FontWeight.w800,
+              ),
+            ),
+            content:
+                _habitDialogField(
+              controller:
+                  nameController,
+              label:
+                  'اسم العادة',
+              icon:
+                  Icons.repeat,
+            ),
+            actionsPadding:
+                const EdgeInsets
+                    .fromLTRB(
+              16,
+              0,
+                                    16,
+              16,
+            ),
+            actions: [
+              Row(
+                children: [
+                  Expanded(
+                    child:
+                        TextButton(
+                      onPressed: () {
+                        Navigator.pop(
+                          dialogContext,
+                        );
+                      },
+                      style:
+                          TextButton
+                              .styleFrom(
+                        backgroundColor:
+                            const Color(
+                          0xFFF1F4F8,
+                        ),
+                        padding:
+                            const EdgeInsets
+                                .symmetric(
+                          vertical: 14,
+                        ),
+                        shape:
+                            RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius
+                                  .circular(
+                            18,
+                          ),
+                        ),
+                      ),
+                      child:
+                          const Text(
+                        'إلغاء',
+                        style:
+                            TextStyle(
+                          color: navy,
+                          fontSize: 16,
+                          fontWeight:
+                              FontWeight
+                                  .w800,
+                        ),
+                      ),
+                    ),
+                  ),
 
-                      if (name.isEmpty) {
-                        ScaffoldMessenger.of(
+                  const SizedBox(
+                    width: 12,
+                  ),
+
+                  Expanded(
+                    child:
+                        ElevatedButton(
+                      onPressed: () {
+                        final name =
+                            nameController
+                                .text
+                                .trim();
+
+                        if (name.isEmpty) {
+                          return;
+                        }
+
+                        setState(() {
+                          habits.add({
+                            'title': name,
+                            'icon':
+                                Icons
+                                    .check_circle_outline,
+                            'completed':
+                                false,
+                          });
+                        });
+
+                        Navigator.pop(
+                          dialogContext,
+                        );
+
+                        ScaffoldMessenger
+                            .of(
                           context,
                         ).showSnackBar(
                           const SnackBar(
-                            content: Text(
-                              'اكتب اسم العادة أولاً',
+                            content:
+                                Text(
+                              'تمت إضافة العادة ✅',
                             ),
                           ),
                         );
-                        return;
-                      }
-
-                      await _addHabit(
-                        name: name,
-                        description:
-                            descriptionController
-                                .text
-                                .trim(),
-                      );
-
-                      if (!mounted) {
-                        return;
-                      }
-
-                      Navigator.pop(
-                        dialogContext,
-                      );
-                    },
-              style:
-                  ElevatedButton.styleFrom(
-                backgroundColor: blue,
-                foregroundColor:
-                    Colors.white,
-                elevation: 0,
-                padding:
-                    const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                shape:
-                    RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(
-                    14,
-                  ),
-                ),
-              ),
-              child: _isSavingHabit
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
+                      },
+                      style:
+                          ElevatedButton
+                              .styleFrom(
+                        backgroundColor:
+                            blue,
+                        foregroundColor:
+                            Colors.white,
+                        padding:
+                            const EdgeInsets
+                                .symmetric(
+                          vertical: 14,
+                        ),
+                        elevation: 0,
+                        shape:
+                            RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius
+                                  .circular(
+                            18,
+                          ),
+                        ),
+                      ),
                       child:
-                          CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text(
-                      'إضافة',
-                      style: TextStyle(
-                        fontWeight:
-                            FontWeight.bold,
-                      ),
-                    ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // ============================================================
-  // نافذة خيارات المهمة
-  // ============================================================
-
-  void _showTaskOptions(
-    String id,
-    bool completed,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape:
-          const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
-      ),
-      builder: (sheetContext) {
-        return Directionality(
-          textDirection:
-              TextDirection.rtl,
-          child: SafeArea(
-            child: Padding(
-              padding:
-                  const EdgeInsets.fromLTRB(
-                20,
-                12,
-                20,
-                20,
-              ),
-              child: Column(
-                mainAxisSize:
-                    MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 42,
-                    height: 5,
-                    decoration:
-                        BoxDecoration(
-                      color:
-                          Colors.grey.shade300,
-                      borderRadius:
-                          BorderRadius.circular(
-                        10,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 18,
-                  ),
-                  const Text(
-                    'خيارات المهمة',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight:
-                          FontWeight.bold,
-                      color: navy,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 14,
-                  ),
-                  if (completed)
-                    ListTile(
-                      leading:
-                          const Icon(
-                        Icons
-                            .refresh_rounded,
-                        color: blue,
-                      ),
-                      title:
                           const Text(
-                        'إعادة المهمة',
+                        'إضافة',
+                        style:
+                            TextStyle(
+                          fontSize: 16,
+                          fontWeight:
+                              FontWeight
+                                  .w800,
+                        ),
                       ),
-                      onTap: () async {
-                        Navigator.pop(
-                          sheetContext,
-                        );
-
-                        await _resetTask(
-                          id,
-                        );
-                      },
                     ),
-                  ListTile(
-                    leading:
-                        const Icon(
-                      Icons
-                          .delete_outline_rounded,
-                      color: Colors.red,
-                    ),
-                    title:
-                        const Text(
-                      'حذف المهمة',
-                    ),
-                    onTap: () async {
-                      Navigator.pop(
-                        sheetContext,
-                      );
-
-                      await _deleteTask(
-                        id,
-                      );
-                    },
                   ),
                 ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-    // ============================================================
-  // نافذة خيارات العادة
-  // ============================================================
-
-  void _showHabitOptions(
-    String id,
-    bool completed,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape:
-          const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
-      ),
-      builder: (sheetContext) {
-        return Directionality(
-          textDirection:
-              TextDirection.rtl,
-          child: SafeArea(
-            child: Padding(
-              padding:
-                  const EdgeInsets.fromLTRB(
-                20,
-                12,
-                20,
-                20,
-              ),
-              child: Column(
-                mainAxisSize:
-                    MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 42,
-                    height: 5,
-                    decoration:
-                        BoxDecoration(
-                      color:
-                          Colors.grey.shade300,
-                      borderRadius:
-                          BorderRadius.circular(
-                        10,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 18,
-                  ),
-                  const Text(
-                    'خيارات العادة',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight:
-                          FontWeight.bold,
-                      color: navy,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 14,
-                  ),
-                  if (completed)
-                    ListTile(
-                      leading:
-                          const Icon(
-                        Icons
-                            .refresh_rounded,
-                        color: blue,
-                      ),
-                      title:
-                          const Text(
-                        'إعادة العادة',
-                      ),
-                      onTap: () async {
-                        Navigator.pop(
-                          sheetContext,
-                        );
-
-                        await _resetHabit(
-                          id,
-                        );
-                      },
-                    ),
-                  ListTile(
-                    leading:
-                        const Icon(
-                      Icons
-                          .delete_outline_rounded,
-                      color: Colors.red,
-                    ),
-                    title:
-                        const Text(
-                      'حذف العادة',
-                    ),
-                    onTap: () async {
-                      Navigator.pop(
-                        sheetContext,
-                      );
-
-                      await _deleteHabit(
-                        id,
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // ============================================================
-  // بناء الصفحة الرئيسية
-  // ============================================================
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: background,
-      body: SafeArea(
-        child: Directionality(
-          textDirection:
-              TextDirection.rtl,
-          child: CustomScrollView(
-            physics:
-                const BouncingScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(
-                child: _buildHeader(),
-              ),
-
-              SliverToBoxAdapter(
-                child: _buildWeekSelector(),
-              ),
-
-              SliverToBoxAdapter(
-                child: _buildProgressCard(),
-              ),
-
-              SliverToBoxAdapter(
-                child: _buildDailyTasks(),
-              ),
-
-              SliverToBoxAdapter(
-                child: _buildDailyHabits(),
-              ),
-
-              const SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 110,
-                ),
               ),
             ],
           ),
-        ),
-      ),
-      bottomNavigationBar:
-          const BottomNavigation(),
+        );
+      },
     );
   }
+
+  // ============================================================
+  // حقل نافذة إضافة العادة
+  // ============================================================
+
+  Widget _habitDialogField({
+    required TextEditingController
+        controller,
+    required String label,
+    required IconData icon,
+  }) {
+    return TextField(
+      controller:
+          controller,
+      textAlign:
+          TextAlign.right,
+      decoration:
+          InputDecoration(
+        labelText:
+            label,
+        prefixIcon:
+            Icon(
+          icon,
+          color: blue,
+        ),
+        border:
+            OutlineInputBorder(
+          borderRadius:
+              BorderRadius.circular(
+            18,
+          ),
+        ),
+        focusedBorder:
+            OutlineInputBorder(
+          borderRadius:
+              BorderRadius.circular(
+            18,
+          ),
+          borderSide:
+              const BorderSide(
+            color: blue,
+            width: 2,
+          ),
+        ),
+      ),
+    );
+  }
+}
