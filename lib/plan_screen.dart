@@ -398,7 +398,8 @@ Future<void> _loadHabits() async {
       if (!mounted) {
         return;
       }
-            setState(() {
+
+      setState(() {
         tasks.insert(
           index,
           deletedTask,
@@ -632,8 +633,7 @@ Future<void> _loadHabits() async {
       ],
     );
   }
-
-  // ============================================================
+    // ============================================================
   // أيام الأسبوع
   // ============================================================
 
@@ -802,39 +802,45 @@ Future<void> _loadHabits() async {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
-              _progressCircle(
-                completed: completed,
-              ),
             ],
           ),
-          const SizedBox(height: 16),
+
+          const SizedBox(
+            height: 16,
+          ),
+
           Row(
             children: [
               Expanded(
                 child: _summaryItem(
-                  Icons.check_circle_outline,
+                  Icons.check_circle,
                   '$completed',
-                  'مكتملة',
-                  const Color(0xFF2E8B70),
+                  'مهام مكتملة',
+                  cyan,
                 ),
               ),
-              const SizedBox(width: 10),
               Expanded(
                 child: _summaryItem(
-                  Icons.pending_actions_outlined,
+                  Icons.gps_fixed,
                   '$remaining',
-                  'متبقية',
-                  const Color(0xFF6D7C91),
+                  'مهام متبقية',
+                  blue,
                 ),
               ),
-              const SizedBox(width: 10),
               Expanded(
                 child: _summaryItem(
-                  Icons.list_alt_outlined,
-                  '${tasks.length}',
-                  'المهام',
-                  blue,
+                  Icons.local_fire_department,
+                  '17',
+                  'يوم نشط',
+                  const Color(
+                    0xFFEF5350,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: _progressCircle(
+                  completed:
+                      completed,
                 ),
               ),
             ],
@@ -850,106 +856,108 @@ Future<void> _loadHabits() async {
     String title,
     Color color,
   ) {
-    return Container(
-      padding:
-          const EdgeInsets.symmetric(
-        vertical: 11,
-        horizontal: 8,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(
-          0.78,
-        ),
-        borderRadius:
-            BorderRadius.circular(16),
-      ),
-      child: Row(
-        mainAxisAlignment:
-            MainAxisAlignment.center,
-        children: [
-          Icon(
+    return Column(
+      children: [
+        Container(
+          width: 43,
+          height: 43,
+          decoration: BoxDecoration(
+            color: color.withValues(
+              alpha: 0.10,
+            ),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
             icon,
             color: color,
-            size: 21,
+            size: 23,
           ),
-          const SizedBox(width: 7),
-          Column(
-            children: [
-              Text(
-                number,
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight:
-                      FontWeight.w800,
-                  color: color,
-                ),
-              ),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color:
-                      Color(0xFF7B8798),
-                  fontWeight:
-                      FontWeight.w600,
-                ),
-              ),
-            ],
+        ),
+
+        const SizedBox(
+          height: 5,
+        ),
+
+        Text(
+          number,
+          style: const TextStyle(
+            fontSize: 19,
+            fontWeight:
+                FontWeight.w800,
+            color: navy,
           ),
-        ],
-      ),
+        ),
+
+        Text(
+          title,
+          textAlign:
+              TextAlign.center,
+          style: const TextStyle(
+            fontSize: 10,
+            color: Color(0xFF66758A),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _progressCircle({
     required int completed,
   }) {
-    final total = tasks.length;
-    final progress = total == 0
+    final progress = tasks.isEmpty
         ? 0.0
-        : completed / total;
+        : completed / tasks.length;
 
     return SizedBox(
-      width: 78,
-      height: 78,
+      width: 70,
+      height: 70,
       child: Stack(
         alignment:
             Alignment.center,
         children: [
           SizedBox(
-            width: 78,
-            height: 78,
-            child: CircularProgressIndicator(
-              value: progress,
+            width: 65,
+            height: 65,
+            child:
+                CircularProgressIndicator(
+              value:
+                  progress.clamp(
+                0.0,
+                1.0,
+              ),
               strokeWidth: 7,
               backgroundColor:
-                  const Color(0xFFD5EDE4),
+                  const Color(
+                0xFFDDE4ED,
+              ),
               valueColor:
                   const AlwaysStoppedAnimation<
                       Color>(
-                Color(0xFF2E8B70),
+                cyan,
               ),
             ),
           ),
+
           Column(
             mainAxisAlignment:
                 MainAxisAlignment.center,
             children: [
               Text(
-                '${(progress * 100).round()}%',
-                style: const TextStyle(
-                  fontSize: 17,
+                '$completed/${tasks.length}',
+                style:
+                    const TextStyle(
+                  fontSize: 15,
                   fontWeight:
                       FontWeight.w800,
                   color: navy,
                 ),
               ),
               const Text(
-                'إنجاز',
+                'مكتملة',
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 9,
                   color:
-                      Color(0xFF7B8798),
+                      Color(0xFF66758A),
                 ),
               ),
             ],
@@ -1191,7 +1199,6 @@ Future<void> _loadHabits() async {
                   : null,
             ),
           ),
-                    ),
 
           const SizedBox(
             width: 12,
@@ -1591,7 +1598,7 @@ Future<void> _loadHabits() async {
               16,
               0,
               16,
-                                    16,
+              16,
             ),
             actions: [
               Row(
@@ -1724,6 +1731,7 @@ Future<void> _loadHabits() async {
 }
 
 Navigator.of(context).pop();
+                                      
                                     
 
                                     ScaffoldMessenger
@@ -1990,7 +1998,8 @@ Navigator.of(context).pop();
             ),
           ],
         ),
-                const SizedBox(
+
+        const SizedBox(
           height: 7,
         ),
 
@@ -2117,8 +2126,7 @@ Navigator.of(context).pop();
                   
                   
                       
-               
-            
+                
               );
             },
           ),
@@ -2390,7 +2398,7 @@ Future<void> _toggleHabit(String id, bool completed) async {
                     .fromLTRB(
               16,
               0,
-                                    16,
+              16,
               16,
             ),
             actions: [
