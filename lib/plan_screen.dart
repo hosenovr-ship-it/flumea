@@ -2046,13 +2046,13 @@ class _PlanScreenState extends State<PlanScreen> {
               final title =
                   _safeString(
                 habit['title'],
-                'عادة',
+            
               );
 
               final icon =
                   _safeIcon(
                 habit['icon'],
-                Icons.check_circle_outline,
+                
               );
 
               final completed =
