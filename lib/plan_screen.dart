@@ -17,7 +17,7 @@ class _PlanScreenState extends State<PlanScreen> {
   static const Color background = Color(0xFFF7FBFF);
 
   final TaskService _taskService = TaskService();
-
+final HabitService _habitService = HabitService();
   int selectedDay = 0;
 
   bool _isLoadingTasks = true;
@@ -47,6 +47,7 @@ class _PlanScreenState extends State<PlanScreen> {
   void initState() {
     super.initState();
     _loadTasks();
+    _loadHabits();
   }
 
   String _safeString(
