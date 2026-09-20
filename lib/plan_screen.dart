@@ -2311,7 +2311,9 @@ Future<void> _toggleHabit(String id, bool completed) async {
             width: 10,
           ),
 
-          Container(
+          GestureDetector(
+  onTap: () => _toggleHabit(id, completed),
+  child: Container(
             width: 23,
             height: 23,
             decoration:
@@ -2341,6 +2343,7 @@ Future<void> _toggleHabit(String id, bool completed) async {
                   )
                 : null,
           ),
+            ),
         ],
       ),
     );
