@@ -1685,9 +1685,13 @@ class _PlanScreenState extends State<PlanScreen> {
                                           false;
                                     });
 
-                                    Navigator.pop(
-                                      dialogContext,
-                                    );
+                                    if (!mounted) {
+  return;
+}
+
+Navigator.of(context).pop();
+                                      
+                                    
 
                                     ScaffoldMessenger
                                         .of(
@@ -2170,12 +2174,12 @@ class _PlanScreenState extends State<PlanScreen> {
             decoration:
                 BoxDecoration(
               color: completed
-                  ? cyan.withOpacity(
-                      0.12,
-                    )
-                  : blue.withOpacity(
-                      0.08,
-                    ),
+                  ? cyan.withValues(alpha: 0.12)
+                      
+                  
+                  : blue.withValues(alpha: 0.08)
+                      
+                    ,
               shape:
                   BoxShape.circle,
             ),
