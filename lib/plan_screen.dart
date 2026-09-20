@@ -2117,11 +2117,16 @@ Navigator.of(context).pop();
                 ),
                 child:
                     _buildHabitRow(
-                  title: title,
-                  icon: icon,
-                  completed:
-                      completed,
-                ),
+    id: _safeString(habit['id']),
+    title: title,
+    icon: icon,
+    completed: completed,
+),
+                  
+                  
+                  
+                      
+                
               );
             },
           ),
