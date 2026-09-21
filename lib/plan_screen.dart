@@ -2086,6 +2086,10 @@ class _PlanScreenState extends State<PlanScreen> {
                                               _isSavingTask = false;
                                             });
 
+                                            if (!dialogContext.mounted) {
+                                              return;
+                                            }
+
                                             Navigator.of(dialogContext).pop();
 
                                             ScaffoldMessenger.of(context)
