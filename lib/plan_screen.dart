@@ -2073,7 +2073,11 @@ final HabitService _habitService = HabitService();
                                               _isSavingTask = false;
                                             });
 
-                                            Navigator.of(dialogContext).pop();
+                                            if (!dialogContext.mounted) {
+  return;
+}
+
+Navigator.of(dialogContext).pop();
 
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
