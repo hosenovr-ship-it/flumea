@@ -22,26 +22,11 @@ final HabitService _habitService = HabitService();
 
   bool _isLoadingTasks = true;
   bool _isSavingTask = false;
+  bool _isSavingHabit = false;
 
   List<Map<String, dynamic>> tasks = [];
 
-  final List<Map<String, dynamic>> habits = [
-    {
-      'title': 'شرب الماء',
-      'icon': Icons.water_drop_outlined,
-      'completed': true,
-    },
-    {
-      'title': 'الرياضة',
-      'icon': Icons.fitness_center_outlined,
-      'completed': true,
-    },
-    {
-      'title': 'القراءة',
-      'icon': Icons.menu_book_outlined,
-      'completed': true,
-    },
-  ];
+  final List<Map<String, dynamic>> habits = [];
 
   @override
   void initState() {
@@ -269,44 +254,234 @@ final HabitService _habitService = HabitService();
     }
   }
   // ============================================================
-// Supabase - تحميل العادات
-// ============================================================
+  // Supabase - تحميل العادات
+  // ============================================================
 
-Future<void> _loadHabits() async {
-  try {
-    final loadedHabits = await _habitService.getHabits();
+  Future<void> _loadHabits() async {
+    try {
+      final loadedHabits = await _habitService.getHabits();
 
-    if (!mounted) {
+      if (!mounted) {
+        return;
+      }
+
+      if (loadedHabits.isEmpty) {
+        const defaultNames = [
+          'شرب الماء',
+          'الرياضة',
+          'القراءة',
+        ];
+
+        final createdHabits = <Map<String, dynamic>>[];
+
+        for (final name in defaultNames) {
+          final created = await _habitService.addHabit(
+            name: name,
+            description: '',
+            completed: false,
+          );
+          createdHabits.add(created);
+        }
+
+        if (!mounted) {
+          return;
+        }
+
+        setState(() {
+          habits.clear();
+          for (final habit in createdHabits) {
+            habits.add(_habitMap(habit));
+          }
+        });
+        return;
+      }
+
+      setState(() {
+        habits.clear();
+        for (final habit in loadedHabits) {
+          habits.add(_habitMap(habit));
+        }
+      });
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'تعذر تحميل العادات: $error',
+          ),
+        ),
+      );
+    }
+  }
+
+  Map<String, dynamic> _habitMap(Map<String, dynamic> habit) {
+    final name = _safeString(habit['name']);
+
+    return {
+      'id': habit['id'],
+      'title': name,
+      'description': _safeString(habit['description']),
+      'completed': _safeBool(habit['completed']),
+      'icon': _habitIconForName(name),
+    };
+  }
+
+  IconData _habitIconForName(String name) {
+    switch (name.trim()) {
+      case 'شرب الماء':
+        return Icons.water_drop_outlined;
+      case 'الرياضة':
+        return Icons.fitness_center_outlined;
+      case 'القراءة':
+        return Icons.menu_book_outlined;
+      case 'النوم':
+        return Icons.bed_outlined;
+      default:
+        return Icons.check_circle_outline;
+    }
+  }
+
+  // ============================================================
+  // Supabase - تحديث حالة العادة
+  // ============================================================
+
+  Future<void> _toggleHabit(
+    String id,
+    bool completed,
+  ) async {
+    if (id.isEmpty) {
       return;
     }
+
+    final index = habits.indexWhere(
+      (habit) => _safeString(habit['id']) == id,
+    );
+
+    if (index == -1) {
+      return;
+    }
+
+    final newValue = !completed;
 
     setState(() {
-      habits.clear();
-
-      for (final habit in loadedHabits) {
-        habits.add({
-          'id': habit['id'],
-          'title': habit['name'] ?? '',
-          'description': habit['description'] ?? '',
-          'completed': habit['completed'] ?? false,
-          'icon': Icons.check_circle_outline,
-        });
-      }
+      habits[index]['completed'] = newValue;
     });
-  } catch (error) {
-    if (!mounted) {
+
+    try {
+      await _habitService.updateHabit(
+        id: id,
+        completed: newValue,
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        habits[index]['completed'] = completed;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'تعذر تحديث العادة: $error',
+          ),
+        ),
+      );
+    }
+  }
+
+  // ============================================================
+  // إعادة العادة
+  // ============================================================
+
+  Future<void> _resetHabit(String id) async {
+    if (id.isEmpty) {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'تعذر تحميل العادات: $error',
-        ),
-      ),
+    final index = habits.indexWhere(
+      (habit) => _safeString(habit['id']) == id,
     );
+
+    if (index == -1) {
+      return;
+    }
+
+    final oldValue = _safeBool(habits[index]['completed']);
+
+    setState(() {
+      habits[index]['completed'] = false;
+    });
+
+    try {
+      await _habitService.resetHabit(id);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        habits[index]['completed'] = oldValue;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'تعذر إعادة العادة: $error',
+          ),
+        ),
+      );
+    }
   }
-}
+
+  // ============================================================
+  // حذف العادة
+  // ============================================================
+
+  Future<void> _deleteHabit(String id) async {
+    if (id.isEmpty) {
+      return;
+    }
+
+    final index = habits.indexWhere(
+      (habit) => _safeString(habit['id']) == id,
+    );
+
+    if (index == -1) {
+      return;
+    }
+
+    final removedHabit = Map<String, dynamic>.from(habits[index]);
+
+    setState(() {
+      habits.removeAt(index);
+    });
+
+    try {
+      await _habitService.deleteHabit(id);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        habits.insert(index, removedHabit);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'تعذر حذف العادة: $error',
+          ),
+        ),
+      );
+    }
+  }
+
     // ============================================================
   // تحديث حالة المهمة في Supabase
   // ============================================================
@@ -2033,43 +2208,29 @@ Navigator.of(context).pop();
 
   Widget _buildDailyHabits() {
     return Container(
-      padding:
-          const EdgeInsets.all(
-        16,
-      ),
-      decoration:
-          BoxDecoration(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(
-          22,
-        ),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: const Color(
-            0xFFE5EAF0,
-          ),
+          color: const Color(0xFFE5EAF0),
         ),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            mainAxisAlignment:
-                MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               const Text(
                 'عادات اليوم',
                 style: TextStyle(
                   color: navy,
                   fontSize: 17,
-                  fontWeight:
-                      FontWeight.w800,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
-              const SizedBox(
-                width: 7,
-              ),
+              const SizedBox(width: 7),
               const Icon(
                 Icons.repeat,
                 color: navy,
@@ -2077,99 +2238,60 @@ Navigator.of(context).pop();
               ),
             ],
           ),
-
-          const SizedBox(
-            height: 16,
-          ),
-
-          ...List.generate(
-            habits.length,
-            (index) {
-              final habit =
-                  habits[index];
-
-              final title =
-                  _safeString(
-                habit['title'],
-            
-              );
-
-              final icon =
-                  _safeIcon(
-                habit['icon'],
-                
-              );
-
-              final completed =
-                  _safeBool(
-                habit['completed'],
-              );
-
-              return Padding(
-                padding:
-                    EdgeInsets.only(
-                  bottom:
-                      index ==
-                              habits.length -
-                                  1
-                          ? 0
-                          : 10,
+          const SizedBox(height: 16),
+          if (habits.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                'لا توجد عادات بعد',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFF7B8798),
+                  fontSize: 13,
                 ),
-                child:
-                    _buildHabitRow(
-    id: _safeString(habit['id']),
-    title: title,
-    icon: icon,
-    completed: completed,
-),
-                  
-                  
-                  
-                      
-                
-              );
-            },
-          ),
-
-          const SizedBox(
-            height: 14,
-          ),
-
+              ),
+            )
+          else
+            ...List.generate(
+              habits.length,
+              (index) {
+                final habit = habits[index];
+                return Padding(
+                  padding: EdgeInsets.only(
+                    bottom: index == habits.length - 1 ? 0 : 10,
+                  ),
+                  child: _buildHabitRow(
+                    id: _safeString(habit['id']),
+                    title: _safeString(habit['title']),
+                    icon: _safeIcon(habit['icon']),
+                    completed: _safeBool(habit['completed']),
+                  ),
+                );
+              },
+            ),
+          const SizedBox(height: 14),
           OutlinedButton.icon(
-            onPressed:
-                _showAddHabitDialog,
-            icon: const Icon(
-              Icons.add,
+            onPressed: _isSavingHabit ? null : _showAddHabitDialog,
+            icon: Icon(
+              _isSavingHabit ? Icons.hourglass_top : Icons.add,
               size: 20,
             ),
-            label: const Text(
-              'إضافة عادة',
-              style: TextStyle(
+            label: Text(
+              _isSavingHabit ? 'جاري الحفظ...' : 'إضافة عادة',
+              style: const TextStyle(
                 fontSize: 14,
-                fontWeight:
-                    FontWeight.w800,
+                fontWeight: FontWeight.w800,
               ),
             ),
-            style:
-                OutlinedButton.styleFrom(
-              foregroundColor:
-                  blue,
-              side:
-                  const BorderSide(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: blue,
+              side: const BorderSide(
                 color: blue,
                 width: 1.3,
               ),
-              padding:
-                  const EdgeInsets
-                      .symmetric(
-                vertical: 12,
-              ),
-              shape:
-                  RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(
-                  16,
-                ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
           ),
@@ -2177,48 +2299,11 @@ Navigator.of(context).pop();
       ),
     );
   }
-// ============================================================
-// Supabase - تحديث حالة العادة
-// ============================================================
 
-Future<void> _toggleHabit(String id, bool completed) async {
-  if (id.isEmpty) {
-    return;
-  }
+  // ============================================================
+  // بطاقة العادة
+  // ============================================================
 
-  try {
-    await _habitService.updateHabit(
-      id: id,
-      completed: !completed,
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    final index = habits.indexWhere(
-      (habit) => _safeString(habit['id']) == id,
-    );
-
-    if (index != -1) {
-      setState(() {
-        habits[index]['completed'] = !completed;
-      });
-    }
-  } catch (error) {
-    if (!mounted) {
-      return;
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'تعذر تحديث العادة: $error',
-        ),
-      ),
-    );
-  }
-}
   Widget _buildHabitRow({
     required String title,
     required IconData icon,
@@ -2226,32 +2311,19 @@ Future<void> _toggleHabit(String id, bool completed) async {
     required String id,
   }) {
     return Container(
-      padding:
-          const EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: 13,
         vertical: 12,
       ),
-      decoration:
-          BoxDecoration(
+      decoration: BoxDecoration(
         color: completed
-            ? const Color(
-                0xFFF1FBF9,
-              )
-            : const Color(
-                0xFFF8FAFC,
-              ),
-        borderRadius:
-            BorderRadius.circular(
-          17,
-        ),
+            ? const Color(0xFFF1FBF9)
+            : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(17),
         border: Border.all(
           color: completed
-              ? const Color(
-                  0xFFD5F0EB,
-                )
-              : const Color(
-                  0xFFE7ECF2,
-                ),
+              ? const Color(0xFFD5F0EB)
+              : const Color(0xFFE7ECF2),
         ),
       ),
       child: Row(
@@ -2259,91 +2331,106 @@ Future<void> _toggleHabit(String id, bool completed) async {
           Container(
             width: 38,
             height: 38,
-            decoration:
-                BoxDecoration(
+            decoration: BoxDecoration(
               color: completed
                   ? cyan.withValues(alpha: 0.12)
-                      
-                  
-                  : blue.withValues(alpha: 0.08)
-                      
-                    ,
-              shape:
-                  BoxShape.circle,
+                  : blue.withValues(alpha: 0.08),
+              shape: BoxShape.circle,
             ),
             child: Icon(
-              completed
-                  ? Icons.check
-                  : icon,
-              color: completed
-                  ? cyan
-                  : blue,
+              completed ? Icons.check : icon,
+              color: completed ? cyan : blue,
               size: 20,
             ),
           ),
-
-          const SizedBox(
-            width: 12,
-          ),
-
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               title,
-              textAlign:
-                  TextAlign.right,
+              textAlign: TextAlign.right,
               style: TextStyle(
                 color: navy,
                 fontSize: 14,
-                fontWeight:
-                    FontWeight.w700,
-                decoration:
-                    completed
-                        ? TextDecoration
-                            .lineThrough
-                        : null,
-                decorationColor:
-                    navy,
+                fontWeight: FontWeight.w700,
+                decoration: completed
+                    ? TextDecoration.lineThrough
+                    : null,
+                decorationColor: navy,
               ),
             ),
           ),
-
-          const SizedBox(
-            width: 10,
+          const SizedBox(width: 4),
+          PopupMenuButton<String>(
+            tooltip: 'خيارات العادة',
+            padding: EdgeInsets.zero,
+            icon: const Icon(
+              Icons.more_vert_rounded,
+              color: Color(0xFF7B8798),
+              size: 21,
+            ),
+            onSelected: (value) async {
+              if (value == 'reset') {
+                await _resetHabit(id);
+              } else if (value == 'delete') {
+                await _deleteHabit(id);
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem<String>(
+                value: 'reset',
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Icon(
+                      Icons.refresh_rounded,
+                      color: blue,
+                    ),
+                    SizedBox(width: 10),
+                    Text('إعادة العادة'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'delete',
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Icon(
+                      Icons.delete_outline_rounded,
+                      color: Colors.red,
+                    ),
+                    SizedBox(width: 10),
+                    Text('حذف العادة'),
+                  ],
+                ),
+              ),
+            ],
           ),
-
+          const SizedBox(width: 4),
           GestureDetector(
-  onTap: () => _toggleHabit(id, completed),
-  child: Container(
-            width: 23,
-            height: 23,
-            decoration:
-                BoxDecoration(
-              color: completed
-                  ? cyan
-                  : Colors.white,
-              borderRadius:
-                  BorderRadius.circular(
-                7,
+            onTap: () => _toggleHabit(id, completed),
+            child: Container(
+              width: 23,
+              height: 23,
+              decoration: BoxDecoration(
+                color: completed ? cyan : Colors.white,
+                borderRadius: BorderRadius.circular(7),
+                border: Border.all(
+                  color: completed
+                      ? cyan
+                      : const Color(0xFFB9C4D0),
+                  width: 1.5,
+                ),
               ),
-              border: Border.all(
-                color: completed
-                    ? cyan
-                    : const Color(
-                        0xFFB9C4D0,
-                      ),
-                width: 1.5,
-              ),
+              child: completed
+                  ? const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 16,
+                    )
+                  : null,
             ),
-            child: completed
-                ? const Icon(
-                    Icons.check,
-                    color:
-                        Colors.white,
-                    size: 16,
-                  )
-                : null,
           ),
-            ),
         ],
       ),
     );
@@ -2354,48 +2441,33 @@ Future<void> _toggleHabit(String id, bool completed) async {
   // ============================================================
 
   void _showAddHabitDialog() {
-    final nameController =
-        TextEditingController();
+    final nameController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (dialogContext) {
         return Directionality(
-          textDirection:
-              TextDirection.rtl,
+          textDirection: TextDirection.rtl,
           child: AlertDialog(
-            backgroundColor:
-                Colors.white,
-            shape:
-                RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(
-                28,
-              ),
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
             ),
             title: const Text(
               'إضافة عادة جديدة',
-              textAlign:
-                  TextAlign.center,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 color: navy,
                 fontSize: 23,
-                fontWeight:
-                    FontWeight.w800,
+                fontWeight: FontWeight.w800,
               ),
             ),
-            content:
-                _habitDialogField(
-              controller:
-                  nameController,
-              label:
-                  'اسم العادة',
-              icon:
-                  Icons.repeat,
+            content: _habitDialogField(
+              controller: nameController,
+              label: 'اسم العادة',
+              icon: Icons.repeat,
             ),
-            actionsPadding:
-                const EdgeInsets
-                    .fromLTRB(
+            actionsPadding: const EdgeInsets.fromLTRB(
               16,
               0,
               16,
@@ -2405,124 +2477,100 @@ Future<void> _toggleHabit(String id, bool completed) async {
               Row(
                 children: [
                   Expanded(
-                    child:
-                        TextButton(
+                    child: TextButton(
                       onPressed: () {
-                        Navigator.pop(
-                          dialogContext,
-                        );
+                        Navigator.pop(dialogContext);
                       },
-                      style:
-                          TextButton
-                              .styleFrom(
-                        backgroundColor:
-                            const Color(
-                          0xFFF1F4F8,
-                        ),
-                        padding:
-                            const EdgeInsets
-                                .symmetric(
-                          vertical: 14,
-                        ),
-                        shape:
-                            RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius
-                                  .circular(
-                            18,
-                          ),
+                      style: TextButton.styleFrom(
+                        backgroundColor: const Color(0xFFF1F4F8),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
                         ),
                       ),
-                      child:
-                          const Text(
+                      child: const Text(
                         'إلغاء',
-                        style:
-                            TextStyle(
+                        style: TextStyle(
                           color: navy,
                           fontSize: 16,
-                          fontWeight:
-                              FontWeight
-                                  .w800,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
                   ),
-
-                  const SizedBox(
-                    width: 12,
-                  ),
-
+                  const SizedBox(width: 12),
                   Expanded(
-                    child:
-                        ElevatedButton(
-                      onPressed: () {
-                        final name =
-                            nameController
-                                .text
-                                .trim();
+                    child: ElevatedButton(
+                      onPressed: _isSavingHabit
+                          ? null
+                          : () async {
+                              final name = nameController.text.trim();
+                              if (name.isEmpty) {
+                                return;
+                              }
 
-                        if (name.isEmpty) {
-                          return;
-                        }
+                              setState(() {
+                                _isSavingHabit = true;
+                              });
 
-                        setState(() {
-                          habits.add({
-                            'title': name,
-                            'icon':
-                                Icons
-                                    .check_circle_outline,
-                            'completed':
-                                false,
-                          });
-                        });
+                              try {
+                                final created =
+                                    await _habitService.addHabit(
+                                  name: name,
+                                  description: '',
+                                  completed: false,
+                                );
 
-                        Navigator.pop(
-                          dialogContext,
-                        );
+                                if (!mounted) {
+                                  return;
+                                }
 
-                        ScaffoldMessenger
-                            .of(
-                          context,
-                        ).showSnackBar(
-                          const SnackBar(
-                            content:
-                                Text(
-                              'تمت إضافة العادة ✅',
-                            ),
-                          ),
-                        );
-                      },
-                      style:
-                          ElevatedButton
-                              .styleFrom(
-                        backgroundColor:
-                            blue,
-                        foregroundColor:
-                            Colors.white,
-                        padding:
-                            const EdgeInsets
-                                .symmetric(
-                          vertical: 14,
-                        ),
+                                setState(() {
+                                  habits.add(_habitMap(created));
+                                  _isSavingHabit = false;
+                                });
+
+                                Navigator.pop(dialogContext);
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'تم حفظ العادة بنجاح ✅',
+                                    ),
+                                  ),
+                                );
+                              } catch (error) {
+                                if (!mounted) {
+                                  return;
+                                }
+
+                                setState(() {
+                                  _isSavingHabit = false;
+                                });
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'تعذر حفظ العادة: $error',
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                         elevation: 0,
-                        shape:
-                            RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius
-                                  .circular(
-                            18,
-                          ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
                         ),
                       ),
-                      child:
-                          const Text(
+                      child: const Text(
                         'إضافة',
-                        style:
-                            TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
-                          fontWeight:
-                              FontWeight
-                                  .w800,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
