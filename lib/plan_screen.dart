@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'bottom_navigation.dart';
 import 'services/task_service.dart';
 import 'services/habit_service.dart';
@@ -17,7 +18,8 @@ class _PlanScreenState extends State<PlanScreen> {
   static const Color background = Color(0xFFF7FBFF);
 
   final TaskService _taskService = TaskService();
-final HabitService _habitService = HabitService();
+  final HabitService _habitService = HabitService();
+  final SupabaseClient _supabase = Supabase.instance.client;
   int selectedDay = 0;
 
   bool _isLoadingTasks = true;
@@ -96,6 +98,41 @@ final HabitService _habitService = HabitService();
   // SUPABASE - تحميل المهام
   // ============================================================
 
+  DateTime get _selectedDate {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final daysFromSunday = today.weekday % 7;
+
+    return today
+        .subtract(Duration(days: daysFromSunday))
+        .add(Duration(days: selectedDay));
+  }
+
+  String _dateKey(DateTime date) {
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return '${date.year}-$month-$day';
+  }
+
+  Future<void> _saveTaskDate(
+    String id,
+    DateTime date,
+  ) async {
+    final userId = _supabase.auth.currentUser?.id;
+
+    if (userId == null || id.isEmpty) {
+      throw Exception('يجب تسجيل الدخول أولاً');
+    }
+
+    await _supabase
+        .from('tasks')
+        .update({
+          'due_date': _dateKey(date),
+        })
+        .eq('id', id)
+        .eq('user_id', userId);
+  }
+
   Future<void> _loadTasks() async {
     if (!mounted) {
       return;
@@ -106,20 +143,46 @@ final HabitService _habitService = HabitService();
     });
 
     try {
-      final loadedTasks = await _taskService.getTasks();
+      final allTasks = await _taskService.getTasks();
 
       if (!mounted) {
         return;
       }
 
-      if (loadedTasks.isEmpty) {
+      if (allTasks.isEmpty) {
         await _createInitialTasks();
-      } else {
-        setState(() {
-          tasks = loadedTasks;
-          _isLoadingTasks = false;
-        });
+        return;
       }
+
+      // المهام القديمة التي لا تملك تاريخاً تُربط باليوم الحالي المعروض
+      // مرة واحدة حتى لا تختفي من التطبيق بعد إضافة نظام الأيام.
+      for (final task in allTasks) {
+        final id = _safeString(task['id']);
+        final dueDate = _safeString(task['due_date']);
+
+        if (id.isNotEmpty && dueDate.isEmpty) {
+          try {
+            await _saveTaskDate(id, _selectedDate);
+            task['due_date'] = _dateKey(_selectedDate);
+          } catch (_) {
+            // لا نوقف تحميل بقية المهام إذا تعذر تحديث مهمة قديمة.
+          }
+        }
+      }
+
+      final selectedDateKey = _dateKey(_selectedDate);
+      final selectedTasks = allTasks.where((task) {
+        return _safeString(task['due_date']) == selectedDateKey;
+      }).toList();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        tasks = selectedTasks;
+        _isLoadingTasks = false;
+      });
     } catch (error) {
       if (!mounted) {
         return;
@@ -224,6 +287,11 @@ final HabitService _habitService = HabitService();
           completed: task['completed'] as bool,
         );
 
+        await _saveTaskDate(
+          _safeString(created['id']),
+          _selectedDate,
+        );
+        created['due_date'] = _dateKey(_selectedDate);
         createdTasks.add(created);
       }
 
@@ -769,8 +837,9 @@ final HabitService _habitService = HabitService();
         GestureDetector(
           onTap: () {
             setState(() {
-              selectedDay = 0;
+              selectedDay = DateTime.now().weekday % 7;
             });
+            _loadTasks();
           },
           child: Container(
             padding:
@@ -835,6 +904,7 @@ final HabitService _habitService = HabitService();
                   setState(() {
                     selectedDay = index;
                   });
+                  _loadTasks();
                 },
                 child: _dayBox(
                   days[index][0],
@@ -1609,7 +1679,6 @@ final HabitService _habitService = HabitService();
 
   void _showAddTaskDialog() {
     final nameController = TextEditingController();
-    final descriptionController = TextEditingController();
     final timeController = TextEditingController();
     final categoryController = TextEditingController();
     final emojiController = TextEditingController();
@@ -1917,66 +1986,6 @@ final HabitService _habitService = HabitService();
 
                           const SizedBox(height: 11),
 
-                          Container(
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFBFCFE),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: const Color(0xFFDCE3EC),
-                                width: 1.2,
-                              ),
-                            ),
-                            child: TextField(
-                              controller: descriptionController,
-                              maxLines: 3,
-                              maxLength: 100,
-                              textAlign: TextAlign.right,
-                              decoration: InputDecoration(
-                                counterStyle: const TextStyle(
-                                  color: Color(0xFF7B8798),
-                                  fontSize: 12,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.fromLTRB(
-                                  16,
-                                  15,
-                                  16,
-                                  4,
-                                ),
-                                labelText: 'الوصف',
-                                alignLabelWithHint: true,
-                                labelStyle: const TextStyle(
-                                  color: navy,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                                hintText: '',
-                                suffixIcon: Padding(
-                                  padding: const EdgeInsets.only(
-                                    right: 10,
-                                    top: 10,
-                                  ),
-                                  child: Align(
-                                    alignment: Alignment.topRight,
-                                    child: Container(
-                                      width: 38,
-                                      height: 38,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFEAF4FF),
-                                        borderRadius:
-                                            BorderRadius.circular(13),
-                                      ),
-                                      child: const Icon(
-                                        Icons.description_outlined,
-                                        color: blue,
-                                        size: 22,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-
                           const SizedBox(height: 16),
 
                           Row(
@@ -2039,9 +2048,6 @@ final HabitService _habitService = HabitService();
                                                   : selectedCategory;
                                           final emoji =
                                               emojiController.text.trim();
-                                          final description =
-                                              descriptionController.text.trim();
-
                                           setState(() {
                                             _isSavingTask = true;
                                           });
@@ -2050,7 +2056,7 @@ final HabitService _habitService = HabitService();
                                             final newTask =
                                                 await _taskService.addTask(
                                               title: name,
-                                              description: description,
+                                              description: '',
                                               time: time.isEmpty
                                                   ? 'بدون وقت'
                                                   : time,
@@ -2064,6 +2070,13 @@ final HabitService _habitService = HabitService();
                                               completed: false,
                                             );
 
+                                            await _saveTaskDate(
+                                              _safeString(newTask['id']),
+                                              _selectedDate,
+                                            );
+                                            newTask['due_date'] =
+                                                _dateKey(_selectedDate);
+
                                             if (!mounted) {
                                               return;
                                             }
@@ -2073,11 +2086,7 @@ final HabitService _habitService = HabitService();
                                               _isSavingTask = false;
                                             });
 
-                                            if (!dialogContext.mounted) {
-  return;
-}
-
-Navigator.of(dialogContext).pop();
+                                            Navigator.of(dialogContext).pop();
 
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
