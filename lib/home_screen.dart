@@ -66,15 +66,14 @@ class HomeScreen extends StatelessWidget {
         ? 'صباح الخير'
         : 'مساء الخير';
 
-    // ترتيب الهيدر ثابت مثل التصميم المرجعي:
-    // FLUMEA في أقصى اليسار، والحساب والتحية في أقصى اليمين.
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return SizedBox(
+      width: double.infinity,
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 8),
+          const Positioned(
+            left: 0,
+            top: 10,
             child: Text(
               'FLUMEA',
               textDirection: TextDirection.ltr,
@@ -86,51 +85,55 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          const Spacer(),
-          Directionality(
-            textDirection: TextDirection.rtl,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundColor: const Color(0xFFE9EEF5),
-                  backgroundImage:
-                      avatarUrl != null && avatarUrl.isNotEmpty
-                          ? NetworkImage(avatarUrl)
-                          : null,
-                  child: avatarUrl == null || avatarUrl.isEmpty
-                      ? const Icon(
-                          Icons.person_rounded,
-                          color: darkBlue,
-                          size: 28,
-                        )
-                      : null,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  '$greeting، $userName 👋',
-                  textAlign: TextAlign.right,
-                  textDirection: TextDirection.rtl,
-                  style: const TextStyle(
-                    fontSize: 25,
-                    height: 1.15,
-                    fontWeight: FontWeight.w800,
-                    color: darkBlue,
+          Positioned(
+            right: 0,
+            top: 0,
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundColor: const Color(0xFFE9EEF5),
+                    backgroundImage:
+                        avatarUrl != null && avatarUrl.isNotEmpty
+                            ? NetworkImage(avatarUrl)
+                            : null,
+                    child: avatarUrl == null || avatarUrl.isEmpty
+                        ? const Icon(
+                            Icons.person_rounded,
+                            color: darkBlue,
+                            size: 28,
+                          )
+                        : null,
                   ),
-                ),
-                const SizedBox(height: 7),
-                const Text(
-                  'يوم جديد، فرصة جديدة لتصبح أفضل نسخة منك.',
-                  textAlign: TextAlign.right,
-                  textDirection: TextDirection.rtl,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: grayText,
-                    height: 1.2,
+                  const SizedBox(height: 10),
+                  Text(
+                    '$greeting، $userName 👋',
+                    textAlign: TextAlign.right,
+                    textDirection: TextDirection.rtl,
+                    style: const TextStyle(
+                      fontSize: 25,
+                      height: 1.15,
+                      fontWeight: FontWeight.w800,
+                      color: darkBlue,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 7),
+                  const Text(
+                    'يوم جديد، فرصة جديدة لتصبح أفضل نسخة منك.',
+                    textAlign: TextAlign.right,
+                    textDirection: TextDirection.rtl,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: grayText,
+                      height: 1.2,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -159,58 +162,67 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          const SizedBox(width: 5),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                const Text(
-                  'تقدمك اليوم',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 19,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 25),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
-                    _ProgressStat(
-                      icon: Icons.track_changes_rounded,
-                      value: '3/5',
-                      label: 'المهام',
-                      iconColor: Color(0xFF4B9FFF),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          children: [
+            Expanded(
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        'تقدمك اليوم',
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 19,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                     ),
-                    _VerticalDivider(),
-                    _ProgressStat(
-                      icon: Icons.local_fire_department_rounded,
-                      value: '2/3',
-                      label: 'العادات',
-                      iconColor: Color(0xFF49D59B),
+                    const SizedBox(height: 25),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        _ProgressStat(
+                          icon: Icons.track_changes_rounded,
+                          value: '3/5',
+                          label: 'المهام',
+                          iconColor: Color(0xFF4B9FFF),
+                        ),
+                        _VerticalDivider(),
+                        _ProgressStat(
+                          icon: Icons.local_fire_department_rounded,
+                          value: '2/3',
+                          label: 'العادات',
+                          iconColor: Color(0xFF49D59B),
+                        ),
+                        _VerticalDivider(),
+                        _ProgressStat(
+                          icon: Icons.favorite_border_rounded,
+                          value: '1,450',
+                          label: 'سعرة حرارية',
+                          iconColor: Color(0xFF8C78FF),
+                        ),
+                      ],
                     ),
-                    _VerticalDivider(),
-                    _ProgressStat(
-                      icon: Icons.favorite_border_rounded,
-                      value: '1,450',
-                      label: 'سعرة حرارية',
-                      iconColor: Color(0xFF8C78FF),
-                    ),
+                    const SizedBox(height: 24),
                   ],
                 ),
-                const SizedBox(height: 24),
-              ],
+              ),
             ),
-          ),
-          const SizedBox(width: 15),
-          const _DailyProgressRing(
-            progress: 0.65,
-            value: '65%',
-            label: 'اليوم',
-          ),
-        ],
+            const SizedBox(width: 15),
+            const _DailyProgressRing(
+              progress: 0.65,
+              value: '65%',
+              label: 'اليوم',
+            ),
+          ],
+        ),
       ),
     );
   }
