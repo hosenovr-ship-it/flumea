@@ -57,80 +57,67 @@ class HomeScreen extends StatelessWidget {
     if (userName.isEmpty && user?.email != null) {
       userName = user!.email!.split('@').first.trim();
     }
-    if (userName.isEmpty) {
-      userName = 'صديقي';
-    }
+    if (userName.isEmpty) userName = 'صديقي';
 
     final hour = DateTime.now().hour;
     final greeting = hour >= 5 && hour < 12 ? 'صباح الخير' : 'مساء الخير';
 
     return SizedBox(
       width: double.infinity,
-      child: Row(
-        textDirection: TextDirection.ltr,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: Text(
-              'FLUMEA',
-              textDirection: TextDirection.ltr,
-              style: TextStyle(
-                color: darkBlue,
-                fontSize: 16,
-                letterSpacing: 4.0,
-                fontWeight: FontWeight.w700,
+          Row(
+            textDirection: TextDirection.ltr,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Text(
+                  'FLUMEA',
+                  textDirection: TextDirection.ltr,
+                  style: TextStyle(
+                    color: darkBlue,
+                    fontSize: 16,
+                    letterSpacing: 4.0,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
+              const Spacer(),
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: const Color(0xFFE9EEF5),
+                backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
+                    ? NetworkImage(avatarUrl)
+                    : null,
+                child: avatarUrl == null || avatarUrl.isEmpty
+                    ? const Icon(Icons.person_rounded, color: darkBlue, size: 28)
+                    : null,
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '$greeting، $userName 👋',
+            textAlign: TextAlign.right,
+            textDirection: TextDirection.rtl,
+            style: const TextStyle(
+              fontSize: 25,
+              height: 1.15,
+              fontWeight: FontWeight.w800,
+              color: darkBlue,
             ),
           ),
-          const Spacer(),
-          Align(
-            alignment: Alignment.topRight,
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: const Color(0xFFE9EEF5),
-                    backgroundImage:
-                        avatarUrl != null && avatarUrl.isNotEmpty
-                            ? NetworkImage(avatarUrl)
-                            : null,
-                    child: avatarUrl == null || avatarUrl.isEmpty
-                        ? const Icon(
-                            Icons.person_rounded,
-                            color: darkBlue,
-                            size: 28,
-                          )
-                        : null,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    '$greeting، $userName 👋',
-                    textAlign: TextAlign.right,
-                    textDirection: TextDirection.rtl,
-                    style: const TextStyle(
-                      fontSize: 25,
-                      height: 1.15,
-                      fontWeight: FontWeight.w800,
-                      color: darkBlue,
-                    ),
-                  ),
-                  const SizedBox(height: 7),
-                  const Text(
-                    'يوم جديد، فرصة جديدة لتصبح أفضل نسخة منك.',
-                    textAlign: TextAlign.right,
-                    textDirection: TextDirection.rtl,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: grayText,
-                      height: 1.2,
-                    ),
-                  ),
-                ],
-              ),
+          const SizedBox(height: 7),
+          const Text(
+            'يوم جديد، فرصة جديدة لتصبح أفضل نسخة منك.',
+            textAlign: TextAlign.right,
+            textDirection: TextDirection.rtl,
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.3,
+              color: grayText,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -356,6 +343,7 @@ class HomeScreen extends StatelessWidget {
       child: Column(
         children: [
           Row(
+            textDirection: TextDirection.ltr,
             children: [
               const Expanded(
                 child: _CaloriesRing(
