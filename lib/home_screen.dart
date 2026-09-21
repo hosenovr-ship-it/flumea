@@ -66,72 +66,75 @@ class HomeScreen extends StatelessWidget {
         ? 'صباح الخير'
         : 'مساء الخير';
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: const Color(0xFFE9EEF5),
-                backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
-                    ? NetworkImage(avatarUrl)
-                    : null,
-                child: avatarUrl == null || avatarUrl.isEmpty
-                    ? const Icon(
-                        Icons.person_rounded,
-                        color: darkBlue,
-                        size: 28,
-                      )
-                    : null,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                '$greeting، $userName 👋',
-                textAlign: TextAlign.right,
-                textDirection: TextDirection.rtl,
-                style: const TextStyle(
-                  fontSize: 25,
-                  height: 1.15,
-                  fontWeight: FontWeight.w800,
-                  color: darkBlue,
-                ),
-              ),
-              const SizedBox(height: 7),
-              const Text(
-                'يوم جديد، فرصة جديدة لتصبح أفضل نسخة منك.',
-                textAlign: TextAlign.right,
-                textDirection: TextDirection.rtl,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: grayText,
-                  height: 1.2,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 18),
-        Column(
-          children: [
-            const SizedBox(height: 3),
-            const _FlumeaMark(),
-            const SizedBox(height: 5),
-            const Text(
+    // ترتيب الهيدر ثابت مثل التصميم المرجعي:
+    // FLUMEA في أقصى اليسار، والحساب والتحية في أقصى اليمين.
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text(
               'FLUMEA',
               textDirection: TextDirection.ltr,
               style: TextStyle(
                 color: darkBlue,
-                fontSize: 11,
-                letterSpacing: 3.0,
-                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                letterSpacing: 4.0,
+                fontWeight: FontWeight.w700,
               ),
             ),
-          ],
-        ),
-      ],
+          ),
+          const Spacer(),
+          Directionality(
+            textDirection: TextDirection.rtl,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: const Color(0xFFE9EEF5),
+                  backgroundImage:
+                      avatarUrl != null && avatarUrl.isNotEmpty
+                          ? NetworkImage(avatarUrl)
+                          : null,
+                  child: avatarUrl == null || avatarUrl.isEmpty
+                      ? const Icon(
+                          Icons.person_rounded,
+                          color: darkBlue,
+                          size: 28,
+                        )
+                      : null,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '$greeting، $userName 👋',
+                  textAlign: TextAlign.right,
+                  textDirection: TextDirection.rtl,
+                  style: const TextStyle(
+                    fontSize: 25,
+                    height: 1.15,
+                    fontWeight: FontWeight.w800,
+                    color: darkBlue,
+                  ),
+                ),
+                const SizedBox(height: 7),
+                const Text(
+                  'يوم جديد، فرصة جديدة لتصبح أفضل نسخة منك.',
+                  textAlign: TextAlign.right,
+                  textDirection: TextDirection.rtl,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: grayText,
+                    height: 1.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -198,7 +201,6 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
-
               ],
             ),
           ),
