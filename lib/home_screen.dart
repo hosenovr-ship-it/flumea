@@ -520,46 +520,6 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _FlumeaMark extends StatelessWidget {
-  const _FlumeaMark();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox(
-      width: 40,
-      height: 31,
-      child: CustomPaint(
-        painter: _FlumeaMarkPainter(),
-      ),
-    );
-  }
-}
-
-class _FlumeaMarkPainter extends CustomPainter {
-  const _FlumeaMarkPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFF32C6B4)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 6
-      ..strokeCap = StrokeCap.round;
-
-    for (var i = 0; i < 3; i++) {
-      final path = Path();
-      final y = 7.0 + (i * 9.0);
-      path.moveTo(4, y + 2);
-      path.cubicTo(10, y - 2, 14, y - 2, 20, y + 2);
-      path.cubicTo(26, y + 6, 31, y + 6, 36, y + 2);
-      canvas.drawPath(path, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
 class _ProgressStat extends StatelessWidget {
   final IconData icon;
   final String value;
