@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'bottom_navigation.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -44,72 +45,87 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildHeader() {
+    final user = Supabase.instance.client.auth.currentUser;
+    final metadata = user?.userMetadata;
+
+    final rawName = metadata?['full_name'] ??
+        metadata?['name'] ??
+        metadata?['display_name'];
+    final avatarUrl = metadata?['avatar_url']?.toString();
+
+    String userName = rawName?.toString().trim() ?? '';
+    if (userName.isEmpty && user?.email != null) {
+      userName = user!.email!.split('@').first.trim();
+    }
+    if (userName.isEmpty) {
+      userName = 'صديقي';
+    }
+
+    final hour = DateTime.now().hour;
+    final greeting = hour >= 5 && hour < 12
+        ? 'صباح الخير'
+        : 'مساء الخير';
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const CircleAvatar(
-          radius: 22,
-          backgroundColor: Color(0xFFE9EEF5),
-          child: Icon(
-            Icons.person,
-            color: darkBlue,
-            size: 27,
-          ),
-        ),
-        const Spacer(),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            const Text(
-              'صباح الخير، حسين 👋',
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 25,
-                height: 1.15,
-                fontWeight: FontWeight.w800,
-                color: darkBlue,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: const Color(0xFFE9EEF5),
+                backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
+                    ? NetworkImage(avatarUrl)
+                    : null,
+                child: avatarUrl == null || avatarUrl.isEmpty
+                    ? const Icon(
+                        Icons.person_rounded,
+                        color: darkBlue,
+                        size: 28,
+                      )
+                    : null,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'يوم جديد، فرصة جديدة لتصبح أفضل نسخة منك.',
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 14,
-                color: grayText,
-                height: 1.2,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(width: 14),
-        Column(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Center(
-                child: Text(
-                  '≈',
-                  style: TextStyle(
-                    color: teal,
-                    fontSize: 30,
-                    fontWeight: FontWeight.w900,
-                  ),
+              const SizedBox(height: 10),
+              Text(
+                '$greeting، $userName 👋',
+                textAlign: TextAlign.right,
+                textDirection: TextDirection.rtl,
+                style: const TextStyle(
+                  fontSize: 25,
+                  height: 1.15,
+                  fontWeight: FontWeight.w800,
+                  color: darkBlue,
                 ),
               ),
-            ),
+              const SizedBox(height: 7),
+              const Text(
+                'يوم جديد، فرصة جديدة لتصبح أفضل نسخة منك.',
+                textAlign: TextAlign.right,
+                textDirection: TextDirection.rtl,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: grayText,
+                  height: 1.2,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 18),
+        Column(
+          children: [
+            const SizedBox(height: 3),
+            const _FlumeaMark(),
             const SizedBox(height: 5),
             const Text(
               'FLUMEA',
+              textDirection: TextDirection.ltr,
               style: TextStyle(
                 color: darkBlue,
-                fontSize: 10,
-                letterSpacing: 2.5,
+                fontSize: 11,
+                letterSpacing: 3.0,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -182,15 +198,7 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
-                const Text(
-                  'استمر، أنت على الطريق الصحيح! ☀️',
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color: Color(0xD9FFFFFF),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+
               ],
             ),
           ),
@@ -508,6 +516,46 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class _FlumeaMark extends StatelessWidget {
+  const _FlumeaMark();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      width: 40,
+      height: 31,
+      child: CustomPaint(
+        painter: _FlumeaMarkPainter(),
+      ),
+    );
+  }
+}
+
+class _FlumeaMarkPainter extends CustomPainter {
+  const _FlumeaMarkPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF32C6B4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 6
+      ..strokeCap = StrokeCap.round;
+
+    for (var i = 0; i < 3; i++) {
+      final path = Path();
+      final y = 7.0 + (i * 9.0);
+      path.moveTo(4, y + 2);
+      path.cubicTo(10, y - 2, 14, y - 2, 20, y + 2);
+      path.cubicTo(26, y + 6, 31, y + 6, 36, y + 2);
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _ProgressStat extends StatelessWidget {
