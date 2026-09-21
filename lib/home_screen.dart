@@ -45,14 +45,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    User? user;
-
-    try {
-      user = Supabase.instance.client.auth.currentUser;
-    } catch (_) {
-      user = null;
-    }
-
+    final user = Supabase.instance.client.auth.currentUser;
     final metadata = user?.userMetadata;
 
     final rawName = metadata?['full_name'] ??
@@ -69,18 +62,16 @@ class HomeScreen extends StatelessWidget {
     }
 
     final hour = DateTime.now().hour;
-    final greeting = hour >= 5 && hour < 12
-        ? 'صباح الخير'
-        : 'مساء الخير';
+    final greeting = hour >= 5 && hour < 12 ? 'صباح الخير' : 'مساء الخير';
 
     return SizedBox(
       width: double.infinity,
-      child: Stack(
-        clipBehavior: Clip.none,
+      child: Row(
+        textDirection: TextDirection.ltr,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Positioned(
-            left: 0,
-            top: 10,
+          const Padding(
+            padding: EdgeInsets.only(top: 8),
             child: Text(
               'FLUMEA',
               textDirection: TextDirection.ltr,
@@ -92,13 +83,12 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          Positioned(
-            right: 0,
-            top: 0,
+          const Spacer(),
+          Align(
+            alignment: Alignment.topRight,
             child: Directionality(
               textDirection: TextDirection.rtl,
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   CircleAvatar(
@@ -169,67 +159,65 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: Row(
-          children: [
-            Expanded(
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        'تقدمك اليوم',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 19,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 25),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        _ProgressStat(
-                          icon: Icons.track_changes_rounded,
-                          value: '3/5',
-                          label: 'المهام',
-                          iconColor: Color(0xFF4B9FFF),
-                        ),
-                        _VerticalDivider(),
-                        _ProgressStat(
-                          icon: Icons.local_fire_department_rounded,
-                          value: '2/3',
-                          label: 'العادات',
-                          iconColor: Color(0xFF49D59B),
-                        ),
-                        _VerticalDivider(),
-                        _ProgressStat(
-                          icon: Icons.favorite_border_rounded,
-                          value: '1,450',
-                          label: 'سعرة حرارية',
-                          iconColor: Color(0xFF8C78FF),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              'تقدمك اليوم',
+              textAlign: TextAlign.right,
+              textDirection: TextDirection.rtl,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 19,
+                fontWeight: FontWeight.w800,
               ),
             ),
-            const SizedBox(width: 15),
-            const _DailyProgressRing(
-              progress: 0.65,
-              value: '65%',
-              label: 'اليوم',
+          ),
+          const SizedBox(height: 14),
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _ProgressStat(
+                        icon: Icons.favorite_border_rounded,
+                        value: '1,450',
+                        label: 'سعرة حرارية',
+                        iconColor: Color(0xFF8C78FF),
+                      ),
+                      _VerticalDivider(),
+                      _ProgressStat(
+                        icon: Icons.local_fire_department_rounded,
+                        value: '2/3',
+                        label: 'العادات',
+                        iconColor: Color(0xFF49D59B),
+                      ),
+                      _VerticalDivider(),
+                      _ProgressStat(
+                        icon: Icons.track_changes_rounded,
+                        value: '3/5',
+                        label: 'المهام',
+                        iconColor: Color(0xFF4B9FFF),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const _DailyProgressRing(
+                  progress: 0.65,
+                  value: '65%',
+                  label: 'اليوم',
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
