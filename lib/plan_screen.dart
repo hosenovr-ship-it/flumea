@@ -2230,49 +2230,6 @@ Navigator.of(dialogContext).pop();
   // حقول نافذة إضافة المهمة
   // ============================================================
 
-  Widget _dialogField({
-    required TextEditingController
-        controller,
-    required String label,
-    required IconData icon,
-  }) {
-    return TextField(
-      controller:
-          controller,
-      textAlign:
-          TextAlign.right,
-      decoration:
-          InputDecoration(
-        labelText:
-            label,
-        prefixIcon:
-            Icon(
-          icon,
-          color: blue,
-        ),
-        border:
-            OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(
-            18,
-          ),
-        ),
-        focusedBorder:
-            OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(
-            18,
-          ),
-          borderSide:
-              const BorderSide(
-            color: blue,
-            width: 2,
-          ),
-        ),
-      ),
-    );
-  }
-
   // ============================================================
   // أهداف الأسبوع
   // ============================================================
