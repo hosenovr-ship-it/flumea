@@ -1608,382 +1608,617 @@ final HabitService _habitService = HabitService();
   // ============================================================
 
   void _showAddTaskDialog() {
-    final nameController =
-        TextEditingController();
+    final nameController = TextEditingController();
+    final descriptionController = TextEditingController();
+    final timeController = TextEditingController();
+    final categoryController = TextEditingController();
+    final emojiController = TextEditingController();
 
-    final descriptionController =
-        TextEditingController();
-
-    final timeController =
-        TextEditingController();
-
-    final categoryController =
-        TextEditingController();
-
-    final emojiController =
-        TextEditingController();
+    String selectedCategory = '';
 
     showDialog(
       context: context,
+      barrierColor: Colors.black54,
       builder: (dialogContext) {
         return Directionality(
-          textDirection:
-              TextDirection.rtl,
-          child: AlertDialog(
-            backgroundColor:
-                Colors.white,
-            shape:
-                RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(28),
+          textDirection: TextDirection.rtl,
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: 18,
+              vertical: 24,
             ),
-            title: const Text(
-              'إضافة مهمة جديدة',
-              textAlign:
-                  TextAlign.center,
-              style: TextStyle(
-                color: navy,
-                fontSize: 24,
-                fontWeight:
-                    FontWeight.w800,
-              ),
-            ),
-            content:
-                SingleChildScrollView(
-              child: Column(
-                mainAxisSize:
-                    MainAxisSize.min,
-                children: [
-                  const Text(
-                    'ابدأ بخطوة صغيرة نحو هدفك الكبير',
-                    textAlign:
-                        TextAlign.center,
-                    style: TextStyle(
-                      color:
-                          Color(0xFF7B8798),
-                      fontSize: 13,
+            child: StatefulBuilder(
+              builder: (dialogContext, setDialogState) {
+                return ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: 520,
+                    maxHeight: 760,
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x33000000),
+                          blurRadius: 28,
+                          offset: Offset(0, 12),
+                        ),
+                      ],
                     ),
-                  ),
-
-                  const SizedBox(
-                    height: 18,
-                  ),
-
-                  _dialogField(
-                    controller:
-                        nameController,
-                    label:
-                        'اسم المهمة *',
-                    icon:
-                        Icons.edit_outlined,
-                  ),
-
-                  const SizedBox(
-                    height: 12,
-                  ),
-
-                  _dialogField(
-                    controller:
-                        timeController,
-                    label:
-                        'الوقت',
-                    icon:
-                        Icons.access_time,
-                  ),
-
-                  const SizedBox(
-                    height: 12,
-                  ),
-
-                  _dialogField(
-                    controller:
-                        categoryController,
-                    label:
-                        'التصنيف',
-                    icon:
-                        Icons.local_offer_outlined,
-                  ),
-
-                  const SizedBox(
-                    height: 12,
-                  ),
-
-                  _dialogField(
-                    controller:
-                        emojiController,
-                    label:
-                        'الإيموجي',
-                    icon:
-                        Icons.sentiment_satisfied_alt,
-                  ),
-
-                  const SizedBox(
-                    height: 12,
-                  ),
-
-                  TextField(
-                    controller:
-                        descriptionController,
-                    maxLines: 3,
-                    maxLength: 100,
-                    textAlign:
-                        TextAlign.right,
-                    decoration:
-                        InputDecoration(
-                      labelText:
-                          'الوصف',
-                      alignLabelWithHint:
-                          true,
-                      prefixIcon:
-                          const Icon(
-                        Icons
-                            .description_outlined,
-                        color:
-                            Color(0xFFE5AA27),
-                      ),
-                      border:
-                          OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius
-                                .circular(
-                          18,
-                        ),
-                      ),
-                      focusedBorder:
-                          OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius
-                                .circular(
-                          18,
-                        ),
-                        borderSide:
-                            const BorderSide(
-                          color: blue,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actionsPadding:
-                const EdgeInsets
-                    .fromLTRB(
-              16,
-              0,
-              16,
-              16,
-            ),
-            actions: [
-              Row(
-                children: [
-                  Expanded(
-                    child:
-                        TextButton(
-                      onPressed: () {
-                        Navigator.pop(
-                          dialogContext,
-                        );
-                      },
-                      style:
-                          TextButton
-                              .styleFrom(
-                        backgroundColor:
-                            const Color(
-                          0xFFF1F4F8,
-                        ),
-                        padding:
-                            const EdgeInsets
-                                .symmetric(
-                          vertical: 14,
-                        ),
-                        shape:
-                            RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius
-                                  .circular(
-                            18,
+                    clipBehavior: Clip.antiAlias,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.end,
+                                    children: [
+                                      const Text(
+                                        'إضافة مهمة جديدة',
+                                        textAlign: TextAlign.right,
+                                        style: TextStyle(
+                                          color: navy,
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w800,
+                                          height: 1.2,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 7),
+                                      const Text(
+                                        'ابدأ بخطوة صغيرة نحو هدفك الكبير',
+                                        textAlign: TextAlign.right,
+                                        style: TextStyle(
+                                          color: Color(0xFF7B8798),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          height: 1.35,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Container(
+                                        width: 62,
+                                        height: 4,
+                                        decoration: BoxDecoration(
+                                          color: blue,
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Container(
+                                width: 94,
+                                height: 94,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEAF4FF),
+                                  borderRadius: BorderRadius.circular(28),
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.assignment_outlined,
+                                      color: blue,
+                                      size: 58,
+                                    ),
+                                    Positioned(
+                                      right: 10,
+                                      bottom: 8,
+                                      child: Container(
+                                        width: 34,
+                                        height: 34,
+                                        decoration: const BoxDecoration(
+                                          color: cyan,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.add,
+                                          color: Colors.white,
+                                          size: 23,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
-                      child:
-                          const Text(
-                        'إلغاء',
-                        style:
-                            TextStyle(
-                          color: navy,
-                          fontSize: 16,
-                          fontWeight:
-                              FontWeight
-                                  .w800,
-                        ),
-                      ),
-                    ),
-                  ),
 
-                  const SizedBox(
-                    width: 12,
-                  ),
+                          const SizedBox(height: 18),
 
-                  Expanded(
-                    child:
-                        ElevatedButton(
-                      onPressed:
-                          _isSavingTask
-                              ? null
-                              : () async {
-                                  final name =
-                                      nameController
-                                          .text
-                                          .trim();
+                          _modernTaskField(
+                            controller: nameController,
+                            label: 'اسم المهمة *',
+                            hint: '',
+                            icon: Icons.edit_outlined,
+                            iconBackground: const Color(0xFFEAF4FF),
+                            iconColor: blue,
+                          ),
 
-                                  if (name.isEmpty) {
-                                    return;
-                                  }
+                          const SizedBox(height: 11),
 
-                                  final time =
-                                      timeController
-                                          .text
-                                          .trim();
-
-                                  final category =
-                                      categoryController
-                                          .text
-                                          .trim();
-
-                                  final emoji =
-                                      emojiController
-                                          .text
-                                          .trim();
-
-                                  final description =
-                                      descriptionController
-                                          .text
-                                          .trim();
-
-                                  setState(() {
-                                    _isSavingTask =
-                                        true;
-                                  });
-
-                                  try {
-                                    final newTask =
-                                        await _taskService
-                                            .addTask(
-                                      title: name,
-                                      description:
-                                          description,
-                                      time: time.isEmpty
-                                          ? 'بدون وقت'
-                                          : time,
-                                      tag: category.isEmpty
-                                          ? 'عام'
-                                          : category,
-                                      emoji: emoji.isEmpty
-                                          ? '📝'
-                                          : emoji,
-                                      color:
-                                          '#1478D4',
-                                      completed:
-                                          false,
-                                    );
-
-                                    if (!mounted) {
-                                      return;
-                                    }
-
-                                    setState(() {
-                                      tasks.add(
-                                        newTask,
-                                      );
-                                      _isSavingTask =
-                                          false;
-                                    });
-
-                                    if (!mounted) {
-  return;
-}
-
-Navigator.of(context).pop();
-                                      
-                                    
-
-                                    ScaffoldMessenger
-                                        .of(
-                                      context,
-                                    ).showSnackBar(
-                                      const SnackBar(
-                                        content:
-                                            Text(
-                                          'تم حفظ المهمة بنجاح ✅',
-                                        ),
-                                      ),
-                                    );
-                                  } catch (error) {
-                                    if (!mounted) {
-                                      return;
-                                    }
-
-                                    setState(() {
-                                      _isSavingTask =
-                                          false;
-                                    });
-
-                                    ScaffoldMessenger
-                                        .of(
-                                      context,
-                                    ).showSnackBar(
-                                      SnackBar(
-                                        content:
-                                            Text(
-                                          'تعذر حفظ المهمة: $error',
-                                        ),
-                                      ),
-                                    );
-                                  }
+                          GestureDetector(
+                            onTap: () async {
+                              final picked = await showTimePicker(
+                                context: dialogContext,
+                                initialTime: TimeOfDay.now(),
+                                builder: (context, child) {
+                                  return Directionality(
+                                    textDirection: TextDirection.rtl,
+                                    child: child!,
+                                  );
                                 },
-                      style:
-                          ElevatedButton
-                              .styleFrom(
-                        backgroundColor:
-                            blue,
-                        foregroundColor:
-                            Colors.white,
-                        padding:
-                            const EdgeInsets
-                                .symmetric(
-                          vertical: 14,
-                        ),
-                        elevation: 0,
-                        shape:
-                            RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius
-                                  .circular(
-                            18,
+                              );
+
+                              if (picked == null) {
+                                return;
+                              }
+
+                              final hour = picked.hourOfPeriod == 0
+                                  ? 12
+                                  : picked.hourOfPeriod;
+                              final minute = picked.minute
+                                  .toString()
+                                  .padLeft(2, '0');
+                              final period = picked.period == DayPeriod.am
+                                  ? 'ص'
+                                  : 'م';
+
+                              setDialogState(() {
+                                timeController.text = '$hour:$minute $period';
+                              });
+                            },
+                            child: AbsorbPointer(
+                              child: _modernTaskField(
+                                controller: timeController,
+                                label: 'الوقت *',
+                                hint: '',
+                                icon: Icons.access_time_rounded,
+                                iconBackground: const Color(0xFFFFEEF0),
+                                iconColor: const Color(0xFFEF5350),
+                                suffixIcon: Icons.keyboard_arrow_down_rounded,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      child:
-                          const Text(
-                        'إضافة المهمة +',
-                        style:
-                            TextStyle(
-                          fontSize: 16,
-                          fontWeight:
-                              FontWeight
-                                  .w800,
-                        ),
+
+                          const SizedBox(height: 11),
+
+                          GestureDetector(
+                            onTap: () async {
+                              final categories = [
+                                'دراسة',
+                                'صحة',
+                                'إنتاجية',
+                                'تطوير الذات',
+                                'شخصي',
+                                'مراجعة',
+                                'عام',
+                              ];
+
+                              final selected = await showModalBottomSheet<String>(
+                                context: dialogContext,
+                                backgroundColor: Colors.white,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(28),
+                                  ),
+                                ),
+                                builder: (sheetContext) {
+                                  return Directionality(
+                                    textDirection: TextDirection.rtl,
+                                    child: SafeArea(
+                                      child: Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                          18,
+                                          18,
+                                          18,
+                                          12,
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              width: 42,
+                                              height: 4,
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFD9E1EA),
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 14),
+                                            const Text(
+                                              'اختر التصنيف',
+                                              style: TextStyle(
+                                                color: navy,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            ...categories.map(
+                                              (category) => ListTile(
+                                                contentPadding:
+                                                    const EdgeInsets.symmetric(
+                                                  horizontal: 4,
+                                                ),
+                                                title: Text(
+                                                  category,
+                                                  textAlign: TextAlign.right,
+                                                  style: const TextStyle(
+                                                    color: navy,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                                leading: const Icon(
+                                                  Icons.local_offer_outlined,
+                                                  color: blue,
+                                                ),
+                                                onTap: () {
+                                                  Navigator.of(sheetContext)
+                                                      .pop(category);
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+
+                              if (selected == null) {
+                                return;
+                              }
+
+                              setDialogState(() {
+                                selectedCategory = selected;
+                                categoryController.text = selected;
+                              });
+                            },
+                            child: AbsorbPointer(
+                              child: _modernTaskField(
+                                controller: categoryController,
+                                label: 'التصنيف *',
+                                hint: '',
+                                icon: Icons.local_offer_outlined,
+                                iconBackground: const Color(0xFFFFF3DD),
+                                iconColor: const Color(0xFFE5A623),
+                                suffixIcon:
+                                    Icons.keyboard_arrow_down_rounded,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 11),
+
+                          _modernTaskField(
+                            controller: emojiController,
+                            label: 'الإيموجي',
+                            hint: '',
+                            icon: Icons.sentiment_satisfied_alt_outlined,
+                            iconBackground: const Color(0xFFEDEBFF),
+                            iconColor: const Color(0xFF6C63C7),
+                          ),
+
+                          const SizedBox(height: 11),
+
+                          Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFBFCFE),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: const Color(0xFFDCE3EC),
+                                width: 1.2,
+                              ),
+                            ),
+                            child: TextField(
+                              controller: descriptionController,
+                              maxLines: 3,
+                              maxLength: 100,
+                              textAlign: TextAlign.right,
+                              decoration: InputDecoration(
+                                counterStyle: const TextStyle(
+                                  color: Color(0xFF7B8798),
+                                  fontSize: 12,
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  15,
+                                  16,
+                                  4,
+                                ),
+                                labelText: 'الوصف',
+                                alignLabelWithHint: true,
+                                labelStyle: const TextStyle(
+                                  color: navy,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                hintText: '',
+                                suffixIcon: Padding(
+                                  padding: const EdgeInsets.only(
+                                    right: 10,
+                                    top: 10,
+                                  ),
+                                  child: Align(
+                                    alignment: Alignment.topRight,
+                                    child: Container(
+                                      width: 38,
+                                      height: 38,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFEAF4FF),
+                                        borderRadius:
+                                            BorderRadius.circular(13),
+                                      ),
+                                      child: const Icon(
+                                        Icons.description_outlined,
+                                        color: blue,
+                                        size: 22,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextButton(
+                                  onPressed: _isSavingTask
+                                      ? null
+                                      : () {
+                                          Navigator.of(dialogContext).pop();
+                                        },
+                                  style: TextButton.styleFrom(
+                                    backgroundColor:
+                                        const Color(0xFFF0F3F8),
+                                    foregroundColor: navy,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 15,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(19),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'إلغاء',
+                                    style: TextStyle(
+                                      color: navy,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                flex: 1,
+                                child: ElevatedButton.icon(
+                                  onPressed: _isSavingTask
+                                      ? null
+                                      : () async {
+                                          final name =
+                                              nameController.text.trim();
+
+                                          if (name.isEmpty) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'اكتب اسم المهمة أولاً',
+                                                ),
+                                              ),
+                                            );
+                                            return;
+                                          }
+
+                                          final time =
+                                              timeController.text.trim();
+                                          final category =
+                                              selectedCategory.isEmpty
+                                                  ? categoryController.text.trim()
+                                                  : selectedCategory;
+                                          final emoji =
+                                              emojiController.text.trim();
+                                          final description =
+                                              descriptionController.text.trim();
+
+                                          setState(() {
+                                            _isSavingTask = true;
+                                          });
+
+                                          try {
+                                            final newTask =
+                                                await _taskService.addTask(
+                                              title: name,
+                                              description: description,
+                                              time: time.isEmpty
+                                                  ? 'بدون وقت'
+                                                  : time,
+                                              tag: category.isEmpty
+                                                  ? 'عام'
+                                                  : category,
+                                              emoji: emoji.isEmpty
+                                                  ? '📝'
+                                                  : emoji,
+                                              color: '#1478D4',
+                                              completed: false,
+                                            );
+
+                                            if (!mounted) {
+                                              return;
+                                            }
+
+                                            setState(() {
+                                              tasks.add(newTask);
+                                              _isSavingTask = false;
+                                            });
+
+                                            Navigator.of(dialogContext).pop();
+
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'تم حفظ المهمة بنجاح ✅',
+                                                ),
+                                              ),
+                                            );
+                                          } catch (error) {
+                                            if (!mounted) {
+                                              return;
+                                            }
+
+                                            setState(() {
+                                              _isSavingTask = false;
+                                            });
+
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  'تعذر حفظ المهمة: $error',
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                  icon: const Icon(
+                                    Icons.add,
+                                    size: 23,
+                                  ),
+                                  label: const Text(
+                                    'إضافة المهمة',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: blue,
+                                    foregroundColor: Colors.white,
+                                    disabledBackgroundColor:
+                                        const Color(0xFFB8CBE0),
+                                    disabledForegroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 15,
+                                    ),
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(19),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              ),
-            ],
+                );
+              },
+            ),
           ),
         );
       },
+    );
+  }
+
+  Widget _modernTaskField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    required Color iconBackground,
+    required Color iconColor,
+    IconData? suffixIcon,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFFBFCFE),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFDCE3EC),
+          width: 1.2,
+        ),
+      ),
+      child: TextField(
+        controller: controller,
+        textAlign: TextAlign.right,
+        style: const TextStyle(
+          color: navy,
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+        ),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: hint.isEmpty ? null : hint,
+          hintStyle: const TextStyle(
+            color: Color(0xFF8B98A8),
+            fontSize: 14,
+          ),
+          labelText: label,
+          labelStyle: const TextStyle(
+            color: navy,
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+          ),
+          floatingLabelBehavior: FloatingLabelBehavior.auto,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 17,
+          ),
+          prefixIcon: Padding(
+            padding: const EdgeInsets.only(
+              left: 10,
+              right: 12,
+            ),
+            child: Align(
+              widthFactor: 1,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: iconBackground,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Icon(
+                  icon,
+                  color: iconColor,
+                  size: 22,
+                ),
+              ),
+            ),
+          ),
+          suffixIcon: suffixIcon == null
+              ? null
+              : Icon(
+                  suffixIcon,
+                  color: navy,
+                  size: 25,
+                ),
+        ),
+      ),
     );
   }
 
