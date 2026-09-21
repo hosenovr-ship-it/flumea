@@ -45,7 +45,14 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    final user = Supabase.instance.client.auth.currentUser;
+    User? user;
+
+    try {
+      user = Supabase.instance.client.auth.currentUser;
+    } catch (_) {
+      user = null;
+    }
+
     final metadata = user?.userMetadata;
 
     final rawName = metadata?['full_name'] ??
