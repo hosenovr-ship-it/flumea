@@ -2530,6 +2530,10 @@ Navigator.of(context).pop();
                                   _isSavingHabit = false;
                                 });
 
+                                if (!dialogContext.mounted) {
+                                  return;
+                                }
+
                                 Navigator.pop(dialogContext);
 
                                 if (!mounted) {
