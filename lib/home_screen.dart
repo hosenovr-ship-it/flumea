@@ -59,8 +59,9 @@ class _HomeScreenState extends State<HomeScreen> {
           .from('tasks')
           .select('id,title,description,completed,priority,due_date,user_id,time,tag,emoji,color')
           .eq('user_id', user.id)
-          .eq('due_date', today)
-          .order('time');
+          .order('due_date', ascending: false)
+          .order('time')
+          .limit(5);
 
       final habitResponse = await _supabase
           .from('habits')
@@ -312,11 +313,27 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          const Text(
+            'تقدمك اليوم',
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            textDirection: TextDirection.rtl,
+            children: [
+              _DailyProgressRing(progress: _dailyProgress, percent: percent),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 const _ProgressStat(
                   icon: Icons.favorite_border_rounded,
@@ -338,11 +355,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   label: 'المهام',
                   iconColor: const Color(0xFF4B9FFF),
                 ),
-              ],
-            ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          _DailyProgressRing(progress: _dailyProgress, percent: percent),
         ],
       ),
     );
@@ -471,6 +488,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               children: [
                 Row(
+                  textDirection: TextDirection.ltr,
                   children: [
                     Expanded(
                       child: _CaloriesRing(
@@ -482,6 +500,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(width: 6),
                     const Expanded(
                       child: Column(
+                        textDirection: TextDirection.rtl,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           _MealLine(name: 'الفطور', calories: '420 سعرة', icon: '☀️'),
