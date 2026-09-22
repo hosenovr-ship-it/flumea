@@ -279,40 +279,49 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
     }
   }
 
-  Future<void> _repeatFood(MealData meal, FoodItem item) async {
-    final user = _supabase.auth.currentUser;
-    if (user == null) return;
+  Future<void> _editFood(MealData meal, FoodItem item) async {
+    final FoodItem? result = await Navigator.push<FoodItem>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddCustomFoodScreen(
+          mealTitle: meal.title,
+          initialItem: item,
+        ),
+      ),
+    );
+
+    if (result == null || item.id == null) return;
 
     try {
-      final date = _dateOnly(selectedDate).toIso8601String().split('T').first;
-      final inserted = await _supabase
-          .from('food_logs')
-          .insert({
-            'user_id': user.id,
-            'meal_type': meal.title,
-            'food_name': item.name,
-            'serving_size': item.amount,
-            'calories': item.calories,
-            'protein': item.protein,
-            'carbs': item.carbs,
-            'fat': item.fat,
-            'logged_date': date,
-            'selected': false,
-          })
-          .select('id')
-          .single();
+      await _supabase.from('food_logs').update({
+        'meal_type': meal.title,
+        'food_name': result.name,
+        'serving_size': result.amount,
+        'calories': result.calories,
+        'protein': result.protein,
+        'carbs': result.carbs,
+        'fat': result.fat,
+        'selected': item.selected,
+      }).eq('id', item.id!);
 
       if (!mounted) return;
       setState(() {
-        meal.items.add(item.copyWith(id: inserted['id']?.toString(), selected: false));
+        final index = meal.items.indexWhere((food) => food.id == item.id);
+        if (index != -1) {
+          meal.items[index] = result.copyWith(
+            id: item.id,
+            selected: item.selected,
+          );
+        }
       });
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تمت إعادة الوجبة.')),
+        const SnackBar(content: Text('تم تعديل الوجبة بنجاح ❤️‍🔥')),
       );
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('تعذر إعادة الوجبة: $error')),
+        SnackBar(content: Text('تعذر تعديل الوجبة: $error')),
       );
     }
   }
@@ -807,67 +816,8 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
-        textDirection: TextDirection.ltr,
+        textDirection: TextDirection.rtl,
         children: [
-          SizedBox(
-            width: 42,
-            child: PopupMenuButton<String>(
-              tooltip: 'خيارات الطعام',
-              padding: EdgeInsets.zero,
-              icon: const Icon(Icons.more_vert, color: Color(0xFF173B67)),
-              onSelected: (value) async {
-                if (value == 'repeat') {
-                  await _repeatFood(meal, item);
-                } else if (value == 'delete') {
-                  await _deleteFood(meal, item);
-                }
-              },
-              itemBuilder: (context) => const [
-                PopupMenuItem<String>(
-                  value: 'repeat',
-                  child: Row(
-                    children: [
-                      Icon(Icons.replay, color: Color(0xFF18A980)),
-                      SizedBox(width: 10),
-                      Text('إعادة الوجبة'),
-                    ],
-                  ),
-                ),
-                PopupMenuItem<String>(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete_outline, color: Colors.redAccent),
-                      SizedBox(width: 10),
-                      Text('حذف الوجبة'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          InkWell(
-            borderRadius: BorderRadius.circular(30),
-            onTap: () => _toggleFoodSelection(item),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: item.selected ? green : Colors.white,
-                border: Border.all(
-                  color: item.selected ? green : const Color(0xFFB8C1CB),
-                  width: 2,
-                ),
-              ),
-              child: item.selected
-                  ? const Icon(Icons.check, size: 20, color: Colors.white)
-                  : null,
-            ),
-          ),
-          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -889,6 +839,65 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                   style: const TextStyle(
                     color: Color(0xFF929BA5),
                     fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 14),
+          InkWell(
+            borderRadius: BorderRadius.circular(30),
+            onTap: () => _toggleFoodSelection(item),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: item.selected ? green : Colors.white,
+                border: Border.all(
+                  color: item.selected ? green : const Color(0xFFB8C1CB),
+                  width: 2,
+                ),
+              ),
+              child: item.selected
+                  ? const Icon(Icons.check, size: 20, color: Colors.white)
+                  : null,
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 42,
+            child: PopupMenuButton<String>(
+              tooltip: 'خيارات الطعام',
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.more_vert, color: Color(0xFF173B67)),
+              onSelected: (value) async {
+                if (value == 'edit') {
+                  await _editFood(meal, item);
+                } else if (value == 'delete') {
+                  await _deleteFood(meal, item);
+                }
+              },
+              itemBuilder: (context) => const [
+                PopupMenuItem<String>(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit_outlined, color: Color(0xFF18A980)),
+                      SizedBox(width: 10),
+                      Text('تعديل الوجبة'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_outline, color: Colors.redAccent),
+                      SizedBox(width: 10),
+                      Text('حذف الوجبة'),
+                    ],
                   ),
                 ),
               ],
@@ -975,10 +984,12 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
 
 class AddCustomFoodScreen extends StatefulWidget {
   final String mealTitle;
+  final FoodItem? initialItem;
 
   const AddCustomFoodScreen({
     super.key,
     required this.mealTitle,
+    this.initialItem,
   });
 
   @override
@@ -989,6 +1000,17 @@ class _AddCustomFoodScreenState extends State<AddCustomFoodScreen> {
   final nameController = TextEditingController();
   final caloriesController = TextEditingController();
   final amountController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final item = widget.initialItem;
+    if (item != null) {
+      nameController.text = item.name;
+      amountController.text = item.amount;
+      caloriesController.text = item.calories.toString();
+    }
+  }
 
   @override
   void dispose() {
@@ -1041,7 +1063,7 @@ class _AddCustomFoodScreenState extends State<AddCustomFoodScreen> {
         protein: protein,
         carbs: carbs,
         fat: fat,
-        selected: true,
+        selected: widget.initialItem?.selected ?? false,
       ),
     );
   }
@@ -1060,7 +1082,7 @@ class _AddCustomFoodScreenState extends State<AddCustomFoodScreen> {
             onPressed: () => Navigator.pop(context),
           ),
           title: const Text(
-            'إضافة طعام مخصص',
+            widget.initialItem == null ? 'إضافة طعام مخصص' : 'تعديل الطعام',
             style: TextStyle(
               color: Color(0xFF142B49),
               fontSize: 21,
@@ -1139,8 +1161,8 @@ class _AddCustomFoodScreenState extends State<AddCustomFoodScreen> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: const Text(
-                      'حفظ الطعام',
+                    child: Text(
+                      widget.initialItem == null ? 'حفظ الطعام' : 'حفظ التعديل',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
