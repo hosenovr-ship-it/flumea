@@ -65,9 +65,10 @@ class _HomeScreenState extends State<HomeScreen> {
             'id,title,description,completed,priority,due_date,user_id,time,tag,emoji,color',
           )
           .eq('user_id', user.id)
-          .order('due_date', ascending: false)
+          // الصفحة الرئيسية تعرض مهام اليوم فقط.
+          .eq('due_date', _today())
           .order('time')
-          .limit(20);
+          .limit(50);
 
       tasks = List<Map<String, dynamic>>.from(response);
     } catch (e) {
@@ -160,33 +161,39 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _habitCompleted[habitId] = newValue);
 
     try {
-      final existing = await _supabase
-          .from('habit_logs')
-          .select('id')
-          .eq('habit_id', habitId)
-          .eq('user_id', user.id)
-          .eq('completed_date', today)
-          .maybeSingle();
-
-      if (existing != null) {
-        await _supabase
-            .from('habit_logs')
-            .update({'completed': newValue})
-            .eq('id', existing['id']);
-      } else {
-        await _supabase.from('habit_logs').insert({
-          'habit_id': habitId,
-          'user_id': user.id,
-          'completed_date': today,
-          'completed': newValue,
-        });
-      }
-
+      // احفظ الحالة الأساسية في جدول habits أولاً.
       await _supabase
           .from('habits')
           .update({'completed': newValue})
           .eq('id', habitId)
           .eq('user_id', user.id);
+
+      // سجل اليوم اختياري؛ إذا كانت سياسات RLS تمنعه فلا نُفشل حفظ العادة.
+      try {
+        final existing = await _supabase
+            .from('habit_logs')
+            .select('id')
+            .eq('habit_id', habitId)
+            .eq('user_id', user.id)
+            .eq('completed_date', today)
+            .maybeSingle();
+
+        if (existing != null) {
+          await _supabase
+              .from('habit_logs')
+              .update({'completed': newValue})
+              .eq('id', existing['id']);
+        } else {
+          await _supabase.from('habit_logs').insert({
+            'habit_id': habitId,
+            'user_id': user.id,
+            'completed_date': today,
+            'completed': newValue,
+          });
+        }
+      } catch (logError) {
+        debugPrint('FLUMEA optional habit log error: $logError');
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() => _habitCompleted[habitId] = oldValue);
@@ -492,21 +499,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       onTap: () => _toggleHabit(habit),
                     );
                   }),
-                if (habitsToShow.isNotEmpty)
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        'عرض الكل ←',
-                        style: TextStyle(
-                          color: blue,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
