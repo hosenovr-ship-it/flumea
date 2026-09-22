@@ -32,7 +32,6 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _habits = [];
   final Map<String, bool> _habitCompleted = {};
 
-  int _foodTotalCalories = 0;
   int _foodSelectedCalories = 0;
   Map<String, int> _mealCalories = {
     'الفطور': 0,
@@ -154,12 +153,10 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
 
-      _foodTotalCalories = totalCalories;
       _foodSelectedCalories = selectedCalories;
       _mealCalories = mealTotals;
     } catch (e) {
       debugPrint('FLUMEA food logs load error: $e');
-      _foodTotalCalories = 0;
       _foodSelectedCalories = 0;
       _mealCalories = {
         'الفطور': 0,
@@ -425,7 +422,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const _ProgressStat(
+                _ProgressStat(
                   icon: Icons.favorite_border_rounded,
                   value: '$_foodSelectedCalories',
                   label: 'سعرة حرارية',
