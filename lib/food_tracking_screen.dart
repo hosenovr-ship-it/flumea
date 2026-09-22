@@ -16,7 +16,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
   static const Color softGreen = Color(0xFFE9FBF5);
 
   final SupabaseClient _supabase = Supabase.instance.client;
-  final int dailyGoal = 2200;
+  
 
   DateTime selectedDate = _dateOnly(DateTime.now());
   bool _loading = true;
@@ -82,7 +82,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
       final rows = await _supabase
           .from('food_logs')
           .select(
-            'id, meal_type, food_name, serving_size, calories, protein, carbs, fat, logged_date',
+            'id, meal_type, food_name, serving_size, calories, protein, carbs, fat, logged_date, selected',
           )
           .eq('user_id', user.id)
           .eq('logged_date', date)
@@ -105,6 +105,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
             protein: _toDouble(row['protein']),
             carbs: _toDouble(row['carbs']),
             fat: _toDouble(row['fat']),
+            selected: row['selected'] == true,
           ),
         );
       }
@@ -133,13 +134,21 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
     return double.tryParse(value?.toString() ?? '') ?? 0;
   }
 
-  Iterable<FoodItem> get _selectedFoods sync* {
+  Iterable<FoodItem> get _allFoods sync* {
     for (final meal in meals) {
       for (final item in meal.items) {
-        if (item.selected) yield item;
+        yield item;
       }
     }
   }
+
+  Iterable<FoodItem> get _selectedFoods => _allFoods.where((item) => item.selected);
+
+  int get totalFoodCalories =>
+      _allFoods.fold<int>(0, (sum, item) => sum + item.calories);
+
+  int get completedCalories =>
+      _selectedFoods.fold<int>(0, (sum, item) => sum + item.calories);
 
   double get totalProtein =>
       _selectedFoods.fold<double>(0, (sum, item) => sum + item.protein);
@@ -149,9 +158,6 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
 
   double get totalFat =>
       _selectedFoods.fold<double>(0, (sum, item) => sum + item.fat);
-
-  int get totalCalories =>
-      _selectedFoods.fold<int>(0, (sum, item) => sum + item.calories);
 
   String get formattedDate {
     const months = [
@@ -228,11 +234,12 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
             'carbs': item.carbs,
             'fat': item.fat,
             'logged_date': date,
+            'selected': false,
           })
           .select('id')
           .single();
 
-      final savedItem = item.copyWith(id: inserted['id']?.toString(), selected: true);
+      final savedItem = item.copyWith(id: inserted['id']?.toString(), selected: false);
       if (!mounted) return;
       setState(() {
         meal.items.add(savedItem);
@@ -290,13 +297,14 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
             'carbs': item.carbs,
             'fat': item.fat,
             'logged_date': date,
+            'selected': false,
           })
           .select('id')
           .single();
 
       if (!mounted) return;
       setState(() {
-        meal.items.add(item.copyWith(id: inserted['id']?.toString(), selected: true));
+        meal.items.add(item.copyWith(id: inserted['id']?.toString(), selected: false));
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('تمت إعادة الوجبة.')),
@@ -505,7 +513,9 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
   }
 
   Widget _buildDailySummary() {
-    final percentage = (totalCalories / dailyGoal).clamp(0.0, 1.0).toDouble();
+    final percentage = totalFoodCalories == 0
+        ? 0.0
+        : (completedCalories / totalFoodCalories).clamp(0.0, 1.0).toDouble();
 
     return Container(
       width: double.infinity,
@@ -593,7 +603,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          '$totalCalories',
+                          '$completedCalories',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -620,7 +630,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '$totalCalories من $dailyGoal',
+                      '$completedCalories من $totalFoodCalories',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 17,
@@ -795,114 +805,93 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
 
   Widget _buildFoodRow(MealData meal, FoodItem item) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 7),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
+        textDirection: TextDirection.ltr,
         children: [
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+          SizedBox(
+            width: 42,
+            child: PopupMenuButton<String>(
+              tooltip: 'خيارات الطعام',
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.more_vert, color: Color(0xFF173B67)),
+              onSelected: (value) async {
+                if (value == 'repeat') {
+                  await _repeatFood(meal, item);
+                } else if (value == 'delete') {
+                  await _deleteFood(meal, item);
+                }
+              },
+              itemBuilder: (context) => const [
+                PopupMenuItem<String>(
+                  value: 'repeat',
+                  child: Row(
                     children: [
-                      Text(
-                        item.name,
-                        textAlign: TextAlign.right,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Color(0xFF27384D),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        item.amount,
-                        textAlign: TextAlign.right,
-                        style: const TextStyle(
-                          color: Color(0xFF929BA5),
-                          fontSize: 11,
-                        ),
-                      ),
+                      Icon(Icons.replay, color: Color(0xFF18A980)),
+                      SizedBox(width: 10),
+                      Text('إعادة الوجبة'),
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  onTap: () => _toggleFoodSelection(item),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: item.selected ? green : Colors.white,
-                      border: Border.all(
-                        color: item.selected
-                            ? green
-                            : const Color(0xFFB8C1CB),
-                        width: 1.7,
-                      ),
-                    ),
-                    child: item.selected
-                        ? const Icon(
-                            Icons.check,
-                            size: 16,
-                            color: Colors.white,
-                          )
-                        : null,
+                PopupMenuItem<String>(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_outline, color: Colors.redAccent),
+                      SizedBox(width: 10),
+                      Text('حذف الوجبة'),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 4),
-          PopupMenuButton<String>(
-            tooltip: 'خيارات الطعام',
-            padding: EdgeInsets.zero,
-            icon: const Icon(Icons.more_vert, color: Color(0xFF6E7885)),
-            onSelected: (value) async {
-              if (value == 'repeat') {
-                await _repeatFood(meal, item);
-              } else if (value == 'delete') {
-                await _deleteFood(meal, item);
-              }
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem<String>(
-                value: 'repeat',
-                child: Row(
-                  children: [
-                    Icon(Icons.replay, color: Color(0xFF18A980)),
-                    SizedBox(width: 10),
-                    Text('إعادة الوجبة'),
-                  ],
+          const SizedBox(width: 8),
+          InkWell(
+            borderRadius: BorderRadius.circular(30),
+            onTap: () => _toggleFoodSelection(item),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: item.selected ? green : Colors.white,
+                border: Border.all(
+                  color: item.selected ? green : const Color(0xFFB8C1CB),
+                  width: 2,
                 ),
               ),
-              PopupMenuItem<String>(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete_outline, color: Colors.redAccent),
-                    SizedBox(width: 10),
-                    Text('حذف الوجبة'),
-                  ],
-                ),
-              ),
-            ],
+              child: item.selected
+                  ? const Icon(Icons.check, size: 20, color: Colors.white)
+                  : null,
+            ),
           ),
-          const SizedBox(width: 4),
-          SizedBox(
-            width: 75,
-            child: Text(
-              '${item.calories} سعرة',
-              textAlign: TextAlign.left,
-              style: const TextStyle(
-                color: Color(0xFF6E7885),
-                fontSize: 12,
-              ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  item.name,
+                  textAlign: TextAlign.right,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFF142B49),
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  '${item.amount} • ${item.calories} سعرة',
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                    color: Color(0xFF929BA5),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -910,10 +899,24 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
     );
   }
 
-  void _toggleFoodSelection(FoodItem item) {
-    setState(() {
-      item.selected = !item.selected;
-    });
+  Future<void> _toggleFoodSelection(FoodItem item) async {
+    final nextValue = !item.selected;
+    setState(() => item.selected = nextValue);
+
+    if (item.id == null) return;
+
+    try {
+      await _supabase
+          .from('food_logs')
+          .update({'selected': nextValue})
+          .eq('id', item.id!);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => item.selected = !nextValue);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تعذر حفظ حالة الطعام: $error')),
+      );
+    }
   }
 
   void _showMealPicker() {
