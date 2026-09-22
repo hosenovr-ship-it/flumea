@@ -46,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadHomeData() async {
     final user = _supabase.auth.currentUser;
+
     if (user == null) {
       if (mounted) setState(() => _loading = false);
       return;
@@ -76,12 +77,11 @@ class _HomeScreenState extends State<HomeScreen> {
       final completedMap = <String, bool>{};
       for (final row in logResponse) {
         final habitId = row['habit_id']?.toString();
-        if (habitId != null) {
-          completedMap[habitId] = row['completed'] == true;
-        }
+        if (habitId != null) completedMap[habitId] = row['completed'] == true;
       }
 
       if (!mounted) return;
+
       setState(() {
         _tasks = List<Map<String, dynamic>>.from(taskResponse);
         _habits = List<Map<String, dynamic>>.from(habitResponse);
@@ -103,17 +103,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final oldValue = task['completed'] == true;
     final newValue = !oldValue;
 
-    setState(() {
-      task['completed'] = newValue;
-    });
+    setState(() => task['completed'] = newValue);
 
     try {
       await _supabase.from('tasks').update({'completed': newValue}).eq('id', id);
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        task['completed'] = oldValue;
-      });
+      setState(() => task['completed'] = oldValue);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('تعذر حفظ حالة المهمة')),
       );
@@ -129,9 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final newValue = !oldValue;
     final today = _today();
 
-    setState(() {
-      _habitCompleted[habitId] = newValue;
-    });
+    setState(() => _habitCompleted[habitId] = newValue);
 
     try {
       final existing = await _supabase
@@ -163,9 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
           .eq('user_id', user.id);
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _habitCompleted[habitId] = oldValue;
-      });
+      setState(() => _habitCompleted[habitId] = oldValue);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('تعذر حفظ حالة العادة')),
       );
@@ -175,12 +167,14 @@ class _HomeScreenState extends State<HomeScreen> {
   int get _completedTasks =>
       _tasks.where((task) => task['completed'] == true).length;
 
-  int get _completedHabits =>
-      _habits.where((habit) => _habitCompleted[habit['id']?.toString()] == true).length;
+  int get _completedHabits => _habits
+      .where((habit) => _habitCompleted[habit['id']?.toString()] == true)
+      .length;
 
   double get _dailyProgress {
     final taskRatio = _tasks.isEmpty ? 0.0 : _completedTasks / _tasks.length;
     final habitRatio = _habits.isEmpty ? 0.0 : _completedHabits / _habits.length;
+
     if (_tasks.isEmpty && _habits.isEmpty) return 0.0;
     if (_tasks.isEmpty) return habitRatio;
     if (_habits.isEmpty) return taskRatio;
@@ -195,7 +189,9 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: background,
         body: SafeArea(
           child: _loading
-              ? const Center(child: CircularProgressIndicator(color: teal))
+              ? const Center(
+                  child: CircularProgressIndicator(color: teal),
+                )
               : RefreshIndicator(
                   onRefresh: _loadHomeData,
                   color: teal,
@@ -225,12 +221,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHeader() {
-    final user = Supabase.instance.client.auth.currentUser;
+    final user = _supabase.auth.currentUser;
     final metadata = user?.userMetadata;
-
-    final rawName = metadata?['full_name'] ??
-        metadata?['name'] ??
-        metadata?['display_name'];
+    final rawName = metadata?['full_name'] ?? metadata?['name'] ?? metadata?['display_name'];
     final avatarUrl = metadata?['avatar_url']?.toString();
 
     String userName = rawName?.toString().trim() ?? '';
@@ -242,66 +235,60 @@ class _HomeScreenState extends State<HomeScreen> {
     final hour = DateTime.now().hour;
     final greeting = hour >= 5 && hour < 12 ? 'صباح الخير' : 'مساء الخير';
 
-    return SizedBox(
-      width: double.infinity,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            textDirection: TextDirection.ltr,
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: Text(
-                  'FLUMEA',
-                  textDirection: TextDirection.ltr,
-                  style: TextStyle(
-                    color: darkBlue,
-                    fontSize: 16,
-                    letterSpacing: 4.0,
-                    fontWeight: FontWeight.w700,
-                  ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          textDirection: TextDirection.ltr,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(top: 8),
+              child: Text(
+                'FLUMEA',
+                style: TextStyle(
+                  color: darkBlue,
+                  fontSize: 16,
+                  letterSpacing: 4.0,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const Spacer(),
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: const Color(0xFFE9EEF5),
-                backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
-                    ? NetworkImage(avatarUrl)
-                    : null,
-                child: avatarUrl == null || avatarUrl.isEmpty
-                    ? const Icon(Icons.person_rounded, color: darkBlue, size: 28)
-                    : null,
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            '$greeting، $userName 👋',
-            textAlign: TextAlign.right,
-            textDirection: TextDirection.rtl,
-            style: const TextStyle(
-              fontSize: 25,
-              height: 1.15,
-              fontWeight: FontWeight.w800,
-              color: darkBlue,
             ),
-          ),
-          const SizedBox(height: 7),
-          const Text(
-            'يوم جديد، فرصة جديدة لتصبح أفضل نسخة منك.',
-            textAlign: TextAlign.right,
-            textDirection: TextDirection.rtl,
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.3,
-              color: grayText,
-              fontWeight: FontWeight.w500,
+            const Spacer(),
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: Color(0xFFE9EEF5),
+              backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
+                  ? NetworkImage(avatarUrl)
+                  : null,
+              child: avatarUrl == null || avatarUrl.isEmpty
+                  ? const Icon(Icons.person_rounded, color: darkBlue, size: 28)
+                  : null,
             ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Text(
+          '$greeting، $userName 👋',
+          textAlign: TextAlign.right,
+          style: const TextStyle(
+            fontSize: 25,
+            height: 1.15,
+            fontWeight: FontWeight.w800,
+            color: darkBlue,
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 7),
+        const Text(
+          'يوم جديد، فرصة جديدة لتصبح أفضل نسخة منك.',
+          textAlign: TextAlign.right,
+          style: TextStyle(
+            fontSize: 14,
+            height: 1.3,
+            color: grayText,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     );
   }
 
@@ -319,77 +306,49 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(23),
         boxShadow: [
           BoxShadow(
-            color: darkBlue.withValues(alpha: 0.10),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 7),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Row(
         children: [
-          const Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              'تقدمك اليوم',
-              textAlign: TextAlign.right,
-              textDirection: TextDirection.rtl,
-              style: TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w800),
-            ),
-          ),
-          const SizedBox(height: 14),
-          Directionality(
-            textDirection: TextDirection.ltr,
+          Expanded(
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      const _ProgressStat(
-                        icon: Icons.favorite_border_rounded,
-                        value: '1,450',
-                        label: 'سعرة حرارية',
-                        iconColor: Color(0xFF8C78FF),
-                      ),
-                      const _VerticalDivider(),
-                      _ProgressStat(
-                        icon: Icons.local_fire_department_rounded,
-                        value: '${_completedHabits}/${_habits.length}',
-                        label: 'العادات',
-                        iconColor: const Color(0xFF49D59B),
-                      ),
-                      const _VerticalDivider(),
-                      _ProgressStat(
-                        icon: Icons.track_changes_rounded,
-                        value: '${_completedTasks}/${_tasks.length}',
-                        label: 'المهام',
-                        iconColor: const Color(0xFF4B9FFF),
-                      ),
-                    ],
-                  ),
+                const _ProgressStat(
+                  icon: Icons.favorite_border_rounded,
+                  value: '1,450',
+                  label: 'سعرة حرارية',
+                  iconColor: Color(0xFF8C78FF),
                 ),
-                const SizedBox(width: 12),
-                _DailyProgressRing(
-                  progress: _dailyProgress,
-                  value: '$percent%',
-                  label: 'اليوم',
+                const _VerticalDivider(),
+                _ProgressStat(
+                  icon: Icons.local_fire_department_rounded,
+                  value: '$_completedHabits/${_habits.length}',
+                  label: 'العادات',
+                  iconColor: const Color(0xFF49D59B),
+                ),
+                const _VerticalDivider(),
+                _ProgressStat(
+                  icon: Icons.track_changes_rounded,
+                  value: '$_completedTasks/${_tasks.length}',
+                  label: 'المهام',
+                  iconColor: const Color(0xFF4B9FFF),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 12),
+          _DailyProgressRing(progress: _dailyProgress, percent: percent),
         ],
       ),
     );
   }
 
   Widget _buildTodayPlan() {
-    final visibleTasks = _tasks.take(5).toList();
-    final completed = _completedTasks;
-    final total = _tasks.length;
-    final progress = total == 0 ? 0.0 : completed / total;
-
     return _LargeCard(
       child: Column(
         children: [
@@ -397,287 +356,207 @@ class _HomeScreenState extends State<HomeScreen> {
             title: 'خطة اليوم',
             icon: Icons.calendar_month_rounded,
           ),
-          const SizedBox(height: 5),
-          if (visibleTasks.isEmpty)
+          const SizedBox(height: 10),
+          if (_tasks.isEmpty)
             const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
+              padding: EdgeInsets.symmetric(vertical: 22),
               child: Text(
                 'لا توجد مهام لهذا اليوم',
                 style: TextStyle(color: grayText, fontSize: 13),
               ),
             )
           else
-            ...visibleTasks.map((task) {
+            ..._tasks.map((task) {
+              final title = task['title']?.toString() ?? '';
+              final time = task['time']?.toString() ?? '';
+              final tag = task['tag']?.toString() ?? 'عام';
+              final color = _parseColor(task['color']?.toString());
+
               return _HomeTask(
-                time: task['time']?.toString() ?? '--',
-                title: task['title']?.toString() ?? 'مهمة',
-                category: task['tag']?.toString() ?? 'روتين',
+                time: time,
+                title: title,
+                category: tag,
                 completed: task['completed'] == true,
-                dotColor: _colorFromHex(task['color']?.toString()),
+                dotColor: color ?? blue,
                 onTap: () => _toggleTask(task),
               );
             }),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Text(
-                '$completed من $total مكتملة',
-                style: const TextStyle(
-                  color: darkBlue,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 7,
-                    backgroundColor: const Color(0xFFE8ECEF),
-                    valueColor: const AlwaysStoppedAnimation<Color>(green),
+          if (_tasks.isNotEmpty) const SizedBox(height: 8),
+          if (_tasks.isNotEmpty)
+            Row(
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: LinearProgressIndicator(
+                      minHeight: 6,
+                      value: _tasks.isEmpty ? 0 : _completedTasks / _tasks.length,
+                      backgroundColor: const Color(0xFFE7EAED),
+                      valueColor: const AlwaysStoppedAnimation<Color>(green),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 14),
-              Text(
-                total > completed ? 'تبقى ${total - completed} مهمة' : 'كل المهام مكتملة',
-                style: const TextStyle(
-                  color: grayText,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                const SizedBox(width: 12),
+                Text(
+                  '$_completedTasks من ${_tasks.length} مكتملة',
+                  style: const TextStyle(
+                    color: darkBlue,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
     );
   }
 
   Widget _buildHabitsAndFood() {
+    final habitsToShow = _habits.take(3).toList();
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: _buildHabitsCard()),
-        const SizedBox(width: 12),
-        Expanded(child: _buildFoodCard()),
-      ],
-    );
-  }
+        Expanded(
+          child: _SmallCard(
+            title: 'عاداتك',
+            icon: Icons.history_rounded,
+            child: Column(
+              children: [
+                if (habitsToShow.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Text(
+                      'لا توجد عادات',
+                      style: TextStyle(color: grayText, fontSize: 11),
+                    ),
+                  )
+                else
+                  ...habitsToShow.map((habit) {
+                    final id = habit['id']?.toString();
+                    final completed = id != null && _habitCompleted[id] == true;
 
-  Widget _buildHabitsCard() {
-    final visibleHabits = _habits.take(3).toList();
-
-    return _SmallCard(
-      title: 'عاداتك',
-      icon: Icons.history_rounded,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (visibleHabits.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 18),
-              child: Text(
-                'لا توجد عادات بعد',
-                textAlign: TextAlign.right,
-                style: TextStyle(color: grayText, fontSize: 12),
-              ),
-            )
-          else
-            ...visibleHabits.map((habit) {
-              final id = habit['id']?.toString();
-              return _HomeHabit(
-                icon: '✓',
-                title: habit['name']?.toString() ?? 'عادة',
-                completed: id != null && _habitCompleted[id] == true,
-                onTap: () => _toggleHabit(habit),
-              );
-            }),
-          const SizedBox(height: 7),
-          const Text(
-            'عرض الكل  ←',
-            textAlign: TextAlign.right,
-            style: TextStyle(
-              color: blue,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
+                    return _HomeHabit(
+                      icon: '✓',
+                      title: habit['name']?.toString() ?? '',
+                      completed: completed,
+                      onTap: () => _toggleHabit(habit),
+                    );
+                  }),
+                if (habitsToShow.isNotEmpty)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {},
+                      child: const Text(
+                        'عرض الكل ←',
+                        style: TextStyle(
+                          color: blue,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFoodCard() {
-    return _SmallCard(
-      title: 'طعامك اليوم',
-      icon: Icons.restaurant_rounded,
-      child: Column(
-        children: [
-          Row(
-            textDirection: TextDirection.ltr,
-            children: [
-              const Expanded(
-                child: _CaloriesRing(
-                  progress: 1450 / 2200,
-                  value: '1,450',
-                  subtitle: 'من 2,200\nسعرة حرارية',
-                ),
-              ),
-              const SizedBox(width: 6),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: _SmallCard(
+            title: 'طعامك اليوم 🍴',
+            icon: Icons.restaurant_menu_rounded,
+            child: Column(
+              children: [
+                Row(
                   children: [
-                    _MealLine(
-                      name: 'الفطور',
-                      calories: '420 سعرة',
-                      icon: '☀️',
+                    Expanded(
+                      child: _CaloriesRing(
+                        progress: 1450 / 2200,
+                        value: '1,450',
+                        subtitle: 'من 2,200\nسعرة حرارية',
+                      ),
                     ),
-                    _MealLine(
-                      name: 'الغداء',
-                      calories: '660 سعرة',
-                      icon: '☀️',
-                    ),
-                    _MealLine(
-                      name: 'العشاء',
-                      calories: '350 سعرة',
-                      icon: '🌙',
+                    const SizedBox(width: 6),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          _MealLine(name: 'الفطور', calories: '420 سعرة', icon: '☀️'),
+                          _MealLine(name: 'الغداء', calories: '660 سعرة', icon: '☀️'),
+                          _MealLine(name: 'العشاء', calories: '350 سعرة', icon: '🌙'),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 9),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEAF8F3),
-              borderRadius: BorderRadius.circular(9),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(Icons.add, size: 19),
+                    label: const Text('تسجيل وجبة'),
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: const Color(0xFFE6F7EF),
+                      foregroundColor: green,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 11),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            child: const Text(
-              'تسجيل وجبة  +',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: green,
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildSmartAssistant() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 17),
       decoration: BoxDecoration(
-        color: const Color(0xFFEAF8F3),
+        color: const Color(0xFFEAF9F3),
         borderRadius: BorderRadius.circular(22),
       ),
       child: Row(
         children: [
-          Expanded(
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(Icons.auto_awesome_rounded, color: green),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const Text(
-                  '✨ مساعدك الذكي',
-                  textAlign: TextAlign.right,
+                Text(
+                  'اقتراح ذكي ✨',
                   style: TextStyle(
                     color: darkBlue,
-                    fontSize: 18,
+                    fontSize: 14,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 9),
-                const Text(
-                  'لديك 5 مهام اليوم. هل تريد أن أرتبها حسب الأولوية؟',
+                SizedBox(height: 4),
+                Text(
+                  'أكمل مهامك المتبقية لتحافظ على تقدمك اليوم.',
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     color: grayText,
-                    fontSize: 13,
-                    height: 1.35,
-                  ),
-                ),
-                const SizedBox(height: 11),
-                Container(
-                  width: double.infinity,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: const Color(0xFF8FD9C0),
-                    ),
-                    borderRadius: BorderRadius.circular(9),
-                    color: Colors.white.withValues(alpha: 0.25),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'رتب الآن',
-                      style: TextStyle(
-                        color: green,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 14),
-          Container(
-            width: 105,
-            height: 105,
-            decoration: BoxDecoration(
-              color: const Color(0xFFDFF5EE),
-              borderRadius: BorderRadius.circular(32),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: 82,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEDF7F8),
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.smart_toy_rounded,
-                  color: Color(0xFF0B3E6D),
-                  size: 47,
-                ),
-                const Positioned(
-                  left: 24,
-                  top: 30,
-                  child: Icon(
-                    Icons.circle,
-                    color: Color(0xFF39D4C1),
-                    size: 5,
-                  ),
-                ),
-                const Positioned(
-                  right: 24,
-                  top: 30,
-                  child: Icon(
-                    Icons.circle,
-                    color: Color(0xFF39D4C1),
-                    size: 5,
+                    fontSize: 10,
+                    height: 1.4,
                   ),
                 ),
               ],
@@ -687,14 +566,16 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-}
 
-Color _colorFromHex(String? hex) {
-  if (hex == null || hex.isEmpty) return const Color(0xFF4AA4D9);
-  final value = hex.replaceFirst('#', '');
-  if (value.length != 6) return const Color(0xFF4AA4D9);
-  final parsed = int.tryParse('FF$value', radix: 16);
-  return parsed == null ? const Color(0xFF4AA4D9) : Color(parsed);
+  static Color? _parseColor(String? value) {
+    if (value == null || value.isEmpty) return null;
+
+    final hex = value.replaceAll('#', '');
+    if (hex.length != 6 && hex.length != 8) return null;
+
+    final normalized = hex.length == 6 ? 'FF$hex' : hex;
+    return Color(int.tryParse(normalized, radix: 16) ?? 0xFF2870B5);
+  }
 }
 
 class _ProgressStat extends StatelessWidget {
@@ -714,13 +595,13 @@ class _ProgressStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: iconColor, size: 26),
-        const SizedBox(height: 6),
+        Icon(icon, color: iconColor, size: 28),
+        const SizedBox(height: 7),
         Text(
           value,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 19,
+            fontSize: 20,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -728,8 +609,8 @@ class _ProgressStat extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            color: Color(0xBFFFFFFF),
-            fontSize: 11,
+            color: Color(0xFFB7C3D1),
+            fontSize: 10,
           ),
         ),
       ],
@@ -744,67 +625,65 @@ class _VerticalDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 1,
-      height: 54,
-      color: const Color(0x557B9AB5),
+      height: 58,
+      color: const Color(0xFF31506F),
     );
   }
 }
 
 class _DailyProgressRing extends StatelessWidget {
   final double progress;
-  final String value;
-  final String label;
+  final int percent;
 
   const _DailyProgressRing({
     required this.progress,
-    required this.value,
-    required this.label,
+    required this.percent,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 125,
-      height: 125,
+      width: 112,
+      height: 112,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          SizedBox(
-            width: 112,
-            height: 112,
+          const SizedBox(
+            width: 102,
+            height: 102,
             child: CircularProgressIndicator(
               value: 1,
-              strokeWidth: 10,
-              color: const Color(0x334E83AD),
+              strokeWidth: 9,
+              color: Color(0xFF244B70),
             ),
           ),
           SizedBox(
-            width: 112,
-            height: 112,
+            width: 102,
+            height: 102,
             child: CircularProgressIndicator(
               value: progress,
-              strokeWidth: 10,
+              strokeWidth: 9,
               strokeCap: StrokeCap.round,
-              color: const Color(0xFF20B9D4),
+              color: Color(0xFF18C5DE),
             ),
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                value,
+                '$percent%',
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 28,
+                  fontSize: 23,
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Color(0xFF36C7E0),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+              const SizedBox(height: 1),
+              const Text(
+                'اليوم',
+                style: TextStyle(
+                  color: Color(0xFF42C4DD),
+                  fontSize: 11,
                 ),
               ),
             ],
@@ -853,11 +732,7 @@ class _CardTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 25,
-          color: HomeScreen.darkBlue,
-        ),
+        Icon(icon, size: 25, color: HomeScreen.darkBlue),
         const SizedBox(width: 7),
         Expanded(
           child: Text(
@@ -894,34 +769,48 @@ class _HomeTask extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final categoryColor = _categoryColor(category);
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
         constraints: const BoxConstraints(minHeight: 51),
         decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: Color(0xFFF0F2F5))),
+          border: Border(
+            bottom: BorderSide(color: Color(0xFFF0F2F5)),
+          ),
         ),
         child: Row(
           children: [
             Container(
               width: 8,
               height: 8,
-              decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: dotColor,
+                shape: BoxShape.circle,
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
-                      color: _categoryColor(category).withValues(alpha: 0.12),
+                      color: categoryColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: Text(
                       category,
-                      style: TextStyle(color: _categoryColor(category), fontSize: 10, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        color: categoryColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -934,7 +823,9 @@ class _HomeTask extends StatelessWidget {
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: HomeScreen.darkBlue,
-                        decoration: completed ? TextDecoration.lineThrough : null,
+                        decoration: completed
+                            ? TextDecoration.lineThrough
+                            : null,
                       ),
                     ),
                   ),
@@ -943,14 +834,25 @@ class _HomeTask extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Icon(
-              completed ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
-              color: completed ? HomeScreen.green : const Color(0xFFC6CCD3),
+              completed
+                  ? Icons.check_box_rounded
+                  : Icons.check_box_outline_blank_rounded,
+              color: completed
+                  ? HomeScreen.green
+                  : const Color(0xFFC6CCD3),
               size: 25,
             ),
             const SizedBox(width: 10),
             SizedBox(
               width: 56,
-              child: Text(time, textAlign: TextAlign.left, style: const TextStyle(fontSize: 11, color: HomeScreen.grayText)),
+              child: Text(
+                time,
+                textAlign: TextAlign.left,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: HomeScreen.grayText,
+                ),
+              ),
             ),
           ],
         ),
@@ -1002,11 +904,7 @@ class _SmallCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                icon,
-                size: 21,
-                color: HomeScreen.darkBlue,
-              ),
+              Icon(icon, size: 21, color: HomeScreen.darkBlue),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -1057,13 +955,21 @@ class _HomeHabit extends StatelessWidget {
               child: Text(
                 title,
                 textAlign: TextAlign.right,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: HomeScreen.darkBlue),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: HomeScreen.darkBlue,
+                ),
               ),
             ),
             Icon(
-              completed ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+              completed
+                  ? Icons.check_circle_rounded
+                  : Icons.radio_button_unchecked_rounded,
               size: 23,
-              color: completed ? HomeScreen.green : const Color(0xFFD2D6DC),
+              color: completed
+                  ? HomeScreen.green
+                  : const Color(0xFFD2D6DC),
             ),
           ],
         ),
@@ -1091,13 +997,13 @@ class _CaloriesRing extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          SizedBox(
+          const SizedBox(
             width: 108,
             height: 108,
             child: CircularProgressIndicator(
               value: 1,
               strokeWidth: 8,
-              color: const Color(0xFFE8ECEF),
+              color: Color(0xFFE8ECEF),
             ),
           ),
           SizedBox(
@@ -1155,10 +1061,7 @@ class _MealLine extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 7),
       child: Row(
         children: [
-          Text(
-            icon,
-            style: const TextStyle(fontSize: 15),
-          ),
+          Text(icon, style: const TextStyle(fontSize: 15)),
           const SizedBox(width: 5),
           Expanded(
             child: Column(
