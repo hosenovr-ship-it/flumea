@@ -134,7 +134,6 @@ class _HomeScreenState extends State<HomeScreen> {
           .eq('user_id', user.id)
           .eq('logged_date', _today());
 
-      int totalCalories = 0;
       int selectedCalories = 0;
       final mealTotals = <String, int>{
         'الفطور': 0,
@@ -146,7 +145,6 @@ class _HomeScreenState extends State<HomeScreen> {
       for (final row in foodRows) {
         final calories = int.tryParse(row['calories']?.toString() ?? '') ?? 0;
         final meal = row['meal_type']?.toString() ?? '';
-        totalCalories += calories;
         if (row['selected'] == true) selectedCalories += calories;
         if (mealTotals.containsKey(meal)) {
           mealTotals[meal] = (mealTotals[meal] ?? 0) + calories;
