@@ -32,6 +32,14 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _habits = [];
   final Map<String, bool> _habitCompleted = {};
 
+  int _foodTotalCalories = 0;
+  final Map<String, int> _mealCalories = {
+    'الفطور': 0,
+    'الغداء': 0,
+    'العشاء': 0,
+    'وجبة خفيفة': 0,
+  };
+
   @override
   void initState() {
     super.initState();
@@ -118,6 +126,39 @@ class _HomeScreenState extends State<HomeScreen> {
       debugPrint('FLUMEA habit logs load error: $e');
     }
 
+    int foodTotalCalories = 0;
+    int foodSelectedCalories = 0;
+    final mealCalories = <String, int>{
+      'الفطور': 0,
+      'الغداء': 0,
+      'العشاء': 0,
+      'وجبة خفيفة': 0,
+    };
+
+    // Read the same food_logs used by the food-tracking screen so the
+    // Home screen never uses hard-coded calorie values.
+    try {
+      final response = await _supabase
+          .from('food_logs')
+          .select('meal_type,calories,selected')
+          .eq('user_id', user.id)
+          .eq('logged_date', _today());
+
+      for (final row in response) {
+        final calories = (row['calories'] is num)
+            ? (row['calories'] as num).toInt()
+            : int.tryParse(row['calories']?.toString() ?? '') ?? 0;
+        final meal = row['meal_type']?.toString() ?? '';
+        foodTotalCalories += calories;
+        if (row['selected'] == true) foodSelectedCalories += calories;
+        if (mealCalories.containsKey(meal)) {
+          mealCalories[meal] = (mealCalories[meal] ?? 0) + calories;
+        }
+      }
+    } catch (e) {
+      debugPrint('FLUMEA food logs load error: $e');
+    }
+
     if (!mounted) return;
 
     setState(() {
@@ -126,6 +167,10 @@ class _HomeScreenState extends State<HomeScreen> {
       _habitCompleted
         ..clear()
         ..addAll(completedMap);
+      _foodTotalCalories = foodTotalCalories;
+      _mealCalories
+        ..clear()
+        ..addAll(mealCalories);
       _loading = false;
     });
   }
@@ -374,11 +419,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const _ProgressStat(
+                _ProgressStat(
                   icon: Icons.favorite_border_rounded,
-                  value: '1,450',
+                  value: _formatCalories(_foodTotalCalories),
                   label: 'سعرة حرارية',
-                  iconColor: Color(0xFF8C78FF),
+                  iconColor: const Color(0xFF8C78FF),
                 ),
                 const _VerticalDivider(),
                 _ProgressStat(
@@ -468,6 +513,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  String _formatCalories(int value) {
+    return value.toString().replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (_) => ',',
+    );
+  }
+
   Widget _buildHabitsAndFood() {
     final habitsToShow = List<Map<String, dynamic>>.from(_habits);
 
@@ -516,20 +568,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Expanded(
                       child: _CaloriesRing(
-                        progress: 1450 / 2200,
-                        value: '1,450',
+                        progress: (_foodTotalCalories / 2200).clamp(0.0, 1.0).toDouble(),
+                        value: _formatCalories(_foodTotalCalories),
                         subtitle: 'من 2,200\nسعرة حرارية',
                       ),
                     ),
                     const SizedBox(width: 6),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         textDirection: TextDirection.rtl,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          _MealLine(name: 'الفطور', calories: '420 سعرة', icon: '☀️'),
-                          _MealLine(name: 'الغداء', calories: '660 سعرة', icon: '☀️'),
-                          _MealLine(name: 'العشاء', calories: '350 سعرة', icon: '🌙'),
+                          _MealLine(name: 'الفطور', calories: '${_mealCalories['الفطور'] ?? 0} سعرة', icon: '☀️'),
+                          _MealLine(name: 'الغداء', calories: '${_mealCalories['الغداء'] ?? 0} سعرة', icon: '☀️'),
+                          _MealLine(name: 'العشاء', calories: '${_mealCalories['العشاء'] ?? 0} سعرة', icon: '🌙'),
                         ],
                       ),
                     ),
@@ -539,13 +591,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
+                    onPressed: () async {
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const FoodTrackingScreen(),
                         ),
                       );
+                      if (mounted) await _loadHomeData();
                     },
                     icon: const Icon(Icons.add, size: 19),
                     label: const Text('تسجيل وجبة'),
