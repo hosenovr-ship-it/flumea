@@ -2,15 +2,190 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'bottom_navigation.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
+class HomeScreen extends StatefulWidget {
   static const darkBlue = Color(0xFF102A4C);
   static const blue = Color(0xFF2870B5);
   static const green = Color(0xFF18B56A);
   static const teal = Color(0xFF32C6B4);
   static const grayText = Color(0xFF7B8798);
   static const background = Color(0xFFF8FAFC);
+
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  static const darkBlue = Color(0xFF102A4C);
+  static const blue = Color(0xFF2870B5);
+  static const green = Color(0xFF18B56A);
+  static const teal = Color(0xFF32C6B4);
+  static const grayText = Color(0xFF7B8798);
+  static const background = Color(0xFFF8FAFC);
+
+  final _supabase = Supabase.instance.client;
+
+  bool _loading = true;
+  List<Map<String, dynamic>> _tasks = [];
+  List<Map<String, dynamic>> _habits = [];
+  final Map<String, bool> _habitCompleted = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHomeData();
+  }
+
+  String _today() {
+    final now = DateTime.now();
+    final month = now.month.toString().padLeft(2, '0');
+    final day = now.day.toString().padLeft(2, '0');
+    return '${now.year}-$month-$day';
+  }
+
+  Future<void> _loadHomeData() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      if (mounted) setState(() => _loading = false);
+      return;
+    }
+
+    try {
+      final today = _today();
+
+      final taskResponse = await _supabase
+          .from('tasks')
+          .select('id,title,description,completed,priority,due_date,user_id,time,tag,emoji,color')
+          .eq('user_id', user.id)
+          .eq('due_date', today)
+          .order('time');
+
+      final habitResponse = await _supabase
+          .from('habits')
+          .select('id,name,description,created_at,user_id,completed')
+          .eq('user_id', user.id)
+          .order('created_at');
+
+      final logResponse = await _supabase
+          .from('habit_logs')
+          .select('habit_id,completed,completed_date')
+          .eq('user_id', user.id)
+          .eq('completed_date', today);
+
+      final completedMap = <String, bool>{};
+      for (final row in logResponse) {
+        final habitId = row['habit_id']?.toString();
+        if (habitId != null) {
+          completedMap[habitId] = row['completed'] == true;
+        }
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _tasks = List<Map<String, dynamic>>.from(taskResponse);
+        _habits = List<Map<String, dynamic>>.from(habitResponse);
+        _habitCompleted
+          ..clear()
+          ..addAll(completedMap);
+        _loading = false;
+      });
+    } catch (e) {
+      debugPrint('FLUMEA home data error: $e');
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _toggleTask(Map<String, dynamic> task) async {
+    final id = task['id']?.toString();
+    if (id == null) return;
+
+    final oldValue = task['completed'] == true;
+    final newValue = !oldValue;
+
+    setState(() {
+      task['completed'] = newValue;
+    });
+
+    try {
+      await _supabase.from('tasks').update({'completed': newValue}).eq('id', id);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        task['completed'] = oldValue;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تعذر حفظ حالة المهمة')),
+      );
+    }
+  }
+
+  Future<void> _toggleHabit(Map<String, dynamic> habit) async {
+    final user = _supabase.auth.currentUser;
+    final habitId = habit['id']?.toString();
+    if (user == null || habitId == null) return;
+
+    final oldValue = _habitCompleted[habitId] == true;
+    final newValue = !oldValue;
+    final today = _today();
+
+    setState(() {
+      _habitCompleted[habitId] = newValue;
+    });
+
+    try {
+      final existing = await _supabase
+          .from('habit_logs')
+          .select('id')
+          .eq('habit_id', habitId)
+          .eq('user_id', user.id)
+          .eq('completed_date', today)
+          .maybeSingle();
+
+      if (existing != null) {
+        await _supabase
+            .from('habit_logs')
+            .update({'completed': newValue})
+            .eq('id', existing['id']);
+      } else {
+        await _supabase.from('habit_logs').insert({
+          'habit_id': habitId,
+          'user_id': user.id,
+          'completed_date': today,
+          'completed': newValue,
+        });
+      }
+
+      await _supabase
+          .from('habits')
+          .update({'completed': newValue})
+          .eq('id', habitId)
+          .eq('user_id', user.id);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _habitCompleted[habitId] = oldValue;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تعذر حفظ حالة العادة')),
+      );
+    }
+  }
+
+  int get _completedTasks =>
+      _tasks.where((task) => task['completed'] == true).length;
+
+  int get _completedHabits =>
+      _habits.where((habit) => _habitCompleted[habit['id']?.toString()] == true).length;
+
+  double get _dailyProgress {
+    final taskRatio = _tasks.isEmpty ? 0.0 : _completedTasks / _tasks.length;
+    final habitRatio = _habits.isEmpty ? 0.0 : _completedHabits / _habits.length;
+    if (_tasks.isEmpty && _habits.isEmpty) return 0.0;
+    if (_tasks.isEmpty) return habitRatio;
+    if (_habits.isEmpty) return taskRatio;
+    return (taskRatio + habitRatio) / 2;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,27 +194,32 @@ class HomeScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: background,
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 105),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 24),
-                _buildDailyProgress(),
-                const SizedBox(height: 20),
-                _buildTodayPlan(),
-                const SizedBox(height: 16),
-                _buildHabitsAndFood(),
-                const SizedBox(height: 16),
-                _buildSmartAssistant(),
-              ],
-            ),
-          ),
+          child: _loading
+              ? const Center(child: CircularProgressIndicator(color: teal))
+              : RefreshIndicator(
+                  onRefresh: _loadHomeData,
+                  color: teal,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(18, 14, 18, 105),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildHeader(),
+                        const SizedBox(height: 24),
+                        _buildDailyProgress(),
+                        const SizedBox(height: 20),
+                        _buildTodayPlan(),
+                        const SizedBox(height: 16),
+                        _buildHabitsAndFood(),
+                        const SizedBox(height: 16),
+                        _buildSmartAssistant(),
+                      ],
+                    ),
+                  ),
+                ),
         ),
-        bottomNavigationBar: const FlumeaBottomNavigation(
-          selectedIndex: 0,
-        ),
+        bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 0),
       ),
     );
   }
@@ -126,16 +306,15 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildDailyProgress() {
+    final percent = (_dailyProgress * 100).round();
+
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 18, 18, 17),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-          colors: [
-            Color(0xFF0B2D52),
-            Color(0xFF062548),
-          ],
+          colors: [Color(0xFF0B2D52), Color(0xFF062548)],
         ),
         borderRadius: BorderRadius.circular(23),
         boxShadow: [
@@ -155,11 +334,7 @@ class HomeScreen extends StatelessWidget {
               'تقدمك اليوم',
               textAlign: TextAlign.right,
               textDirection: TextDirection.rtl,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 19,
-                fontWeight: FontWeight.w800,
-              ),
+              style: TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w800),
             ),
           ),
           const SizedBox(height: 14),
@@ -168,37 +343,37 @@ class HomeScreen extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Expanded(
+                Expanded(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _ProgressStat(
+                      const _ProgressStat(
                         icon: Icons.favorite_border_rounded,
                         value: '1,450',
                         label: 'سعرة حرارية',
                         iconColor: Color(0xFF8C78FF),
                       ),
-                      _VerticalDivider(),
+                      const _VerticalDivider(),
                       _ProgressStat(
                         icon: Icons.local_fire_department_rounded,
-                        value: '2/3',
+                        value: '${_completedHabits}/${_habits.length}',
                         label: 'العادات',
-                        iconColor: Color(0xFF49D59B),
+                        iconColor: const Color(0xFF49D59B),
                       ),
-                      _VerticalDivider(),
+                      const _VerticalDivider(),
                       _ProgressStat(
                         icon: Icons.track_changes_rounded,
-                        value: '3/5',
+                        value: '${_completedTasks}/${_tasks.length}',
                         label: 'المهام',
-                        iconColor: Color(0xFF4B9FFF),
+                        iconColor: const Color(0xFF4B9FFF),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 12),
-                const _DailyProgressRing(
-                  progress: 0.65,
-                  value: '65%',
+                _DailyProgressRing(
+                  progress: _dailyProgress,
+                  value: '$percent%',
                   label: 'اليوم',
                 ),
               ],
@@ -210,6 +385,11 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildTodayPlan() {
+    final visibleTasks = _tasks.take(5).toList();
+    final completed = _completedTasks;
+    final total = _tasks.length;
+    final progress = total == 0 ? 0.0 : completed / total;
+
     return _LargeCard(
       child: Column(
         children: [
@@ -218,43 +398,31 @@ class HomeScreen extends StatelessWidget {
             icon: Icons.calendar_month_rounded,
           ),
           const SizedBox(height: 5),
-          const _HomeTask(
-            time: '9:00 ص',
-            title: 'دراسة 3 ساعات',
-            category: 'دراسة',
-            dotColor: Color(0xFF4AA4D9),
-          ),
-          const _HomeTask(
-            time: '12:30 م',
-            title: 'التمرين في النادي',
-            category: 'صحة',
-            completed: true,
-            dotColor: Color(0xFF3CC28D),
-          ),
-          const _HomeTask(
-            time: '4:00 م',
-            title: 'قراءة 30 دقيقة',
-            category: 'تطوير ذات',
-            dotColor: Color(0xFF4AA4D9),
-          ),
-          const _HomeTask(
-            time: '6:30 م',
-            title: 'مشروع العمل',
-            category: 'عمل',
-            dotColor: Color(0xFFF2BF2C),
-          ),
-          const _HomeTask(
-            time: '9:30 م',
-            title: 'مراجعة اليوم',
-            category: 'روتين',
-            dotColor: Color(0xFF4AA4D9),
-          ),
+          if (visibleTasks.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Text(
+                'لا توجد مهام لهذا اليوم',
+                style: TextStyle(color: grayText, fontSize: 13),
+              ),
+            )
+          else
+            ...visibleTasks.map((task) {
+              return _HomeTask(
+                time: task['time']?.toString() ?? '--',
+                title: task['title']?.toString() ?? 'مهمة',
+                category: task['tag']?.toString() ?? 'روتين',
+                completed: task['completed'] == true,
+                dotColor: _colorFromHex(task['color']?.toString()),
+                onTap: () => _toggleTask(task),
+              );
+            }),
           const SizedBox(height: 10),
           Row(
             children: [
-              const Text(
-                '3 من 5 مكتملة',
-                style: TextStyle(
+              Text(
+                '$completed من $total مكتملة',
+                style: const TextStyle(
                   color: darkBlue,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -265,18 +433,17 @@ class HomeScreen extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
-                    value: 0.60,
+                    value: progress,
                     minHeight: 7,
                     backgroundColor: const Color(0xFFE8ECEF),
-                    valueColor:
-                        const AlwaysStoppedAnimation<Color>(green),
+                    valueColor: const AlwaysStoppedAnimation<Color>(green),
                   ),
                 ),
               ),
               const SizedBox(width: 14),
-              const Text(
-                'تبقى مهمتان',
-                style: TextStyle(
+              Text(
+                total > completed ? 'تبقى ${total - completed} مهمة' : 'كل المهام مكتملة',
+                style: const TextStyle(
                   color: grayText,
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -301,28 +468,35 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildHabitsCard() {
+    final visibleHabits = _habits.take(3).toList();
+
     return _SmallCard(
       title: 'عاداتك',
       icon: Icons.history_rounded,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: const [
-          _HomeHabit(
-            icon: '💧',
-            title: 'شرب 2 لتر ماء',
-            completed: true,
-          ),
-          _HomeHabit(
-            icon: '📖',
-            title: 'قراءة 20 دقيقة',
-            completed: true,
-          ),
-          _HomeHabit(
-            icon: '↔',
-            title: 'تمرين 30 دقيقة',
-          ),
-          SizedBox(height: 7),
-          Text(
+        children: [
+          if (visibleHabits.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 18),
+              child: Text(
+                'لا توجد عادات بعد',
+                textAlign: TextAlign.right,
+                style: TextStyle(color: grayText, fontSize: 12),
+              ),
+            )
+          else
+            ...visibleHabits.map((habit) {
+              final id = habit['id']?.toString();
+              return _HomeHabit(
+                icon: '✓',
+                title: habit['name']?.toString() ?? 'عادة',
+                completed: id != null && _habitCompleted[id] == true,
+                onTap: () => _toggleHabit(habit),
+              );
+            }),
+          const SizedBox(height: 7),
+          const Text(
             'عرض الكل  ←',
             textAlign: TextAlign.right,
             style: TextStyle(
@@ -515,6 +689,14 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+Color _colorFromHex(String? hex) {
+  if (hex == null || hex.isEmpty) return const Color(0xFF4AA4D9);
+  final value = hex.replaceFirst('#', '');
+  if (value.length != 6) return const Color(0xFF4AA4D9);
+  final parsed = int.tryParse('FF$value', radix: 16);
+  return parsed == null ? const Color(0xFF4AA4D9) : Color(parsed);
+}
+
 class _ProgressStat extends StatelessWidget {
   final IconData icon;
   final String value;
@@ -699,99 +881,79 @@ class _HomeTask extends StatelessWidget {
   final String category;
   final bool completed;
   final Color dotColor;
+  final VoidCallback onTap;
 
   const _HomeTask({
     required this.time,
     required this.title,
     required this.category,
     required this.dotColor,
+    required this.onTap,
     this.completed = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minHeight: 51),
-      decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: Color(0xFFF0F2F5),
-          ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 51),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: Color(0xFFF0F2F5))),
         ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: dotColor,
-              shape: BoxShape.circle,
+        child: Row(
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
             ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _categoryColor(category).withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Text(
-                    category,
-                    style: TextStyle(
-                      color: _categoryColor(category),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: _categoryColor(category).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Text(
+                      category,
+                      style: TextStyle(color: _categoryColor(category), fontSize: 10, fontWeight: FontWeight.w700),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    title,
-                    textAlign: TextAlign.right,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: HomeScreen.darkBlue,
-                      decoration:
-                          completed ? TextDecoration.lineThrough : null,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.right,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: HomeScreen.darkBlue,
+                        decoration: completed ? TextDecoration.lineThrough : null,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          Icon(
-            completed
-                ? Icons.check_box_rounded
-                : Icons.check_box_outline_blank_rounded,
-            color: completed
-                ? HomeScreen.green
-                : const Color(0xFFC6CCD3),
-            size: 25,
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 56,
-            child: Text(
-              time,
-              textAlign: TextAlign.left,
-              style: const TextStyle(
-                fontSize: 11,
-                color: HomeScreen.grayText,
+                ],
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 10),
+            Icon(
+              completed ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
+              color: completed ? HomeScreen.green : const Color(0xFFC6CCD3),
+              size: 25,
+            ),
+            const SizedBox(width: 10),
+            SizedBox(
+              width: 56,
+              child: Text(time, textAlign: TextAlign.left, style: const TextStyle(fontSize: 11, color: HomeScreen.grayText)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -871,47 +1033,40 @@ class _HomeHabit extends StatelessWidget {
   final String icon;
   final String title;
   final bool completed;
+  final VoidCallback onTap;
 
   const _HomeHabit({
     required this.icon,
     required this.title,
+    required this.onTap,
     this.completed = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Text(
-            icon,
-            style: const TextStyle(fontSize: 18),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              title,
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: HomeScreen.darkBlue,
-                decoration:
-                    completed ? TextDecoration.none : null,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Row(
+          children: [
+            Text(icon, style: const TextStyle(fontSize: 18)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                title,
+                textAlign: TextAlign.right,
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: HomeScreen.darkBlue),
               ),
             ),
-          ),
-          Icon(
-            completed
-                ? Icons.check_circle_rounded
-                : Icons.radio_button_unchecked_rounded,
-            size: 23,
-            color: completed
-                ? HomeScreen.green
-                : const Color(0xFFD2D6DC),
-          ),
-        ],
+            Icon(
+              completed ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+              size: 23,
+              color: completed ? HomeScreen.green : const Color(0xFFD2D6DC),
+            ),
+          ],
+        ),
       ),
     );
   }
