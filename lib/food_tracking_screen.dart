@@ -109,14 +109,6 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
         );
       }
 
-      // Keep the original demo foods for the first empty day.
-      // They are inserted into Supabase once, so they also survive app restarts.
-      if (rows.isEmpty) {
-        await _seedDefaultFoods(user.id, date);
-        await _loadFoodsWithoutSeeding();
-        return;
-      }
-
       if (!mounted) return;
       setState(() {
         meals = loadedMeals;
@@ -129,139 +121,6 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
         SnackBar(content: Text('تعذر تحميل الطعام: $error')),
       );
     }
-  }
-
-  Future<void> _loadFoodsWithoutSeeding() async {
-    final user = _supabase.auth.currentUser;
-    if (user == null) return;
-
-    try {
-      final date = _dateOnly(selectedDate).toIso8601String().split('T').first;
-      final rows = await _supabase
-          .from('food_logs')
-          .select(
-            'id, meal_type, food_name, serving_size, calories, protein, carbs, fat, logged_date',
-          )
-          .eq('user_id', user.id)
-          .eq('logged_date', date)
-          .order('created_at', ascending: true);
-
-      final loadedMeals = _createEmptyMeals();
-      for (final row in rows) {
-        final mealTitle = (row['meal_type'] ?? '').toString();
-        final meal = loadedMeals.firstWhere(
-          (m) => m.title == mealTitle,
-          orElse: () => loadedMeals.first,
-        );
-        meal.items.add(
-          FoodItem(
-            id: row['id']?.toString(),
-            name: (row['food_name'] ?? '').toString(),
-            calories: _toInt(row['calories']),
-            amount: (row['serving_size'] ?? '').toString(),
-            protein: _toDouble(row['protein']),
-            carbs: _toDouble(row['carbs']),
-            fat: _toDouble(row['fat']),
-          ),
-        );
-      }
-
-      if (!mounted) return;
-      setState(() {
-        meals = loadedMeals;
-        _loading = false;
-      });
-    } catch (error) {
-      if (!mounted) return;
-      setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('تعذر تحميل الطعام: $error')),
-      );
-    }
-  }
-
-  Future<void> _seedDefaultFoods(String userId, String date) async {
-    final defaults = <Map<String, dynamic>>[
-      {
-        'user_id': userId,
-        'meal_type': 'الفطور',
-        'food_name': 'شوفان بالحليب',
-        'serving_size': '1 طبق',
-        'calories': 250,
-        'protein': 0,
-        'carbs': 0,
-        'fat': 0,
-        'logged_date': date,
-      },
-      {
-        'user_id': userId,
-        'meal_type': 'الفطور',
-        'food_name': 'موزة متوسطة',
-        'serving_size': '1 حبة',
-        'calories': 105,
-        'protein': 0,
-        'carbs': 0,
-        'fat': 0,
-        'logged_date': date,
-      },
-      {
-        'user_id': userId,
-        'meal_type': 'الفطور',
-        'food_name': 'قهوة سوداء',
-        'serving_size': '1 كوب',
-        'calories': 0,
-        'protein': 0,
-        'carbs': 0,
-        'fat': 0,
-        'logged_date': date,
-      },
-      {
-        'user_id': userId,
-        'meal_type': 'الغداء',
-        'food_name': 'دجاج مشوي',
-        'serving_size': '150 جرام',
-        'calories': 350,
-        'protein': 0,
-        'carbs': 0,
-        'fat': 0,
-        'logged_date': date,
-      },
-      {
-        'user_id': userId,
-        'meal_type': 'الغداء',
-        'food_name': 'أرز أبيض',
-        'serving_size': '1 كوب',
-        'calories': 200,
-        'protein': 0,
-        'carbs': 0,
-        'fat': 0,
-        'logged_date': date,
-      },
-      {
-        'user_id': userId,
-        'meal_type': 'الغداء',
-        'food_name': 'سلطة خضراء',
-        'serving_size': '1 طبق',
-        'calories': 70,
-        'protein': 0,
-        'carbs': 0,
-        'fat': 0,
-        'logged_date': date,
-      },
-      {
-        'user_id': userId,
-        'meal_type': 'وجبة خفيفة',
-        'food_name': 'تفاحة متوسطة',
-        'serving_size': '1 حبة',
-        'calories': 95,
-        'protein': 0,
-        'carbs': 0,
-        'fat': 0,
-        'logged_date': date,
-      },
-    ];
-
-    await _supabase.from('food_logs').insert(defaults);
   }
 
   static int _toInt(dynamic value) {
@@ -274,25 +133,25 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
     return double.tryParse(value?.toString() ?? '') ?? 0;
   }
 
-  double get totalProtein => meals.fold<double>(
-        0,
-        (sum, meal) => sum + meal.items.fold<double>(0, (s, item) => s + item.protein),
-      );
+  Iterable<FoodItem> get _selectedFoods sync* {
+    for (final meal in meals) {
+      for (final item in meal.items) {
+        if (item.selected) yield item;
+      }
+    }
+  }
 
-  double get totalCarbs => meals.fold<double>(
-        0,
-        (sum, meal) => sum + meal.items.fold<double>(0, (s, item) => s + item.carbs),
-      );
+  double get totalProtein =>
+      _selectedFoods.fold<double>(0, (sum, item) => sum + item.protein);
 
-  double get totalFat => meals.fold<double>(
-        0,
-        (sum, meal) => sum + meal.items.fold<double>(0, (s, item) => s + item.fat),
-      );
+  double get totalCarbs =>
+      _selectedFoods.fold<double>(0, (sum, item) => sum + item.carbs);
 
-  int get totalCalories => meals.fold<int>(
-        0,
-        (sum, meal) => sum + meal.items.fold<int>(0, (s, item) => s + item.calories),
-      );
+  double get totalFat =>
+      _selectedFoods.fold<double>(0, (sum, item) => sum + item.fat);
+
+  int get totalCalories =>
+      _selectedFoods.fold<int>(0, (sum, item) => sum + item.calories);
 
   String get formattedDate {
     const months = [
@@ -373,7 +232,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
           .select('id')
           .single();
 
-      final savedItem = item.copyWith(id: inserted['id']?.toString());
+      final savedItem = item.copyWith(id: inserted['id']?.toString(), selected: true);
       if (!mounted) return;
       setState(() {
         meal.items.add(savedItem);
@@ -437,7 +296,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
 
       if (!mounted) return;
       setState(() {
-        meal.items.add(item.copyWith(id: inserted['id']?.toString()));
+        meal.items.add(item.copyWith(id: inserted['id']?.toString(), selected: true));
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('تمت إعادة الوجبة.')),
@@ -689,21 +548,21 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
               Expanded(
                 child: _macroItem(
                   'البروتين',
-                  '${_formatNumber(totalProtein)} جم / 120 جم',
+                  '${_formatNumber(totalProtein)} جم',
                   const Color(0xFF65D8B0),
                 ),
               ),
               Expanded(
                 child: _macroItem(
                   'الكربوهيدرات',
-                  '${_formatNumber(totalCarbs)} جم / 280 جم',
+                  '${_formatNumber(totalCarbs)} جم',
                   const Color(0xFF55B7F5),
                 ),
               ),
               Expanded(
                 child: _macroItem(
                   'الدهون',
-                  '${_formatNumber(totalFat)} جم / 70 جم',
+                  '${_formatNumber(totalFat)} جم',
                   const Color(0xFFA779F7),
                 ),
               ),
@@ -837,6 +696,21 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
     );
   }
 
+  String _exampleFoodFor(String mealTitle) {
+    switch (mealTitle) {
+      case 'الفطور':
+        return 'بيض';
+      case 'الغداء':
+        return 'دجاج مشوي';
+      case 'وجبة خفيفة':
+        return 'تفاحة';
+      case 'العشاء':
+        return 'سمك';
+      default:
+        return 'طعام';
+    }
+  }
+
   Widget _buildMealCard(MealData meal) {
     final calories = meal.items.fold<int>(0, (sum, item) => sum + item.calories);
 
@@ -852,6 +726,8 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
         children: [
           Row(
             children: [
+              Icon(meal.icon, color: meal.iconColor, size: 24),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   meal.title,
@@ -863,30 +739,34 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Icon(meal.icon, color: meal.iconColor, size: 22),
-              const Spacer(),
-              Text(
-                '$calories سعرة',
-                textAlign: TextAlign.left,
-                style: const TextStyle(
-                  color: Color(0xFF6D7885),
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 78,
+                child: Text(
+                  '$calories سعرة',
+                  textAlign: TextAlign.left,
+                  style: const TextStyle(
+                    color: Color(0xFF6D7885),
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 14),
           if (meal.items.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 14),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Text(
-                  'لم تتم إضافة طعام بعد',
+                  'مثال: ${_exampleFoodFor(meal.title)}',
                   textAlign: TextAlign.right,
-                  style: TextStyle(color: Color(0xFF9AA3AD)),
+                  style: const TextStyle(
+                    color: Color(0xFF9AA3AD),
+                    fontSize: 13,
+                  ),
                 ),
               ),
             )
@@ -919,31 +799,66 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
       child: Row(
         children: [
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(
-                  item.name,
-                  textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    color: Color(0xFF27384D),
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        item.name,
+                        textAlign: TextAlign.right,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFF27384D),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        item.amount,
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(
+                          color: Color(0xFF929BA5),
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  item.amount,
-                  textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    color: Color(0xFF929BA5),
-                    fontSize: 11,
+                const SizedBox(width: 8),
+                InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => _toggleFoodSelection(item),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: item.selected ? green : Colors.white,
+                      border: Border.all(
+                        color: item.selected
+                            ? green
+                            : const Color(0xFFB8C1CB),
+                        width: 1.7,
+                      ),
+                    ),
+                    child: item.selected
+                        ? const Icon(
+                            Icons.check,
+                            size: 16,
+                            color: Colors.white,
+                          )
+                        : null,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
           PopupMenuButton<String>(
             tooltip: 'خيارات الطعام',
             padding: EdgeInsets.zero,
@@ -978,7 +893,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
               ),
             ],
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
           SizedBox(
             width: 75,
             child: Text(
@@ -993,6 +908,12 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
         ],
       ),
     );
+  }
+
+  void _toggleFoodSelection(FoodItem item) {
+    setState(() {
+      item.selected = !item.selected;
+    });
   }
 
   void _showMealPicker() {
@@ -1074,6 +995,21 @@ class _AddCustomFoodScreenState extends State<AddCustomFoodScreen> {
     super.dispose();
   }
 
+  String _exampleFoodForMeal(String mealTitle) {
+    switch (mealTitle) {
+      case 'الفطور':
+        return 'بيض';
+      case 'الغداء':
+        return 'دجاج مشوي';
+      case 'وجبة خفيفة':
+        return 'تفاحة';
+      case 'العشاء':
+        return 'سمك';
+      default:
+        return 'طعام';
+    }
+  }
+
   void saveFood() {
     final name = nameController.text.trim();
     final calories = int.tryParse(caloriesController.text.trim());
@@ -1086,12 +1022,23 @@ class _AddCustomFoodScreenState extends State<AddCustomFoodScreen> {
       return;
     }
 
+    // The add-food screen asks only for calories. To keep the daily
+    // macro counters useful, estimate macros from the entered calories.
+    // These are estimates, not nutrition-label values.
+    final protein = calories * 0.25 / 4.0;
+    final carbs = calories * 0.50 / 4.0;
+    final fat = calories * 0.25 / 9.0;
+
     Navigator.pop(
       context,
       FoodItem(
         name: name,
         calories: calories,
         amount: amount,
+        protein: protein,
+        carbs: carbs,
+        fat: fat,
+        selected: true,
       ),
     );
   }
@@ -1129,7 +1076,7 @@ class _AddCustomFoodScreenState extends State<AddCustomFoodScreen> {
                 _field(
                   controller: nameController,
                   label: 'اسم الطعام',
-                  hint: 'مثال: دجاج مشوي',
+                  hint: 'مثال: ${_exampleFoodForMeal(widget.mealTitle)}',
                   icon: Icons.restaurant_outlined,
                 ),
                 const SizedBox(height: 14),
@@ -1282,6 +1229,7 @@ class FoodItem {
   final double protein;
   final double carbs;
   final double fat;
+  bool selected;
 
   FoodItem({
     this.id,
@@ -1291,9 +1239,10 @@ class FoodItem {
     this.protein = 0,
     this.carbs = 0,
     this.fat = 0,
+    this.selected = false,
   });
 
-  FoodItem copyWith({String? id}) {
+  FoodItem copyWith({String? id, bool? selected}) {
     return FoodItem(
       id: id ?? this.id,
       name: name,
@@ -1302,6 +1251,7 @@ class FoodItem {
       protein: protein,
       carbs: carbs,
       fat: fat,
+      selected: selected ?? this.selected,
     );
   }
 }
