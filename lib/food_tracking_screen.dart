@@ -1081,7 +1081,7 @@ class _AddCustomFoodScreenState extends State<AddCustomFoodScreen> {
             icon: const Icon(Icons.close, color: Color(0xFF142B49)),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text(
+          title: Text(
             widget.initialItem == null ? 'إضافة طعام مخصص' : 'تعديل الطعام',
             style: TextStyle(
               color: Color(0xFF142B49),
