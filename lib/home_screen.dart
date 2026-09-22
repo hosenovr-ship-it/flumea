@@ -468,7 +468,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHabitsAndFood() {
-    final habitsToShow = _habits.take(3).toList();
+    final habitsToShow = List<Map<String, dynamic>>.from(_habits);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
