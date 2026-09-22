@@ -20,7 +20,7 @@ class _PlanScreenState extends State<PlanScreen> {
   final TaskService _taskService = TaskService();
   final HabitService _habitService = HabitService();
   final SupabaseClient _supabase = Supabase.instance.client;
-  int selectedDay = 0;
+  int selectedDay = DateTime.now().weekday % 7;
 
   bool _isLoadingTasks = true;
   bool _isSavingTask = false;
@@ -882,15 +882,30 @@ class _PlanScreenState extends State<PlanScreen> {
   // ============================================================
 
   Widget _buildDays() {
-    const days = [
-      ['الأحد', '20'],
-      ['الاثنين', '21'],
-      ['الثلاثاء', '22'],
-      ['الأربعاء', '23'],
-      ['الخميس', '24'],
-      ['الجمعة', '25'],
-      ['السبت', '26'],
+    const dayNames = [
+      'الأحد',
+      'الاثنين',
+      'الثلاثاء',
+      'الأربعاء',
+      'الخميس',
+      'الجمعة',
+      'السبت',
     ];
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final sunday = today.subtract(
+      Duration(days: today.weekday % 7),
+    );
+
+    final days = List.generate(7, (index) {
+      final date = sunday.add(Duration(days: index));
+
+      return {
+        'name': dayNames[index],
+        'number': date.day.toString(),
+      };
+    });
 
     return SizedBox(
       height: 82,
@@ -907,8 +922,8 @@ class _PlanScreenState extends State<PlanScreen> {
                   _loadTasks();
                 },
                 child: _dayBox(
-                  days[index][0],
-                  days[index][1],
+                  days[index]['name']!,
+                  days[index]['number']!,
                   selectedDay == index,
                 ),
               ),
