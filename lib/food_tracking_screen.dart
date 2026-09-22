@@ -190,7 +190,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
         scrollDirection: Axis.horizontal,
         reverse: true,
         itemCount: dates.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final date = dates[index];
           final isSelected =
@@ -365,7 +365,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                       child: CircularProgressIndicator(
                         value: percentage,
                         strokeWidth: 9,
-                        backgroundColor: Colors.white.withOpacity(.12),
+                        backgroundColor: Colors.white.withValues(alpha: .12),
                         valueColor:
                             const AlwaysStoppedAnimation<Color>(
                           Color(0xFF52D5B5),
@@ -421,7 +421,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                       value: percentage,
                       minHeight: 7,
                       borderRadius: BorderRadius.circular(10),
-                      backgroundColor: Colors.white.withOpacity(.12),
+                      backgroundColor: Colors.white.withValues(alpha: .12),
                       valueColor:
                           const AlwaysStoppedAnimation<Color>(
                         Color(0xFF55D5B2),
@@ -463,7 +463,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
           Container(
             height: 4,
             decoration: BoxDecoration(
-              color: color.withOpacity(.18),
+              color: color.withValues(alpha: .18),
               borderRadius: BorderRadius.circular(5),
             ),
             child: FractionallySizedBox(
