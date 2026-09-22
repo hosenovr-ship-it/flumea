@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class FoodTrackingScreen extends StatefulWidget {
   const FoodTrackingScreen({super.key});
@@ -8,54 +9,296 @@ class FoodTrackingScreen extends StatefulWidget {
 }
 
 class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
-  DateTime selectedDate = DateTime.now();
+  static const Color background = Color(0xFFF7F9FC);
+  static const Color darkBlue = Color(0xFF142B49);
+  static const Color cardBlue = Color(0xFF092D54);
+  static const Color green = Color(0xFF0DB58A);
+  static const Color softGreen = Color(0xFFE9FBF5);
 
-  final List<MealData> meals = [
-    MealData(
-      title: 'الفطور',
-      icon: Icons.wb_sunny_outlined,
-      iconColor: Colors.orange,
-      items: [
-        FoodItem(name: 'شوفان بالحليب', calories: 250, amount: '1 طبق'),
-        FoodItem(name: 'موزة متوسطة', calories: 105, amount: '1 حبة'),
-        FoodItem(name: 'قهوة سوداء', calories: 0, amount: '1 كوب'),
-      ],
-    ),
-    MealData(
-      title: 'الغداء',
-      icon: Icons.wb_sunny_outlined,
-      iconColor: Colors.orange,
-      items: [
-        FoodItem(name: 'دجاج مشوي', calories: 350, amount: '150 جرام'),
-        FoodItem(name: 'أرز أبيض', calories: 200, amount: '1 كوب'),
-        FoodItem(name: 'سلطة خضراء', calories: 70, amount: '1 طبق'),
-      ],
-    ),
-    MealData(
-      title: 'وجبة خفيفة',
-      icon: Icons.brightness_5_outlined,
-      iconColor: Colors.pinkAccent,
-      items: [
-        FoodItem(name: 'تفاحة متوسطة', calories: 95, amount: '1 حبة'),
-      ],
-    ),
-    MealData(
-      title: 'العشاء',
-      icon: Icons.nightlight_round,
-      iconColor: Colors.amber,
-      items: [],
-    ),
-  ];
+  final SupabaseClient _supabase = Supabase.instance.client;
+  final int dailyGoal = 2200;
 
-  int get totalCalories {
-    return meals.fold(
-      0,
-      (sum, meal) =>
-          sum + meal.items.fold(0, (s, item) => s + item.calories),
-    );
+  DateTime selectedDate = _dateOnly(DateTime.now());
+  bool _loading = true;
+  bool _saving = false;
+  List<MealData> meals = _createEmptyMeals();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFoods();
   }
 
-  final int dailyGoal = 2200;
+  static DateTime _dateOnly(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
+  static List<MealData> _createEmptyMeals() {
+    return [
+      MealData(
+        title: 'الفطور',
+        icon: Icons.wb_sunny_outlined,
+        iconColor: Colors.orange,
+        items: [],
+      ),
+      MealData(
+        title: 'الغداء',
+        icon: Icons.wb_sunny_outlined,
+        iconColor: Colors.orange,
+        items: [],
+      ),
+      MealData(
+        title: 'وجبة خفيفة',
+        icon: Icons.brightness_5_outlined,
+        iconColor: Colors.pinkAccent,
+        items: [],
+      ),
+      MealData(
+        title: 'العشاء',
+        icon: Icons.nightlight_round,
+        iconColor: Colors.amber,
+        items: [],
+      ),
+    ];
+  }
+
+  MealData? _mealByTitle(String title) {
+    for (final meal in meals) {
+      if (meal.title == title) return meal;
+    }
+    return null;
+  }
+
+  Future<void> _loadFoods() async {
+    if (!mounted) return;
+    setState(() => _loading = true);
+
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      if (!mounted) return;
+      setState(() {
+        meals = _createEmptyMeals();
+        _loading = false;
+      });
+      return;
+    }
+
+    try {
+      final date = _dateOnly(selectedDate).toIso8601String().split('T').first;
+
+      final rows = await _supabase
+          .from('food_logs')
+          .select(
+            'id, meal_type, food_name, serving_size, calories, protein, carbs, fat, logged_date',
+          )
+          .eq('user_id', user.id)
+          .eq('logged_date', date)
+          .order('created_at', ascending: true);
+
+      final loadedMeals = _createEmptyMeals();
+      for (final row in rows) {
+        final mealTitle = (row['meal_type'] ?? '').toString();
+        final meal = loadedMeals.firstWhere(
+          (m) => m.title == mealTitle,
+          orElse: () => loadedMeals.first,
+        );
+
+        meal.items.add(
+          FoodItem(
+            id: row['id']?.toString(),
+            name: (row['food_name'] ?? '').toString(),
+            calories: _toInt(row['calories']),
+            amount: (row['serving_size'] ?? '').toString(),
+            protein: _toDouble(row['protein']),
+            carbs: _toDouble(row['carbs']),
+            fat: _toDouble(row['fat']),
+          ),
+        );
+      }
+
+      // Keep the original demo foods for the first empty day.
+      // They are inserted into Supabase once, so they also survive app restarts.
+      if (rows.isEmpty) {
+        await _seedDefaultFoods(user.id, date);
+        return _loadFoodsWithoutSeeding();
+      }
+
+      if (!mounted) return;
+      setState(() {
+        meals = loadedMeals;
+        _loading = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تعذر تحميل الطعام: $error')),
+      );
+    }
+  }
+
+  Future<void> _loadFoodsWithoutSeeding() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    try {
+      final date = _dateOnly(selectedDate).toIso8601String().split('T').first;
+      final rows = await _supabase
+          .from('food_logs')
+          .select(
+            'id, meal_type, food_name, serving_size, calories, protein, carbs, fat, logged_date',
+          )
+          .eq('user_id', user.id)
+          .eq('logged_date', date)
+          .order('created_at', ascending: true);
+
+      final loadedMeals = _createEmptyMeals();
+      for (final row in rows) {
+        final mealTitle = (row['meal_type'] ?? '').toString();
+        final meal = loadedMeals.firstWhere(
+          (m) => m.title == mealTitle,
+          orElse: () => loadedMeals.first,
+        );
+        meal.items.add(
+          FoodItem(
+            id: row['id']?.toString(),
+            name: (row['food_name'] ?? '').toString(),
+            calories: _toInt(row['calories']),
+            amount: (row['serving_size'] ?? '').toString(),
+            protein: _toDouble(row['protein']),
+            carbs: _toDouble(row['carbs']),
+            fat: _toDouble(row['fat']),
+          ),
+        );
+      }
+
+      if (!mounted) return;
+      setState(() {
+        meals = loadedMeals;
+        _loading = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تعذر تحميل الطعام: $error')),
+      );
+    }
+  }
+
+  Future<void> _seedDefaultFoods(String userId, String date) async {
+    final defaults = <Map<String, dynamic>>[
+      {
+        'user_id': userId,
+        'meal_type': 'الفطور',
+        'food_name': 'شوفان بالحليب',
+        'serving_size': '1 طبق',
+        'calories': 250,
+        'protein': 0,
+        'carbs': 0,
+        'fat': 0,
+        'logged_date': date,
+      },
+      {
+        'user_id': userId,
+        'meal_type': 'الفطور',
+        'food_name': 'موزة متوسطة',
+        'serving_size': '1 حبة',
+        'calories': 105,
+        'protein': 0,
+        'carbs': 0,
+        'fat': 0,
+        'logged_date': date,
+      },
+      {
+        'user_id': userId,
+        'meal_type': 'الفطور',
+        'food_name': 'قهوة سوداء',
+        'serving_size': '1 كوب',
+        'calories': 0,
+        'protein': 0,
+        'carbs': 0,
+        'fat': 0,
+        'logged_date': date,
+      },
+      {
+        'user_id': userId,
+        'meal_type': 'الغداء',
+        'food_name': 'دجاج مشوي',
+        'serving_size': '150 جرام',
+        'calories': 350,
+        'protein': 0,
+        'carbs': 0,
+        'fat': 0,
+        'logged_date': date,
+      },
+      {
+        'user_id': userId,
+        'meal_type': 'الغداء',
+        'food_name': 'أرز أبيض',
+        'serving_size': '1 كوب',
+        'calories': 200,
+        'protein': 0,
+        'carbs': 0,
+        'fat': 0,
+        'logged_date': date,
+      },
+      {
+        'user_id': userId,
+        'meal_type': 'الغداء',
+        'food_name': 'سلطة خضراء',
+        'serving_size': '1 طبق',
+        'calories': 70,
+        'protein': 0,
+        'carbs': 0,
+        'fat': 0,
+        'logged_date': date,
+      },
+      {
+        'user_id': userId,
+        'meal_type': 'وجبة خفيفة',
+        'food_name': 'تفاحة متوسطة',
+        'serving_size': '1 حبة',
+        'calories': 95,
+        'protein': 0,
+        'carbs': 0,
+        'fat': 0,
+        'logged_date': date,
+      },
+    ];
+
+    await _supabase.from('food_logs').insert(defaults);
+  }
+
+  static int _toInt(dynamic value) {
+    if (value is int) return value;
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static double _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  double get totalProtein => meals.fold<double>(
+        0,
+        (sum, meal) => sum + meal.items.fold<double>(0, (s, item) => s + item.protein),
+      );
+
+  double get totalCarbs => meals.fold<double>(
+        0,
+        (sum, meal) => sum + meal.items.fold<double>(0, (s, item) => s + item.carbs),
+      );
+
+  double get totalFat => meals.fold<double>(
+        0,
+        (sum, meal) => sum + meal.items.fold<double>(0, (s, item) => s + item.fat),
+      );
+
+  int get totalCalories => meals.fold<int>(
+        0,
+        (sum, meal) => sum + meal.items.fold<int>(0, (s, item) => s + item.calories),
+      );
 
   String get formattedDate {
     const months = [
@@ -89,7 +332,8 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
   }
 
   void selectDate(DateTime date) {
-    setState(() => selectedDate = date);
+    setState(() => selectedDate = _dateOnly(date));
+    _loadFoods();
   }
 
   Future<void> openAddFood(MealData meal) async {
@@ -101,8 +345,115 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
     );
 
     if (result == null) return;
+    await _saveFoodToSupabase(meal, result);
+  }
 
-    setState(() => meal.items.add(result));
+  Future<void> _saveFoodToSupabase(MealData meal, FoodItem item) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('يجب تسجيل الدخول أولاً لحفظ الطعام.')),
+      );
+      return;
+    }
+
+    setState(() => _saving = true);
+
+    try {
+      final date = _dateOnly(selectedDate).toIso8601String().split('T').first;
+
+      final inserted = await _supabase
+          .from('food_logs')
+          .insert({
+            'user_id': user.id,
+            'meal_type': meal.title,
+            'food_name': item.name,
+            'serving_size': item.amount,
+            'calories': item.calories,
+            'protein': item.protein,
+            'carbs': item.carbs,
+            'fat': item.fat,
+            'logged_date': date,
+          })
+          .select('id')
+          .single();
+
+      final savedItem = item.copyWith(id: inserted['id']?.toString());
+      if (!mounted) return;
+      setState(() {
+        meal.items.add(savedItem);
+        _saving = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تم حفظ الطعام بنجاح ❤️‍🔥')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تعذر حفظ الطعام: $error')),
+      );
+    }
+  }
+
+  Future<void> _deleteFood(MealData meal, FoodItem item) async {
+    if (item.id == null) {
+      setState(() => meal.items.remove(item));
+      return;
+    }
+
+    try {
+      await _supabase.from('food_logs').delete().eq('id', item.id!);
+      if (!mounted) return;
+      setState(() => meal.items.removeWhere((food) => food.id == item.id));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تم حذف الوجبة.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تعذر حذف الوجبة: $error')),
+      );
+    }
+  }
+
+  Future<void> _repeatFood(MealData meal, FoodItem item) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    try {
+      final date = _dateOnly(selectedDate).toIso8601String().split('T').first;
+      final inserted = await _supabase
+          .from('food_logs')
+          .insert({
+            'user_id': user.id,
+            'meal_type': meal.title,
+            'food_name': item.name,
+            'serving_size': item.amount,
+            'calories': item.calories,
+            'protein': item.protein,
+            'carbs': item.carbs,
+            'fat': item.fat,
+            'logged_date': date,
+          })
+          .select('id')
+          .single();
+
+      if (!mounted) return;
+      setState(() {
+        meal.items.add(item.copyWith(id: inserted['id']?.toString()));
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تمت إعادة الوجبة.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تعذر إعادة الوجبة: $error')),
+      );
+    }
   }
 
   @override
@@ -110,21 +461,18 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF7F9FC),
+        backgroundColor: background,
         appBar: AppBar(
-          backgroundColor: const Color(0xFFF7F9FC),
+          backgroundColor: background,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_forward_ios,
-              color: Color(0xFF142B49),
-            ),
+            icon: const Icon(Icons.arrow_forward_ios, color: darkBlue),
             onPressed: () => Navigator.pop(context),
           ),
           title: const Text(
             'تسجيل الطعام',
             style: TextStyle(
-              color: Color(0xFF142B49),
+              color: darkBlue,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -132,126 +480,144 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
           centerTitle: true,
         ),
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
-            child: Column(
-              children: [
-                _buildDateSelector(),
-                const SizedBox(height: 18),
-                _buildDailySummary(),
-                const SizedBox(height: 18),
-                ...meals.map(
-                  (meal) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: _buildMealCard(meal),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  height: 58,
-                  child: ElevatedButton.icon(
-                    onPressed: _showMealPicker,
-                    icon: const Icon(Icons.add, size: 27),
-                    label: const Text(
-                      'إضافة وجبة / طعام',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+          child: _loading
+              ? const Center(
+                  child: CircularProgressIndicator(color: green),
+                )
+              : Stack(
+                  children: [
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
+                      child: Column(
+                        children: [
+                          _buildDateSelector(),
+                          const SizedBox(height: 18),
+                          _buildDailySummary(),
+                          const SizedBox(height: 18),
+                          ...meals.map(
+                            (meal) => Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: _buildMealCard(meal),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 58,
+                            child: ElevatedButton.icon(
+                              onPressed: _saving ? null : _showMealPicker,
+                              icon: const Icon(Icons.add, size: 27),
+                              label: const Text(
+                                'إضافة وجبة / طعام',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: green,
+                                foregroundColor: Colors.white,
+                                disabledBackgroundColor: green.withValues(alpha: .55),
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0DB58A),
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                    if (_saving)
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: Container(
+                            color: Colors.black.withValues(alpha: .04),
+                            alignment: Alignment.topCenter,
+                            child: const Padding(
+                              padding: EdgeInsets.only(top: 8),
+                              child: LinearProgressIndicator(color: green),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ),
         ),
       ),
     );
   }
 
   Widget _buildDateSelector() {
-    final dates = List.generate(
-      5,
-      (index) => selectedDate.subtract(Duration(days: 2 - index)),
-    );
+    final current = _dateOnly(selectedDate);
+    final sunday = current.subtract(Duration(days: current.weekday % 7));
+    final dates = List.generate(7, (index) => sunday.add(Duration(days: index)));
 
     return SizedBox(
       height: 94,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        reverse: true,
-        itemCount: dates.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 10),
-        itemBuilder: (context, index) {
-          final date = dates[index];
-          final isSelected =
-              date.year == selectedDate.year &&
-              date.month == selectedDate.month &&
-              date.day == selectedDate.day;
-
-          return GestureDetector(
-            onTap: () => selectDate(date),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 82,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? const Color(0xFFE9FBF5)
-                    : Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: isSelected
-                      ? const Color(0xFF66CDAA)
-                      : const Color(0xFFE3E8EE),
-                  width: isSelected ? 2 : 1,
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _shortWeekday(date),
-                    style: TextStyle(
-                      color: isSelected
-                          ? const Color(0xFF142B49)
-                          : const Color(0xFF7E8997),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    '${date.day}',
-                    style: TextStyle(
-                      color: isSelected
-                          ? const Color(0xFF142B49)
-                          : const Color(0xFF27384D),
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    _shortMonth(date),
-                    style: const TextStyle(
-                      color: Color(0xFF8C96A3),
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+      child: Row(
+        children: [
+          for (int index = 0; index < dates.length; index++) ...[
+            Expanded(child: _buildDateCard(dates[index])),
+            if (index != dates.length - 1) const SizedBox(width: 5),
+          ],
+        ],
       ),
     );
+  }
+
+  Widget _buildDateCard(DateTime date) {
+    final isSelected = _sameDate(date, selectedDate);
+
+    return GestureDetector(
+      onTap: () => selectDate(date),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: isSelected ? softGreen : Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF66CDAA) : const Color(0xFFE3E8EE),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              _shortWeekday(date),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: isSelected ? darkBlue : const Color(0xFF7E8997),
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${date.day}',
+              style: TextStyle(
+                color: isSelected ? darkBlue : const Color(0xFF27384D),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              _shortMonth(date),
+              style: const TextStyle(
+                color: Color(0xFF8C96A3),
+                fontSize: 9,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static bool _sameDate(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
   String _shortWeekday(DateTime date) {
@@ -286,13 +652,13 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
   }
 
   Widget _buildDailySummary() {
-    final percentage = (totalCalories / dailyGoal).clamp(0.0, 1.0);
+    final percentage = (totalCalories / dailyGoal).clamp(0.0, 1.0).toDouble();
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF092D54),
+        color: cardBlue,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Column(
@@ -301,10 +667,10 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
             children: [
               const Icon(Icons.chevron_right, color: Colors.white70),
               const Spacer(),
-              Column(
+              const Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text(
+                  Text(
                     'ملخص اليوم',
                     style: TextStyle(
                       color: Colors.white,
@@ -312,17 +678,16 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    '$weekdayName، $formattedDate',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                    ),
-                  ),
                 ],
               ),
             ],
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              '$weekdayName، $formattedDate',
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
+            ),
           ),
           const SizedBox(height: 20),
           Row(
@@ -330,21 +695,21 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
               Expanded(
                 child: _macroItem(
                   'البروتين',
-                  '0 جم / 120 جم',
+                  '${_formatNumber(totalProtein)} جم / 120 جم',
                   const Color(0xFF65D8B0),
                 ),
               ),
               Expanded(
                 child: _macroItem(
                   'الكربوهيدرات',
-                  '0 جم / 280 جم',
+                  '${_formatNumber(totalCarbs)} جم / 280 جم',
                   const Color(0xFF55B7F5),
                 ),
               ),
               Expanded(
                 child: _macroItem(
                   'الدهون',
-                  '0 جم / 70 جم',
+                  '${_formatNumber(totalFat)} جم / 70 جم',
                   const Color(0xFFA779F7),
                 ),
               ),
@@ -366,8 +731,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                         value: percentage,
                         strokeWidth: 9,
                         backgroundColor: Colors.white.withValues(alpha: .12),
-                        valueColor:
-                            const AlwaysStoppedAnimation<Color>(
+                        valueColor: const AlwaysStoppedAnimation<Color>(
                           Color(0xFF52D5B5),
                         ),
                       ),
@@ -385,10 +749,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                         ),
                         const Text(
                           'سعرة',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                          ),
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                       ],
                     ),
@@ -402,10 +763,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                   children: [
                     const Text(
                       'السعرات الحرارية',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: Colors.white70, fontSize: 13),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -422,8 +780,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                       minHeight: 7,
                       borderRadius: BorderRadius.circular(10),
                       backgroundColor: Colors.white.withValues(alpha: .12),
-                      valueColor:
-                          const AlwaysStoppedAnimation<Color>(
+                      valueColor: const AlwaysStoppedAnimation<Color>(
                         Color(0xFF55D5B2),
                       ),
                     ),
@@ -437,6 +794,11 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
     );
   }
 
+  String _formatNumber(double value) {
+    if (value == value.roundToDouble()) return value.toInt().toString();
+    return value.toStringAsFixed(1);
+  }
+
   Widget _macroItem(String title, String value, Color color) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -445,14 +807,13 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 11,
-            ),
+            textAlign: TextAlign.right,
+            style: const TextStyle(color: Colors.white70, fontSize: 11),
           ),
           const SizedBox(height: 5),
           Text(
             value,
+            textAlign: TextAlign.right,
             style: TextStyle(
               color: color,
               fontSize: 11,
@@ -483,8 +844,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
   }
 
   Widget _buildMealCard(MealData meal) {
-    final calories =
-        meal.items.fold<int>(0, (sum, item) => sum + item.calories);
+    final calories = meal.items.fold<int>(0, (sum, item) => sum + item.calories);
 
     return Container(
       width: double.infinity,
@@ -498,32 +858,28 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
         children: [
           Row(
             children: [
+              Expanded(
+                child: Text(
+                  meal.title,
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                    color: darkBlue,
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(meal.icon, color: meal.iconColor, size: 22),
+              const Spacer(),
               Text(
                 '$calories سعرة',
+                textAlign: TextAlign.left,
                 style: const TextStyle(
                   color: Color(0xFF6D7885),
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
                 ),
-              ),
-              const Spacer(),
-              Row(
-                children: [
-                  Text(
-                    meal.title,
-                    style: const TextStyle(
-                      color: Color(0xFF142B49),
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    meal.icon,
-                    color: meal.iconColor,
-                    size: 22,
-                  ),
-                ],
               ),
             ],
           ),
@@ -531,26 +887,30 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
           if (meal.items.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 14),
-              child: Text(
-                'لم تتم إضافة طعام بعد',
-                style: TextStyle(color: Color(0xFF9AA3AD)),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'لم تتم إضافة طعام بعد',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(color: Color(0xFF9AA3AD)),
+                ),
               ),
             )
           else
-            ...meal.items.map(_buildFoodRow),
+            ...meal.items.map((item) => _buildFoodRow(meal, item)),
           const SizedBox(height: 8),
-          TextButton.icon(
-            onPressed: () => openAddFood(meal),
-            icon: const Icon(
-              Icons.add,
-              color: Color(0xFF18A980),
-            ),
-            label: const Text(
-              'إضافة طعام',
-              style: TextStyle(
-                color: Color(0xFF18A980),
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: _saving ? null : () => openAddFood(meal),
+              icon: const Icon(Icons.add, color: Color(0xFF18A980)),
+              label: const Text(
+                'إضافة طعام',
+                style: TextStyle(
+                  color: Color(0xFF18A980),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -559,39 +919,82 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
     );
   }
 
-  Widget _buildFoodRow(FoodItem item) {
+  Widget _buildFoodRow(MealData meal, FoodItem item) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 7),
       child: Row(
         children: [
-          Text(
-            '${item.calories} سعرة',
-            style: const TextStyle(
-              color: Color(0xFF6E7885),
-              fontSize: 12,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  item.name,
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                    color: Color(0xFF27384D),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  item.amount,
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                    color: Color(0xFF929BA5),
+                    fontSize: 11,
+                  ),
+                ),
+              ],
             ),
           ),
-          const Spacer(),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                item.name,
-                style: const TextStyle(
-                  color: Color(0xFF27384D),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
+          const SizedBox(width: 8),
+          PopupMenuButton<String>(
+            tooltip: 'خيارات الطعام',
+            padding: EdgeInsets.zero,
+            icon: const Icon(Icons.more_vert, color: Color(0xFF6E7885)),
+            onSelected: (value) async {
+              if (value == 'repeat') {
+                await _repeatFood(meal, item);
+              } else if (value == 'delete') {
+                await _deleteFood(meal, item);
+              }
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem<String>(
+                value: 'repeat',
+                child: Row(
+                  children: [
+                    Icon(Icons.replay, color: Color(0xFF18A980)),
+                    SizedBox(width: 10),
+                    Text('إعادة الوجبة'),
+                  ],
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                item.amount,
-                style: const TextStyle(
-                  color: Color(0xFF929BA5),
-                  fontSize: 11,
+              PopupMenuItem<String>(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_outline, color: Colors.redAccent),
+                    SizedBox(width: 10),
+                    Text('حذف الوجبة'),
+                  ],
                 ),
               ),
             ],
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 75,
+            child: Text(
+              '${item.calories} سعرة',
+              textAlign: TextAlign.left,
+              style: const TextStyle(
+                color: Color(0xFF6E7885),
+                fontSize: 12,
+              ),
+            ),
           ),
         ],
       ),
@@ -603,9 +1006,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
         return Directionality(
@@ -616,22 +1017,27 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    'اختر الوجبة',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF142B49),
+                  const Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      'اختر الوجبة',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: darkBlue,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 18),
                   ...meals.map(
                     (meal) => ListTile(
-                      leading: Icon(
-                        meal.icon,
-                        color: meal.iconColor,
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(meal.icon, color: meal.iconColor),
+                      title: Text(
+                        meal.title,
+                        textAlign: TextAlign.right,
                       ),
-                      title: Text(meal.title),
                       trailing: const Icon(Icons.chevron_left),
                       onTap: () {
                         Navigator.pop(context);
@@ -658,12 +1064,10 @@ class AddCustomFoodScreen extends StatefulWidget {
   });
 
   @override
-  State<AddCustomFoodScreen> createState() =>
-      _AddCustomFoodScreenState();
+  State<AddCustomFoodScreen> createState() => _AddCustomFoodScreenState();
 }
 
-class _AddCustomFoodScreenState
-    extends State<AddCustomFoodScreen> {
+class _AddCustomFoodScreenState extends State<AddCustomFoodScreen> {
   final nameController = TextEditingController();
   final caloriesController = TextEditingController();
   final amountController = TextEditingController();
@@ -678,16 +1082,12 @@ class _AddCustomFoodScreenState
 
   void saveFood() {
     final name = nameController.text.trim();
-    final calories = int.tryParse(
-      caloriesController.text.trim(),
-    );
+    final calories = int.tryParse(caloriesController.text.trim());
     final amount = amountController.text.trim();
 
     if (name.isEmpty || calories == null || amount.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('أكمل معلومات الطعام أولاً'),
-        ),
+        const SnackBar(content: Text('أكمل معلومات الطعام أولاً')),
       );
       return;
     }
@@ -712,10 +1112,7 @@ class _AddCustomFoodScreenState
           backgroundColor: const Color(0xFFF7F9FC),
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(
-              Icons.close,
-              color: Color(0xFF142B49),
-            ),
+            icon: const Icon(Icons.close, color: Color(0xFF142B49)),
             onPressed: () => Navigator.pop(context),
           ),
           title: const Text(
@@ -768,17 +1165,17 @@ class _AddCustomFoodScreenState
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.restaurant_menu,
-                        color: Color(0xFF13A67F),
-                      ),
+                      const Icon(Icons.restaurant_menu, color: Color(0xFF13A67F)),
                       const SizedBox(width: 12),
-                      Text(
-                        widget.mealTitle,
-                        style: const TextStyle(
-                          color: Color(0xFF142B49),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                      Expanded(
+                        child: Text(
+                          widget.mealTitle,
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(
+                            color: Color(0xFF142B49),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     ],
@@ -820,6 +1217,7 @@ class _AddCustomFoodScreenState
       alignment: Alignment.centerRight,
       child: Text(
         title,
+        textAlign: TextAlign.right,
         style: const TextStyle(
           color: Color(0xFF142B49),
           fontSize: 18,
@@ -839,27 +1237,22 @@ class _AddCustomFoodScreenState
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
+      textDirection: TextDirection.rtl,
       textAlign: TextAlign.right,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        prefixIcon: Icon(
-          icon,
-          color: const Color(0xFF13A67F),
-        ),
+        labelStyle: const TextStyle(color: Color(0xFF6E7885)),
+        prefixIcon: Icon(icon, color: const Color(0xFF13A67F)),
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(
-            color: Color(0xFFE1E7ED),
-          ),
+          borderSide: const BorderSide(color: Color(0xFFE1E7ED)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(
-            color: Color(0xFFE1E7ED),
-          ),
+          borderSide: const BorderSide(color: Color(0xFFE1E7ED)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -888,13 +1281,33 @@ class MealData {
 }
 
 class FoodItem {
+  final String? id;
   final String name;
   final int calories;
   final String amount;
+  final double protein;
+  final double carbs;
+  final double fat;
 
   FoodItem({
+    this.id,
     required this.name,
     required this.calories,
     required this.amount,
+    this.protein = 0,
+    this.carbs = 0,
+    this.fat = 0,
   });
+
+  FoodItem copyWith({String? id}) {
+    return FoodItem(
+      id: id ?? this.id,
+      name: name,
+      calories: calories,
+      amount: amount,
+      protein: protein,
+      carbs: carbs,
+      fat: fat,
+    );
+  }
 }
