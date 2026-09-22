@@ -52,49 +52,80 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    try {
-      final today = _today();
+    List<Map<String, dynamic>> tasks = [];
+    List<Map<String, dynamic>> habits = [];
+    final completedMap = <String, bool>{};
 
-      final taskResponse = await _supabase
+    // Load tasks independently so an error in another table
+    // cannot make the whole Home screen look empty.
+    try {
+      final response = await _supabase
           .from('tasks')
-          .select('id,title,description,completed,priority,due_date,user_id,time,tag,emoji,color')
+          .select(
+            'id,title,description,completed,priority,due_date,user_id,time,tag,emoji,color',
+          )
           .eq('user_id', user.id)
           .order('due_date', ascending: false)
           .order('time')
-          .limit(5);
+          .limit(20);
 
-      final habitResponse = await _supabase
+      tasks = List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      debugPrint('FLUMEA tasks load error: $e');
+    }
+
+    // Load habits independently.
+    try {
+      final response = await _supabase
           .from('habits')
           .select('id,name,description,created_at,user_id,completed')
           .eq('user_id', user.id)
-          .order('created_at');
+          .order('created_at', ascending: true);
 
-      final logResponse = await _supabase
+      habits = List<Map<String, dynamic>>.from(response);
+
+      // Use the saved completed value as a fallback.
+      for (final habit in habits) {
+        final id = habit['id']?.toString();
+        if (id != null) {
+          completedMap[id] = habit['completed'] == true;
+        }
+      }
+    } catch (e) {
+      debugPrint('FLUMEA habits load error: $e');
+    }
+
+    // Today's habit logs are optional. If this query fails,
+    // tasks and habits must still remain visible.
+    try {
+      final today = _today();
+
+      final response = await _supabase
           .from('habit_logs')
           .select('habit_id,completed,completed_date')
           .eq('user_id', user.id)
           .eq('completed_date', today);
 
-      final completedMap = <String, bool>{};
-      for (final row in logResponse) {
+      for (final row in response) {
         final habitId = row['habit_id']?.toString();
-        if (habitId != null) completedMap[habitId] = row['completed'] == true;
+        if (habitId != null) {
+          completedMap[habitId] = row['completed'] == true;
+        }
       }
-
-      if (!mounted) return;
-
-      setState(() {
-        _tasks = List<Map<String, dynamic>>.from(taskResponse);
-        _habits = List<Map<String, dynamic>>.from(habitResponse);
-        _habitCompleted
-          ..clear()
-          ..addAll(completedMap);
-        _loading = false;
-      });
     } catch (e) {
-      debugPrint('FLUMEA home data error: $e');
-      if (mounted) setState(() => _loading = false);
+      debugPrint('FLUMEA habit logs load error: $e');
     }
+
+    if (!mounted) return;
+
+    setState(() {
+      _tasks = tasks;
+      _habits = habits;
+      _habitCompleted
+        ..clear()
+        ..addAll(completedMap);
+      _loading = false;
+    });
   }
 
   Future<void> _toggleTask(Map<String, dynamic> task) async {
