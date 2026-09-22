@@ -62,13 +62,6 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
     ];
   }
 
-  MealData? _mealByTitle(String title) {
-    for (final meal in meals) {
-      if (meal.title == title) return meal;
-    }
-    return null;
-  }
-
   Future<void> _loadFoods() async {
     if (!mounted) return;
     setState(() => _loading = true);
@@ -120,7 +113,8 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
       // They are inserted into Supabase once, so they also survive app restarts.
       if (rows.isEmpty) {
         await _seedDefaultFoods(user.id, date);
-        return _loadFoodsWithoutSeeding();
+        await _loadFoodsWithoutSeeding();
+        return;
       }
 
       if (!mounted) return;
