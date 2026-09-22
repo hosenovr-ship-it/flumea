@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'bottom_navigation.dart';
+import 'food_tracking_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   static const darkBlue = Color(0xFF102A4C);
@@ -538,7 +539,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FoodTrackingScreen(),
+                        ),
+                      );
+                    },
                     icon: const Icon(Icons.add, size: 19),
                     label: const Text('تسجيل وجبة'),
                     style: ElevatedButton.styleFrom(
