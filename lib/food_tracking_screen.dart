@@ -820,25 +820,32 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
         children: [
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              // In RTL, CrossAxisAlignment.start is the right side.
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  item.name,
-                  textAlign: TextAlign.right,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Color(0xFF142B49),
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    item.name,
+                    textAlign: TextAlign.right,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Color(0xFF142B49),
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 3),
-                Text(
-                  '${item.amount} • ${item.calories} سعرة',
-                  textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    color: Color(0xFF929BA5),
-                    fontSize: 12,
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '${item.amount} • ${item.calories} سعرة',
+                    textAlign: TextAlign.right,
+                    style: const TextStyle(
+                      color: Color(0xFF929BA5),
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ],
