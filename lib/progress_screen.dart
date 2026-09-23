@@ -210,6 +210,19 @@ class _ProgressScreenState extends State<ProgressScreen> {
           uniqueHabitDays.add('${habitId}_${_dateKey(date)}');
         }
       }
+
+      // إذا كانت العادة مكتملة اليوم ولكن لم يُحفظ سجلها التاريخي بعد،
+      // نستخدم حالة habits.completed حتى لا تظهر الإحصائيات الأسبوعية/الشهرية
+      // بصفر بينما الصفحة الرئيسية تعرض العادة مكتملة.
+      for (final habit in habits) {
+        final id = habit['id']?.toString();
+        if (id != null &&
+            _asBool(habit['completed']) &&
+            !today.isBefore(range.start) &&
+            !today.isAfter(range.end)) {
+          uniqueHabitDays.add('${id}_${_dateKey(today)}');
+        }
+      }
       completedHabitCount = uniqueHabitDays.length;
     }
 
@@ -445,14 +458,50 @@ class _ProgressScreenState extends State<ProgressScreen> {
     });
 
     final selected = sortedHabits.take(7).toList();
-    final periodDays = _daysBetween(range.start, range.end).clamp(1, 366);
+    final today = _dateOnly(DateTime.now());
     final values = <double>[];
     final names = <String>[];
 
     for (final habit in selected) {
       final id = habit['id']?.toString();
-      final count = logs.where((log) => log['habit_id']?.toString() == id).length;
-      final rate = (count / periodDays).clamp(0.0, 1.0).toDouble();
+      if (id == null) {
+        values.add(0);
+        names.add('عادة');
+        continue;
+      }
+
+      final created = _readDate(habit['created_at']);
+      final habitStart = created != null && created.isAfter(range.start)
+          ? created
+          : range.start;
+      final possibleDays = _daysBetween(habitStart, range.end).clamp(1, 366);
+
+      // نجمع أيام الإكمال الفعلية لهذا المستخدم والعادة داخل الفترة،
+      // ونمنع تكرار نفس اليوم إذا كان هناك أكثر من سجل.
+      final completedDays = <String>{};
+      for (final log in logs) {
+        if (log['habit_id']?.toString() != id || !_asBool(log['completed'])) {
+          continue;
+        }
+        final date =
+            _readDate(log['completed_date']) ?? _readDate(log['created_at']);
+        if (date == null || date.isBefore(habitStart) || date.isAfter(range.end)) {
+          continue;
+        }
+        completedDays.add(_dateKey(date));
+      }
+
+      // habits.completed يمثل حالة اليوم الحالية في التطبيق. لذلك نستخدمه
+      // كاحتياط لليوم الحالي إذا لم يكن سجل اليوم موجودًا في habit_logs.
+      if (_asBool(habit['completed']) &&
+          !today.isBefore(habitStart) &&
+          !today.isAfter(range.end)) {
+        completedDays.add(_dateKey(today));
+      }
+
+      final rate = (completedDays.length / possibleDays)
+          .clamp(0.0, 1.0)
+          .toDouble();
       values.add(rate);
       names.add((habit['name']?.toString().trim().isNotEmpty ?? false)
           ? habit['name'].toString()
@@ -619,18 +668,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
     if (period == 1) {
       return _DateRange(today.subtract(const Duration(days: 6)), today);
     }
-    if (period == 2) {
-      return _DateRange(DateTime(today.year, today.month, 1), today);
-    }
-    return _DateRange(DateTime(2020, 1, 1), today);
+    return _DateRange(DateTime(today.year, today.month, 1), today);
   }
 
   _DateRange _previousPeriodRange(int period) {
     final current = _periodRange(period);
     final length = _daysBetween(current.start, current.end);
-    if (period == 3) {
-      return _DateRange(DateTime(2019, 1, 1), DateTime(2019, 12, 31));
-    }
     final end = current.start.subtract(const Duration(days: 1));
     return _DateRange(end.subtract(Duration(days: length - 1)), end);
   }
@@ -641,10 +684,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
         return 'اليوم';
       case 1:
         return 'آخر 7 أيام';
-      case 2:
-        return 'هذا الشهر';
       default:
-        return 'كل الوقت';
+        return 'هذا الشهر';
     }
   }
 
@@ -786,7 +827,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _periodSelector() {
-    const titles = ['اليوم', 'الأسبوع', 'الشهر', 'الكل'];
+    const titles = ['اليوم', 'الأسبوع', 'الشهر'];
     return Container(
       height: 52,
       decoration: BoxDecoration(
@@ -965,7 +1006,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
             textAlign: TextAlign.right,
             style: const TextStyle(color: Color(0xFF7B8798), fontSize: 13),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+          _habitOverallProgressBar(),
+          const SizedBox(height: 14),
           SizedBox(
             height: 190,
             child: Row(
@@ -1012,6 +1055,47 @@ class _ProgressScreenState extends State<ProgressScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _habitOverallProgressBar() {
+    final value = _data.dailyRate.clamp(0.0, 1.0).toDouble();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            const Expanded(
+              child: Text(
+                'معدل إكمال العادة اليوم',
+                style: TextStyle(
+                  color: navy,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            Text(
+              _formatPercent(value),
+              style: const TextStyle(
+                color: green,
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 7),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: LinearProgressIndicator(
+            minHeight: 8,
+            value: value,
+            backgroundColor: const Color(0xFFE5EEE9),
+            valueColor: const AlwaysStoppedAnimation<Color>(green),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1071,7 +1155,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             children: [
               Expanded(
                 child: Text(
-                  'توزيع وقتك اليومي',
+                  'معدل إكمال المهام',
                   style: TextStyle(
                     color: navy,
                     fontSize: 18,
@@ -1145,11 +1229,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 ),
               ],
             ),
-          ),
-          const Text(
-            'ملاحظة: جدول المهام الحالي يحفظ وقت المهمة كوقت بدء، وليس مدة.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Color(0xFF9AA7B8), fontSize: 9),
           ),
         ],
       ),
@@ -1275,13 +1354,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                     ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    'عرض الكل',
-                    style: TextStyle(color: blue, fontWeight: FontWeight.w700),
                   ),
                 ),
               ],
