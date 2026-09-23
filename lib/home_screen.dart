@@ -32,8 +32,9 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _habits = [];
   final Map<String, bool> _habitCompleted = {};
 
+  int _foodTotalCalories = 0;
   int _foodSelectedCalories = 0;
-  Map<String, int> _mealCalories = {
+  final Map<String, int> _mealCalories = {
     'الفطور': 0,
     'الغداء': 0,
     'العشاء': 0,
@@ -126,42 +127,37 @@ class _HomeScreenState extends State<HomeScreen> {
       debugPrint('FLUMEA habit logs load error: $e');
     }
 
-    // Load today's food totals independently.
+    int foodTotalCalories = 0;
+    int foodSelectedCalories = 0;
+    final mealCalories = <String, int>{
+      'الفطور': 0,
+      'الغداء': 0,
+      'العشاء': 0,
+      'وجبة خفيفة': 0,
+    };
+
+    // Read the same food_logs used by the food-tracking screen so the
+    // Home screen never uses hard-coded calorie values.
     try {
-      final foodRows = await _supabase
+      final response = await _supabase
           .from('food_logs')
-          .select('meal_type, calories, selected')
+          .select('meal_type,calories,selected')
           .eq('user_id', user.id)
           .eq('logged_date', _today());
 
-      int selectedCalories = 0;
-      final mealTotals = <String, int>{
-        'الفطور': 0,
-        'الغداء': 0,
-        'العشاء': 0,
-        'وجبة خفيفة': 0,
-      };
-
-      for (final row in foodRows) {
-        final calories = int.tryParse(row['calories']?.toString() ?? '') ?? 0;
+      for (final row in response) {
+        final calories = (row['calories'] is num)
+            ? (row['calories'] as num).toInt()
+            : int.tryParse(row['calories']?.toString() ?? '') ?? 0;
         final meal = row['meal_type']?.toString() ?? '';
-        if (row['selected'] == true) selectedCalories += calories;
-        if (mealTotals.containsKey(meal)) {
-          mealTotals[meal] = (mealTotals[meal] ?? 0) + calories;
+        foodTotalCalories += calories;
+        if (row['selected'] == true) foodSelectedCalories += calories;
+        if (mealCalories.containsKey(meal)) {
+          mealCalories[meal] = (mealCalories[meal] ?? 0) + calories;
         }
       }
-
-      _foodSelectedCalories = selectedCalories;
-      _mealCalories = mealTotals;
     } catch (e) {
       debugPrint('FLUMEA food logs load error: $e');
-      _foodSelectedCalories = 0;
-      _mealCalories = {
-        'الفطور': 0,
-        'الغداء': 0,
-        'العشاء': 0,
-        'وجبة خفيفة': 0,
-      };
     }
 
     if (!mounted) return;
@@ -172,6 +168,11 @@ class _HomeScreenState extends State<HomeScreen> {
       _habitCompleted
         ..clear()
         ..addAll(completedMap);
+      _foodTotalCalories = foodTotalCalories;
+      _foodSelectedCalories = foodSelectedCalories;
+      _mealCalories
+        ..clear()
+        ..addAll(mealCalories);
       _loading = false;
     });
   }
@@ -422,9 +423,9 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _ProgressStat(
                   icon: Icons.favorite_border_rounded,
-                  value: '$_foodSelectedCalories',
+                  value: _formatCalories(_foodSelectedCalories),
                   label: 'سعرة حرارية',
-                  iconColor: Color(0xFF8C78FF),
+                  iconColor: const Color(0xFF8C78FF),
                 ),
                 const _VerticalDivider(),
                 _ProgressStat(
@@ -514,6 +515,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  String _formatCalories(int value) {
+    return value.toString().replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (_) => ',',
+    );
+  }
+
   Widget _buildHabitsAndFood() {
     final habitsToShow = List<Map<String, dynamic>>.from(_habits);
 
@@ -562,17 +570,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Expanded(
                       child: _CaloriesRing(
-                        // When no food is selected, there is no calorie
-                        // target to display: show 0 من 0.
-                        progress: _foodSelectedCalories == 0
+                        progress: _foodTotalCalories == 0
                             ? 0.0
-                            : (_foodSelectedCalories / 2200)
+                            : (_foodSelectedCalories / _foodTotalCalories)
                                 .clamp(0.0, 1.0)
                                 .toDouble(),
-                        value: '$_foodSelectedCalories',
-                        subtitle: _foodSelectedCalories == 0
-                            ? 'من 0\nسعرة حرارية'
-                            : 'من 2,200\nسعرة حرارية',
+                        value:
+                            '${_formatCalories(_foodSelectedCalories)} من ${_formatCalories(_foodTotalCalories)}',
+                        subtitle: 'سعرة حرارية',
                       ),
                     ),
                     const SizedBox(width: 6),
@@ -600,9 +605,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           builder: (context) => const FoodTrackingScreen(),
                         ),
                       );
-                      if (mounted) {
-                        await _loadHomeData();
-                      }
+                      if (mounted) await _loadHomeData();
                     },
                     icon: const Icon(Icons.add, size: 19),
                     label: const Text('تسجيل وجبة'),
