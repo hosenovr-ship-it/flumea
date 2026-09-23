@@ -146,15 +146,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
           _asBool(log['completed']);
     }).toList();
 
-    final previousLogs = habitLogs.where((log) {
-      final date =
-          _readDate(log['completed_date']) ?? _readDate(log['created_at']);
-      return date != null &&
-          !date.isBefore(previous.start) &&
-          !date.isAfter(previous.end) &&
-          _asBool(log['completed']);
-    }).toList();
-
     final periodTasks = tasks.where((task) {
       final date = _readDate(task['due_date']) ?? _readDate(task['created_at']);
       return date != null &&
@@ -474,11 +465,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
     }
 
     return _ChartData(values: values, names: names);
-  }
-
-  double _completionRate(int completed, int days, int habitCount) {
-    if (days <= 0 || habitCount <= 0) return 0;
-    return (completed / (days * habitCount)).clamp(0.0, 1.0).toDouble();
   }
 
   _TimeSummary _buildTimeSummary(
