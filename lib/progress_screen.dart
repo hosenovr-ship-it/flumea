@@ -138,7 +138,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final previous = _previousPeriodRange(_selectedPeriod);
 
     final periodLogs = habitLogs.where((log) {
-      final date = _readDate(log['completed_date']) ?? _readDate(log['created_at']);
+      final date =
+          _readDate(log['completed_date']) ?? _readDate(log['created_at']);
       return date != null &&
           !date.isBefore(range.start) &&
           !date.isAfter(range.end) &&
@@ -146,7 +147,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
     }).toList();
 
     final previousLogs = habitLogs.where((log) {
-      final date = _readDate(log['completed_date']) ?? _readDate(log['created_at']);
+      final date =
+          _readDate(log['completed_date']) ?? _readDate(log['created_at']);
       return date != null &&
           !date.isBefore(previous.start) &&
           !date.isAfter(previous.end) &&
@@ -161,44 +163,106 @@ class _ProgressScreenState extends State<ProgressScreen> {
           _asBool(task['completed']);
     }).toList();
 
-    final activityDates = <String>{};
-    for (final log in periodLogs) {
-      final date = _readDate(log['completed_date']) ?? _readDate(log['created_at']);
-      if (date != null) activityDates.add(_dateKey(date));
-    }
-    for (final task in periodTasks) {
-      final date = _readDate(task['due_date']) ?? _readDate(task['created_at']);
-      if (date != null) activityDates.add(_dateKey(date));
-    }
-
-    final goalsInProgress = goals.where((goal) => !_asBool(goal['completed'])).length;
-
+    // الصفحة الرئيسية تعتمد على قيمة completed الموجودة في habits،
+    // بينما habit_logs يسجل إكمال كل يوم. نستخدم المصدرين معًا حتى
+    // تبقى صفحة التقدم متطابقة مع الصفحة الرئيسية حتى لو لم يوجد log.
     final today = _dateOnly(DateTime.now());
-    final todayLogs = habitLogs.where((log) {
-      final date = _readDate(log['completed_date']) ?? _readDate(log['created_at']);
-      return date != null && _dateOnly(date) == today && _asBool(log['completed']);
-    }).length;
+
+    final completedTodayFromLogs = <String>{};
+    for (final log in habitLogs) {
+      final date =
+          _readDate(log['completed_date']) ?? _readDate(log['created_at']);
+      final id = log['habit_id']?.toString();
+      if (id != null &&
+          date != null &&
+          _dateOnly(date) == today &&
+          _asBool(log['completed'])) {
+        completedTodayFromLogs.add(id);
+      }
+    }
+
+    final completedTodayFromHabits = <String>{};
+    for (final habit in habits) {
+      final id = habit['id']?.toString();
+      if (id != null && _asBool(habit['completed'])) {
+        final created = _readDate(habit['created_at']);
+        if (created == null || !created.isAfter(today)) {
+          completedTodayFromHabits.add(id);
+        }
+      }
+    }
+
+    final completedTodayIds = <String>{
+      ...completedTodayFromLogs,
+      ...completedTodayFromHabits,
+    };
 
     final availableHabitsToday = habits.where((habit) {
       final created = _readDate(habit['created_at']);
       return created == null || !created.isAfter(today);
     }).length;
 
+    final todayCompletedCount = completedTodayIds.length;
+
+    // في اليوم نعرض عدد العادات المكتملة فعليًا، وفي الفترات الأطول
+    // نعرض عدد سجلات الإكمال الفريدة (عادة + تاريخ) حتى لا نكرر نفس السجل.
+    int completedHabitCount;
+    if (_selectedPeriod == 0) {
+      completedHabitCount = todayCompletedCount;
+    } else {
+      final uniqueHabitDays = <String>{};
+      for (final log in periodLogs) {
+        final habitId = log['habit_id']?.toString();
+        final date =
+            _readDate(log['completed_date']) ?? _readDate(log['created_at']);
+        if (habitId != null && date != null) {
+          uniqueHabitDays.add('${habitId}_${_dateKey(date)}');
+        }
+      }
+      completedHabitCount = uniqueHabitDays.length;
+    }
+
+    final activityDates = <String>{};
+    for (final log in periodLogs) {
+      final date =
+          _readDate(log['completed_date']) ?? _readDate(log['created_at']);
+      if (date != null) activityDates.add(_dateKey(date));
+    }
+    for (final task in periodTasks) {
+      final date = _readDate(task['due_date']) ?? _readDate(task['created_at']);
+      if (date != null) activityDates.add(_dateKey(date));
+    }
+    if (todayCompletedCount > 0 &&
+        !today.isBefore(range.start) &&
+        !today.isAfter(range.end)) {
+      activityDates.add(_dateKey(today));
+    }
+
+    final goalsInProgress =
+        goals.where((goal) => !_asBool(goal['completed'])).length;
+
     final dailyRate = availableHabitsToday == 0
         ? 0.0
-        : (todayLogs / availableHabitsToday).clamp(0.0, 1.0).toDouble();
+        : (todayCompletedCount / availableHabitsToday)
+            .clamp(0.0, 1.0)
+            .toDouble();
 
     final chart = _buildHabitChart(habits, periodLogs, range);
 
-    final previousRate = _completionRate(
-      previousLogs.length,
-      _daysBetween(previous.start, previous.end),
-      habits.length,
+    final currentRate = _periodCompletionRate(
+      habits: habits,
+      logs: habitLogs,
+      start: range.start,
+      end: range.end,
+      fallbackTodayIds: completedTodayIds,
     );
-    final currentRate = _completionRate(
-      periodLogs.length,
-      _daysBetween(range.start, range.end),
-      habits.length,
+
+    final previousRate = _periodCompletionRate(
+      habits: habits,
+      logs: habitLogs,
+      start: previous.start,
+      end: previous.end,
+      fallbackTodayIds: const <String>{},
     );
 
     double improvement = 0;
@@ -208,13 +272,22 @@ class _ProgressScreenState extends State<ProgressScreen> {
       improvement = 100;
     }
 
+    final trend = _buildTrendData(
+      habits: habits,
+      habitLogs: habitLogs,
+      range: range,
+      fallbackTodayIds: completedTodayIds,
+    );
+
     return _ProgressData(
       activityDays: activityDates.length,
-      completedHabitLogs: periodLogs.length,
+      completedHabitLogs: completedHabitCount,
       goalsInProgress: goalsInProgress,
       dailyRate: dailyRate,
       chartValues: chart.values,
       chartNames: chart.names,
+      trendValues: trend.values,
+      trendLabels: trend.labels,
       periodLabel: _periodLabel(_selectedPeriod),
       improvement: improvement,
       improvementLabel: previousRate == 0 && currentRate == 0
@@ -224,9 +297,142 @@ class _ProgressScreenState extends State<ProgressScreen> {
         habitLogs: habitLogs,
         tasks: tasks,
         goals: goals,
+        habits: habits,
+        completedTodayIds: completedTodayIds,
       ),
       timeSummary: _buildTimeSummary(tasks, range),
     );
+  }
+
+  double _periodCompletionRate({
+    required List<Map<String, dynamic>> habits,
+    required List<Map<String, dynamic>> logs,
+    required DateTime start,
+    required DateTime end,
+    required Set<String> fallbackTodayIds,
+  }) {
+    if (habits.isEmpty) return 0;
+
+    final availableHabits = habits.where((habit) {
+      final created = _readDate(habit['created_at']);
+      return created == null || !created.isAfter(end);
+    }).length;
+
+    if (availableHabits == 0) return 0;
+
+    final uniqueCompletions = <String>{};
+    for (final log in logs) {
+      if (!_asBool(log['completed'])) continue;
+      final habitId = log['habit_id']?.toString();
+      final date =
+          _readDate(log['completed_date']) ?? _readDate(log['created_at']);
+      if (habitId == null ||
+          date == null ||
+          date.isBefore(start) ||
+          date.isAfter(end)) {
+        continue;
+      }
+      uniqueCompletions.add('${habitId}_${_dateKey(date)}');
+    }
+
+    if (start == _dateOnly(DateTime.now()) &&
+        end == _dateOnly(DateTime.now())) {
+      for (final id in fallbackTodayIds) {
+        uniqueCompletions.add('${id}_${_dateKey(start)}');
+      }
+    }
+
+    final possible = _daysBetween(start, end) * availableHabits;
+    if (possible <= 0) return 0;
+    return (uniqueCompletions.length / possible).clamp(0.0, 1.0).toDouble();
+  }
+
+  _TrendData _buildTrendData({
+    required List<Map<String, dynamic>> habits,
+    required List<Map<String, dynamic>> habitLogs,
+    required _DateRange range,
+    required Set<String> fallbackTodayIds,
+  }) {
+    if (range.start == range.end) {
+      final value = _dailyCompletionRate(
+        date: range.start,
+        habits: habits,
+        habitLogs: habitLogs,
+        fallbackTodayIds: fallbackTodayIds,
+      );
+      return _TrendData(
+        values: [value],
+        labels: ['اليوم'],
+      );
+    }
+
+    final totalDays = _daysBetween(range.start, range.end);
+    int step = 1;
+
+    // نحافظ على الرسم مقروءًا بدل إنشاء عشرات النقاط في "كل الوقت".
+    if (totalDays > 31) {
+      step = (totalDays / 7).ceil();
+    }
+
+    final values = <double>[];
+    final labels = <String>[];
+
+    for (int offset = 0; offset < totalDays; offset += step) {
+      final date = range.start.add(Duration(days: offset));
+      final value = _dailyCompletionRate(
+        date: date,
+        habits: habits,
+        habitLogs: habitLogs,
+        fallbackTodayIds: date == _dateOnly(DateTime.now())
+            ? fallbackTodayIds
+            : const <String>{},
+      );
+      values.add(value);
+      labels.add(_shortArabicDate(date));
+    }
+
+    if (values.isEmpty) {
+      values.add(0);
+      labels.add(_shortArabicDate(range.start));
+    }
+
+    return _TrendData(values: values, labels: labels);
+  }
+
+  double _dailyCompletionRate({
+    required DateTime date,
+    required List<Map<String, dynamic>> habits,
+    required List<Map<String, dynamic>> habitLogs,
+    required Set<String> fallbackTodayIds,
+  }) {
+    final day = _dateOnly(date);
+    final available = habits.where((habit) {
+      final created = _readDate(habit['created_at']);
+      return created == null || !created.isAfter(day);
+    }).length;
+
+    if (available == 0) return 0;
+
+    final completed = <String>{};
+    for (final log in habitLogs) {
+      if (!_asBool(log['completed'])) continue;
+      final habitId = log['habit_id']?.toString();
+      final logDate =
+          _readDate(log['completed_date']) ?? _readDate(log['created_at']);
+      if (habitId != null && logDate != null && _dateOnly(logDate) == day) {
+        completed.add(habitId);
+      }
+    }
+
+    if (day == _dateOnly(DateTime.now())) {
+      completed.addAll(fallbackTodayIds);
+    }
+
+    return (completed.length / available).clamp(0.0, 1.0).toDouble();
+  }
+
+  String _shortArabicDate(DateTime date) {
+    return '${date.day}/${date.month}';
   }
 
   _ChartData _buildHabitChart(
@@ -311,32 +517,59 @@ class _ProgressScreenState extends State<ProgressScreen> {
     required List<Map<String, dynamic>> habitLogs,
     required List<Map<String, dynamic>> tasks,
     required List<Map<String, dynamic>> goals,
+    required List<Map<String, dynamic>> habits,
+    required Set<String> completedTodayIds,
   }) {
     final result = <_AchievementData>[];
-    final completedLogs = habitLogs.where((log) => _asBool(log['completed'])).toList();
-    final completedTasks = tasks.where((task) => _asBool(task['completed'])).toList();
-    final completedGoals = goals.where((goal) => _asBool(goal['completed'])).length;
 
-    if (completedLogs.isNotEmpty) {
-      final streak = _currentStreak(habitLogs);
+    final completedLogs =
+        habitLogs.where((log) => _asBool(log['completed'])).toList();
+    final completedTasks =
+        tasks.where((task) => _asBool(task['completed'])).toList();
+    final completedGoals =
+        goals.where((goal) => _asBool(goal['completed'])).length;
+
+    final currentStreak = _currentStreak(habitLogs);
+
+    if (completedTodayIds.isNotEmpty) {
+      result.add(_AchievementData(
+        Icons.check_circle_rounded,
+        green,
+        'أكملت ${completedTodayIds.length} من ${habits.length} عادات اليوم',
+        'استمر على نفس الإيقاع وحافظ على تقدمك.',
+      ));
+    }
+
+    if (currentStreak > 0) {
       result.add(_AchievementData(
         Icons.local_fire_department_rounded,
         green,
-        'أكملت $streak ${streak == 1 ? 'يوم' : 'أيام'} متتالية',
-        'استمر في بناء عاداتك يومًا بعد يوم!',
+        'سلسلة عادات: $currentStreak ${currentStreak == 1 ? 'يوم' : 'أيام'}',
+        'استمر يومًا بعد يوم لبناء عادة أقوى.',
       ));
     }
 
     final studyTasks = completedTasks.where((task) {
-      final text = '${task['title'] ?? ''} ${task['tag'] ?? ''}'.toLowerCase();
-      return text.contains('دراسة') || text.contains('قراءة') || text.contains('تعليم');
+      final value =
+          '${task['title'] ?? ''} ${task['tag'] ?? ''}'.toLowerCase();
+      return value.contains('دراسة') ||
+          value.contains('قراءة') ||
+          value.contains('تعليم');
     }).length;
+
     if (studyTasks > 0) {
       result.add(_AchievementData(
         Icons.school_rounded,
         blue,
-        'أنجزت $studyTasks مهام مرتبطة بالتعلم',
-        'كل جلسة مكتملة تقرّبك من هدفك!',
+        'أنجزت $studyTasks ${studyTasks == 1 ? 'مهمة' : 'مهام'} مرتبطة بالتعلم',
+        'كل جلسة مكتملة تقرّبك من هدفك.',
+      ));
+    } else if (completedTasks.isNotEmpty) {
+      result.add(_AchievementData(
+        Icons.task_alt_rounded,
+        blue,
+        'أنجزت ${completedTasks.length} ${completedTasks.length == 1 ? 'مهمة' : 'مهام'}',
+        'تقدمك في المهام يظهر هنا تلقائيًا.',
       ));
     }
 
@@ -345,7 +578,16 @@ class _ProgressScreenState extends State<ProgressScreen> {
         Icons.flag_rounded,
         Colors.orange,
         'أكملت $completedGoals ${completedGoals == 1 ? 'هدفًا' : 'أهدافًا'}',
-        'إنجاز حقيقي يُضاف إلى رحلتك!',
+        'إنجاز حقيقي يُضاف إلى رحلتك.',
+      ));
+    }
+
+    if (result.isEmpty && completedLogs.isNotEmpty) {
+      result.add(_AchievementData(
+        Icons.track_changes_rounded,
+        blue,
+        'سجلت ${completedLogs.length} إكمالات للعادات',
+        'كل تسجيل جديد يساعدك على رؤية تقدمك بوضوح.',
       ));
     }
 
@@ -1000,15 +1242,23 @@ class _ProgressScreenState extends State<ProgressScreen> {
           Expanded(
             child: CustomPaint(
               painter: _LineChartPainter(
-                values: _data.chartValues,
+                values: _data.trendValues,
               ),
             ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text('البداية', style: _smallText),
-              Text('الآن', style: _smallText),
+            children: [
+              Text(
+                _data.trendLabels.isEmpty ? 'البداية' : _data.trendLabels.first,
+                style: _smallText,
+              ),
+              Text(
+                _data.trendLabels.length < 2
+                    ? 'الآن'
+                    : _data.trendLabels.last,
+                style: _smallText,
+              ),
             ],
           ),
         ],
@@ -1120,6 +1370,8 @@ class _ProgressData {
   final double dailyRate;
   final List<double> chartValues;
   final List<String> chartNames;
+  final List<double> trendValues;
+  final List<String> trendLabels;
   final String periodLabel;
   final double improvement;
   final String improvementLabel;
@@ -1133,6 +1385,8 @@ class _ProgressData {
     required this.dailyRate,
     required this.chartValues,
     required this.chartNames,
+    required this.trendValues,
+    required this.trendLabels,
     required this.periodLabel,
     required this.improvement,
     required this.improvementLabel,
@@ -1147,6 +1401,8 @@ class _ProgressData {
         dailyRate: 0,
         chartValues: [0, 0, 0, 0, 0, 0, 0],
         chartNames: ['الصحة', 'الرياضة', 'الدراسة', 'القراءة', 'العمل', 'الماء', 'التأمل'],
+        trendValues: [0],
+        trendLabels: ['اليوم'],
         periodLabel: 'اليوم',
         improvement: 0,
         improvementLabel: 'لا توجد بيانات كافية للمقارنة',
@@ -1167,6 +1423,16 @@ class _ChartData {
   final List<String> names;
 
   const _ChartData({required this.values, required this.names});
+}
+
+class _TrendData {
+  final List<double> values;
+  final List<String> labels;
+
+  const _TrendData({
+    required this.values,
+    required this.labels,
+  });
 }
 
 class _DateRange {
