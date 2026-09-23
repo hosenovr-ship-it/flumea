@@ -570,14 +570,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Expanded(
                       child: _CaloriesRing(
+                        // الدائرة تعرض السعرات المحددة فقط من إجمالي
+                        // السعرات المضافة لليوم. لا يوجد هدف ثابت مثل 2200.
                         progress: _foodTotalCalories == 0
                             ? 0.0
                             : (_foodSelectedCalories / _foodTotalCalories)
                                 .clamp(0.0, 1.0)
                                 .toDouble(),
-                        value:
-                            '${_formatCalories(_foodSelectedCalories)} من ${_formatCalories(_foodTotalCalories)}',
-                        subtitle: 'سعرة حرارية',
+                        value: _formatCalories(_foodSelectedCalories),
+                        subtitle:
+                            'من ${_formatCalories(_foodTotalCalories)}\nسعرة حرارية',
                       ),
                     ),
                     const SizedBox(width: 6),
