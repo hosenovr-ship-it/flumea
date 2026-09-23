@@ -53,29 +53,31 @@ class _ProgressScreenState extends State<ProgressScreen> {
         return;
       }
 
-      final results = await Future.wait([
-        _supabase
-            .from('habits')
-            .select('id, name, created_at, completed, user_id')
-            .eq('user_id', user.id),
-        _supabase
-            .from('habit_logs')
-            .select('id, habit_id, completed_date, completed, created_at, user_id')
-            .eq('user_id', user.id),
-        _supabase
-            .from('tasks')
-            .select('id, title, completed, due_date, created_at, user_id, tag, time')
-            .eq('user_id', user.id),
-        _supabase
-            .from('goals')
-            .select('id, title, description, target_date, completed, created_at, user_id')
-            .eq('user_id', user.id),
-      ]);
+      // نحمّل كل جدول بشكل مستقل حتى لا تتعطل صفحة التقدم بالكامل
+      // إذا كان أحد الجداول فارغًا أو كانت سياساته مختلفة.
+      final habits = await _safeSelect(
+        table: 'habits',
+        columns: 'id, name, created_at, completed, user_id',
+        userId: user.id,
+      );
 
-      final habits = _asMaps(results[0]);
-      final habitLogs = _asMaps(results[1]);
-      final tasks = _asMaps(results[2]);
-      final goals = _asMaps(results[3]);
+      final habitLogs = await _safeSelect(
+        table: 'habit_logs',
+        columns: 'id, habit_id, completed_date, completed, created_at, user_id',
+        userId: user.id,
+      );
+
+      final tasks = await _safeSelect(
+        table: 'tasks',
+        columns: 'id, title, completed, due_date, created_at, user_id, tag',
+        userId: user.id,
+      );
+
+      final goals = await _safeSelect(
+        table: 'goals',
+        columns: 'id, title, description, target_date, completed, created_at, user_id',
+        userId: user.id,
+      );
 
       final data = _buildProgressData(
         habits: habits,
@@ -93,8 +95,26 @@ class _ProgressScreenState extends State<ProgressScreen> {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _error = 'تعذر تحميل بيانات التقدم. اسحب الصفحة للأسفل وحاول مرة أخرى.';
+        _data = _ProgressData.empty();
+        _error = null;
       });
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _safeSelect({
+    required String table,
+    required String columns,
+    required String userId,
+  }) async {
+    try {
+      final response = await _supabase
+          .from(table)
+          .select(columns)
+          .eq('user_id', userId);
+      return _asMaps(response);
+    } catch (_) {
+      // إذا فشل جدول واحد، لا نمنع بقية صفحة التقدم من الظهور.
+      return <Map<String, dynamic>>[];
     }
   }
 
