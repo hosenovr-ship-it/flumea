@@ -562,9 +562,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Expanded(
                       child: _CaloriesRing(
-                        progress: (_foodSelectedCalories / 2200).clamp(0.0, 1.0).toDouble(),
+                        // When no food is selected, there is no calorie
+                        // target to display: show 0 من 0.
+                        progress: _foodSelectedCalories == 0
+                            ? 0.0
+                            : (_foodSelectedCalories / 2200)
+                                .clamp(0.0, 1.0)
+                                .toDouble(),
                         value: '$_foodSelectedCalories',
-                        subtitle: 'من 2,200\nسعرة حرارية',
+                        subtitle: _foodSelectedCalories == 0
+                            ? 'من 0\nسعرة حرارية'
+                            : 'من 2,200\nسعرة حرارية',
                       ),
                     ),
                     const SizedBox(width: 6),
