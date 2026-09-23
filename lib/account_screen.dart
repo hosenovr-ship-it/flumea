@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'bottom_navigation.dart';
 
-
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
   static const Color navy = Color(0xFF102A4C);
   static const Color blue = Color(0xFF1976D2);
-  static const Color teal = Color(0xFF16B8A6);
   static const Color lightBlue = Color(0xFFEAF3FF);
   static const Color background = Color(0xFFF7FAFC);
 
@@ -26,7 +24,6 @@ class AccountScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // ===== Header =====
                       Row(
                         children: [
                           Expanded(
@@ -35,6 +32,7 @@ class AccountScreen extends StatelessWidget {
                               children: const [
                                 Text(
                                   'حسابي',
+                                  textAlign: TextAlign.right,
                                   style: TextStyle(
                                     fontSize: 30,
                                     fontWeight: FontWeight.bold,
@@ -44,6 +42,7 @@ class AccountScreen extends StatelessWidget {
                                 SizedBox(height: 4),
                                 Text(
                                   'إدارة حسابك وتخصيص تجربتك',
+                                  textAlign: TextAlign.right,
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Color(0xFF7B8798),
@@ -54,7 +53,8 @@ class AccountScreen extends StatelessWidget {
                           ),
                           const SizedBox(width: 14),
                           const Text(
-                            '🌊 FLUMEA',
+                            'FLUMEA',
+                            textAlign: TextAlign.left,
                             style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.bold,
@@ -63,10 +63,7 @@ class AccountScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 22),
-
-                      // ===== Profile Card =====
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
@@ -91,6 +88,7 @@ class AccountScreen extends StatelessWidget {
                                 children: [
                                   const Text(
                                     'حسين',
+                                    textAlign: TextAlign.right,
                                     style: TextStyle(
                                       fontSize: 25,
                                       fontWeight: FontWeight.bold,
@@ -100,6 +98,7 @@ class AccountScreen extends StatelessWidget {
                                   const SizedBox(height: 8),
                                   const Text(
                                     '✨  نسخة أفضل من نفسي كل يوم',
+                                    textAlign: TextAlign.right,
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: Color(0xFF718096),
@@ -115,6 +114,7 @@ class AccountScreen extends StatelessWidget {
                                     ),
                                     label: const Text(
                                       'تعديل الملف الشخصي',
+                                      textAlign: TextAlign.right,
                                       style: TextStyle(
                                         color: blue,
                                         fontWeight: FontWeight.bold,
@@ -126,8 +126,7 @@ class AccountScreen extends StatelessWidget {
                                         color: Color(0xFFE4EBF2),
                                       ),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(30),
+                                        borderRadius: BorderRadius.circular(30),
                                       ),
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 15,
@@ -177,10 +176,7 @@ class AccountScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 22),
-
-                      // ===== Settings =====
                       _sectionCard(
                         title: 'الإعدادات',
                         icon: Icons.settings,
@@ -188,13 +184,7 @@ class AccountScreen extends StatelessWidget {
                           _settingRow(
                             icon: Icons.dark_mode,
                             title: 'المظهر',
-                            subtitle: 'فاتح / داكن / نظام',
-                            color: blue,
-                          ),
-                          _settingRow(
-                            icon: Icons.language,
-                            title: 'اللغة',
-                            subtitle: 'العربية',
+                            subtitle: 'فاتح / داكن',
                             color: blue,
                           ),
                           _settingRow(
@@ -212,10 +202,7 @@ class AccountScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 20),
-
-                      // ===== Support =====
                       _sectionCard(
                         title: 'الدعم والمساعدة',
                         icon: Icons.help_outline,
@@ -235,10 +222,7 @@ class AccountScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 20),
-
-                      // ===== Logout =====
                       Container(
                         height: 58,
                         decoration: BoxDecoration(
@@ -256,6 +240,7 @@ class AccountScreen extends StatelessWidget {
                           ),
                           label: const Text(
                             'تسجيل الخروج',
+                            textAlign: TextAlign.right,
                             style: TextStyle(
                               color: Color(0xFFD93B3B),
                               fontSize: 17,
@@ -271,11 +256,9 @@ class AccountScreen extends StatelessWidget {
             ],
           ),
         ),
-
-        // ===== Bottom Navigation =====
         bottomNavigationBar: const FlumeaBottomNavigation(
-  selectedIndex: 3,
-),
+          selectedIndex: 3,
+        ),
       ),
     );
   }
@@ -305,12 +288,15 @@ class AccountScreen extends StatelessWidget {
                   size: 28,
                 ),
                 const SizedBox(width: 10),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: navy,
+                Expanded(
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.right,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: navy,
+                    ),
                   ),
                 ),
               ],
@@ -351,26 +337,30 @@ class AccountScreen extends StatelessWidget {
             size: 27,
           ),
           const Spacer(),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  color: navy,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  title,
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: navy,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF8290A2),
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF8290A2),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(width: 14),
           Container(
@@ -391,8 +381,3 @@ class AccountScreen extends StatelessWidget {
     );
   }
 }
-  
-
-
-  
-
