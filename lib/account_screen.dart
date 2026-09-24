@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'bottom_navigation.dart';
 
-
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
   static const Color navy = Color(0xFF102A4C);
   static const Color blue = Color(0xFF1976D2);
-  static const Color teal = Color(0xFF16B8A6);
   static const Color lightBlue = Color(0xFFEAF3FF);
   static const Color background = Color(0xFFF7FAFC);
 
@@ -18,273 +16,268 @@ class AccountScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: background,
         body: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: 74,
+                  child: Row(
+                    textDirection: TextDirection.ltr,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ===== Header =====
-                      SizedBox(
-                        height: 72,
-                        child: Stack(
+                      const Text(
+                        'FLUMEA',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: navy,
+                        ),
+                      ),
+                      const Spacer(),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: const [
+                          Text(
+                            'حسابي',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontSize: 30,
+                              height: 1.05,
+                              fontWeight: FontWeight.bold,
+                              color: navy,
+                            ),
+                          ),
+                          SizedBox(height: 5),
+                          Text(
+                            'إدارة حسابك وتخصيص تجربتك',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFF7B8798),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // بطاقة الملف الشخصي
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                  constraints: const BoxConstraints(minHeight: 174),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                      colors: [
+                        Color(0xFFF2FBFA),
+                        Color(0xFFF8FBFF),
+                      ],
+                    ),
+                    border: Border.all(
+                      color: Color(0xFFE4EBF2),
+                    ),
+                  ),
+                  child: Row(
+                    textDirection: TextDirection.ltr,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 92,
+                            height: 92,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Color(0xFFE3F5F1),
+                            ),
+                            child: const Icon(
+                              Icons.person,
+                              size: 58,
+                              color: navy,
+                            ),
+                          ),
+                          Positioned(
+                            bottom: -2,
+                            left: -4,
+                            child: Container(
+                              width: 34,
+                              height: 34,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: navy,
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt,
+                                size: 18,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 18),
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            const Align(
-                              alignment: Alignment.topLeft,
+                            const SizedBox(
+                              width: double.infinity,
                               child: Text(
-                                'FLUMEA',
-                                textAlign: TextAlign.left,
+                                'حسين',
+                                textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 17,
+                                  fontSize: 25,
+                                  height: 1.15,
                                   fontWeight: FontWeight.bold,
                                   color: navy,
                                 ),
                               ),
                             ),
+                            const SizedBox(height: 7),
+                            const SizedBox(
+                              width: double.infinity,
+                              child: Text(
+                                '✨  نسخة أفضل من نفسي كل يوم',
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0xFF718096),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 14),
                             Align(
-                              alignment: Alignment.topRight,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: const [
-                                  Text(
-                                    'حسابي',
-                                    textAlign: TextAlign.right,
-                                    style: TextStyle(
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.bold,
-                                      color: navy,
-                                    ),
+                              alignment: Alignment.centerRight,
+                              child: OutlinedButton.icon(
+                                onPressed: () {},
+                                icon: const Icon(
+                                  Icons.edit,
+                                  size: 19,
+                                  color: blue,
+                                ),
+                                label: const Text(
+                                  'تعديل الملف الشخصي',
+                                  textAlign: TextAlign.right,
+                                  style: TextStyle(
+                                    color: blue,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    'إدارة حسابك وتخصيص تجربتك',
-                                    textAlign: TextAlign.right,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Color(0xFF7B8798),
-                                    ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  side: const BorderSide(
+                                    color: Color(0xFFE4EBF2),
                                   ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 15),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  const Text(
-                                    'حسين',
-                                    textAlign: TextAlign.right,
-                                    style: TextStyle(
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold,
-                                      color: navy,
-                                    ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
                                   ),
-                                  const SizedBox(height: 8),
-                                  const Text(
-                                    '✨  نسخة أفضل من نفسي كل يوم',
-                                    textAlign: TextAlign.right,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Color(0xFF718096),
-                                    ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 15,
+                                    vertical: 10,
                                   ),
-                                  const SizedBox(height: 18),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: OutlinedButton.icon(
-                                      onPressed: () {},
-                                      icon: const Icon(
-                                        Icons.edit,
-                                        size: 19,
-                                        color: blue,
-                                      ),
-                                      label: const Text(
-                                        'تعديل الملف الشخصي',
-                                        textAlign: TextAlign.right,
-                                        style: TextStyle(
-                                          color: blue,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      style: OutlinedButton.styleFrom(
-                                        backgroundColor: Colors.white,
-                                        side: const BorderSide(
-                                          color: Color(0xFFE4EBF2),
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(30),
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 15,
-                                          vertical: 11,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 22),
-
-                      // ===== Profile Card =====
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          gradient: const LinearGradient(
-                            begin: Alignment.topRight,
-                            end: Alignment.bottomLeft,
-                            colors: [
-                              Color(0xFFF2FBFA),
-                              Color(0xFFF8FBFF),
-                            ],
-                          ),
-                          border: Border.all(
-                            color: const Color(0xFFE4EBF2),
-                          ),
-                        ),
-                        child: Row(
-                          textDirection: TextDirection.ltr,
-                          children: [
-                            Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                Container(
-                                  width: 92,
-                                  height: 92,
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Color(0xFFE3F5F1),
-                                  ),
-                                  child: const Icon(
-                                    Icons.person,
-                                    size: 58,
-                                    color: navy,
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: -2,
-                                  left: -4,
-                                  child: Container(
-                                    width: 34,
-                                    height: 34,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: navy,
-                                    ),
-                                    child: const Icon(
-                                      Icons.camera_alt,
-                                      size: 18,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 22),
-
-                      // ===== Settings =====
-                      _sectionCard(
-                        title: 'الإعدادات',
-                        icon: Icons.settings,
-                        children: [
-                          _settingRow(
-                            icon: Icons.dark_mode,
-                            title: 'المظهر',
-                            subtitle: 'فاتح / داكن',
-                            color: blue,
-                          ),
-                          _settingRow(
-                            icon: Icons.notifications_none,
-                            title: 'الإشعارات',
-                            subtitle: 'تنبيهات المهام والعادات',
-                            color: blue,
-                          ),
-                          _settingRow(
-                            icon: Icons.lock,
-                            title: 'الخصوصية',
-                            subtitle: 'إدارة بياناتك',
-                            color: navy,
-                            last: true,
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // ===== Support =====
-                      _sectionCard(
-                        title: 'الدعم والمساعدة',
-                        icon: Icons.help_outline,
-                        children: [
-                          _settingRow(
-                            icon: Icons.headset_mic,
-                            title: 'مركز المساعدة',
-                            subtitle: 'الأسئلة الشائعة',
-                            color: blue,
-                          ),
-                          _settingRow(
-                            icon: Icons.mail_outline,
-                            title: 'تواصل معنا',
-                            subtitle: 'نحن هنا لمساعدتك',
-                            color: navy,
-                            last: true,
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // ===== Logout =====
-                      Container(
-                        height: 58,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFE7E7),
-                          borderRadius: BorderRadius.circular(30),
-                          border: Border.all(
-                            color: const Color(0xFFFFD2D2),
-                          ),
-                        ),
-                        child: TextButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.logout,
-                            color: Color(0xFFD93B3B),
-                          ),
-                          label: const Text(
-                            'تسجيل الخروج',
-                            style: TextStyle(
-                              color: Color(0xFFD93B3B),
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 22),
+
+                _sectionCard(
+                  title: 'الإعدادات',
+                  icon: Icons.settings,
+                  children: [
+                    _settingRow(
+                      icon: Icons.dark_mode,
+                      title: 'المظهر',
+                      subtitle: 'فاتح / داكن',
+                      color: blue,
+                    ),
+                    _settingRow(
+                      icon: Icons.notifications_none,
+                      title: 'الإشعارات',
+                      subtitle: 'تنبيهات المهام والعادات',
+                      color: blue,
+                    ),
+                    _settingRow(
+                      icon: Icons.lock,
+                      title: 'الخصوصية',
+                      subtitle: 'إدارة بياناتك',
+                      color: navy,
+                      last: true,
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                _sectionCard(
+                  title: 'الدعم والمساعدة',
+                  icon: Icons.help_outline,
+                  children: [
+                    _settingRow(
+                      icon: Icons.headset_mic,
+                      title: 'مركز المساعدة',
+                      subtitle: 'الأسئلة الشائعة',
+                      color: blue,
+                    ),
+                    _settingRow(
+                      icon: Icons.mail_outline,
+                      title: 'تواصل معنا',
+                      subtitle: 'نحن هنا لمساعدتك',
+                      color: navy,
+                      last: true,
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                Container(
+                  height: 58,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFE7E7),
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(
+                      color: const Color(0xFFFFD2D2),
+                    ),
+                  ),
+                  child: TextButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(
+                      Icons.logout,
+                      color: Color(0xFFD93B3B),
+                    ),
+                    label: const Text(
+                      'تسجيل الخروج',
+                      style: TextStyle(
+                        color: Color(0xFFD93B3B),
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-
-        // ===== Bottom Navigation =====
         bottomNavigationBar: const FlumeaBottomNavigation(
-  selectedIndex: 3,
-),
+          selectedIndex: 3,
+        ),
       ),
     );
   }
@@ -358,37 +351,37 @@ class AccountScreen extends StatelessWidget {
       ),
       child: Row(
         textDirection: TextDirection.ltr,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Icon(
             Icons.chevron_left,
             color: Color(0xFF718096),
             size: 27,
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  title,
-                  textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    color: navy,
-                  ),
+          const Spacer(),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                title,
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: navy,
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  subtitle,
-                  textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF8290A2),
-                  ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                subtitle,
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF8290A2),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           const SizedBox(width: 14),
           Container(
@@ -409,8 +402,3 @@ class AccountScreen extends StatelessWidget {
     );
   }
 }
-  
-
-
-  
-
