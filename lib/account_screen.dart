@@ -234,7 +234,12 @@ class _AccountScreenState extends State<AccountScreen> {
 
     final newName = await showDialog<String>(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
+        void closeDialog([String? value]) {
+          FocusScope.of(dialogContext).unfocus();
+          Navigator.of(dialogContext).pop(value);
+        }
+
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
@@ -243,6 +248,10 @@ class _AccountScreenState extends State<AccountScreen> {
               controller: controller,
               autofocus: true,
               textInputAction: TextInputAction.done,
+              onSubmitted: (value) {
+                final trimmed = value.trim();
+                if (trimmed.isNotEmpty) closeDialog(trimmed);
+              },
               decoration: const InputDecoration(
                 labelText: 'الاسم',
                 hintText: 'اكتب اسمك',
@@ -250,13 +259,13 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => closeDialog(),
                 child: const Text('إلغاء'),
               ),
               FilledButton(
                 onPressed: () {
                   final value = controller.text.trim();
-                  if (value.isNotEmpty) Navigator.pop(context, value);
+                  if (value.isNotEmpty) closeDialog(value);
                 },
                 child: const Text('حفظ'),
               ),
@@ -266,7 +275,9 @@ class _AccountScreenState extends State<AccountScreen> {
       },
     );
 
-    controller.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.dispose();
+    });
 
     if (newName == null || newName.trim().isEmpty) return;
 
