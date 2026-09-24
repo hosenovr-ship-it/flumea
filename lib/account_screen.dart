@@ -330,6 +330,8 @@ class AccountScreen extends StatelessWidget {
               ),
       ),
       child: Row(
+        // السهم في أقصى اليسار والنصوص في أقصى اليمين.
+        textDirection: TextDirection.ltr,
         children: [
           const Icon(
             Icons.chevron_left,
