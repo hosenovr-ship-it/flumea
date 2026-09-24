@@ -36,30 +36,38 @@ class AccountScreen extends StatelessWidget {
                           color: navy,
                         ),
                       ),
-                      const Spacer(),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: const [
-                          Text(
-                            'حسابي',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              fontSize: 30,
-                              height: 1.05,
-                              fontWeight: FontWeight.bold,
-                              color: navy,
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: const [
+                            SizedBox(
+                              width: double.infinity,
+                              child: Text(
+                                'حسابي',
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  height: 1.05,
+                                  fontWeight: FontWeight.bold,
+                                  color: navy,
+                                ),
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            'إدارة حسابك وتخصيص تجربتك',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Color(0xFF7B8798),
+                            SizedBox(height: 5),
+                            SizedBox(
+                              width: double.infinity,
+                              child: Text(
+                                'إدارة حسابك وتخصيص تجربتك',
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Color(0xFF7B8798),
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -359,31 +367,39 @@ class AccountScreen extends StatelessWidget {
             size: 27,
           ),
           const Spacer(),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                title,
-                textAlign: TextAlign.right,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  color: navy,
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.right,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: navy,
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                subtitle,
-                textAlign: TextAlign.right,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF8290A2),
+                const SizedBox(height: 3),
+                SizedBox(
+                  width: double.infinity,
+                  child: Text(
+                    subtitle,
+                    textAlign: TextAlign.right,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF8290A2),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 8),
           Container(
             width: 52,
             height: 52,
