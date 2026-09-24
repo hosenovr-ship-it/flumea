@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'bottom_navigation.dart';
 
+
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
   static const Color navy = Color(0xFF102A4C);
   static const Color blue = Color(0xFF1976D2);
+  static const Color teal = Color(0xFF16B8A6);
   static const Color lightBlue = Color(0xFFEAF3FF);
   static const Color background = Color(0xFFF7FAFC);
 
@@ -24,64 +26,50 @@ class AccountScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: const [
-                                Text(
-                                  'حسابي',
-                                  textAlign: TextAlign.right,
-                                  style: TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                    color: navy,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  'إدارة حسابك وتخصيص تجربتك',
-                                  textAlign: TextAlign.right,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Color(0xFF7B8798),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          const Text(
-                            'FLUMEA',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              color: navy,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 22),
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          gradient: const LinearGradient(
-                            begin: Alignment.topRight,
-                            end: Alignment.bottomLeft,
-                            colors: [
-                              Color(0xFFF2FBFA),
-                              Color(0xFFF8FBFF),
-                            ],
-                          ),
-                          border: Border.all(
-                            color: const Color(0xFFE4EBF2),
-                          ),
-                        ),
-                        child: Row(
+                      // ===== Header =====
+                      SizedBox(
+                        height: 72,
+                        child: Stack(
                           children: [
+                            const Align(
+                              alignment: Alignment.topLeft,
+                              child: Text(
+                                'FLUMEA',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                  color: navy,
+                                ),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.topRight,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: const [
+                                  Text(
+                                    'حسابي',
+                                    textAlign: TextAlign.right,
+                                    style: TextStyle(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold,
+                                      color: navy,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    'إدارة حسابك وتخصيص تجربتك',
+                                    textAlign: TextAlign.right,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Color(0xFF7B8798),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 15),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -105,39 +93,67 @@ class AccountScreen extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(height: 18),
-                                  OutlinedButton.icon(
-                                    onPressed: () {},
-                                    icon: const Icon(
-                                      Icons.edit,
-                                      size: 19,
-                                      color: blue,
-                                    ),
-                                    label: const Text(
-                                      'تعديل الملف الشخصي',
-                                      textAlign: TextAlign.right,
-                                      style: TextStyle(
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: OutlinedButton.icon(
+                                      onPressed: () {},
+                                      icon: const Icon(
+                                        Icons.edit,
+                                        size: 19,
                                         color: blue,
-                                        fontWeight: FontWeight.bold,
                                       ),
-                                    ),
-                                    style: OutlinedButton.styleFrom(
-                                      backgroundColor: Colors.white,
-                                      side: const BorderSide(
-                                        color: Color(0xFFE4EBF2),
+                                      label: const Text(
+                                        'تعديل الملف الشخصي',
+                                        textAlign: TextAlign.right,
+                                        style: TextStyle(
+                                          color: blue,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(30),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 15,
-                                        vertical: 11,
+                                      style: OutlinedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        side: const BorderSide(
+                                          color: Color(0xFFE4EBF2),
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(30),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 15,
+                                          vertical: 11,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 15),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 22),
+
+                      // ===== Profile Card =====
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(24),
+                          gradient: const LinearGradient(
+                            begin: Alignment.topRight,
+                            end: Alignment.bottomLeft,
+                            colors: [
+                              Color(0xFFF2FBFA),
+                              Color(0xFFF8FBFF),
+                            ],
+                          ),
+                          border: Border.all(
+                            color: const Color(0xFFE4EBF2),
+                          ),
+                        ),
+                        child: Row(
+                          textDirection: TextDirection.ltr,
+                          children: [
                             Stack(
                               clipBehavior: Clip.none,
                               children: [
@@ -176,7 +192,10 @@ class AccountScreen extends StatelessWidget {
                           ],
                         ),
                       ),
+
                       const SizedBox(height: 22),
+
+                      // ===== Settings =====
                       _sectionCard(
                         title: 'الإعدادات',
                         icon: Icons.settings,
@@ -202,7 +221,10 @@ class AccountScreen extends StatelessWidget {
                           ),
                         ],
                       ),
+
                       const SizedBox(height: 20),
+
+                      // ===== Support =====
                       _sectionCard(
                         title: 'الدعم والمساعدة',
                         icon: Icons.help_outline,
@@ -222,7 +244,10 @@ class AccountScreen extends StatelessWidget {
                           ),
                         ],
                       ),
+
                       const SizedBox(height: 20),
+
+                      // ===== Logout =====
                       Container(
                         height: 58,
                         decoration: BoxDecoration(
@@ -240,7 +265,6 @@ class AccountScreen extends StatelessWidget {
                           ),
                           label: const Text(
                             'تسجيل الخروج',
-                            textAlign: TextAlign.right,
                             style: TextStyle(
                               color: Color(0xFFD93B3B),
                               fontSize: 17,
@@ -256,9 +280,11 @@ class AccountScreen extends StatelessWidget {
             ],
           ),
         ),
+
+        // ===== Bottom Navigation =====
         bottomNavigationBar: const FlumeaBottomNavigation(
-          selectedIndex: 3,
-        ),
+  selectedIndex: 3,
+),
       ),
     );
   }
@@ -281,6 +307,7 @@ class AccountScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 18, 18, 8),
             child: Row(
+              textDirection: TextDirection.rtl,
               children: [
                 Icon(
                   icon,
@@ -330,7 +357,6 @@ class AccountScreen extends StatelessWidget {
               ),
       ),
       child: Row(
-        // السهم في أقصى اليسار والنصوص في أقصى اليمين.
         textDirection: TextDirection.ltr,
         children: [
           const Icon(
@@ -338,7 +364,7 @@ class AccountScreen extends StatelessWidget {
             color: Color(0xFF718096),
             size: 27,
           ),
-          const Spacer(),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -383,3 +409,8 @@ class AccountScreen extends StatelessWidget {
     );
   }
 }
+  
+
+
+  
+
