@@ -1,13 +1,308 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'bottom_navigation.dart';
 
-class AccountScreen extends StatelessWidget {
+class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
 
+  @override
+  State<AccountScreen> createState() => _AccountScreenState();
+}
+
+class _AccountScreenState extends State<AccountScreen> {
   static const Color navy = Color(0xFF102A4C);
   static const Color blue = Color(0xFF1976D2);
   static const Color lightBlue = Color(0xFFEAF3FF);
   static const Color background = Color(0xFFF7FAFC);
+
+  final SupabaseClient _supabase = Supabase.instance.client;
+  final ImagePicker _imagePicker = ImagePicker();
+
+  String _fullName = 'حسين';
+  String? _avatarUrl;
+  bool _loading = true;
+  bool _uploadingAvatar = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      if (mounted) setState(() => _loading = false);
+      return;
+    }
+
+    try {
+      final data = await _supabase
+          .from('profiles')
+          .select('full_name, avatar_url')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      if (!mounted) return;
+
+      setState(() {
+        final name = data?['full_name'] as String?;
+        _fullName = (name != null && name.trim().isNotEmpty) ? name : 'حسين';
+        _avatarUrl = data?['avatar_url'] as String?;
+        _loading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _pickAvatar() async {
+    if (_uploadingAvatar) return;
+
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 42,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD9E0E7),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                const Text(
+                  'اختيار صورة الحساب',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: navy,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: lightBlue,
+                    child: Icon(Icons.photo_library, color: blue),
+                  ),
+                  title: const Text('اختيار من المعرض'),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                ),
+                ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: lightBlue,
+                    child: Icon(Icons.camera_alt, color: navy),
+                  ),
+                  title: const Text('التقاط صورة بالكاميرا'),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (source == null) return;
+
+    try {
+      final picked = await _imagePicker.pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 1200,
+        maxHeight: 1200,
+      );
+
+      if (picked == null) return;
+
+      await _uploadAvatar(picked);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('حدث خطأ أثناء اختيار الصورة.')),
+      );
+    }
+  }
+
+  Future<void> _uploadAvatar(XFile picked) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    setState(() => _uploadingAvatar = true);
+
+    try {
+      final extension = _extensionFor(picked.path);
+      final contentType = _contentTypeFor(extension);
+      final path = '${user.id}/avatar.$extension';
+
+      final oldUrl = _avatarUrl;
+      if (oldUrl != null && oldUrl.isNotEmpty) {
+        final oldPath = _storagePathFromPublicUrl(oldUrl);
+        if (oldPath != null && oldPath != path) {
+          await _supabase.storage.from('avatars').remove([oldPath]);
+        }
+      }
+
+      await _supabase.storage.from('avatars').upload(
+            path,
+            File(picked.path),
+            fileOptions: FileOptions(
+              upsert: true,
+              contentType: contentType,
+            ),
+          );
+
+      final publicUrl = _supabase.storage.from('avatars').getPublicUrl(path);
+      final cacheBustedUrl = '$publicUrl?v=${DateTime.now().millisecondsSinceEpoch}';
+
+      await _supabase.from('profiles').upsert({
+        'id': user.id,
+        'avatar_url': cacheBustedUrl,
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+
+      if (!mounted) return;
+
+      setState(() {
+        _avatarUrl = cacheBustedUrl;
+        _uploadingAvatar = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تم تحديث صورة الحساب بنجاح ❤️‍🔥')),
+      );
+    } on StorageException catch (e) {
+      if (!mounted) return;
+      setState(() => _uploadingAvatar = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تعذر رفع الصورة: ${e.message}')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _uploadingAvatar = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تعذر حفظ صورة الحساب.')),
+      );
+    }
+  }
+
+  String _extensionFor(String path) {
+    final lower = path.toLowerCase();
+    if (lower.endsWith('.png')) return 'png';
+    if (lower.endsWith('.webp')) return 'webp';
+    if (lower.endsWith('.heic')) return 'heic';
+    return 'jpg';
+  }
+
+  String _contentTypeFor(String extension) {
+    switch (extension) {
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      case 'heic':
+        return 'image/heic';
+      default:
+        return 'image/jpeg';
+    }
+  }
+
+  String? _storagePathFromPublicUrl(String url) {
+    final marker = '/storage/v1/object/public/avatars/';
+    final index = url.indexOf(marker);
+    if (index == -1) return null;
+    final pathWithQuery = url.substring(index + marker.length);
+    return pathWithQuery.split('?').first;
+  }
+
+  Future<void> _editProfile() async {
+    final controller = TextEditingController(text: _fullName);
+
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            title: const Text('تعديل الملف الشخصي'),
+            content: TextField(
+              controller: controller,
+              autofocus: true,
+              textInputAction: TextInputAction.done,
+              decoration: const InputDecoration(
+                labelText: 'الاسم',
+                hintText: 'اكتب اسمك',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('إلغاء'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  final value = controller.text.trim();
+                  if (value.isNotEmpty) Navigator.pop(context, value);
+                },
+                child: const Text('حفظ'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    controller.dispose();
+
+    if (newName == null || newName.trim().isEmpty) return;
+
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    try {
+      await _supabase.from('profiles').upsert({
+        'id': user.id,
+        'full_name': newName.trim(),
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+
+      if (!mounted) return;
+      setState(() => _fullName = newName.trim());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تم تحديث الاسم بنجاح ❤️‍🔥')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تعذر حفظ الاسم.')),
+      );
+    }
+  }
+
+  Future<void> _signOut() async {
+    try {
+      await _supabase.auth.signOut();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تعذر تسجيل الخروج.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,40 +391,65 @@ class AccountScreen extends StatelessWidget {
                     textDirection: TextDirection.ltr,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            width: 92,
-                            height: 92,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Color(0xFFE3F5F1),
-                            ),
-                            child: const Icon(
-                              Icons.person,
-                              size: 58,
-                              color: navy,
-                            ),
-                          ),
-                          Positioned(
-                            bottom: -2,
-                            left: -4,
-                            child: Container(
-                              width: 34,
-                              height: 34,
+                      GestureDetector(
+                        onTap: _pickAvatar,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              width: 92,
+                              height: 92,
                               decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: navy,
+                                color: Color(0xFFE3F5F1),
                               ),
-                              child: const Icon(
-                                Icons.camera_alt,
-                                size: 18,
-                                color: Colors.white,
+                              clipBehavior: Clip.antiAlias,
+                              child: _avatarUrl != null && _avatarUrl!.isNotEmpty
+                                  ? Image.network(
+                                      _avatarUrl!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => const Icon(
+                                        Icons.person,
+                                        size: 58,
+                                        color: navy,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.person,
+                                      size: 58,
+                                      color: navy,
+                                    ),
+                            ),
+                            Positioned(
+                              bottom: -2,
+                              left: -4,
+                              child: Container(
+                                width: 34,
+                                height: 34,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: navy,
+                                ),
+                                child: _uploadingAvatar
+                                    ? const Padding(
+                                        padding: EdgeInsets.all(8),
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                            Colors.white,
+                                          ),
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.camera_alt,
+                                        size: 18,
+                                        color: Colors.white,
+                                      ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       const SizedBox(width: 18),
                       Expanded(
@@ -137,12 +457,12 @@ class AccountScreen extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            const SizedBox(
+                            SizedBox(
                               width: double.infinity,
                               child: Text(
-                                'حسين',
+                                _loading ? '...' : _fullName,
                                 textAlign: TextAlign.right,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 25,
                                   height: 1.15,
                                   fontWeight: FontWeight.bold,
@@ -166,7 +486,7 @@ class AccountScreen extends StatelessWidget {
                             Align(
                               alignment: Alignment.centerRight,
                               child: OutlinedButton.icon(
-                                onPressed: () {},
+                                onPressed: _editProfile,
                                 icon: const Icon(
                                   Icons.edit,
                                   size: 19,
@@ -264,7 +584,7 @@ class AccountScreen extends StatelessWidget {
                     ),
                   ),
                   child: TextButton.icon(
-                    onPressed: () {},
+                    onPressed: _signOut,
                     icon: const Icon(
                       Icons.logout,
                       color: Color(0xFFD93B3B),
