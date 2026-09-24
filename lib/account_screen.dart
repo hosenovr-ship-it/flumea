@@ -408,7 +408,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                   ? Image.network(
                                       _avatarUrl!,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => const Icon(
+                                      errorBuilder: (_, error, stackTrace) => const Icon(
                                         Icons.person,
                                         size: 58,
                                         color: navy,
