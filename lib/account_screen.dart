@@ -230,27 +230,27 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _editProfile() async {
-    final controller = TextEditingController(text: _fullName);
+    String editedName = _fullName;
 
     final newName = await showDialog<String>(
       context: context,
+      barrierDismissible: true,
       builder: (dialogContext) {
-        void closeDialog([String? value]) {
-          FocusScope.of(dialogContext).unfocus();
-          Navigator.of(dialogContext).pop(value);
-        }
-
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
             title: const Text('تعديل الملف الشخصي'),
-            content: TextField(
-              controller: controller,
-              autofocus: true,
+            content: TextFormField(
+              initialValue: _fullName,
               textInputAction: TextInputAction.done,
-              onSubmitted: (value) {
+              onChanged: (value) {
+                editedName = value;
+              },
+              onFieldSubmitted: (value) {
                 final trimmed = value.trim();
-                if (trimmed.isNotEmpty) closeDialog(trimmed);
+                if (trimmed.isNotEmpty) {
+                  Navigator.of(dialogContext).pop(trimmed);
+                }
               },
               decoration: const InputDecoration(
                 labelText: 'الاسم',
@@ -259,13 +259,17 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
             actions: [
               TextButton(
-                onPressed: () => closeDialog(),
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                },
                 child: const Text('إلغاء'),
               ),
               FilledButton(
                 onPressed: () {
-                  final value = controller.text.trim();
-                  if (value.isNotEmpty) closeDialog(value);
+                  final value = editedName.trim();
+                  if (value.isNotEmpty) {
+                    Navigator.of(dialogContext).pop(value);
+                  }
                 },
                 child: const Text('حفظ'),
               ),
@@ -275,11 +279,10 @@ class _AccountScreenState extends State<AccountScreen> {
       },
     );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.dispose();
-    });
-
     if (newName == null || newName.trim().isEmpty) return;
+
+    final trimmedName = newName.trim();
+    if (trimmedName == _fullName.trim()) return;
 
     final user = _supabase.auth.currentUser;
     if (user == null) return;
@@ -287,12 +290,12 @@ class _AccountScreenState extends State<AccountScreen> {
     try {
       await _supabase.from('profiles').upsert({
         'id': user.id,
-        'full_name': newName.trim(),
+        'full_name': trimmedName,
         'updated_at': DateTime.now().toIso8601String(),
       });
 
       if (!mounted) return;
-      setState(() => _fullName = newName.trim());
+      setState(() => _fullName = trimmedName);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('تم تحديث الاسم بنجاح ❤️‍🔥')),
       );
