@@ -18,7 +18,6 @@ class _AccountScreenState extends State<AccountScreen> {
   static const Color navy = Color(0xFF102A4C);
   static const Color blue = Color(0xFF1976D2);
   static const Color lightBlue = Color(0xFFEAF3FF);
-  static const Color background = Color(0xFFF7FAFC);
 
   final SupabaseClient _supabase = Supabase.instance.client;
   final ImagePicker _imagePicker = ImagePicker();
@@ -321,27 +320,28 @@ class _AccountScreenState extends State<AccountScreen> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                RadioListTile<ThemeMode>(
-                  value: ThemeMode.light,
+                RadioGroup<ThemeMode>(
                   groupValue: currentMode,
-                  title: const Text('فاتح'),
-                  secondary: const Icon(Icons.light_mode),
                   onChanged: (value) {
                     if (value != null) {
                       Navigator.of(dialogContext).pop(value);
                     }
                   },
-                ),
-                RadioListTile<ThemeMode>(
-                  value: ThemeMode.dark,
-                  groupValue: currentMode,
-                  title: const Text('داكن'),
-                  secondary: const Icon(Icons.dark_mode),
-                  onChanged: (value) {
-                    if (value != null) {
-                      Navigator.of(dialogContext).pop(value);
-                    }
-                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      RadioListTile<ThemeMode>(
+                        value: ThemeMode.light,
+                        title: const Text('فاتح'),
+                        secondary: const Icon(Icons.light_mode),
+                      ),
+                      RadioListTile<ThemeMode>(
+                        value: ThemeMode.dark,
+                        title: const Text('داكن'),
+                        secondary: const Icon(Icons.dark_mode),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
