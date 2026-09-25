@@ -873,7 +873,7 @@ class _PlanScreenState extends State<PlanScreen> {
               borderRadius:
                   BorderRadius.circular(28),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
@@ -1272,7 +1272,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   size: 27,
                 ),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'المهام اليوم',
                     style: TextStyle(
