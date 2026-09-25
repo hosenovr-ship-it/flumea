@@ -9,10 +9,8 @@ class FoodTrackingScreen extends StatefulWidget {
 }
 
 class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
-  static const Color darkBlue = Color(0xFF142B49);
   static const Color cardBlue = Color(0xFF092D54);
   static const Color green = Color(0xFF0DB58A);
-  static const Color softGreen = Color(0xFFE9FBF5);
 
   final SupabaseClient _supabase = Supabase.instance.client;
   
@@ -950,7 +948,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Align(
+                  Align(
                     alignment: Alignment.centerRight,
                     child: Text(
                       'اختر الوجبة',
