@@ -27,8 +27,6 @@ class _PlanScreenState extends State<PlanScreen> {
   Color get _surfaceVariant =>
       Theme.of(context).colorScheme.surfaceContainerHighest;
 
-  Color get _mutedText =>
-      Theme.of(context).colorScheme.onSurfaceVariant;
 
   Color get _outline =>
       Theme.of(context).colorScheme.outlineVariant;
@@ -759,15 +757,15 @@ class _PlanScreenState extends State<PlanScreen> {
                   CrossAxisAlignment.stretch,
               children: [
                 _buildHeader(),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 _buildTodayButton(),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 _buildDays(),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 _buildSummary(),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 _buildTasks(),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 Row(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
@@ -775,7 +773,7 @@ class _PlanScreenState extends State<PlanScreen> {
                     Expanded(
                       child: _buildWeeklyGoals(),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: _buildDailyHabits(),
                     ),
@@ -809,7 +807,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 mainAxisAlignment:
                     MainAxisAlignment.end,
                 children: [
-                  const Text(
+                  Text(
                     'الخطة',
                     style: TextStyle(
                       fontSize: 30,
@@ -818,7 +816,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       color: _primaryText,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Icon(
                     Icons.calendar_month_outlined,
                     color: _primaryText,
@@ -826,8 +824,8 @@ class _PlanScreenState extends State<PlanScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
-              const Text(
+              SizedBox(height: 4),
+              Text(
                 'نظم يومك وحقق أهدافك',
                 style: TextStyle(
                   fontSize: 16,
@@ -868,7 +866,7 @@ class _PlanScreenState extends State<PlanScreen> {
               borderRadius:
                   BorderRadius.circular(28),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
@@ -989,7 +987,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   : const Color(0xFF52647A),
             ),
           ),
-          const SizedBox(height: 5),
+          SizedBox(height: 5),
           Text(
             number,
             style: TextStyle(
@@ -998,7 +996,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   FontWeight.w800,
               color: selected
                   ? Colors.white
-                  : navy,
+                  : _primaryText,
             ),
           ),
         ],
@@ -1042,7 +1040,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       mainAxisAlignment:
                           MainAxisAlignment.end,
                       children: [
-                        const Text(
+                        Text(
                           'خطة اليوم',
                           style: TextStyle(
                             fontSize: 21,
@@ -1051,10 +1049,10 @@ class _PlanScreenState extends State<PlanScreen> {
                             color: _primaryText,
                           ),
                         ),
-                        const SizedBox(
+                        SizedBox(
                           width: 7,
                         ),
-                        const Text(
+                        Text(
                           '☀️',
                           style: TextStyle(
                             fontSize: 22,
@@ -1062,10 +1060,10 @@ class _PlanScreenState extends State<PlanScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(
+                    SizedBox(
                       height: 7,
                     ),
-                    const Text(
+                    Text(
                       'خطوات صغيرة تصنع فرقاً كبيراً',
                       textAlign:
                           TextAlign.right,
@@ -1081,7 +1079,7 @@ class _PlanScreenState extends State<PlanScreen> {
             ],
           ),
 
-          const SizedBox(
+          SizedBox(
             height: 16,
           ),
 
@@ -1150,7 +1148,7 @@ class _PlanScreenState extends State<PlanScreen> {
           ),
         ),
 
-        const SizedBox(
+        SizedBox(
           height: 5,
         ),
 
@@ -1228,7 +1226,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   color: _primaryText,
                 ),
               ),
-              const Text(
+              Text(
                 'مكتملة',
                 style: TextStyle(
                   fontSize: 9,
@@ -1273,8 +1271,8 @@ class _PlanScreenState extends State<PlanScreen> {
                   color: _primaryText,
                   size: 27,
                 ),
-                const SizedBox(width: 8),
-                const Expanded(
+                SizedBox(width: 8),
+                Expanded(
                   child: Text(
                     'المهام اليوم',
                     style: TextStyle(
@@ -1290,7 +1288,7 @@ class _PlanScreenState extends State<PlanScreen> {
           ),
 
           if (_isLoadingTasks)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(
                 vertical: 30,
               ),
@@ -1299,7 +1297,7 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             )
           else if (tasks.isEmpty)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(
                 vertical: 25,
                 horizontal: 20,
@@ -1352,7 +1350,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       color: blue,
                       size: 24,
                     ),
-                    const SizedBox(width: 5),
+                    SizedBox(width: 5),
                     Text(
                       _isSavingTask
                           ? 'جاري الحفظ...'
@@ -1476,7 +1474,7 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
 
-          const SizedBox(
+          SizedBox(
             width: 12,
           ),
 
@@ -1510,7 +1508,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                 ? const Color(
                                     0xFF9AA4AE,
                                   )
-                                : navy,
+                                : _primaryText,
                             decoration:
                                 completed
                                     ? TextDecoration
@@ -1521,7 +1519,7 @@ class _PlanScreenState extends State<PlanScreen> {
                         ),
                       ),
 
-                      const SizedBox(
+                      SizedBox(
                         width: 8,
                       ),
 
@@ -1559,7 +1557,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                         .w800,
                               ),
                             ),
-                            const SizedBox(
+                            SizedBox(
                               width: 3,
                             ),
                             Text(
@@ -1575,7 +1573,7 @@ class _PlanScreenState extends State<PlanScreen> {
                     ],
                   ),
 
-                  const SizedBox(
+                  SizedBox(
                     height: 4,
                   ),
 
@@ -1598,7 +1596,7 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
 
-          const SizedBox(
+          SizedBox(
             width: 12,
           ),
 
@@ -1619,7 +1617,7 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
 
-          const SizedBox(
+          SizedBox(
             width: 5,
           ),
 
@@ -1763,7 +1761,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.end,
                                     children: [
-                                      const Text(
+                                      Text(
                                         'إضافة مهمة جديدة',
                                         textAlign: TextAlign.right,
                                         style: TextStyle(
@@ -1773,8 +1771,8 @@ class _PlanScreenState extends State<PlanScreen> {
                                           height: 1.2,
                                         ),
                                       ),
-                                      const SizedBox(height: 7),
-                                      const Text(
+                                      SizedBox(height: 7),
+                                      Text(
                                         'ابدأ بخطوة صغيرة نحو هدفك الكبير',
                                         textAlign: TextAlign.right,
                                         style: TextStyle(
@@ -1784,7 +1782,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                           height: 1.35,
                                         ),
                                       ),
-                                      const SizedBox(height: 12),
+                                      SizedBox(height: 12),
                                       Container(
                                         width: 62,
                                         height: 4,
@@ -1798,7 +1796,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              SizedBox(width: 12),
                               Container(
                                 width: 94,
                                 height: 94,
@@ -1837,7 +1835,7 @@ class _PlanScreenState extends State<PlanScreen> {
                             ],
                           ),
 
-                          const SizedBox(height: 18),
+                          SizedBox(height: 18),
 
                           _modernTaskField(
                             controller: nameController,
@@ -1848,7 +1846,7 @@ class _PlanScreenState extends State<PlanScreen> {
                             iconColor: blue,
                           ),
 
-                          const SizedBox(height: 11),
+                          SizedBox(height: 11),
 
                           GestureDetector(
                             onTap: () async {
@@ -1894,7 +1892,7 @@ class _PlanScreenState extends State<PlanScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 11),
+                          SizedBox(height: 11),
 
                           GestureDetector(
                             onTap: () async {
@@ -1939,8 +1937,8 @@ class _PlanScreenState extends State<PlanScreen> {
                                                     BorderRadius.circular(20),
                                               ),
                                             ),
-                                            const SizedBox(height: 14),
-                                            const Text(
+                                            SizedBox(height: 14),
+                                            Text(
                                               'اختر التصنيف',
                                               style: TextStyle(
                                                 color: _primaryText,
@@ -1948,7 +1946,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                                 fontWeight: FontWeight.w800,
                                               ),
                                             ),
-                                            const SizedBox(height: 8),
+                                            SizedBox(height: 8),
                                             ...categories.map(
                                               (category) => ListTile(
                                                 contentPadding:
@@ -2004,7 +2002,7 @@ class _PlanScreenState extends State<PlanScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 11),
+                          SizedBox(height: 11),
 
                           _modernTaskField(
                             controller: emojiController,
@@ -2015,9 +2013,9 @@ class _PlanScreenState extends State<PlanScreen> {
                             iconColor: const Color(0xFF6C63C7),
                           ),
 
-                          const SizedBox(height: 11),
+                          SizedBox(height: 11),
 
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
 
                           Row(
                             children: [
@@ -2031,7 +2029,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                   style: TextButton.styleFrom(
                                     backgroundColor:
                                         const Color(0xFFF0F3F8),
-                                    foregroundColor: navy,
+                                    foregroundColor: _primaryText,
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 15,
                                     ),
@@ -2039,7 +2037,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                       borderRadius: BorderRadius.circular(19),
                                     ),
                                   ),
-                                  child: const Text(
+                                  child: Text(
                                     'إلغاء',
                                     style: TextStyle(
                                       color: _primaryText,
@@ -2049,7 +2047,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              SizedBox(width: 12),
                               Expanded(
                                 flex: 1,
                                 child: ElevatedButton.icon(
@@ -2154,7 +2152,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                     Icons.add,
                                     size: 23,
                                   ),
-                                  label: const Text(
+                                  label: Text(
                                     'إضافة المهمة',
                                     style: TextStyle(
                                       fontSize: 16,
@@ -2306,7 +2304,7 @@ class _PlanScreenState extends State<PlanScreen> {
             mainAxisAlignment:
                 MainAxisAlignment.end,
             children: [
-              const Text(
+              Text(
                 'أهداف الأسبوع',
                 style:
                     TextStyle(
@@ -2316,7 +2314,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       FontWeight.w800,
                 ),
               ),
-              const SizedBox(
+              SizedBox(
                 width: 7,
               ),
               Icon(
@@ -2327,7 +2325,7 @@ class _PlanScreenState extends State<PlanScreen> {
             ],
           ),
 
-          const SizedBox(
+          SizedBox(
             height: 18,
           ),
 
@@ -2338,7 +2336,7 @@ class _PlanScreenState extends State<PlanScreen> {
             blue,
           ),
 
-          const SizedBox(
+          SizedBox(
             height: 15,
           ),
 
@@ -2349,7 +2347,7 @@ class _PlanScreenState extends State<PlanScreen> {
             cyan,
           ),
 
-          const SizedBox(
+          SizedBox(
             height: 15,
           ),
 
@@ -2414,7 +2412,7 @@ class _PlanScreenState extends State<PlanScreen> {
           ],
         ),
 
-        const SizedBox(
+        SizedBox(
           height: 7,
         ),
 
@@ -2462,7 +2460,7 @@ class _PlanScreenState extends State<PlanScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const Text(
+              Text(
                 'عادات اليوم',
                 style: TextStyle(
                   color: _primaryText,
@@ -2470,7 +2468,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              const SizedBox(width: 7),
+              SizedBox(width: 7),
               Icon(
                 Icons.repeat,
                 color: _primaryText,
@@ -2478,9 +2476,9 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           if (habits.isEmpty)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Text(
                 'لا توجد عادات بعد',
@@ -2509,7 +2507,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 );
               },
             ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           OutlinedButton.icon(
             onPressed: _isSavingHabit ? null : _showAddHabitDialog,
             icon: Icon(
@@ -2583,7 +2581,7 @@ class _PlanScreenState extends State<PlanScreen> {
               size: 20,
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Text(
               title,
@@ -2599,7 +2597,7 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 4),
+          SizedBox(width: 4),
           PopupMenuButton<String>(
             tooltip: 'خيارات العادة',
             padding: EdgeInsets.zero,
@@ -2646,7 +2644,7 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             ],
           ),
-          const SizedBox(width: 4),
+          SizedBox(width: 4),
           GestureDetector(
             onTap: () => _toggleHabit(id, completed),
             child: Container(
@@ -2693,7 +2691,7 @@ class _PlanScreenState extends State<PlanScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(28),
             ),
-            title: const Text(
+            title: Text(
               'إضافة عادة جديدة',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -2728,7 +2726,7 @@ class _PlanScreenState extends State<PlanScreen> {
                           borderRadius: BorderRadius.circular(18),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         'إلغاء',
                         style: TextStyle(
                           color: _primaryText,
@@ -2738,7 +2736,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _isSavingHabit
@@ -2814,7 +2812,7 @@ class _PlanScreenState extends State<PlanScreen> {
                           borderRadius: BorderRadius.circular(18),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         'إضافة',
                         style: TextStyle(
                           fontSize: 16,
