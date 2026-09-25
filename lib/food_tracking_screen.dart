@@ -9,7 +9,6 @@ class FoodTrackingScreen extends StatefulWidget {
 }
 
 class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
-  static const Color background = Color(0xFFF7F9FC);
   static const Color darkBlue = Color(0xFF142B49);
   static const Color cardBlue = Color(0xFF092D54);
   static const Color green = Color(0xFF0DB58A);
@@ -331,18 +330,18 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: background,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_forward_ios, color: darkBlue),
+            icon: Icon(Icons.arrow_forward_ios, color: Theme.of(context).colorScheme.onSurface),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text(
+          title: Text(
             'تسجيل الطعام',
             style: TextStyle(
-              color: darkBlue,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -444,10 +443,10 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: isSelected ? softGreen : Colors.white,
+          color: isSelected ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
-            color: isSelected ? const Color(0xFF66CDAA) : const Color(0xFFE3E8EE),
+            color: isSelected ? const Color(0xFF66CDAA) : Theme.of(context).colorScheme.outlineVariant,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -459,7 +458,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: isSelected ? darkBlue : const Color(0xFF7E8997),
+                color: isSelected ? Theme.of(context).colorScheme.onSecondaryContainer : Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
               ),
@@ -468,15 +467,15 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
             Text(
               '${date.day}',
               style: TextStyle(
-                color: isSelected ? darkBlue : const Color(0xFF27384D),
+                color: isSelected ? Theme.of(context).colorScheme.onSecondaryContainer : Theme.of(context).colorScheme.onSurface,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
               _shortMonth(date),
-              style: const TextStyle(
-                color: Color(0xFF8C96A3),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 9,
               ),
             ),
@@ -737,9 +736,9 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE7EBEF)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         children: [
@@ -751,8 +750,8 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                 child: Text(
                   meal.title,
                   textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    color: darkBlue,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
                   ),
@@ -764,8 +763,8 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                 child: Text(
                   '$calories سعرة',
                   textAlign: TextAlign.left,
-                  style: const TextStyle(
-                    color: Color(0xFF6D7885),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                   ),
@@ -782,8 +781,8 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                 child: Text(
                   'مثال: ${_exampleFoodFor(meal.title)}',
                   textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    color: Color(0xFF9AA3AD),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 13,
                   ),
                 ),
@@ -829,8 +828,8 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                     item.name,
                     textAlign: TextAlign.right,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Color(0xFF142B49),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
                     ),
@@ -842,8 +841,8 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                   child: Text(
                     '${item.amount} • ${item.calories} سعرة',
                     textAlign: TextAlign.right,
-                    style: const TextStyle(
-                      color: Color(0xFF929BA5),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 12,
                     ),
                   ),
@@ -861,9 +860,9 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
               height: 34,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: item.selected ? green : Colors.white,
+                color: item.selected ? green : Theme.of(context).colorScheme.surface,
                 border: Border.all(
-                  color: item.selected ? green : const Color(0xFFB8C1CB),
+                  color: item.selected ? green : Theme.of(context).colorScheme.outline,
                   width: 2,
                 ),
               ),
@@ -878,7 +877,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
             child: PopupMenuButton<String>(
               tooltip: 'خيارات الطعام',
               padding: EdgeInsets.zero,
-              icon: const Icon(Icons.more_vert, color: Color(0xFF173B67)),
+              icon: Icon(Icons.more_vert, color: Theme.of(context).colorScheme.onSurfaceVariant),
               onSelected: (value) async {
                 if (value == 'edit') {
                   await _editFood(meal, item);
@@ -938,7 +937,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
   void _showMealPicker() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -959,7 +958,7 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: darkBlue,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -1080,9 +1079,9 @@ class _AddCustomFoodScreenState extends State<AddCustomFoodScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF7F9FC),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: const Color(0xFFF7F9FC),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.close, color: Color(0xFF142B49)),
@@ -1091,7 +1090,7 @@ class _AddCustomFoodScreenState extends State<AddCustomFoodScreen> {
           title: Text(
             widget.initialItem == null ? 'إضافة طعام مخصص' : 'تعديل الطعام',
             style: TextStyle(
-              color: Color(0xFF142B49),
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 21,
               fontWeight: FontWeight.bold,
             ),
@@ -1133,19 +1132,19 @@ class _AddCustomFoodScreenState extends State<AddCustomFoodScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(17),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE9FBF5),
+                    color: Theme.of(context).colorScheme.secondaryContainer,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.restaurant_menu, color: Color(0xFF13A67F)),
+                      Icon(Icons.restaurant_menu, color: Theme.of(context).colorScheme.secondary),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           widget.mealTitle,
                           textAlign: TextAlign.right,
-                          style: const TextStyle(
-                            color: Color(0xFF142B49),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSecondaryContainer,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
@@ -1191,8 +1190,8 @@ class _AddCustomFoodScreenState extends State<AddCustomFoodScreen> {
       child: Text(
         title,
         textAlign: TextAlign.right,
-        style: const TextStyle(
-          color: Color(0xFF142B49),
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onSurface,
           fontSize: 18,
           fontWeight: FontWeight.bold,
         ),
@@ -1215,22 +1214,22 @@ class _AddCustomFoodScreenState extends State<AddCustomFoodScreen> {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        labelStyle: const TextStyle(color: Color(0xFF6E7885)),
-        prefixIcon: Icon(icon, color: const Color(0xFF13A67F)),
+        labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+        prefixIcon: Icon(icon, color: Theme.of(context).colorScheme.secondary),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Theme.of(context).colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFFE1E7ED)),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFFE1E7ED)),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(
-            color: Color(0xFF13A67F),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.secondary,
             width: 1.5,
           ),
         ),
