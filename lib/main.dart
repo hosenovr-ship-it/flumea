@@ -8,7 +8,7 @@ Future<void> main() async {
 
   await Supabase.initialize(
     url: 'https://mmmypwmdzkjmsdhmjdfd.supabase.co',
-    publishableKey: 'sb_publishable_RlA_bgKUcEqSRli1CzJTHA_-6g3mOxs',
+    publishableKey: 'sb_publishable_RIA_bgKUcEqSRi1cZjTHA_-6g3m0xs',
   );
 
   runApp(const FlumeaApp());
@@ -47,8 +47,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           pageBuilder: (context, animation, secondaryAnimation) {
             return const LoginScreen();
           },
-          transitionsBuilder:
-              (context, animation, secondaryAnimation, child) {
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity: animation,
               child: child,
