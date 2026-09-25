@@ -8,7 +8,7 @@ class FoodScreen extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: SingleChildScrollView(
             child: Column(
@@ -28,9 +28,9 @@ class FoodScreen extends StatelessWidget {
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.arrow_back_ios_new,
-                              color: Color(0xFF102A4C),
+                              color: Theme.of(context).colorScheme.onSurface,
                               size: 24,
                             ),
                           ),
@@ -44,8 +44,8 @@ class FoodScreen extends StatelessWidget {
                 const SizedBox(height: 38),
 
                 // العنوان
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 25),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
                   child: Text(
                     'هل تريد تسجيل طعامك\nومتابعة السعرات؟',
                     textAlign: TextAlign.center,
@@ -53,7 +53,7 @@ class FoodScreen extends StatelessWidget {
                       fontSize: 29,
                       height: 1.35,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF102A4C),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -62,15 +62,15 @@ class FoodScreen extends StatelessWidget {
                 const SizedBox(height: 14),
 
                 // الوصف
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 25),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
                   child: Text(
                     'سيساعدك ذلك على فهم غذائك بشكل أفضل',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFFA0A8B3),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -145,9 +145,9 @@ class FoodScreen extends StatelessWidget {
 },
                         
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF102A4C),
-                            side: const BorderSide(
-                              color: Color(0xFFE1E5EA),
+                            foregroundColor: Theme.of(context).colorScheme.onSurface,
+                            side: BorderSide(
+                              color: Theme.of(context).colorScheme.outlineVariant,
                               width: 1.3,
                             ),
                             shape: RoundedRectangleBorder(
