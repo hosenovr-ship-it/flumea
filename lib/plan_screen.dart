@@ -1659,7 +1659,7 @@ class _PlanScreenState extends State<PlanScreen> {
       itemBuilder:
           (context) {
         return [
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'reset',
             child: Row(
               mainAxisAlignment:
