@@ -9,7 +9,7 @@ Future<void> main() async {
 
   await Supabase.initialize(
     url: 'https://mmmypwmdzkjmsdhmjdfd.supabase.co',
-    publishableKey: 'sb_publishable_RIA_bgKUcEqSRi1cZjTHA_-6g3m0xs',
+    publishableKey: 'sb_publishable_RlA_bgKUcEqSRli1CzJTHA_-6g3mOxs',
   );
 
   await FlumeaThemeController.load();
