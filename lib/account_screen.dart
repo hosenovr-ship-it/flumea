@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'bottom_navigation.dart';
+import 'theme_controller.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -307,6 +308,65 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
+  Future<void> _showAppearance() async {
+    final currentMode = FlumeaThemeController.mode.value;
+
+    final selectedMode = await showDialog<ThemeMode>(
+      context: context,
+      builder: (dialogContext) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            title: const Text('المظهر'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RadioListTile<ThemeMode>(
+                  value: ThemeMode.light,
+                  groupValue: currentMode,
+                  title: const Text('فاتح'),
+                  secondary: const Icon(Icons.light_mode),
+                  onChanged: (value) {
+                    if (value != null) {
+                      Navigator.of(dialogContext).pop(value);
+                    }
+                  },
+                ),
+                RadioListTile<ThemeMode>(
+                  value: ThemeMode.dark,
+                  groupValue: currentMode,
+                  title: const Text('داكن'),
+                  secondary: const Icon(Icons.dark_mode),
+                  onChanged: (value) {
+                    if (value != null) {
+                      Navigator.of(dialogContext).pop(value);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (selectedMode == null || selectedMode == currentMode) return;
+
+    await FlumeaThemeController.setMode(selectedMode);
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          selectedMode == ThemeMode.dark
+              ? 'تم تفعيل الوضع الداكن 🌙'
+              : 'تم تفعيل الوضع الفاتح ☀️',
+        ),
+      ),
+    );
+  }
+
   Future<void> _signOut() async {
     try {
       await _supabase.auth.signOut();
@@ -320,10 +380,11 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
@@ -389,13 +450,18 @@ class _AccountScreenState extends State<AccountScreen> {
                   constraints: const BoxConstraints(minHeight: 174),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24),
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,
-                      colors: [
-                        Color(0xFFF2FBFA),
-                        Color(0xFFF8FBFF),
-                      ],
+                      colors: isDark
+                          ? const [
+                              Color(0xFF17212B),
+                              Color(0xFF1B2733),
+                            ]
+                          : const [
+                              Color(0xFFF2FBFA),
+                              Color(0xFFF8FBFF),
+                            ],
                     ),
                     border: Border.all(
                       color: Color(0xFFE4EBF2),
@@ -542,11 +608,17 @@ class _AccountScreenState extends State<AccountScreen> {
                   title: 'الإعدادات',
                   icon: Icons.settings,
                   children: [
-                    _settingRow(
-                      icon: Icons.dark_mode,
-                      title: 'المظهر',
-                      subtitle: 'فاتح / داكن',
-                      color: blue,
+                    ValueListenableBuilder<ThemeMode>(
+                      valueListenable: FlumeaThemeController.mode,
+                      builder: (context, mode, _) {
+                        return _settingRow(
+                          icon: Icons.dark_mode,
+                          title: 'المظهر',
+                          subtitle: mode == ThemeMode.dark ? 'داكن' : 'فاتح',
+                          color: blue,
+                          onTap: _showAppearance,
+                        );
+                      },
                     ),
                     _settingRow(
                       icon: Icons.notifications_none,
@@ -631,7 +703,7 @@ class _AccountScreenState extends State<AccountScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: const Color(0xFFE5EBF1),
@@ -654,10 +726,10 @@ class _AccountScreenState extends State<AccountScreen> {
                   child: Text(
                     title,
                     textAlign: TextAlign.right,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: navy,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -676,78 +748,89 @@ class _AccountScreenState extends State<AccountScreen> {
     required String subtitle,
     required Color color,
     bool last = false,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 14,
-      ),
-      decoration: BoxDecoration(
-        border: last
-            ? null
-            : const Border(
-                bottom: BorderSide(
-                  color: Color(0xFFE9EEF3),
-                ),
-              ),
-      ),
-      child: Row(
-        textDirection: TextDirection.ltr,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.chevron_left,
-            color: Color(0xFF718096),
-            size: 27,
-          ),
-          const Spacer(),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: Text(
-                    title,
-                    textAlign: TextAlign.right,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                      color: navy,
-                    ),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.onSurface;
+    final secondary = isDark ? const Color(0xFFB8C2CC) : const Color(0xFF8290A2);
+    final divider = isDark ? const Color(0xFF2A3540) : const Color(0xFFE9EEF3);
+    final iconBackground = isDark ? const Color(0xFF223247) : lightBlue;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        decoration: BoxDecoration(
+          border: last
+              ? null
+              : Border(
+                  bottom: BorderSide(
+                    color: divider,
                   ),
                 ),
-                const SizedBox(height: 3),
-                SizedBox(
-                  width: double.infinity,
-                  child: Text(
-                    subtitle,
-                    textAlign: TextAlign.right,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF8290A2),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: lightBlue,
-              borderRadius: BorderRadius.circular(17),
-            ),
-            child: Icon(
-              icon,
-              color: color,
+        ),
+        child: Row(
+          textDirection: TextDirection.ltr,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.chevron_left,
+              color: Color(0xFF718096),
               size: 27,
             ),
-          ),
-        ],
+            const Spacer(),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      subtitle,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: secondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: iconBackground,
+                borderRadius: BorderRadius.circular(17),
+              ),
+              child: Icon(
+                icon,
+                color: color,
+                size: 27,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
