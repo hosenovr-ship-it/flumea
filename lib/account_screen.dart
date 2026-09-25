@@ -18,7 +18,6 @@ class _AccountScreenState extends State<AccountScreen> {
   static const Color navy = Color(0xFF102A4C);
   static const Color blue = Color(0xFF1976D2);
   static const Color lightBlue = Color(0xFFEAF3FF);
-  static const Color background = Color(0xFFF7FAFC);
 
   final SupabaseClient _supabase = Supabase.instance.client;
   final ImagePicker _imagePicker = ImagePicker();
@@ -321,27 +320,25 @@ class _AccountScreenState extends State<AccountScreen> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                RadioListTile<ThemeMode>(
-                  value: ThemeMode.light,
-                  groupValue: currentMode,
+                ListTile(
+                  leading: const Icon(Icons.light_mode),
                   title: const Text('فاتح'),
-                  secondary: const Icon(Icons.light_mode),
-                  onChanged: (value) {
-                    if (value != null) {
-                      Navigator.of(dialogContext).pop(value);
-                    }
-                  },
+                  trailing: Icon(
+                    currentMode == ThemeMode.light
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
+                  ),
+                  onTap: () => Navigator.of(dialogContext).pop(ThemeMode.light),
                 ),
-                RadioListTile<ThemeMode>(
-                  value: ThemeMode.dark,
-                  groupValue: currentMode,
+                ListTile(
+                  leading: const Icon(Icons.dark_mode),
                   title: const Text('داكن'),
-                  secondary: const Icon(Icons.dark_mode),
-                  onChanged: (value) {
-                    if (value != null) {
-                      Navigator.of(dialogContext).pop(value);
-                    }
-                  },
+                  trailing: Icon(
+                    currentMode == ThemeMode.dark
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
+                  ),
+                  onTap: () => Navigator.of(dialogContext).pop(ThemeMode.dark),
                 ),
               ],
             ),
