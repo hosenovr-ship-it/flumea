@@ -18,7 +18,8 @@ class _PlanScreenState extends State<PlanScreen> {
   static const Color background = Color(0xFFF7FBFF);
 
   final TaskService _taskService = TaskService();
-final HabitService _habitService = HabitService();
+  final HabitService _habitService = HabitService();
+  final SupabaseClient _supabase = Supabase.instance.client;
   int selectedDay = DateTime.now().weekday % 7;
 
   bool _isLoadingTasks = true;
