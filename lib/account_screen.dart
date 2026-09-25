@@ -16,9 +16,9 @@ class AccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<AccountScreen> {
   static const Color navy = Color(0xFF102A4C);
-  static const Color blue = Color(0xFF35A9FF);
-  static const Color lightBlue = Color(0xFF223247);
-  static const Color background = Color(0xFF0B151E);
+  static const Color blue = Color(0xFF1976D2);
+  static const Color lightBlue = Color(0xFFEAF3FF);
+  static const Color background = Color(0xFFF7FAFC);
 
   final SupabaseClient _supabase = Supabase.instance.client;
   final ImagePicker _imagePicker = ImagePicker();
@@ -66,7 +66,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
-      backgroundColor: const Color(0xFF111216),
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -81,34 +81,34 @@ class _AccountScreenState extends State<AccountScreen> {
                   width: 42,
                   height: 5,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF34404A),
+                    color: const Color(0xFFD9E0E7),
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
                 const SizedBox(height: 18),
-                Text(
+                const Text(
                   'اختيار صورة الحساب',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: navy,
                   ),
                 ),
                 const SizedBox(height: 14),
                 ListTile(
-                  leading: CircleAvatar(
+                  leading: const CircleAvatar(
                     backgroundColor: lightBlue,
                     child: Icon(Icons.photo_library, color: blue),
                   ),
-                  title: Text('اختيار من المعرض'),
+                  title: const Text('اختيار من المعرض'),
                   onTap: () => Navigator.pop(context, ImageSource.gallery),
                 ),
                 ListTile(
-                  leading: CircleAvatar(
+                  leading: const CircleAvatar(
                     backgroundColor: lightBlue,
                     child: Icon(Icons.camera_alt, color: navy),
                   ),
-                  title: Text('التقاط صورة بالكاميرا'),
+                  title: const Text('التقاط صورة بالكاميرا'),
                   onTap: () => Navigator.pop(context, ImageSource.camera),
                 ),
               ],
@@ -240,7 +240,7 @@ class _AccountScreenState extends State<AccountScreen> {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
-            title: Text('تعديل الملف الشخصي'),
+            title: const Text('تعديل الملف الشخصي'),
             content: TextFormField(
               initialValue: _fullName,
               textInputAction: TextInputAction.done,
@@ -263,7 +263,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 onPressed: () {
                   Navigator.of(dialogContext).pop();
                 },
-                child: Text('إلغاء'),
+                child: const Text('إلغاء'),
               ),
               FilledButton(
                 onPressed: () {
@@ -272,7 +272,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     Navigator.of(dialogContext).pop(value);
                   }
                 },
-                child: Text('حفظ'),
+                child: const Text('حفظ'),
               ),
             ],
           ),
@@ -317,15 +317,15 @@ class _AccountScreenState extends State<AccountScreen> {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
-            title: Text('المظهر'),
+            title: const Text('المظهر'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 RadioListTile<ThemeMode>(
                   value: ThemeMode.light,
                   groupValue: currentMode,
-                  title: Text('فاتح'),
-                  secondary: Icon(Icons.light_mode),
+                  title: const Text('فاتح'),
+                  secondary: const Icon(Icons.light_mode),
                   onChanged: (value) {
                     if (value != null) {
                       Navigator.of(dialogContext).pop(value);
@@ -335,8 +335,8 @@ class _AccountScreenState extends State<AccountScreen> {
                 RadioListTile<ThemeMode>(
                   value: ThemeMode.dark,
                   groupValue: currentMode,
-                  title: Text('داكن'),
-                  secondary: Icon(Icons.dark_mode),
+                  title: const Text('داكن'),
+                  secondary: const Icon(Icons.dark_mode),
                   onChanged: (value) {
                     if (value != null) {
                       Navigator.of(dialogContext).pop(value);
@@ -397,13 +397,13 @@ class _AccountScreenState extends State<AccountScreen> {
                     textDirection: TextDirection.ltr,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'FLUMEA',
                         textAlign: TextAlign.left,
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSurface,
+                          color: navy,
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -420,7 +420,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                   fontSize: 30,
                                   height: 1.05,
                                   fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.onSurface,
+                                  color: navy,
                                 ),
                               ),
                             ),
@@ -432,7 +432,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: Color(0xFF9AA6B2),
+                                  color: Color(0xFF7B8798),
                                 ),
                               ),
                             ),
@@ -455,8 +455,8 @@ class _AccountScreenState extends State<AccountScreen> {
                       end: Alignment.bottomLeft,
                       colors: isDark
                           ? const [
-                              Color(0xFF18242E),
-                              Color(0xFF111216),
+                              Color(0xFF17212B),
+                              Color(0xFF1B2733),
                             ]
                           : const [
                               Color(0xFFF2FBFA),
@@ -464,7 +464,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             ],
                     ),
                     border: Border.all(
-                      color: Color(0xFF34404A),
+                      color: Color(0xFFE4EBF2),
                     ),
                   ),
                   child: Row(
@@ -479,27 +479,25 @@ class _AccountScreenState extends State<AccountScreen> {
                             Container(
                               width: 92,
                               height: 92,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: isDark
-                                    ? const Color(0xFF203A45)
-                                    : const Color(0xFFE3F5F1),
+                                color: Color(0xFFE3F5F1),
                               ),
                               clipBehavior: Clip.antiAlias,
                               child: _avatarUrl != null && _avatarUrl!.isNotEmpty
                                   ? Image.network(
                                       _avatarUrl!,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, error, stackTrace) => Icon(
+                                      errorBuilder: (_, error, stackTrace) => const Icon(
                                         Icons.person,
                                         size: 58,
-                                        color: Theme.of(context).colorScheme.onSurface,
+                                        color: navy,
                                       ),
                                     )
-                                  : Icon(
+                                  : const Icon(
                                       Icons.person,
                                       size: 58,
-                                      color: Theme.of(context).colorScheme.onSurface,
+                                      color: navy,
                                     ),
                             ),
                             Positioned(
@@ -508,9 +506,9 @@ class _AccountScreenState extends State<AccountScreen> {
                               child: Container(
                                 width: 34,
                                 height: 34,
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Theme.of(context).colorScheme.onSurface,
+                                  color: navy,
                                 ),
                                 child: _uploadingAvatar
                                     ? const Padding(
@@ -523,7 +521,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                           ),
                                         ),
                                       )
-                                    : Icon(
+                                    : const Icon(
                                         Icons.camera_alt,
                                         size: 18,
                                         color: Colors.white,
@@ -544,11 +542,11 @@ class _AccountScreenState extends State<AccountScreen> {
                               child: Text(
                                 _loading ? '...' : _fullName,
                                 textAlign: TextAlign.right,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 25,
                                   height: 1.15,
                                   fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.onSurface,
+                                  color: navy,
                                 ),
                               ),
                             ),
@@ -560,7 +558,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: Color(0xFF9AA6B2),
+                                  color: Color(0xFF718096),
                                 ),
                               ),
                             ),
@@ -569,12 +567,12 @@ class _AccountScreenState extends State<AccountScreen> {
                               alignment: Alignment.centerRight,
                               child: OutlinedButton.icon(
                                 onPressed: _editProfile,
-                                icon: Icon(
+                                icon: const Icon(
                                   Icons.edit,
                                   size: 19,
                                   color: blue,
                                 ),
-                                label: Text(
+                                label: const Text(
                                   'تعديل الملف الشخصي',
                                   textAlign: TextAlign.right,
                                   style: TextStyle(
@@ -583,9 +581,9 @@ class _AccountScreenState extends State<AccountScreen> {
                                   ),
                                 ),
                                 style: OutlinedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF111216),
+                                  backgroundColor: Colors.white,
                                   side: const BorderSide(
-                                    color: Color(0xFF34404A),
+                                    color: Color(0xFFE4EBF2),
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30),
@@ -632,7 +630,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       icon: Icons.lock,
                       title: 'الخصوصية',
                       subtitle: 'إدارة بياناتك',
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: navy,
                       last: true,
                     ),
                   ],
@@ -654,7 +652,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       icon: Icons.mail_outline,
                       title: 'تواصل معنا',
                       subtitle: 'نحن هنا لمساعدتك',
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: navy,
                       last: true,
                     ),
                   ],
@@ -665,19 +663,19 @@ class _AccountScreenState extends State<AccountScreen> {
                 Container(
                   height: 58,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2A181B),
+                    color: const Color(0xFFFFE7E7),
                     borderRadius: BorderRadius.circular(30),
                     border: Border.all(
-                      color: const Color(0xFF573238),
+                      color: const Color(0xFFFFD2D2),
                     ),
                   ),
                   child: TextButton.icon(
                     onPressed: _signOut,
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.logout,
                       color: Color(0xFFD93B3B),
                     ),
-                    label: Text(
+                    label: const Text(
                       'تسجيل الخروج',
                       style: TextStyle(
                         color: Color(0xFFD93B3B),
@@ -691,7 +689,7 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
         ),
-        bottomNavigationBar: const FlumeaBottomNavigation(
+        bottomNavigationBar: FlumeaBottomNavigation(
           selectedIndex: 3,
         ),
       ),
@@ -705,10 +703,10 @@ class _AccountScreenState extends State<AccountScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF111216),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: const Color(0xFF34404A),
+          color: const Color(0xFFE5EBF1),
         ),
       ),
       child: Column(
@@ -720,7 +718,7 @@ class _AccountScreenState extends State<AccountScreen> {
               children: [
                 Icon(
                   icon,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: navy,
                   size: 28,
                 ),
                 const SizedBox(width: 10),
@@ -755,7 +753,7 @@ class _AccountScreenState extends State<AccountScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.onSurface;
     final secondary = isDark ? const Color(0xFFB8C2CC) : const Color(0xFF8290A2);
-    final divider = isDark ? const Color(0xFF29343E) : const Color(0xFFE9EEF3);
+    final divider = isDark ? const Color(0xFF2A3540) : const Color(0xFFE9EEF3);
     final iconBackground = isDark ? const Color(0xFF223247) : lightBlue;
 
     return InkWell(
@@ -779,9 +777,9 @@ class _AccountScreenState extends State<AccountScreen> {
           textDirection: TextDirection.ltr,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.chevron_left,
-              color: Color(0xFF9AA6B2),
+              color: Color(0xFF718096),
               size: 27,
             ),
             const Spacer(),
