@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'login_screen.dart';
+import 'theme_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,6 +12,8 @@ Future<void> main() async {
     publishableKey: 'sb_publishable_RIA_bgKUcEqSRi1cZjTHA_-6g3m0xs',
   );
 
+  await FlumeaThemeController.load();
+
   runApp(const FlumeaApp());
 }
 
@@ -19,10 +22,34 @@ class FlumeaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'FLUMEA',
-      home: const WelcomeScreen(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: FlumeaThemeController.mode,
+      builder: (context, themeMode, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'FLUMEA',
+          themeMode: themeMode,
+          theme: ThemeData(
+            brightness: Brightness.light,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF1976D2),
+              brightness: Brightness.light,
+            ),
+            scaffoldBackgroundColor: const Color(0xFFF7FAFC),
+            useMaterial3: true,
+          ),
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF1976D2),
+              brightness: Brightness.dark,
+            ),
+            scaffoldBackgroundColor: const Color(0xFF0F1720),
+            useMaterial3: true,
+          ),
+          home: const WelcomeScreen(),
+        );
+      },
     );
   }
 }
