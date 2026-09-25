@@ -652,7 +652,7 @@ class _PlanScreenState extends State<PlanScreen> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
             'تم حذف المهمة',
           ),
@@ -716,7 +716,7 @@ class _PlanScreenState extends State<PlanScreen> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
             'تمت إعادة المهمة',
           ),
@@ -753,7 +753,7 @@ class _PlanScreenState extends State<PlanScreen> {
         backgroundColor: background,
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               18,
               12,
               18,
@@ -764,15 +764,15 @@ class _PlanScreenState extends State<PlanScreen> {
                   CrossAxisAlignment.stretch,
               children: [
                 _buildHeader(),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 _buildTodayButton(),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 _buildDays(),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 _buildSummary(),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 _buildTasks(),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 Row(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
@@ -780,7 +780,7 @@ class _PlanScreenState extends State<PlanScreen> {
                     Expanded(
                       child: _buildWeeklyGoals(),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: _buildDailyHabits(),
                     ),
@@ -823,7 +823,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       color: navy,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Icon(
                     Icons.calendar_month_outlined,
                     color: navy,
@@ -831,7 +831,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Text(
                 'نظم يومك وحقق أهدافك',
                 style: TextStyle(
@@ -864,7 +864,7 @@ class _PlanScreenState extends State<PlanScreen> {
           },
           child: Container(
             padding:
-                const EdgeInsets.symmetric(
+                EdgeInsets.symmetric(
               horizontal: 20,
               vertical: 11,
             ),
@@ -955,7 +955,7 @@ class _PlanScreenState extends State<PlanScreen> {
   ) {
     return Container(
       margin:
-          const EdgeInsets.symmetric(
+          EdgeInsets.symmetric(
         horizontal: 3,
       ),
       decoration: BoxDecoration(
@@ -987,7 +987,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   : _subtle,
             ),
           ),
-          const SizedBox(height: 5),
+          SizedBox(height: 5),
           Text(
             number,
             style: TextStyle(
@@ -1021,7 +1021,7 @@ class _PlanScreenState extends State<PlanScreen> {
     return Container(
       width: double.infinity,
       padding:
-          const EdgeInsets.all(16),
+          EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: _summary,
         borderRadius:
@@ -1049,7 +1049,7 @@ class _PlanScreenState extends State<PlanScreen> {
                             color: navy,
                           ),
                         ),
-                        const SizedBox(
+                        SizedBox(
                           width: 7,
                         ),
                         Text(
@@ -1060,7 +1060,7 @@ class _PlanScreenState extends State<PlanScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(
+                    SizedBox(
                       height: 7,
                     ),
                     Text(
@@ -1079,7 +1079,7 @@ class _PlanScreenState extends State<PlanScreen> {
             ],
           ),
 
-          const SizedBox(
+          SizedBox(
             height: 16,
           ),
 
@@ -1148,7 +1148,7 @@ class _PlanScreenState extends State<PlanScreen> {
           ),
         ),
 
-        const SizedBox(
+        SizedBox(
           height: 5,
         ),
 
@@ -1258,7 +1258,7 @@ class _PlanScreenState extends State<PlanScreen> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               18,
               15,
               18,
@@ -1271,7 +1271,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   color: navy,
                   size: 27,
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'المهام اليوم',
@@ -1288,7 +1288,7 @@ class _PlanScreenState extends State<PlanScreen> {
           ),
 
           if (_isLoadingTasks)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(
                 vertical: 30,
               ),
@@ -1297,7 +1297,7 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             )
           else if (tasks.isEmpty)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(
                 vertical: 25,
                 horizontal: 20,
@@ -1321,7 +1321,7 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
 
           Padding(
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.all(14),
             child: GestureDetector(
               onTap: _isSavingTask
                   ? null
@@ -1329,7 +1329,7 @@ class _PlanScreenState extends State<PlanScreen> {
               child: Container(
                 width: double.infinity,
                 padding:
-                    const EdgeInsets.symmetric(
+                    EdgeInsets.symmetric(
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
@@ -1350,7 +1350,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       color: blue,
                       size: 24,
                     ),
-                    const SizedBox(width: 5),
+                    SizedBox(width: 5),
                     Text(
                       _isSavingTask
                           ? 'جاري الحفظ...'
@@ -1422,7 +1422,7 @@ class _PlanScreenState extends State<PlanScreen> {
 
     return Container(
       padding:
-          const EdgeInsets.symmetric(
+          EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 14,
       ),
@@ -1474,7 +1474,7 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
 
-          const SizedBox(
+          SizedBox(
             width: 12,
           ),
 
@@ -1519,13 +1519,13 @@ class _PlanScreenState extends State<PlanScreen> {
                         ),
                       ),
 
-                      const SizedBox(
+                      SizedBox(
                         width: 8,
                       ),
 
                       Container(
                         padding:
-                            const EdgeInsets
+                            EdgeInsets
                                 .symmetric(
                           horizontal: 10,
                           vertical: 6,
@@ -1557,7 +1557,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                         .w800,
                               ),
                             ),
-                            const SizedBox(
+                            SizedBox(
                               width: 3,
                             ),
                             Text(
@@ -1573,7 +1573,7 @@ class _PlanScreenState extends State<PlanScreen> {
                     ],
                   ),
 
-                  const SizedBox(
+                  SizedBox(
                     height: 4,
                   ),
 
@@ -1596,7 +1596,7 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
 
-          const SizedBox(
+          SizedBox(
             width: 12,
           ),
 
@@ -1617,7 +1617,7 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
 
-          const SizedBox(
+          SizedBox(
             width: 5,
           ),
 
@@ -1722,7 +1722,7 @@ class _PlanScreenState extends State<PlanScreen> {
           textDirection: TextDirection.rtl,
           child: Dialog(
             backgroundColor: Colors.transparent,
-            insetPadding: const EdgeInsets.symmetric(
+            insetPadding: EdgeInsets.symmetric(
               horizontal: 18,
               vertical: 24,
             ),
@@ -1747,7 +1747,7 @@ class _PlanScreenState extends State<PlanScreen> {
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+                      padding: EdgeInsets.fromLTRB(18, 18, 18, 18),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -1756,7 +1756,7 @@ class _PlanScreenState extends State<PlanScreen> {
                             children: [
                               Expanded(
                                 child: Padding(
-                                  padding: const EdgeInsets.only(top: 4),
+                                  padding: EdgeInsets.only(top: 4),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.end,
@@ -1771,7 +1771,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                           height: 1.2,
                                         ),
                                       ),
-                                      const SizedBox(height: 7),
+                                      SizedBox(height: 7),
                                       Text(
                                         'ابدأ بخطوة صغيرة نحو هدفك الكبير',
                                         textAlign: TextAlign.right,
@@ -1782,7 +1782,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                           height: 1.35,
                                         ),
                                       ),
-                                      const SizedBox(height: 12),
+                                      SizedBox(height: 12),
                                       Container(
                                         width: 62,
                                         height: 4,
@@ -1796,7 +1796,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              SizedBox(width: 12),
                               Container(
                                 width: 94,
                                 height: 94,
@@ -1835,7 +1835,7 @@ class _PlanScreenState extends State<PlanScreen> {
                             ],
                           ),
 
-                          const SizedBox(height: 18),
+                          SizedBox(height: 18),
 
                           _modernTaskField(
                             controller: nameController,
@@ -1846,7 +1846,7 @@ class _PlanScreenState extends State<PlanScreen> {
                             iconColor: blue,
                           ),
 
-                          const SizedBox(height: 11),
+                          SizedBox(height: 11),
 
                           GestureDetector(
                             onTap: () async {
@@ -1892,7 +1892,7 @@ class _PlanScreenState extends State<PlanScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 11),
+                          SizedBox(height: 11),
 
                           GestureDetector(
                             onTap: () async {
@@ -1919,7 +1919,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                     textDirection: TextDirection.rtl,
                                     child: SafeArea(
                                       child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(
+                                        padding: EdgeInsets.fromLTRB(
                                           18,
                                           18,
                                           18,
@@ -1937,7 +1937,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                                     BorderRadius.circular(20),
                                               ),
                                             ),
-                                            const SizedBox(height: 14),
+                                            SizedBox(height: 14),
                                             Text(
                                               'اختر التصنيف',
                                               style: TextStyle(
@@ -1946,11 +1946,11 @@ class _PlanScreenState extends State<PlanScreen> {
                                                 fontWeight: FontWeight.w800,
                                               ),
                                             ),
-                                            const SizedBox(height: 8),
+                                            SizedBox(height: 8),
                                             ...categories.map(
                                               (category) => ListTile(
                                                 contentPadding:
-                                                    const EdgeInsets.symmetric(
+                                                    EdgeInsets.symmetric(
                                                   horizontal: 4,
                                                 ),
                                                 title: Text(
@@ -2002,7 +2002,7 @@ class _PlanScreenState extends State<PlanScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 11),
+                          SizedBox(height: 11),
 
                           _modernTaskField(
                             controller: emojiController,
@@ -2013,9 +2013,9 @@ class _PlanScreenState extends State<PlanScreen> {
                             iconColor: const Color(0xFF6C63C7),
                           ),
 
-                          const SizedBox(height: 11),
+                          SizedBox(height: 11),
 
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
 
                           Row(
                             children: [
@@ -2030,7 +2030,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                     backgroundColor:
                                         _softButton,
                                     foregroundColor: navy,
-                                    padding: const EdgeInsets.symmetric(
+                                    padding: EdgeInsets.symmetric(
                                       vertical: 15,
                                     ),
                                     shape: RoundedRectangleBorder(
@@ -2047,7 +2047,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              SizedBox(width: 12),
                               Expanded(
                                 flex: 1,
                                 child: ElevatedButton.icon(
@@ -2060,7 +2060,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                           if (name.isEmpty) {
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
-                                              const SnackBar(
+                                              SnackBar(
                                                 content: Text(
                                                   'اكتب اسم المهمة أولاً',
                                                 ),
@@ -2123,7 +2123,7 @@ class _PlanScreenState extends State<PlanScreen> {
 
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
-                                              const SnackBar(
+                                              SnackBar(
                                                 content: Text(
                                                   'تم حفظ المهمة بنجاح ✅',
                                                 ),
@@ -2165,7 +2165,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                     disabledBackgroundColor:
                                         const Color(0xFFB8CBE0),
                                     disabledForegroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
+                                    padding: EdgeInsets.symmetric(
                                       vertical: 15,
                                     ),
                                     elevation: 0,
@@ -2230,12 +2230,12 @@ class _PlanScreenState extends State<PlanScreen> {
             fontWeight: FontWeight.w700,
           ),
           floatingLabelBehavior: FloatingLabelBehavior.auto,
-          contentPadding: const EdgeInsets.symmetric(
+          contentPadding: EdgeInsets.symmetric(
             horizontal: 14,
             vertical: 17,
           ),
           prefixIcon: Padding(
-            padding: const EdgeInsets.only(
+            padding: EdgeInsets.only(
               left: 10,
               right: 12,
             ),
@@ -2279,7 +2279,7 @@ class _PlanScreenState extends State<PlanScreen> {
   Widget _buildWeeklyGoals() {
     return Container(
       padding:
-          const EdgeInsets.all(
+          EdgeInsets.all(
         16,
       ),
       decoration:
@@ -2314,7 +2314,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       FontWeight.w800,
                 ),
               ),
-              const SizedBox(
+              SizedBox(
                 width: 7,
               ),
               Icon(
@@ -2325,7 +2325,7 @@ class _PlanScreenState extends State<PlanScreen> {
             ],
           ),
 
-          const SizedBox(
+          SizedBox(
             height: 18,
           ),
 
@@ -2336,7 +2336,7 @@ class _PlanScreenState extends State<PlanScreen> {
             blue,
           ),
 
-          const SizedBox(
+          SizedBox(
             height: 15,
           ),
 
@@ -2347,7 +2347,7 @@ class _PlanScreenState extends State<PlanScreen> {
             cyan,
           ),
 
-          const SizedBox(
+          SizedBox(
             height: 15,
           ),
 
@@ -2412,7 +2412,7 @@ class _PlanScreenState extends State<PlanScreen> {
           ],
         ),
 
-        const SizedBox(
+        SizedBox(
           height: 7,
         ),
 
@@ -2446,7 +2446,7 @@ class _PlanScreenState extends State<PlanScreen> {
 
   Widget _buildDailyHabits() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: _surface,
         borderRadius: BorderRadius.circular(22),
@@ -2468,7 +2468,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              const SizedBox(width: 7),
+              SizedBox(width: 7),
               Icon(
                 Icons.repeat,
                 color: navy,
@@ -2476,9 +2476,9 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           if (habits.isEmpty)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Text(
                 'لا توجد عادات بعد',
@@ -2507,7 +2507,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 );
               },
             ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           OutlinedButton.icon(
             onPressed: _isSavingHabit ? null : _showAddHabitDialog,
             icon: Icon(
@@ -2527,7 +2527,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 color: blue,
                 width: 1.3,
               ),
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -2549,7 +2549,7 @@ class _PlanScreenState extends State<PlanScreen> {
     required String id,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(
+      padding: EdgeInsets.symmetric(
         horizontal: 13,
         vertical: 12,
       ),
@@ -2581,7 +2581,7 @@ class _PlanScreenState extends State<PlanScreen> {
               size: 20,
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Text(
               title,
@@ -2597,7 +2597,7 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 4),
+          SizedBox(width: 4),
           PopupMenuButton<String>(
             tooltip: 'خيارات العادة',
             padding: EdgeInsets.zero,
@@ -2644,7 +2644,7 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             ],
           ),
-          const SizedBox(width: 4),
+          SizedBox(width: 4),
           GestureDetector(
             onTap: () => _toggleHabit(id, completed),
             child: Container(
@@ -2705,7 +2705,7 @@ class _PlanScreenState extends State<PlanScreen> {
               label: 'اسم العادة',
               icon: Icons.repeat,
             ),
-            actionsPadding: const EdgeInsets.fromLTRB(
+            actionsPadding: EdgeInsets.fromLTRB(
               16,
               0,
               16,
@@ -2721,7 +2721,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       },
                       style: TextButton.styleFrom(
                         backgroundColor: _softButton,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
                         ),
@@ -2736,7 +2736,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _isSavingHabit
@@ -2779,7 +2779,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                 }
 
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
+                                  SnackBar(
                                     content: Text(
                                       'تم حفظ العادة بنجاح ✅',
                                     ),
@@ -2806,7 +2806,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: blue,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: EdgeInsets.symmetric(vertical: 14),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
