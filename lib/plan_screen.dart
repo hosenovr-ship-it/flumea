@@ -5,65 +5,19 @@ import 'services/task_service.dart';
 import 'services/habit_service.dart';
 
 class PlanScreen extends StatefulWidget {
-  PlanScreen({super.key});
+  const PlanScreen({super.key});
 
   @override
   State<PlanScreen> createState() => _PlanScreenState();
 }
 
 class _PlanScreenState extends State<PlanScreen> {
-  static const Color _navyLight = Color(0xFF102A4C);
-  static const Color _blueLight = Color(0xFF1478D4);
-  static const Color _cyanLight = Color(0xFF20C7B7);
-  static const Color _backgroundLight = Color(0xFFF7FBFF);
+  static const Color navy = Color(0xFF102A4C);
+  static const Color blue = Color(0xFF1478D4);
+  static const Color cyan = Color(0xFF20C7B7);
+  static const Color background = Color(0xFFF7FBFF);
 
-  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
-
-  Color get navy => _adaptive(_navyLight);
-  Color get blue => _adaptive(_blueLight);
-  Color get cyan => _adaptive(_cyanLight);
-  Color get background => _adaptive(_backgroundLight);
-
-  Color _adaptive(Color light) {
-    if (!_isDark) return light;
-    switch (light.value) {
-      case 0xFFFFFFFF: return const Color(0xFF12171F);
-      case 0xFFF7FBFF: return const Color(0xFF0B141D);
-      case 0xFFEAF9F4: return const Color(0xFF102C36);
-      case 0xFFEAF4FF: return const Color(0xFF182B3F);
-      case 0xFFF5F8FC: return const Color(0xFF151B23);
-      case 0xFFE5EAF0:
-      case 0xFFE7ECF2:
-      case 0xFFE8EDF2:
-      case 0xFFE8EDF3:
-      case 0xFFDCE3EC:
-      case 0xFFD9E1EA: return const Color(0xFF2B3643);
-      case 0xFFDDE4ED: return const Color(0xFF36414E);
-      case 0xFFF0F3F8:
-      case 0xFFF1F4F8: return const Color(0xFF202832);
-      case 0xFFFBFCFE: return const Color(0xFF151B23);
-      case 0xFFF1FBF9: return const Color(0xFF122A29);
-      case 0xFFF8FAFC: return const Color(0xFF151B23);
-      case 0xFFD5F0EB: return const Color(0xFF274441);
-      case 0xFFFFEEF0: return const Color(0xFF38262A);
-      case 0xFFFFF3DD: return const Color(0xFF392F1F);
-      case 0xFFEDEBFF: return const Color(0xFF2D2A43);
-      case 0xFFB8CBE0: return const Color(0xFF435263);
-      case 0xFFB8C2CE:
-      case 0xFFB9C4D0: return const Color(0xFF657385);
-      case 0xFF102A4C: return const Color(0xFFF2F6FB);
-      case 0xFF7B8798: return const Color(0xFF9BA8B8);
-      case 0xFF52647A: return const Color(0xFFB4C0CF);
-      case 0xFF66758A: return const Color(0xFFAAB6C5);
-      case 0xFF6E7A88: return const Color(0xFFA0ADBC);
-      case 0xFF9AA4AE: return const Color(0xFF9DA9B8);
-      case 0xFF8B98A8: return const Color(0xFFAAB5C3);
-      case 0xFFD64545: return const Color(0xFFFF6B6B);
-      default: return light;
-    }
-  }
-
-final TaskService _taskService = TaskService();
+  final TaskService _taskService = TaskService();
   final HabitService _habitService = HabitService();
   final SupabaseClient _supabase = Supabase.instance.client;
   int selectedDay = 0;
@@ -380,7 +334,7 @@ final TaskService _taskService = TaskService();
       }
 
       if (loadedHabits.isEmpty) {
-        defaultNames = [
+        const defaultNames = [
           'شرب الماء',
           'الرياضة',
           'القراءة',
@@ -677,7 +631,7 @@ final TaskService _taskService = TaskService();
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text(
             'تم حذف المهمة',
           ),
@@ -741,7 +695,7 @@ final TaskService _taskService = TaskService();
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text(
             'تمت إعادة المهمة',
           ),
@@ -778,7 +732,7 @@ final TaskService _taskService = TaskService();
         backgroundColor: background,
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
+            padding: const EdgeInsets.fromLTRB(
               18,
               12,
               18,
@@ -789,15 +743,15 @@ final TaskService _taskService = TaskService();
                   CrossAxisAlignment.stretch,
               children: [
                 _buildHeader(),
-                SizedBox(height: 14),
+                const SizedBox(height: 14),
                 _buildTodayButton(),
-                SizedBox(height: 14),
+                const SizedBox(height: 14),
                 _buildDays(),
-                SizedBox(height: 14),
+                const SizedBox(height: 14),
                 _buildSummary(),
-                SizedBox(height: 14),
+                const SizedBox(height: 14),
                 _buildTasks(),
-                SizedBox(height: 14),
+                const SizedBox(height: 14),
                 Row(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
@@ -805,7 +759,7 @@ final TaskService _taskService = TaskService();
                     Expanded(
                       child: _buildWeeklyGoals(),
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: _buildDailyHabits(),
                     ),
@@ -816,7 +770,7 @@ final TaskService _taskService = TaskService();
           ),
         ),
         bottomNavigationBar:
-            FlumeaBottomNavigation(
+            const FlumeaBottomNavigation(
           selectedIndex: 1,
         ),
       ),
@@ -839,7 +793,7 @@ final TaskService _taskService = TaskService();
                 mainAxisAlignment:
                     MainAxisAlignment.end,
                 children: [
-                  Text(
+                  const Text(
                     'الخطة',
                     style: TextStyle(
                       fontSize: 30,
@@ -848,20 +802,20 @@ final TaskService _taskService = TaskService();
                       color: navy,
                     ),
                   ),
-                  SizedBox(width: 8),
-                  Icon(
+                  const SizedBox(width: 8),
+                  const Icon(
                     Icons.calendar_month_outlined,
                     color: navy,
                     size: 30,
                   ),
                 ],
               ),
-              SizedBox(height: 4),
-              Text(
+              const SizedBox(height: 4),
+              const Text(
                 'نظم يومك وحقق أهدافك',
                 style: TextStyle(
                   fontSize: 16,
-                  color: _adaptive(Color(0xFF7B8798)),
+                  color: Color(0xFF7B8798),
                 ),
               ),
             ],
@@ -889,16 +843,16 @@ final TaskService _taskService = TaskService();
           },
           child: Container(
             padding:
-                EdgeInsets.symmetric(
+                const EdgeInsets.symmetric(
               horizontal: 20,
               vertical: 11,
             ),
             decoration: BoxDecoration(
-              color: _adaptive(Color(0xFFEAF9F4)),
+              color: const Color(0xFFEAF9F4),
               borderRadius:
                   BorderRadius.circular(28),
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
@@ -928,7 +882,7 @@ final TaskService _taskService = TaskService();
   // ============================================================
 
   Widget _buildDays() {
-    days = [
+    const days = [
       ['الأحد', '20'],
       ['الاثنين', '21'],
       ['الثلاثاء', '22'],
@@ -972,19 +926,19 @@ final TaskService _taskService = TaskService();
   ) {
     return Container(
       margin:
-          EdgeInsets.symmetric(
+          const EdgeInsets.symmetric(
         horizontal: 3,
       ),
       decoration: BoxDecoration(
         color: selected
             ? blue
-            : _adaptive(Color(0xFFF5F8FC)),
+            : const Color(0xFFF5F8FC),
         borderRadius:
             BorderRadius.circular(16),
         border: Border.all(
           color: selected
               ? blue
-              : _adaptive(Color(0xFFE7ECF2)),
+              : const Color(0xFFE7ECF2),
         ),
       ),
       child: Column(
@@ -1000,11 +954,11 @@ final TaskService _taskService = TaskService();
               fontWeight:
                   FontWeight.w700,
               color: selected
-                  ? _adaptive(Colors.white)
-                  : _adaptive(Color(0xFF52647A)),
+                  ? Colors.white
+                  : const Color(0xFF52647A),
             ),
           ),
-          SizedBox(height: 5),
+          const SizedBox(height: 5),
           Text(
             number,
             style: TextStyle(
@@ -1012,7 +966,7 @@ final TaskService _taskService = TaskService();
               fontWeight:
                   FontWeight.w800,
               color: selected
-                  ? _adaptive(Colors.white)
+                  ? Colors.white
                   : navy,
             ),
           ),
@@ -1038,9 +992,9 @@ final TaskService _taskService = TaskService();
     return Container(
       width: double.infinity,
       padding:
-          EdgeInsets.all(16),
+          const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _adaptive(Color(0xFFEAF9F4)),
+        color: const Color(0xFFEAF9F4),
         borderRadius:
             BorderRadius.circular(24),
       ),
@@ -1057,7 +1011,7 @@ final TaskService _taskService = TaskService();
                       mainAxisAlignment:
                           MainAxisAlignment.end,
                       children: [
-                        Text(
+                        const Text(
                           'خطة اليوم',
                           style: TextStyle(
                             fontSize: 21,
@@ -1066,10 +1020,10 @@ final TaskService _taskService = TaskService();
                             color: navy,
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 7,
                         ),
-                        Text(
+                        const Text(
                           '☀️',
                           style: TextStyle(
                             fontSize: 22,
@@ -1077,17 +1031,17 @@ final TaskService _taskService = TaskService();
                         ),
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 7,
                     ),
-                    Text(
+                    const Text(
                       'خطوات صغيرة تصنع فرقاً كبيراً',
                       textAlign:
                           TextAlign.right,
                       style: TextStyle(
                         fontSize: 13,
                         color:
-                            _adaptive(Color(0xFF7B8798)),
+                            Color(0xFF7B8798),
                       ),
                     ),
                   ],
@@ -1096,7 +1050,7 @@ final TaskService _taskService = TaskService();
             ],
           ),
 
-          SizedBox(
+          const SizedBox(
             height: 16,
           ),
 
@@ -1123,7 +1077,7 @@ final TaskService _taskService = TaskService();
                   Icons.local_fire_department,
                   '17',
                   'يوم نشط',
-                  Color(
+                  const Color(
                     0xFFEF5350,
                   ),
                 ),
@@ -1165,13 +1119,13 @@ final TaskService _taskService = TaskService();
           ),
         ),
 
-        SizedBox(
+        const SizedBox(
           height: 5,
         ),
 
         Text(
           number,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 19,
             fontWeight:
                 FontWeight.w800,
@@ -1183,9 +1137,9 @@ final TaskService _taskService = TaskService();
           title,
           textAlign:
               TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 10,
-            color: _adaptive(Color(0xFF66758A)),
+            color: Color(0xFF66758A),
           ),
         ),
       ],
@@ -1218,11 +1172,11 @@ final TaskService _taskService = TaskService();
               ),
               strokeWidth: 7,
               backgroundColor:
-                  Color(
+                  const Color(
                 0xFFDDE4ED,
               ),
               valueColor:
-                  AlwaysStoppedAnimation<
+                  const AlwaysStoppedAnimation<
                       Color>(
                 cyan,
               ),
@@ -1236,19 +1190,19 @@ final TaskService _taskService = TaskService();
               Text(
                 '$completed/${tasks.length}',
                 style:
-                    TextStyle(
+                    const TextStyle(
                   fontSize: 15,
                   fontWeight:
                       FontWeight.w800,
                   color: navy,
                 ),
               ),
-              Text(
+              const Text(
                 'مكتملة',
                 style: TextStyle(
                   fontSize: 9,
                   color:
-                      _adaptive(Color(0xFF66758A)),
+                      Color(0xFF66758A),
                 ),
               ),
             ],
@@ -1265,17 +1219,17 @@ final TaskService _taskService = TaskService();
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: _adaptive(Colors.white),
+        color: Colors.white,
         borderRadius:
             BorderRadius.circular(24),
         border: Border.all(
-          color: _adaptive(Color(0xFFE5EAF0)),
+          color: const Color(0xFFE5EAF0),
         ),
       ),
       child: Column(
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(
+            padding: const EdgeInsets.fromLTRB(
               18,
               15,
               18,
@@ -1283,13 +1237,13 @@ final TaskService _taskService = TaskService();
             ),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.format_list_bulleted,
                   color: navy,
                   size: 27,
                 ),
-                SizedBox(width: 8),
-                Expanded(
+                const SizedBox(width: 8),
+                const Expanded(
                   child: Text(
                     'المهام اليوم',
                     style: TextStyle(
@@ -1305,7 +1259,7 @@ final TaskService _taskService = TaskService();
           ),
 
           if (_isLoadingTasks)
-            Padding(
+            const Padding(
               padding: EdgeInsets.symmetric(
                 vertical: 30,
               ),
@@ -1314,7 +1268,7 @@ final TaskService _taskService = TaskService();
               ),
             )
           else if (tasks.isEmpty)
-            Padding(
+            const Padding(
               padding: EdgeInsets.symmetric(
                 vertical: 25,
                 horizontal: 20,
@@ -1323,7 +1277,7 @@ final TaskService _taskService = TaskService();
                 'لا توجد مهام بعد',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: _adaptive(Color(0xFF7B8798)),
+                  color: Color(0xFF7B8798),
                   fontSize: 14,
                 ),
               ),
@@ -1338,7 +1292,7 @@ final TaskService _taskService = TaskService();
             ),
 
           Padding(
-            padding: EdgeInsets.all(14),
+            padding: const EdgeInsets.all(14),
             child: GestureDetector(
               onTap: _isSavingTask
                   ? null
@@ -1346,11 +1300,11 @@ final TaskService _taskService = TaskService();
               child: Container(
                 width: double.infinity,
                 padding:
-                    EdgeInsets.symmetric(
+                    const EdgeInsets.symmetric(
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: Color(
+                  color: const Color(
                     0xFFEAF4FF,
                   ),
                   borderRadius:
@@ -1367,12 +1321,12 @@ final TaskService _taskService = TaskService();
                       color: blue,
                       size: 24,
                     ),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     Text(
                       _isSavingTask
                           ? 'جاري الحفظ...'
                           : 'إضافة مهمة جديدة',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: blue,
                         fontSize: 16,
                         fontWeight:
@@ -1439,12 +1393,12 @@ final TaskService _taskService = TaskService();
 
     return Container(
       padding:
-          EdgeInsets.symmetric(
+          const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 14,
       ),
       decoration:
-          BoxDecoration(
+          const BoxDecoration(
         border: Border(
           top: BorderSide(
             color: Color(
@@ -1466,7 +1420,7 @@ final TaskService _taskService = TaskService();
                   BoxDecoration(
                 color: completed
                     ? blue
-                    : _adaptive(Colors.white),
+                    : Colors.white,
                 borderRadius:
                     BorderRadius.circular(
                   6,
@@ -1474,24 +1428,24 @@ final TaskService _taskService = TaskService();
                 border: Border.all(
                   color: completed
                       ? blue
-                      : Color(
+                      : const Color(
                           0xFFB8C2CE,
                         ),
                   width: 2,
                 ),
               ),
               child: completed
-                  ? Icon(
+                  ? const Icon(
                       Icons.check,
                       color:
-                          _adaptive(Colors.white),
+                          Colors.white,
                       size: 20,
                     )
                   : null,
             ),
           ),
 
-          SizedBox(
+          const SizedBox(
             width: 12,
           ),
 
@@ -1522,7 +1476,7 @@ final TaskService _taskService = TaskService();
                             fontWeight:
                                 FontWeight.w800,
                             color: completed
-                                ? Color(
+                                ? const Color(
                                     0xFF9AA4AE,
                                   )
                                 : navy,
@@ -1536,13 +1490,13 @@ final TaskService _taskService = TaskService();
                         ),
                       ),
 
-                      SizedBox(
+                      const SizedBox(
                         width: 8,
                       ),
 
                       Container(
                         padding:
-                            EdgeInsets
+                            const EdgeInsets
                                 .symmetric(
                           horizontal: 10,
                           vertical: 6,
@@ -1574,13 +1528,13 @@ final TaskService _taskService = TaskService();
                                         .w800,
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               width: 3,
                             ),
                             Text(
                               emoji,
                               style:
-                                  TextStyle(
+                                  const TextStyle(
                                 fontSize: 13,
                               ),
                             ),
@@ -1590,7 +1544,7 @@ final TaskService _taskService = TaskService();
                     ],
                   ),
 
-                  SizedBox(
+                  const SizedBox(
                     height: 4,
                   ),
 
@@ -1602,10 +1556,10 @@ final TaskService _taskService = TaskService();
                     overflow:
                         TextOverflow.ellipsis,
                     style:
-                        TextStyle(
+                        const TextStyle(
                       fontSize: 12,
                       color:
-                          _adaptive(Color(0xFF7B8798)),
+                          Color(0xFF7B8798),
                     ),
                   ),
                 ],
@@ -1613,7 +1567,7 @@ final TaskService _taskService = TaskService();
             ),
           ),
 
-          SizedBox(
+          const SizedBox(
             width: 12,
           ),
 
@@ -1624,17 +1578,17 @@ final TaskService _taskService = TaskService();
               textAlign:
                   TextAlign.left,
               style:
-                  TextStyle(
+                  const TextStyle(
                 fontSize: 13,
                 color:
-                    _adaptive(Color(0xFF52647A)),
+                    Color(0xFF52647A),
                 fontWeight:
                     FontWeight.w600,
               ),
             ),
           ),
 
-          SizedBox(
+          const SizedBox(
             width: 5,
           ),
 
@@ -1657,10 +1611,10 @@ final TaskService _taskService = TaskService();
       padding:
           EdgeInsets.zero,
       icon:
-          Icon(
+          const Icon(
         Icons.more_vert,
         color:
-            _adaptive(Color(0xFF6E7A88)),
+            Color(0xFF6E7A88),
         size: 22,
       ),
       onSelected:
@@ -1676,7 +1630,7 @@ final TaskService _taskService = TaskService();
       itemBuilder:
           (context) {
         return [
-          PopupMenuItem<String>(
+          const PopupMenuItem<String>(
             value: 'reset',
             child: Row(
               mainAxisAlignment:
@@ -1695,7 +1649,7 @@ final TaskService _taskService = TaskService();
               ],
             ),
           ),
-          PopupMenuItem<String>(
+          const PopupMenuItem<String>(
             value: 'delete',
             child: Row(
               mainAxisAlignment:
@@ -1706,7 +1660,7 @@ final TaskService _taskService = TaskService();
                   style:
                       TextStyle(
                     color:
-                        _adaptive(Color(0xFFD64545)),
+                        Color(0xFFD64545),
                     fontSize: 14,
                     fontWeight:
                         FontWeight.w700,
@@ -1739,22 +1693,22 @@ final TaskService _taskService = TaskService();
           textDirection: TextDirection.rtl,
           child: Dialog(
             backgroundColor: Colors.transparent,
-            insetPadding: EdgeInsets.symmetric(
+            insetPadding: const EdgeInsets.symmetric(
               horizontal: 18,
               vertical: 24,
             ),
             child: StatefulBuilder(
               builder: (dialogContext, setDialogState) {
                 return ConstrainedBox(
-                  constraints: BoxConstraints(
+                  constraints: const BoxConstraints(
                     maxWidth: 520,
                     maxHeight: 760,
                   ),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: _adaptive(Colors.white),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           color: Color(0x33000000),
                           blurRadius: 28,
@@ -1764,7 +1718,7 @@ final TaskService _taskService = TaskService();
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: SingleChildScrollView(
-                      padding: EdgeInsets.fromLTRB(18, 18, 18, 18),
+                      padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -1773,12 +1727,12 @@ final TaskService _taskService = TaskService();
                             children: [
                               Expanded(
                                 child: Padding(
-                                  padding: EdgeInsets.only(top: 4),
+                                  padding: const EdgeInsets.only(top: 4),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.end,
                                     children: [
-                                      Text(
+                                      const Text(
                                         'إضافة مهمة جديدة',
                                         textAlign: TextAlign.right,
                                         style: TextStyle(
@@ -1788,18 +1742,18 @@ final TaskService _taskService = TaskService();
                                           height: 1.2,
                                         ),
                                       ),
-                                      SizedBox(height: 7),
-                                      Text(
+                                      const SizedBox(height: 7),
+                                      const Text(
                                         'ابدأ بخطوة صغيرة نحو هدفك الكبير',
                                         textAlign: TextAlign.right,
                                         style: TextStyle(
-                                          color: _adaptive(Color(0xFF7B8798)),
+                                          color: Color(0xFF7B8798),
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                           height: 1.35,
                                         ),
                                       ),
-                                      SizedBox(height: 12),
+                                      const SizedBox(height: 12),
                                       Container(
                                         width: 62,
                                         height: 4,
@@ -1813,18 +1767,18 @@ final TaskService _taskService = TaskService();
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 12),
+                              const SizedBox(width: 12),
                               Container(
                                 width: 94,
                                 height: 94,
                                 decoration: BoxDecoration(
-                                  color: _adaptive(Color(0xFFEAF4FF)),
+                                  color: const Color(0xFFEAF4FF),
                                   borderRadius: BorderRadius.circular(28),
                                 ),
                                 child: Stack(
                                   alignment: Alignment.center,
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.assignment_outlined,
                                       color: blue,
                                       size: 58,
@@ -1835,13 +1789,13 @@ final TaskService _taskService = TaskService();
                                       child: Container(
                                         width: 34,
                                         height: 34,
-                                        decoration: BoxDecoration(
+                                        decoration: const BoxDecoration(
                                           color: cyan,
                                           shape: BoxShape.circle,
                                         ),
-                                        child: Icon(
+                                        child: const Icon(
                                           Icons.add,
-                                          color: _adaptive(Colors.white),
+                                          color: Colors.white,
                                           size: 23,
                                         ),
                                       ),
@@ -1852,18 +1806,18 @@ final TaskService _taskService = TaskService();
                             ],
                           ),
 
-                          SizedBox(height: 18),
+                          const SizedBox(height: 18),
 
                           _modernTaskField(
                             controller: nameController,
                             label: 'اسم المهمة *',
                             hint: '',
                             icon: Icons.edit_outlined,
-                            iconBackground: _adaptive(Color(0xFFEAF4FF)),
+                            iconBackground: const Color(0xFFEAF4FF),
                             iconColor: blue,
                           ),
 
-                          SizedBox(height: 11),
+                          const SizedBox(height: 11),
 
                           GestureDetector(
                             onTap: () async {
@@ -1902,14 +1856,14 @@ final TaskService _taskService = TaskService();
                                 label: 'الوقت *',
                                 hint: '',
                                 icon: Icons.access_time_rounded,
-                                iconBackground: _adaptive(Color(0xFFFFEEF0)),
-                                iconColor: _adaptive(Color(0xFFEF5350)),
+                                iconBackground: const Color(0xFFFFEEF0),
+                                iconColor: const Color(0xFFEF5350),
                                 suffixIcon: Icons.keyboard_arrow_down_rounded,
                               ),
                             ),
                           ),
 
-                          SizedBox(height: 11),
+                          const SizedBox(height: 11),
 
                           GestureDetector(
                             onTap: () async {
@@ -1925,8 +1879,8 @@ final TaskService _taskService = TaskService();
 
                               final selected = await showModalBottomSheet<String>(
                                 context: dialogContext,
-                                backgroundColor: _adaptive(Colors.white),
-                                shape: RoundedRectangleBorder(
+                                backgroundColor: Colors.white,
+                                shape: const RoundedRectangleBorder(
                                   borderRadius: BorderRadius.vertical(
                                     top: Radius.circular(28),
                                   ),
@@ -1936,7 +1890,7 @@ final TaskService _taskService = TaskService();
                                     textDirection: TextDirection.rtl,
                                     child: SafeArea(
                                       child: Padding(
-                                        padding: EdgeInsets.fromLTRB(
+                                        padding: const EdgeInsets.fromLTRB(
                                           18,
                                           18,
                                           18,
@@ -1949,13 +1903,13 @@ final TaskService _taskService = TaskService();
                                               width: 42,
                                               height: 4,
                                               decoration: BoxDecoration(
-                                                color: _adaptive(Color(0xFFD9E1EA)),
+                                                color: const Color(0xFFD9E1EA),
                                                 borderRadius:
                                                     BorderRadius.circular(20),
                                               ),
                                             ),
-                                            SizedBox(height: 14),
-                                            Text(
+                                            const SizedBox(height: 14),
+                                            const Text(
                                               'اختر التصنيف',
                                               style: TextStyle(
                                                 color: navy,
@@ -1963,22 +1917,22 @@ final TaskService _taskService = TaskService();
                                                 fontWeight: FontWeight.w800,
                                               ),
                                             ),
-                                            SizedBox(height: 8),
+                                            const SizedBox(height: 8),
                                             ...categories.map(
                                               (category) => ListTile(
                                                 contentPadding:
-                                                    EdgeInsets.symmetric(
+                                                    const EdgeInsets.symmetric(
                                                   horizontal: 4,
                                                 ),
                                                 title: Text(
                                                   category,
                                                   textAlign: TextAlign.right,
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                     color: navy,
                                                     fontWeight: FontWeight.w700,
                                                   ),
                                                 ),
-                                                leading: Icon(
+                                                leading: const Icon(
                                                   Icons.local_offer_outlined,
                                                   color: blue,
                                                 ),
@@ -2011,28 +1965,28 @@ final TaskService _taskService = TaskService();
                                 label: 'التصنيف *',
                                 hint: '',
                                 icon: Icons.local_offer_outlined,
-                                iconBackground: _adaptive(Color(0xFFFFF3DD)),
-                                iconColor: _adaptive(Color(0xFFE5A623)),
+                                iconBackground: const Color(0xFFFFF3DD),
+                                iconColor: const Color(0xFFE5A623),
                                 suffixIcon:
                                     Icons.keyboard_arrow_down_rounded,
                               ),
                             ),
                           ),
 
-                          SizedBox(height: 11),
+                          const SizedBox(height: 11),
 
                           _modernTaskField(
                             controller: emojiController,
                             label: 'الإيموجي',
                             hint: '',
                             icon: Icons.sentiment_satisfied_alt_outlined,
-                            iconBackground: _adaptive(Color(0xFFEDEBFF)),
-                            iconColor: _adaptive(Color(0xFF6C63C7)),
+                            iconBackground: const Color(0xFFEDEBFF),
+                            iconColor: const Color(0xFF6C63C7),
                           ),
 
-                          SizedBox(height: 11),
+                          const SizedBox(height: 11),
 
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
                           Row(
                             children: [
@@ -2045,16 +1999,16 @@ final TaskService _taskService = TaskService();
                                         },
                                   style: TextButton.styleFrom(
                                     backgroundColor:
-                                        _adaptive(Color(0xFFF0F3F8)),
+                                        const Color(0xFFF0F3F8),
                                     foregroundColor: navy,
-                                    padding: EdgeInsets.symmetric(
+                                    padding: const EdgeInsets.symmetric(
                                       vertical: 15,
                                     ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(19),
                                     ),
                                   ),
-                                  child: Text(
+                                  child: const Text(
                                     'إلغاء',
                                     style: TextStyle(
                                       color: navy,
@@ -2064,7 +2018,7 @@ final TaskService _taskService = TaskService();
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 12),
+                              const SizedBox(width: 12),
                               Expanded(
                                 flex: 1,
                                 child: ElevatedButton.icon(
@@ -2077,7 +2031,7 @@ final TaskService _taskService = TaskService();
                                           if (name.isEmpty) {
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
-                                              SnackBar(
+                                              const SnackBar(
                                                 content: Text(
                                                   'اكتب اسم المهمة أولاً',
                                                 ),
@@ -2140,7 +2094,7 @@ final TaskService _taskService = TaskService();
 
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
-                                              SnackBar(
+                                              const SnackBar(
                                                 content: Text(
                                                   'تم حفظ المهمة بنجاح ✅',
                                                 ),
@@ -2165,11 +2119,11 @@ final TaskService _taskService = TaskService();
                                             );
                                           }
                                         },
-                                  icon: Icon(
+                                  icon: const Icon(
                                     Icons.add,
                                     size: 23,
                                   ),
-                                  label: Text(
+                                  label: const Text(
                                     'إضافة المهمة',
                                     style: TextStyle(
                                       fontSize: 16,
@@ -2178,11 +2132,11 @@ final TaskService _taskService = TaskService();
                                   ),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: blue,
-                                    foregroundColor: _adaptive(Colors.white),
+                                    foregroundColor: Colors.white,
                                     disabledBackgroundColor:
-                                        _adaptive(Color(0xFFB8CBE0)),
-                                    disabledForegroundColor: _adaptive(Colors.white),
-                                    padding: EdgeInsets.symmetric(
+                                        const Color(0xFFB8CBE0),
+                                    disabledForegroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
                                       vertical: 15,
                                     ),
                                     elevation: 0,
@@ -2218,17 +2172,17 @@ final TaskService _taskService = TaskService();
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: _adaptive(Color(0xFFFBFCFE)),
+        color: const Color(0xFFFBFCFE),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: _adaptive(Color(0xFFDCE3EC)),
+          color: const Color(0xFFDCE3EC),
           width: 1.2,
         ),
       ),
       child: TextField(
         controller: controller,
         textAlign: TextAlign.right,
-        style: TextStyle(
+        style: const TextStyle(
           color: navy,
           fontSize: 16,
           fontWeight: FontWeight.w700,
@@ -2236,23 +2190,23 @@ final TaskService _taskService = TaskService();
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: hint.isEmpty ? null : hint,
-          hintStyle: TextStyle(
-            color: _adaptive(Color(0xFF8B98A8)),
+          hintStyle: const TextStyle(
+            color: Color(0xFF8B98A8),
             fontSize: 14,
           ),
           labelText: label,
-          labelStyle: TextStyle(
+          labelStyle: const TextStyle(
             color: navy,
             fontSize: 15,
             fontWeight: FontWeight.w700,
           ),
           floatingLabelBehavior: FloatingLabelBehavior.auto,
-          contentPadding: EdgeInsets.symmetric(
+          contentPadding: const EdgeInsets.symmetric(
             horizontal: 14,
             vertical: 17,
           ),
           prefixIcon: Padding(
-            padding: EdgeInsets.only(
+            padding: const EdgeInsets.only(
               left: 10,
               right: 12,
             ),
@@ -2296,18 +2250,18 @@ final TaskService _taskService = TaskService();
   Widget _buildWeeklyGoals() {
     return Container(
       padding:
-          EdgeInsets.all(
+          const EdgeInsets.all(
         16,
       ),
       decoration:
           BoxDecoration(
-        color: _adaptive(Colors.white),
+        color: Colors.white,
         borderRadius:
             BorderRadius.circular(
           22,
         ),
         border: Border.all(
-          color: Color(
+          color: const Color(
             0xFFE5EAF0,
           ),
         ),
@@ -2321,7 +2275,7 @@ final TaskService _taskService = TaskService();
             mainAxisAlignment:
                 MainAxisAlignment.end,
             children: [
-              Text(
+              const Text(
                 'أهداف الأسبوع',
                 style:
                     TextStyle(
@@ -2331,10 +2285,10 @@ final TaskService _taskService = TaskService();
                       FontWeight.w800,
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 7,
               ),
-              Icon(
+              const Icon(
                 Icons.flag_outlined,
                 color: navy,
                 size: 21,
@@ -2342,7 +2296,7 @@ final TaskService _taskService = TaskService();
             ],
           ),
 
-          SizedBox(
+          const SizedBox(
             height: 18,
           ),
 
@@ -2353,7 +2307,7 @@ final TaskService _taskService = TaskService();
             blue,
           ),
 
-          SizedBox(
+          const SizedBox(
             height: 15,
           ),
 
@@ -2364,7 +2318,7 @@ final TaskService _taskService = TaskService();
             cyan,
           ),
 
-          SizedBox(
+          const SizedBox(
             height: 15,
           ),
 
@@ -2372,7 +2326,7 @@ final TaskService _taskService = TaskService();
             'القراءة',
             6,
             7,
-            Color(
+            const Color(
               0xFF8E44AD,
             ),
           ),
@@ -2419,7 +2373,7 @@ final TaskService _taskService = TaskService();
             Text(
               title,
               style:
-                  TextStyle(
+                  const TextStyle(
                 color: navy,
                 fontSize: 13,
                 fontWeight:
@@ -2429,7 +2383,7 @@ final TaskService _taskService = TaskService();
           ],
         ),
 
-        SizedBox(
+        const SizedBox(
           height: 7,
         ),
 
@@ -2444,7 +2398,7 @@ final TaskService _taskService = TaskService();
                 progress,
             minHeight: 7,
             backgroundColor:
-                Color(
+                const Color(
               0xFFE8EDF3,
             ),
             valueColor:
@@ -2463,12 +2417,12 @@ final TaskService _taskService = TaskService();
 
   Widget _buildDailyHabits() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _adaptive(Colors.white),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: _adaptive(Color(0xFFE5EAF0)),
+          color: const Color(0xFFE5EAF0),
         ),
       ),
       child: Column(
@@ -2477,7 +2431,7 @@ final TaskService _taskService = TaskService();
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text(
+              const Text(
                 'عادات اليوم',
                 style: TextStyle(
                   color: navy,
@@ -2485,23 +2439,23 @@ final TaskService _taskService = TaskService();
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              SizedBox(width: 7),
-              Icon(
+              const SizedBox(width: 7),
+              const Icon(
                 Icons.repeat,
                 color: navy,
                 size: 21,
               ),
             ],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           if (habits.isEmpty)
-            Padding(
+            const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Text(
                 'لا توجد عادات بعد',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: _adaptive(Color(0xFF7B8798)),
+                  color: Color(0xFF7B8798),
                   fontSize: 13,
                 ),
               ),
@@ -2524,7 +2478,7 @@ final TaskService _taskService = TaskService();
                 );
               },
             ),
-          SizedBox(height: 14),
+          const SizedBox(height: 14),
           OutlinedButton.icon(
             onPressed: _isSavingHabit ? null : _showAddHabitDialog,
             icon: Icon(
@@ -2533,18 +2487,18 @@ final TaskService _taskService = TaskService();
             ),
             label: Text(
               _isSavingHabit ? 'جاري الحفظ...' : 'إضافة عادة',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
               ),
             ),
             style: OutlinedButton.styleFrom(
               foregroundColor: blue,
-              side: BorderSide(
+              side: const BorderSide(
                 color: blue,
                 width: 1.3,
               ),
-              padding: EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -2566,19 +2520,19 @@ final TaskService _taskService = TaskService();
     required String id,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: 13,
         vertical: 12,
       ),
       decoration: BoxDecoration(
         color: completed
-            ? _adaptive(Color(0xFFF1FBF9))
-            : _adaptive(Color(0xFFF8FAFC)),
+            ? const Color(0xFFF1FBF9)
+            : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(17),
         border: Border.all(
           color: completed
-              ? _adaptive(Color(0xFFD5F0EB))
-              : _adaptive(Color(0xFFE7ECF2)),
+              ? const Color(0xFFD5F0EB)
+              : const Color(0xFFE7ECF2),
         ),
       ),
       child: Row(
@@ -2598,7 +2552,7 @@ final TaskService _taskService = TaskService();
               size: 20,
             ),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               title,
@@ -2614,13 +2568,13 @@ final TaskService _taskService = TaskService();
               ),
             ),
           ),
-          SizedBox(width: 4),
+          const SizedBox(width: 4),
           PopupMenuButton<String>(
             tooltip: 'خيارات العادة',
             padding: EdgeInsets.zero,
-            icon: Icon(
+            icon: const Icon(
               Icons.more_vert_rounded,
-              color: _adaptive(Color(0xFF7B8798)),
+              color: Color(0xFF7B8798),
               size: 21,
             ),
             onSelected: (value) async {
@@ -2631,7 +2585,7 @@ final TaskService _taskService = TaskService();
               }
             },
             itemBuilder: (context) => [
-              PopupMenuItem<String>(
+              const PopupMenuItem<String>(
                 value: 'reset',
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -2645,7 +2599,7 @@ final TaskService _taskService = TaskService();
                   ],
                 ),
               ),
-              PopupMenuItem<String>(
+              const PopupMenuItem<String>(
                 value: 'delete',
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -2661,26 +2615,26 @@ final TaskService _taskService = TaskService();
               ),
             ],
           ),
-          SizedBox(width: 4),
+          const SizedBox(width: 4),
           GestureDetector(
             onTap: () => _toggleHabit(id, completed),
             child: Container(
               width: 23,
               height: 23,
               decoration: BoxDecoration(
-                color: completed ? cyan : _adaptive(Colors.white),
+                color: completed ? cyan : Colors.white,
                 borderRadius: BorderRadius.circular(7),
                 border: Border.all(
                   color: completed
                       ? cyan
-                      : _adaptive(Color(0xFFB9C4D0)),
+                      : const Color(0xFFB9C4D0),
                   width: 1.5,
                 ),
               ),
               child: completed
-                  ? Icon(
+                  ? const Icon(
                       Icons.check,
-                      color: _adaptive(Colors.white),
+                      color: Colors.white,
                       size: 16,
                     )
                   : null,
@@ -2704,11 +2658,11 @@ final TaskService _taskService = TaskService();
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
-            backgroundColor: _adaptive(Colors.white),
+            backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(28),
             ),
-            title: Text(
+            title: const Text(
               'إضافة عادة جديدة',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -2722,7 +2676,7 @@ final TaskService _taskService = TaskService();
               label: 'اسم العادة',
               icon: Icons.repeat,
             ),
-            actionsPadding: EdgeInsets.fromLTRB(
+            actionsPadding: const EdgeInsets.fromLTRB(
               16,
               0,
               16,
@@ -2737,13 +2691,13 @@ final TaskService _taskService = TaskService();
                         Navigator.pop(dialogContext);
                       },
                       style: TextButton.styleFrom(
-                        backgroundColor: _adaptive(Color(0xFFF1F4F8)),
-                        padding: EdgeInsets.symmetric(vertical: 14),
+                        backgroundColor: const Color(0xFFF1F4F8),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
                         ),
                       ),
-                      child: Text(
+                      child: const Text(
                         'إلغاء',
                         style: TextStyle(
                           color: navy,
@@ -2753,7 +2707,7 @@ final TaskService _taskService = TaskService();
                       ),
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _isSavingHabit
@@ -2796,7 +2750,7 @@ final TaskService _taskService = TaskService();
                                 }
 
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
+                                  const SnackBar(
                                     content: Text(
                                       'تم حفظ العادة بنجاح ✅',
                                     ),
@@ -2822,14 +2776,14 @@ final TaskService _taskService = TaskService();
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: blue,
-                        foregroundColor: _adaptive(Colors.white),
-                        padding: EdgeInsets.symmetric(vertical: 14),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
                         ),
                       ),
-                      child: Text(
+                      child: const Text(
                         'إضافة',
                         style: TextStyle(
                           fontSize: 16,
@@ -2885,7 +2839,7 @@ final TaskService _taskService = TaskService();
             18,
           ),
           borderSide:
-              BorderSide(
+              const BorderSide(
             color: blue,
             width: 2,
           ),
