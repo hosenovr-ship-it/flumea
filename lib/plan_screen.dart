@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'bottom_navigation.dart';
 import 'services/task_service.dart';
 import 'services/habit_service.dart';
@@ -93,8 +94,59 @@ final HabitService _habitService = HabitService();
   }
 
   // ============================================================
-  // SUPABASE - تحميل المهام
+  // SUPABASE - تحميل المهام حسب اليوم
   // ============================================================
+
+  DateTime get _selectedDate {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final daysFromSunday = today.weekday % 7;
+
+    return today
+        .subtract(Duration(days: daysFromSunday))
+        .add(Duration(days: selectedDay));
+  }
+
+  String _dateKey(DateTime date) {
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return '${date.year}-$month-$day';
+  }
+
+  Future<void> _saveTaskDate(
+    String id,
+    DateTime date,
+  ) async {
+    final userId = _supabase.auth.currentUser?.id;
+
+    if (userId == null || id.isEmpty) {
+      throw Exception('يجب تسجيل الدخول أولاً');
+    }
+
+    await _supabase
+        .from('tasks')
+        .update({
+          'due_date': _dateKey(date),
+        })
+        .eq('id', id)
+        .eq('user_id', userId);
+  }
+
+  String? _createdDateKey(dynamic value) {
+    final raw = _safeString(value);
+
+    if (raw.isEmpty) {
+      return null;
+    }
+
+    final parsed = DateTime.tryParse(raw);
+
+    if (parsed == null) {
+      return null;
+    }
+
+    return _dateKey(parsed.toLocal());
+  }
 
   Future<void> _loadTasks() async {
     if (!mounted) {
@@ -106,20 +158,40 @@ final HabitService _habitService = HabitService();
     });
 
     try {
-      final loadedTasks = await _taskService.getTasks();
+      final allTasks = await _taskService.getTasks();
 
       if (!mounted) {
         return;
       }
 
-      if (loadedTasks.isEmpty) {
+      if (allTasks.isEmpty) {
         await _createInitialTasks();
-      } else {
-        setState(() {
-          tasks = loadedTasks;
-          _isLoadingTasks = false;
-        });
+        return;
       }
+
+      final selectedDateKey = _dateKey(_selectedDate);
+
+      // المهام القديمة التي لا تحتوي due_date لا نضعها كلها في اليوم الحالي.
+      // نستخدم created_at كمرجع فقط، من دون تغيير تاريخها في Supabase.
+      final selectedTasks = allTasks.where((task) {
+        final dueDate = _safeString(task['due_date']);
+
+        if (dueDate.isNotEmpty) {
+          return dueDate == selectedDateKey;
+        }
+
+        final createdDate = _createdDateKey(task['created_at']);
+        return createdDate == selectedDateKey;
+      }).toList();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        tasks = selectedTasks;
+        _isLoadingTasks = false;
+      });
     } catch (error) {
       if (!mounted) {
         return;
@@ -224,6 +296,11 @@ final HabitService _habitService = HabitService();
           completed: task['completed'] as bool,
         );
 
+        await _saveTaskDate(
+          _safeString(created['id']),
+          _selectedDate,
+        );
+        created['due_date'] = _dateKey(_selectedDate);
         createdTasks.add(created);
       }
 
@@ -771,6 +848,7 @@ final HabitService _habitService = HabitService();
             setState(() {
               selectedDay = DateTime.now().weekday % 7;
             });
+            _loadTasks();
           },
           child: Container(
             padding:
@@ -813,15 +891,30 @@ final HabitService _habitService = HabitService();
   // ============================================================
 
   Widget _buildDays() {
-    const days = [
-      ['الأحد', '20'],
-      ['الاثنين', '21'],
-      ['الثلاثاء', '22'],
-      ['الأربعاء', '23'],
-      ['الخميس', '24'],
-      ['الجمعة', '25'],
-      ['السبت', '26'],
+    final today = DateTime.now();
+    final startOfWeek = DateTime(
+      today.year,
+      today.month,
+      today.day,
+    ).subtract(Duration(days: today.weekday % 7));
+
+    const names = [
+      'الأحد',
+      'الاثنين',
+      'الثلاثاء',
+      'الأربعاء',
+      'الخميس',
+      'الجمعة',
+      'السبت',
     ];
+
+    final days = List.generate(7, (index) {
+      final date = startOfWeek.add(Duration(days: index));
+      return [
+        names[index],
+        date.day.toString(),
+      ];
+    });
 
     return SizedBox(
       height: 82,
@@ -835,6 +928,7 @@ final HabitService _habitService = HabitService();
                   setState(() {
                     selectedDay = index;
                   });
+                  _loadTasks();
                 },
                 child: _dayBox(
                   days[index][0],
@@ -2063,6 +2157,13 @@ final HabitService _habitService = HabitService();
                                               color: '#1478D4',
                                               completed: false,
                                             );
+
+                                            await _saveTaskDate(
+                                              _safeString(newTask['id']),
+                                              _selectedDate,
+                                            );
+                                            newTask['due_date'] =
+                                                _dateKey(_selectedDate);
 
                                             if (!mounted) {
                                               return;
