@@ -5,7 +5,7 @@ import 'services/task_service.dart';
 import 'services/habit_service.dart';
 
 class PlanScreen extends StatefulWidget {
-  const PlanScreen({super.key});
+  PlanScreen({super.key});
 
   @override
   State<PlanScreen> createState() => _PlanScreenState();
@@ -30,6 +30,33 @@ class _PlanScreenState extends State<PlanScreen> {
 
   Color get _outline =>
       Theme.of(context).colorScheme.outlineVariant;
+
+  bool get _isDark =>
+      Theme.of(context).brightness == Brightness.dark;
+
+  Color get _card =>
+      _isDark ? Color(0xFF111318) : Colors.white;
+
+  Color get _cardAlt =>
+      _isDark ? Color(0xFF171B22) : Color(0xFFFBFCFE);
+
+  Color get _softCard =>
+      _isDark ? Color(0xFF18202A) : Color(0xFFEAF9F4);
+
+  Color get _fieldBackground =>
+      _isDark ? Color(0xFF111318) : Color(0xFFFBFCFE);
+
+  Color get _muted =>
+      _isDark ? Color(0xFF9AA4B2) : Color(0xFF7B8798);
+
+  Color get _border =>
+      _isDark ? Color(0xFF3A4350) : Color(0xFFDCE3EC);
+
+  Color get _selectedDayBackground =>
+      _isDark ? Color(0xFF3B4355) : Color(0xFF1478D4);
+
+  Color get _buttonBackground =>
+      _isDark ? Color(0xFF202731) : Color(0xFFF0F3F8);
 
   final TaskService _taskService = TaskService();
   final HabitService _habitService = HabitService();
@@ -348,7 +375,7 @@ class _PlanScreenState extends State<PlanScreen> {
       }
 
       if (loadedHabits.isEmpty) {
-        const defaultNames = [
+        defaultNames = [
           'شرب الماء',
           'الرياضة',
           'القراءة',
@@ -645,7 +672,7 @@ class _PlanScreenState extends State<PlanScreen> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
             'تم حذف المهمة',
           ),
@@ -709,7 +736,7 @@ class _PlanScreenState extends State<PlanScreen> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
             'تمت إعادة المهمة',
           ),
@@ -746,7 +773,7 @@ class _PlanScreenState extends State<PlanScreen> {
         backgroundColor: _pageBackground,
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               18,
               12,
               18,
@@ -784,7 +811,7 @@ class _PlanScreenState extends State<PlanScreen> {
           ),
         ),
         bottomNavigationBar:
-            const FlumeaBottomNavigation(
+            FlumeaBottomNavigation(
           selectedIndex: 1,
         ),
       ),
@@ -829,7 +856,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 'نظم يومك وحقق أهدافك',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Color(0xFF7B8798),
+                  color: _muted,
                 ),
               ),
             ],
@@ -857,12 +884,12 @@ class _PlanScreenState extends State<PlanScreen> {
           },
           child: Container(
             padding:
-                const EdgeInsets.symmetric(
+                EdgeInsets.symmetric(
               horizontal: 20,
               vertical: 11,
             ),
             decoration: BoxDecoration(
-              color: const Color(0xFFEAF9F4),
+              color: _softCard,
               borderRadius:
                   BorderRadius.circular(28),
             ),
@@ -896,7 +923,7 @@ class _PlanScreenState extends State<PlanScreen> {
   // ============================================================
 
   Widget _buildDays() {
-    const dayNames = [
+    dayNames = [
       'الأحد',
       'الاثنين',
       'الثلاثاء',
@@ -955,13 +982,13 @@ class _PlanScreenState extends State<PlanScreen> {
   ) {
     return Container(
       margin:
-          const EdgeInsets.symmetric(
+          EdgeInsets.symmetric(
         horizontal: 3,
       ),
       decoration: BoxDecoration(
         color: selected
             ? blue
-            : const Color(0xFFF5F8FC),
+            : Color(0xFFF5F8FC),
         borderRadius:
             BorderRadius.circular(16),
         border: Border.all(
@@ -984,7 +1011,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   FontWeight.w700,
               color: selected
                   ? Colors.white
-                  : const Color(0xFF52647A),
+                  : Color(0xFF52647A),
             ),
           ),
           SizedBox(height: 5),
@@ -1021,9 +1048,9 @@ class _PlanScreenState extends State<PlanScreen> {
     return Container(
       width: double.infinity,
       padding:
-          const EdgeInsets.all(16),
+          EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFEAF9F4),
+        color: _softCard,
         borderRadius:
             BorderRadius.circular(24),
       ),
@@ -1106,7 +1133,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   Icons.local_fire_department,
                   '17',
                   'يوم نشط',
-                  const Color(
+                  Color(
                     0xFFEF5350,
                   ),
                 ),
@@ -1168,7 +1195,7 @@ class _PlanScreenState extends State<PlanScreen> {
               TextAlign.center,
           style: TextStyle(
             fontSize: 10,
-            color: Color(0xFF66758A),
+            color: _muted,
           ),
         ),
       ],
@@ -1201,11 +1228,11 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
               strokeWidth: 7,
               backgroundColor:
-                  const Color(
+                  Color(
                 0xFFDDE4ED,
               ),
               valueColor:
-                  const AlwaysStoppedAnimation<
+                  AlwaysStoppedAnimation<
                       Color>(
                 cyan,
               ),
@@ -1248,7 +1275,7 @@ class _PlanScreenState extends State<PlanScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _card,
         borderRadius:
             BorderRadius.circular(24),
         border: Border.all(
@@ -1258,7 +1285,7 @@ class _PlanScreenState extends State<PlanScreen> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               18,
               15,
               18,
@@ -1306,7 +1333,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 'لا توجد مهام بعد',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Color(0xFF7B8798),
+                  color: _muted,
                   fontSize: 14,
                 ),
               ),
@@ -1321,7 +1348,7 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
 
           Padding(
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.all(14),
             child: GestureDetector(
               onTap: _isSavingTask
                   ? null
@@ -1329,11 +1356,11 @@ class _PlanScreenState extends State<PlanScreen> {
               child: Container(
                 width: double.infinity,
                 padding:
-                    const EdgeInsets.symmetric(
+                    EdgeInsets.symmetric(
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(
+                  color: Color(
                     0xFFEAF4FF,
                   ),
                   borderRadius:
@@ -1422,7 +1449,7 @@ class _PlanScreenState extends State<PlanScreen> {
 
     return Container(
       padding:
-          const EdgeInsets.symmetric(
+          EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 14,
       ),
@@ -1457,7 +1484,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 border: Border.all(
                   color: completed
                       ? blue
-                      : const Color(
+                      : Color(
                           0xFFB8C2CE,
                         ),
                   width: 2,
@@ -1505,7 +1532,7 @@ class _PlanScreenState extends State<PlanScreen> {
                             fontWeight:
                                 FontWeight.w800,
                             color: completed
-                                ? const Color(
+                                ? Color(
                                     0xFF9AA4AE,
                                   )
                                 : _primaryText,
@@ -1525,7 +1552,7 @@ class _PlanScreenState extends State<PlanScreen> {
 
                       Container(
                         padding:
-                            const EdgeInsets
+                            EdgeInsets
                                 .symmetric(
                           horizontal: 10,
                           vertical: 6,
@@ -1678,7 +1705,7 @@ class _PlanScreenState extends State<PlanScreen> {
               ],
             ),
           ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'delete',
             child: Row(
               mainAxisAlignment:
@@ -1722,22 +1749,22 @@ class _PlanScreenState extends State<PlanScreen> {
           textDirection: TextDirection.rtl,
           child: Dialog(
             backgroundColor: Colors.transparent,
-            insetPadding: const EdgeInsets.symmetric(
+            insetPadding: EdgeInsets.symmetric(
               horizontal: 18,
               vertical: 24,
             ),
             child: StatefulBuilder(
               builder: (dialogContext, setDialogState) {
                 return ConstrainedBox(
-                  constraints: const BoxConstraints(
+                  constraints: BoxConstraints(
                     maxWidth: 520,
                     maxHeight: 760,
                   ),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: _card,
                       borderRadius: BorderRadius.circular(30),
-                      boxShadow: const [
+                      boxShadow: [
                         BoxShadow(
                           color: Color(0x33000000),
                           blurRadius: 28,
@@ -1747,7 +1774,7 @@ class _PlanScreenState extends State<PlanScreen> {
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+                      padding: EdgeInsets.fromLTRB(18, 18, 18, 18),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -1756,7 +1783,7 @@ class _PlanScreenState extends State<PlanScreen> {
                             children: [
                               Expanded(
                                 child: Padding(
-                                  padding: const EdgeInsets.only(top: 4),
+                                  padding: EdgeInsets.only(top: 4),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.end,
@@ -1776,7 +1803,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                         'ابدأ بخطوة صغيرة نحو هدفك الكبير',
                                         textAlign: TextAlign.right,
                                         style: TextStyle(
-                                          color: Color(0xFF7B8798),
+                                          color: _muted,
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                           height: 1.35,
@@ -1824,7 +1851,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                         ),
                                         child: Icon(
                                           Icons.add,
-                                          color: Colors.white,
+                                          color: _card,
                                           size: 23,
                                         ),
                                       ),
@@ -1885,8 +1912,8 @@ class _PlanScreenState extends State<PlanScreen> {
                                 label: 'الوقت *',
                                 hint: '',
                                 icon: Icons.access_time_rounded,
-                                iconBackground: const Color(0xFFFFEEF0),
-                                iconColor: const Color(0xFFEF5350),
+                                iconBackground: Color(0xFFFFEEF0),
+                                iconColor: Color(0xFFEF5350),
                                 suffixIcon: Icons.keyboard_arrow_down_rounded,
                               ),
                             ),
@@ -1909,7 +1936,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               final selected = await showModalBottomSheet<String>(
                                 context: dialogContext,
                                 backgroundColor: Colors.white,
-                                shape: const RoundedRectangleBorder(
+                                shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.vertical(
                                     top: Radius.circular(28),
                                   ),
@@ -1919,7 +1946,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                     textDirection: TextDirection.rtl,
                                     child: SafeArea(
                                       child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(
+                                        padding: EdgeInsets.fromLTRB(
                                           18,
                                           18,
                                           18,
@@ -1932,7 +1959,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                               width: 42,
                                               height: 4,
                                               decoration: BoxDecoration(
-                                                color: const Color(0xFFD9E1EA),
+                                                color: _border,
                                                 borderRadius:
                                                     BorderRadius.circular(20),
                                               ),
@@ -1950,7 +1977,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                             ...categories.map(
                                               (category) => ListTile(
                                                 contentPadding:
-                                                    const EdgeInsets.symmetric(
+                                                    EdgeInsets.symmetric(
                                                   horizontal: 4,
                                                 ),
                                                 title: Text(
@@ -1994,8 +2021,8 @@ class _PlanScreenState extends State<PlanScreen> {
                                 label: 'التصنيف *',
                                 hint: '',
                                 icon: Icons.local_offer_outlined,
-                                iconBackground: const Color(0xFFFFF3DD),
-                                iconColor: const Color(0xFFE5A623),
+                                iconBackground: Color(0xFFFFF3DD),
+                                iconColor: Color(0xFFE5A623),
                                 suffixIcon:
                                     Icons.keyboard_arrow_down_rounded,
                               ),
@@ -2009,8 +2036,8 @@ class _PlanScreenState extends State<PlanScreen> {
                             label: 'الإيموجي',
                             hint: '',
                             icon: Icons.sentiment_satisfied_alt_outlined,
-                            iconBackground: const Color(0xFFEDEBFF),
-                            iconColor: const Color(0xFF6C63C7),
+                            iconBackground: Color(0xFFEDEBFF),
+                            iconColor: Color(0xFF6C63C7),
                           ),
 
                           SizedBox(height: 11),
@@ -2028,9 +2055,9 @@ class _PlanScreenState extends State<PlanScreen> {
                                         },
                                   style: TextButton.styleFrom(
                                     backgroundColor:
-                                        const Color(0xFFF0F3F8),
+                                        Color(0xFFF0F3F8),
                                     foregroundColor: _primaryText,
-                                    padding: const EdgeInsets.symmetric(
+                                    padding: EdgeInsets.symmetric(
                                       vertical: 15,
                                     ),
                                     shape: RoundedRectangleBorder(
@@ -2060,7 +2087,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                           if (name.isEmpty) {
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
-                                              const SnackBar(
+                                              SnackBar(
                                                 content: Text(
                                                   'اكتب اسم المهمة أولاً',
                                                 ),
@@ -2123,7 +2150,7 @@ class _PlanScreenState extends State<PlanScreen> {
 
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
-                                              const SnackBar(
+                                              SnackBar(
                                                 content: Text(
                                                   'تم حفظ المهمة بنجاح ✅',
                                                 ),
@@ -2163,9 +2190,9 @@ class _PlanScreenState extends State<PlanScreen> {
                                     backgroundColor: blue,
                                     foregroundColor: Colors.white,
                                     disabledBackgroundColor:
-                                        const Color(0xFFB8CBE0),
+                                        Color(0xFFB8CBE0),
                                     disabledForegroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
+                                    padding: EdgeInsets.symmetric(
                                       vertical: 15,
                                     ),
                                     elevation: 0,
@@ -2201,10 +2228,10 @@ class _PlanScreenState extends State<PlanScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFFBFCFE),
+        color: _fieldBackground,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFFDCE3EC),
+          color: _border,
           width: 1.2,
         ),
       ),
@@ -2220,7 +2247,7 @@ class _PlanScreenState extends State<PlanScreen> {
           border: InputBorder.none,
           hintText: hint.isEmpty ? null : hint,
           hintStyle: TextStyle(
-            color: Color(0xFF8B98A8),
+            color: _muted,
             fontSize: 14,
           ),
           labelText: label,
@@ -2230,12 +2257,12 @@ class _PlanScreenState extends State<PlanScreen> {
             fontWeight: FontWeight.w700,
           ),
           floatingLabelBehavior: FloatingLabelBehavior.auto,
-          contentPadding: const EdgeInsets.symmetric(
+          contentPadding: EdgeInsets.symmetric(
             horizontal: 14,
             vertical: 17,
           ),
           prefixIcon: Padding(
-            padding: const EdgeInsets.only(
+            padding: EdgeInsets.only(
               left: 10,
               right: 12,
             ),
@@ -2279,18 +2306,18 @@ class _PlanScreenState extends State<PlanScreen> {
   Widget _buildWeeklyGoals() {
     return Container(
       padding:
-          const EdgeInsets.all(
+          EdgeInsets.all(
         16,
       ),
       decoration:
           BoxDecoration(
-        color: Colors.white,
+        color: _card,
         borderRadius:
             BorderRadius.circular(
           22,
         ),
         border: Border.all(
-          color: const Color(
+          color: Color(
             0xFFE5EAF0,
           ),
         ),
@@ -2355,7 +2382,7 @@ class _PlanScreenState extends State<PlanScreen> {
             'القراءة',
             6,
             7,
-            const Color(
+            Color(
               0xFF8E44AD,
             ),
           ),
@@ -2427,7 +2454,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 progress,
             minHeight: 7,
             backgroundColor:
-                const Color(
+                Color(
               0xFFE8EDF3,
             ),
             valueColor:
@@ -2446,7 +2473,7 @@ class _PlanScreenState extends State<PlanScreen> {
 
   Widget _buildDailyHabits() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: _surface,
         borderRadius: BorderRadius.circular(22),
@@ -2484,7 +2511,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 'لا توجد عادات بعد',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Color(0xFF7B8798),
+                  color: _muted,
                   fontSize: 13,
                 ),
               ),
@@ -2527,7 +2554,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 color: blue,
                 width: 1.3,
               ),
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -2549,18 +2576,18 @@ class _PlanScreenState extends State<PlanScreen> {
     required String id,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(
+      padding: EdgeInsets.symmetric(
         horizontal: 13,
         vertical: 12,
       ),
       decoration: BoxDecoration(
         color: completed
-            ? const Color(0xFFF1FBF9)
+            ? Color(0xFFF1FBF9)
             : _surfaceVariant,
         borderRadius: BorderRadius.circular(17),
         border: Border.all(
           color: completed
-              ? const Color(0xFFD5F0EB)
+              ? Color(0xFFD5F0EB)
               : _outline,
         ),
       ),
@@ -2603,7 +2630,7 @@ class _PlanScreenState extends State<PlanScreen> {
             padding: EdgeInsets.zero,
             icon: Icon(
               Icons.more_vert_rounded,
-              color: Color(0xFF7B8798),
+              color: _muted,
               size: 21,
             ),
             onSelected: (value) async {
@@ -2614,7 +2641,7 @@ class _PlanScreenState extends State<PlanScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'reset',
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -2628,7 +2655,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   ],
                 ),
               ),
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'delete',
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -2663,7 +2690,7 @@ class _PlanScreenState extends State<PlanScreen> {
               child: completed
                   ? Icon(
                       Icons.check,
-                      color: Colors.white,
+                      color: _card,
                       size: 16,
                     )
                   : null,
@@ -2705,7 +2732,7 @@ class _PlanScreenState extends State<PlanScreen> {
               label: 'اسم العادة',
               icon: Icons.repeat,
             ),
-            actionsPadding: const EdgeInsets.fromLTRB(
+            actionsPadding: EdgeInsets.fromLTRB(
               16,
               0,
               16,
@@ -2721,7 +2748,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       },
                       style: TextButton.styleFrom(
                         backgroundColor: _surfaceVariant,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
                         ),
@@ -2779,7 +2806,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                 }
 
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
+                                  SnackBar(
                                     content: Text(
                                       'تم حفظ العادة بنجاح ✅',
                                     ),
@@ -2806,7 +2833,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: blue,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: EdgeInsets.symmetric(vertical: 14),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
