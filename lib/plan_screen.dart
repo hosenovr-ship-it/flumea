@@ -18,7 +18,7 @@ class _PlanScreenState extends State<PlanScreen> {
 
   final TaskService _taskService = TaskService();
 final HabitService _habitService = HabitService();
-  int selectedDay = 0;
+  int selectedDay = DateTime.now().weekday % 7;
 
   bool _isLoadingTasks = true;
   bool _isSavingTask = false;
@@ -769,7 +769,7 @@ final HabitService _habitService = HabitService();
         GestureDetector(
           onTap: () {
             setState(() {
-              selectedDay = 0;
+              selectedDay = DateTime.now().weekday % 7;
             });
           },
           child: Container(
