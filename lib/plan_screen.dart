@@ -2073,10 +2073,19 @@ final HabitService _habitService = HabitService();
                                               _isSavingTask = false;
                                             });
 
+                                            if (!dialogContext.mounted) {
+                                              return;
+                                            }
+
                                             Navigator.of(dialogContext).pop();
 
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
+                                            if (!mounted) {
+                                              return;
+                                            }
+
+                                            final messenger =
+                                                ScaffoldMessenger.of(context);
+                                            messenger.showSnackBar(
                                               const SnackBar(
                                                 content: Text(
                                                   'تم حفظ المهمة بنجاح ✅',
@@ -2226,48 +2235,6 @@ final HabitService _habitService = HabitService();
   // حقول نافذة إضافة المهمة
   // ============================================================
 
-  Widget _dialogField({
-    required TextEditingController
-        controller,
-    required String label,
-    required IconData icon,
-  }) {
-    return TextField(
-      controller:
-          controller,
-      textAlign:
-          TextAlign.right,
-      decoration:
-          InputDecoration(
-        labelText:
-            label,
-        prefixIcon:
-            Icon(
-          icon,
-          color: blue,
-        ),
-        border:
-            OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(
-            18,
-          ),
-        ),
-        focusedBorder:
-            OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(
-            18,
-          ),
-          borderSide:
-              const BorderSide(
-            color: blue,
-            width: 2,
-          ),
-        ),
-      ),
-    );
-  }
 
   // ============================================================
   // أهداف الأسبوع
