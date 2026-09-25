@@ -9,7 +9,6 @@ class HomeScreen extends StatefulWidget {
   static const green = Color(0xFF18B56A);
   static const teal = Color(0xFF32C6B4);
   static const grayText = Color(0xFF7B8798);
-  static const background = Color(0xFFF8FAFC);
 
   const HomeScreen({super.key});
 
@@ -23,7 +22,6 @@ class _HomeScreenState extends State<HomeScreen> {
   static const green = Color(0xFF18B56A);
   static const teal = Color(0xFF32C6B4);
   static const grayText = Color(0xFF7B8798);
-  static const background = Color(0xFFF8FAFC);
 
   final _supabase = Supabase.instance.client;
 
@@ -888,7 +886,7 @@ class _HomeTask extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: Container(
         constraints: const BoxConstraints(minHeight: 51),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(color: Theme.of(context).dividerColor),
           ),
@@ -1109,7 +1107,7 @@ class _CaloriesRing extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          const SizedBox(
+          SizedBox(
             width: 108,
             height: 108,
             child: CircularProgressIndicator(
@@ -1133,7 +1131,7 @@ class _CaloriesRing extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
@@ -1142,7 +1140,7 @@ class _CaloriesRing extends StatelessWidget {
               Text(
                 subtitle,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 9,
                   height: 1.25,
@@ -1181,7 +1179,7 @@ class _MealLine extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -1189,7 +1187,7 @@ class _MealLine extends StatelessWidget {
                 ),
                 Text(
                   calories,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 8,
                   ),
