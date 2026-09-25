@@ -273,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: _loading
               ? const Center(
@@ -343,12 +343,12 @@ class _HomeScreenState extends State<HomeScreen> {
             const Spacer(),
             CircleAvatar(
               radius: 24,
-              backgroundColor: Color(0xFFE9EEF5),
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
                   ? NetworkImage(avatarUrl)
                   : null,
               child: avatarUrl == null || avatarUrl.isEmpty
-                  ? const Icon(Icons.person_rounded, color: darkBlue, size: 28)
+                  ? Icon(Icons.person_rounded, color: Theme.of(context).colorScheme.onSurface, size: 28)
                   : null,
             ),
           ],
@@ -357,11 +357,11 @@ class _HomeScreenState extends State<HomeScreen> {
         Text(
           '$greeting، $userName 👋',
           textAlign: TextAlign.right,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 25,
             height: 1.15,
             fontWeight: FontWeight.w800,
-            color: darkBlue,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 7),
@@ -494,7 +494,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: LinearProgressIndicator(
                       minHeight: 6,
                       value: _tasks.isEmpty ? 0 : _completedTasks / _tasks.length,
-                      backgroundColor: const Color(0xFFE7EAED),
+                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                       valueColor: const AlwaysStoppedAnimation<Color>(green),
                     ),
                   ),
@@ -502,8 +502,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(width: 12),
                 Text(
                   '$_completedTasks من ${_tasks.length} مكتملة',
-                  style: const TextStyle(
-                    color: darkBlue,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                   ),
@@ -613,8 +613,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: const Text('تسجيل وجبة'),
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
-                      backgroundColor: const Color(0xFFE6F7EF),
-                      foregroundColor: green,
+                      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                      foregroundColor: Theme.of(context).colorScheme.secondary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -634,7 +634,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 17),
       decoration: BoxDecoration(
-        color: const Color(0xFFEAF9F3),
+        color: Theme.of(context).colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Row(
@@ -643,7 +643,7 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(Icons.auto_awesome_rounded, color: green),
@@ -816,7 +816,7 @@ class _LargeCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 15, 14, 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
@@ -844,16 +844,16 @@ class _CardTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 25, color: HomeScreen.darkBlue),
+        Icon(icon, size: 25, color: Theme.of(context).colorScheme.onSurface),
         const SizedBox(width: 7),
         Expanded(
           child: Text(
             title,
             textAlign: TextAlign.right,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 19,
               fontWeight: FontWeight.w800,
-              color: HomeScreen.darkBlue,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),
@@ -890,7 +890,7 @@ class _HomeTask extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: 51),
         decoration: const BoxDecoration(
           border: Border(
-            bottom: BorderSide(color: Color(0xFFF0F2F5)),
+            bottom: BorderSide(color: Theme.of(context).dividerColor),
           ),
         ),
         child: Row(
@@ -934,7 +934,7 @@ class _HomeTask extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: HomeScreen.darkBlue,
+                        color: Theme.of(context).colorScheme.onSurface,
                         decoration: completed
                             ? TextDecoration.lineThrough
                             : null,
@@ -951,7 +951,7 @@ class _HomeTask extends StatelessWidget {
                   : Icons.check_box_outline_blank_rounded,
               color: completed
                   ? HomeScreen.green
-                  : const Color(0xFFC6CCD3),
+                  : Theme.of(context).colorScheme.outlineVariant,
               size: 25,
             ),
             const SizedBox(width: 10),
@@ -960,9 +960,9 @@ class _HomeTask extends StatelessWidget {
               child: Text(
                 time,
                 textAlign: TextAlign.left,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
-                  color: HomeScreen.grayText,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -1002,7 +1002,7 @@ class _SmallCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 13, 12, 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -1016,16 +1016,16 @@ class _SmallCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 21, color: HomeScreen.darkBlue),
+              Icon(icon, size: 21, color: Theme.of(context).colorScheme.onSurface),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   title,
                   textAlign: TextAlign.right,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    color: HomeScreen.darkBlue,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -1067,10 +1067,10 @@ class _HomeHabit extends StatelessWidget {
               child: Text(
                 title,
                 textAlign: TextAlign.right,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: HomeScreen.darkBlue,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
@@ -1081,7 +1081,7 @@ class _HomeHabit extends StatelessWidget {
               size: 23,
               color: completed
                   ? HomeScreen.green
-                  : const Color(0xFFD2D6DC),
+                  : Theme.of(context).colorScheme.outlineVariant,
             ),
           ],
         ),
@@ -1115,7 +1115,7 @@ class _CaloriesRing extends StatelessWidget {
             child: CircularProgressIndicator(
               value: 1,
               strokeWidth: 8,
-              color: Color(0xFFE8ECEF),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
           ),
           SizedBox(
@@ -1134,7 +1134,7 @@ class _CaloriesRing extends StatelessWidget {
               Text(
                 value,
                 style: const TextStyle(
-                  color: HomeScreen.darkBlue,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                 ),
@@ -1143,7 +1143,7 @@ class _CaloriesRing extends StatelessWidget {
                 subtitle,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  color: HomeScreen.grayText,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 9,
                   height: 1.25,
                 ),
@@ -1182,7 +1182,7 @@ class _MealLine extends StatelessWidget {
                 Text(
                   name,
                   style: const TextStyle(
-                    color: HomeScreen.darkBlue,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                   ),
@@ -1190,7 +1190,7 @@ class _MealLine extends StatelessWidget {
                 Text(
                   calories,
                   style: const TextStyle(
-                    color: HomeScreen.grayText,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 8,
                   ),
                 ),
