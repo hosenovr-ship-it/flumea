@@ -1274,15 +1274,6 @@ class _FlumeaNotificationCard extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const Spacer(),
-                    Text(
-                      'الآن',
-                      style: TextStyle(
-                        color: const Color(0xFF6F7B89),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 5),
@@ -1313,14 +1304,32 @@ class _FlumeaNotificationCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          Container(
-            width: 45,
-            height: 45,
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.13),
-              shape: BoxShape.circle,
+          SizedBox(
+            width: 50,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'الآن',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFF6F7B89),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Container(
+                  width: 45,
+                  height: 45,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.13),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: accent, size: 24),
+                ),
+              ],
             ),
-            child: Icon(icon, color: accent, size: 24),
           ),
         ],
       ),
@@ -1342,35 +1351,75 @@ class _FlumeaMiniLogo extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFE4EDF5)),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: const [
-          _LogoWave(color: Color(0xFF1787F2)),
-          _LogoWave(color: Color(0xFF16BFE7)),
-          _LogoWave(color: Color(0xFF18D79B)),
-        ],
+      child: const CustomPaint(
+        painter: _FlumeaLogoPainter(),
+        size: Size(32, 30),
       ),
     );
   }
 }
 
-class _LogoWave extends StatelessWidget {
-  const _LogoWave({required this.color});
-
-  final Color color;
+class _FlumeaLogoPainter extends CustomPainter {
+  const _FlumeaLogoPainter();
 
   @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Container(
-        width: 29,
-        height: 6,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
+  void paint(Canvas canvas, Size size) {
+    final strokeWidth = size.height * 0.16;
+
+    final paintTop = Paint()
+      ..color = const Color(0xFF18D79B)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final paintMiddle = Paint()
+      ..color = const Color(0xFF16BFE7)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final paintBottom = Paint()
+      ..color = const Color(0xFF1787F2)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    Path wave(double y, double curve) {
+      final path = Path();
+      path.moveTo(size.width * 0.08, y);
+      path.cubicTo(
+        size.width * 0.28,
+        y,
+        size.width * 0.35,
+        y,
+        size.width * 0.48,
+        y - curve,
+      );
+      path.cubicTo(
+        size.width * 0.60,
+        y - curve * 1.55,
+        size.width * 0.70,
+        y - curve,
+        size.width * 0.92,
+        y - curve,
+      );
+      return path;
+    }
+
+    canvas.drawPath(wave(size.height * 0.20, size.height * 0.06), paintTop);
+    canvas.drawPath(
+      wave(size.height * 0.50, size.height * 0.06),
+      paintMiddle,
+    );
+    canvas.drawPath(
+      wave(size.height * 0.80, size.height * 0.06),
+      paintBottom,
     );
   }
+
+  @override
+  bool shouldRepaint(covariant _FlumeaLogoPainter oldDelegate) => false;
 }
