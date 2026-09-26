@@ -307,6 +307,186 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
+  Future<void> _showNotifications() async {
+    if (!mounted) return;
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = Theme.of(context).colorScheme.surface;
+    final primary = Theme.of(context).colorScheme.onSurface;
+    final secondary =
+        isDark ? const Color(0xFFB8C2CC) : const Color(0xFF8290A2);
+    final border =
+        isDark ? const Color(0xFF2A3540) : const Color(0xFFE4EBF2);
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            backgroundColor: surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+              side: BorderSide(color: border),
+            ),
+            titlePadding: const EdgeInsets.fromLTRB(24, 22, 24, 8),
+            contentPadding: const EdgeInsets.fromLTRB(18, 8, 18, 20),
+            title: Row(
+              children: [
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: blue.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: const Icon(
+                    Icons.notifications_none_rounded,
+                    color: blue,
+                    size: 25,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'الإشعارات',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: primary,
+                      fontSize: 21,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _notificationItem(
+                  icon: Icons.check_circle_outline_rounded,
+                  color: const Color(0xFF20C997),
+                  title: 'العادات',
+                  message: 'تابع عاداتك اليومية وحافظ على تقدمك.',
+                  primary: primary,
+                  secondary: secondary,
+                ),
+                const SizedBox(height: 10),
+                _notificationItem(
+                  icon: Icons.flag_outlined,
+                  color: const Color(0xFF1976D2),
+                  title: 'المهام',
+                  message: 'راجع مهامك القادمة وأكمل ما عليك.',
+                  primary: primary,
+                  secondary: secondary,
+                ),
+                const SizedBox(height: 10),
+                _notificationItem(
+                  icon: Icons.emoji_events_outlined,
+                  color: const Color(0xFFFFA726),
+                  title: 'إنجاز جديد',
+                  message: 'استمر في التقدم نحو أهدافك.',
+                  primary: primary,
+                  secondary: secondary,
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    style: TextButton.styleFrom(
+                      backgroundColor: isDark
+                          ? const Color(0xFF223247)
+                          : const Color(0xFFEAF3FF),
+                      foregroundColor: blue,
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Text(
+                      'إغلاق',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _notificationItem({
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String message,
+    required Color primary,
+    required Color secondary,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background =
+        isDark ? const Color(0xFF151A20) : const Color(0xFFF7F9FC);
+    final border =
+        isDark ? const Color(0xFF2A3540) : const Color(0xFFE4EBF2);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: border),
+      ),
+      child: Row(
+        textDirection: TextDirection.rtl,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: Icon(icon, color: color, size: 23),
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  title,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    color: primary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  message,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    color: secondary,
+                    fontSize: 12.5,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _showAppearance() async {
     final currentMode = FlumeaThemeController.mode.value;
 
@@ -618,10 +798,11 @@ class _AccountScreenState extends State<AccountScreen> {
                       },
                     ),
                     _settingRow(
-                      icon: Icons.notifications_none,
+                      icon: Icons.notifications_none_rounded,
                       title: 'الإشعارات',
                       subtitle: 'تنبيهات المهام والعادات',
                       color: blue,
+                      onTap: _showNotifications,
                     ),
                     _settingRow(
                       icon: Icons.lock,
