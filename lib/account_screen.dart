@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -32,6 +33,9 @@ class _AccountScreenState extends State<AccountScreen> {
   bool _taskNotifications = true;
   bool _achievementNotifications = true;
   bool _waterNotifications = true;
+
+  OverlayEntry? _notificationOverlay;
+  Timer? _notificationTimer;
 
   @override
   void initState() {
@@ -139,8 +143,11 @@ class _AccountScreenState extends State<AccountScreen> {
       await _uploadAvatar(picked);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('حدث خطأ أثناء اختيار الصورة.')),
+      _showFlumeaNotification(
+        title: 'تعذر اختيار الصورة',
+        message: 'حدث خطأ أثناء اختيار الصورة.',
+        icon: Icons.error_outline_rounded,
+        accent: const Color(0xFFE53935),
       );
     }
   }
@@ -189,20 +196,29 @@ class _AccountScreenState extends State<AccountScreen> {
         _uploadingAvatar = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم تحديث صورة الحساب بنجاح ❤️‍🔥')),
+      _showFlumeaNotification(
+        title: 'تم تحديث صورة الحساب!',
+        message: 'أحسنت! تم حفظ الصورة بنجاح.',
+        icon: Icons.check_rounded,
+        accent: const Color(0xFF20C997),
       );
     } on StorageException catch (e) {
       if (!mounted) return;
       setState(() => _uploadingAvatar = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('تعذر رفع الصورة: ${e.message}')),
+      _showFlumeaNotification(
+        title: 'تعذر رفع الصورة',
+        message: e.message,
+        icon: Icons.error_outline_rounded,
+        accent: const Color(0xFFE53935),
       );
     } catch (_) {
       if (!mounted) return;
       setState(() => _uploadingAvatar = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تعذر حفظ صورة الحساب.')),
+      _showFlumeaNotification(
+        title: 'تعذر حفظ صورة الحساب',
+        message: 'حاول مرة أخرى.',
+        icon: Icons.error_outline_rounded,
+        accent: const Color(0xFFE53935),
       );
     }
   }
@@ -303,13 +319,19 @@ class _AccountScreenState extends State<AccountScreen> {
 
       if (!mounted) return;
       setState(() => _fullName = trimmedName);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم تحديث الاسم بنجاح ❤️‍🔥')),
+      _showFlumeaNotification(
+        title: 'تم تحديث الاسم!',
+        message: 'تم حفظ اسمك بنجاح.',
+        icon: Icons.check_rounded,
+        accent: const Color(0xFF20C997),
       );
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تعذر حفظ الاسم.')),
+      _showFlumeaNotification(
+        title: 'تعذر حفظ الاسم',
+        message: 'حاول مرة أخرى.',
+        icon: Icons.error_outline_rounded,
+        accent: const Color(0xFFE53935),
       );
     }
   }
@@ -330,6 +352,77 @@ class _AccountScreenState extends State<AccountScreen> {
   Future<void> _setNotificationPreference(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
+  }
+
+  @override
+  void dispose() {
+    _notificationTimer?.cancel();
+    _notificationOverlay?.remove();
+    _notificationOverlay = null;
+    super.dispose();
+  }
+
+  void _showFlumeaNotification({
+    required String title,
+    required String message,
+    required IconData icon,
+    required Color accent,
+  }) {
+    if (!mounted) return;
+
+    _notificationTimer?.cancel();
+    _notificationOverlay?.remove();
+
+    final overlay = Overlay.of(context);
+    late OverlayEntry entry;
+
+    entry = OverlayEntry(
+      builder: (overlayContext) {
+        final top = MediaQuery.of(overlayContext).padding.top + 12;
+
+        return Positioned(
+          top: top,
+          left: 12,
+          right: 12,
+          child: Material(
+            color: Colors.transparent,
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 280),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Transform.translate(
+                      offset: Offset(0, -18 * (1 - value)),
+                      child: child,
+                    ),
+                  );
+                },
+                child: _FlumeaNotificationCard(
+                  title: title,
+                  message: message,
+                  icon: icon,
+                  accent: accent,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    _notificationOverlay = entry;
+    overlay.insert(entry);
+
+    _notificationTimer = Timer(const Duration(seconds: 4), () {
+      if (_notificationOverlay == entry) {
+        entry.remove();
+        _notificationOverlay = null;
+      }
+    });
   }
 
   Future<void> _showNotifications() async {
@@ -642,14 +735,17 @@ class _AccountScreenState extends State<AccountScreen> {
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          selectedMode == ThemeMode.dark
-              ? 'تم تفعيل الوضع الداكن 🌙'
-              : 'تم تفعيل الوضع الفاتح ☀️',
-        ),
-      ),
+    _showFlumeaNotification(
+      title: selectedMode == ThemeMode.dark
+          ? 'تم تفعيل الوضع الداكن!'
+          : 'تم تفعيل الوضع الفاتح!',
+      message: selectedMode == ThemeMode.dark
+          ? '🌙 تم حفظ اختيارك وسيبقى مفعّلًا.'
+          : '☀️ تم حفظ اختيارك وسيبقى مفعّلًا.',
+      icon: selectedMode == ThemeMode.dark
+          ? Icons.dark_mode_rounded
+          : Icons.light_mode_rounded,
+      accent: blue,
     );
   }
 
@@ -658,8 +754,11 @@ class _AccountScreenState extends State<AccountScreen> {
       await _supabase.auth.signOut();
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تعذر تسجيل الخروج.')),
+      _showFlumeaNotification(
+        title: 'تعذر تسجيل الخروج',
+        message: 'حاول مرة أخرى.',
+        icon: Icons.error_outline_rounded,
+        accent: const Color(0xFFE53935),
       );
     }
   }
@@ -1117,6 +1216,159 @@ class _AccountScreenState extends State<AccountScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FlumeaNotificationCard extends StatelessWidget {
+  const _FlumeaNotificationCard({
+    required this.title,
+    required this.message,
+    required this.icon,
+    required this.accent,
+  });
+
+  final String title;
+  final String message;
+  final IconData icon;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(minHeight: 94, maxWidth: 520),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.97),
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.16),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        textDirection: TextDirection.rtl,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const _FlumeaMiniLogo(),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  textDirection: TextDirection.rtl,
+                  children: [
+                    const Text(
+                      'FLUMEA',
+                      style: TextStyle(
+                        color: Color(0xFF5E6B7A),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      'الآن',
+                      style: TextStyle(
+                        color: const Color(0xFF6F7B89),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  title,
+                  textAlign: TextAlign.right,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFF101820),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  message,
+                  textAlign: TextAlign.right,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFF718096),
+                    fontSize: 12.5,
+                    height: 1.25,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Container(
+            width: 45,
+            height: 45,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.13),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: accent, size: 24),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FlumeaMiniLogo extends StatelessWidget {
+  const _FlumeaMiniLogo();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 48,
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FBFF),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE4EDF5)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: const [
+          _LogoWave(color: Color(0xFF1787F2)),
+          _LogoWave(color: Color(0xFF16BFE7)),
+          _LogoWave(color: Color(0xFF18D79B)),
+        ],
+      ),
+    );
+  }
+}
+
+class _LogoWave extends StatelessWidget {
+  const _LogoWave({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Container(
+        width: 29,
+        height: 6,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(10),
         ),
       ),
     );
