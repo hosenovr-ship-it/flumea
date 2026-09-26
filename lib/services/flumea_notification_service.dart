@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class FlumeaNotificationService {
@@ -17,41 +16,35 @@ class FlumeaNotificationService {
     description: 'إشعارات تطبيق FLUMEA',
     importance: Importance.high,
     playSound: true,
+    enableVibration: true,
+    showBadge: true,
   );
 
-  bool _initialized = false;
-
   Future<void> initialize() async {
-    if (_initialized) return;
-
-    const androidSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
-    );
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
     const settings = InitializationSettings(
       android: androidSettings,
     );
 
-    await _plugin.initialize(settings);
+    await _plugin.initialize(
+      settings: settings,
+    );
 
-    final androidImplementation =
+    final androidPlugin =
         _plugin.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
 
-    await androidImplementation?.createNotificationChannel(_channel);
-
-    await androidImplementation?.requestNotificationsPermission();
-
-    _initialized = true;
+    await androidPlugin?.createNotificationChannel(_channel);
+    await androidPlugin?.requestNotificationsPermission();
   }
 
   Future<void> show({
+    required int id,
     required String title,
     required String body,
-    int id = 0,
   }) async {
-    await initialize();
-
     const androidDetails = AndroidNotificationDetails(
       'flumea_notifications',
       'FLUMEA',
@@ -60,9 +53,7 @@ class FlumeaNotificationService {
       priority: Priority.high,
       playSound: true,
       enableVibration: true,
-      showWhen: true,
       icon: '@mipmap/ic_launcher',
-      styleInformation: BigTextStyleInformation(''),
     );
 
     const details = NotificationDetails(
@@ -70,10 +61,10 @@ class FlumeaNotificationService {
     );
 
     await _plugin.show(
-      id,
-      title,
-      body,
-      details,
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: details,
     );
   }
 
@@ -89,8 +80,10 @@ class FlumeaNotificationService {
     );
   }
 
-  Future<void> cancel(int id) async {
-    await _plugin.cancel(id);
+  Future<void> cancel({
+    required int id,
+  }) async {
+    await _plugin.cancel(id: id);
   }
 
   Future<void> cancelAll() async {
