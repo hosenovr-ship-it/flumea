@@ -519,34 +519,13 @@ class _AccountScreenState extends State<AccountScreen> {
         border: Border.all(color: border),
       ),
       child: Row(
-        textDirection: TextDirection.rtl,
+        textDirection: TextDirection.ltr,
         children: [
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  title,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color: primary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  message,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color: secondary,
-                    fontSize: 12.5,
-                    height: 1.35,
-                  ),
-                ),
-              ],
-            ),
+          Switch.adaptive(
+            value: enabled,
+            onChanged: onChanged,
+            activeTrackColor: const Color(0xFF20C997),
+            activeThumbColor: Colors.white,
           ),
           const SizedBox(width: 10),
           Container(
@@ -558,12 +537,36 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
             child: Icon(icon, color: color, size: 23),
           ),
-          const SizedBox(width: 8),
-          Switch.adaptive(
-            value: enabled,
-            onChanged: onChanged,
-            activeTrackColor: const Color(0xFF20C997),
-            activeThumbColor: Colors.white,
+          const SizedBox(width: 10),
+          Expanded(
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    title,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: primary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    message,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: secondary,
+                      fontSize: 12.5,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
