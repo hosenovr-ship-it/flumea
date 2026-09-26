@@ -528,7 +528,9 @@ class _AccountScreenState extends State<AccountScreen> {
             activeThumbColor: Colors.white,
           ),
           const SizedBox(width: 10),
-          Expanded(
+          const Spacer(),
+          Flexible(
+            fit: FlexFit.loose,
             child: Directionality(
               textDirection: TextDirection.rtl,
               child: Column(
@@ -538,6 +540,8 @@ class _AccountScreenState extends State<AccountScreen> {
                   Text(
                     title,
                     textAlign: TextAlign.right,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: primary,
                       fontSize: 15,
@@ -548,6 +552,8 @@ class _AccountScreenState extends State<AccountScreen> {
                   Text(
                     message,
                     textAlign: TextAlign.right,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: secondary,
                       fontSize: 12.5,
@@ -558,7 +564,7 @@ class _AccountScreenState extends State<AccountScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Container(
             width: 42,
             height: 42,
