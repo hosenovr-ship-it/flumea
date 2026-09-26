@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'login_screen.dart';
 import 'theme_controller.dart';
+import 'services/flumea_notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await FlumeaNotificationService.instance.initialize();
 
   await Supabase.initialize(
     url: 'https://mmmypwmdzkjmsdhmjdfd.supabase.co',
