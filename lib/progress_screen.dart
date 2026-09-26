@@ -1341,6 +1341,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             child: CustomPaint(
               painter: _LineChartPainter(
                 values: _data.trendValues,
+                isDark: _isDark,
               ),
             ),
           ),
@@ -1408,7 +1409,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(top: BorderSide(color: _dividerColor)),
       ),
       child: Row(
