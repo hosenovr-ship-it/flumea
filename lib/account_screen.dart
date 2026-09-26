@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'bottom_navigation.dart';
 import 'theme_controller.dart';
@@ -27,9 +28,15 @@ class _AccountScreenState extends State<AccountScreen> {
   bool _loading = true;
   bool _uploadingAvatar = false;
 
+  bool _habitNotifications = true;
+  bool _taskNotifications = true;
+  bool _achievementNotifications = true;
+  bool _waterNotifications = true;
+
   @override
   void initState() {
     super.initState();
+    _loadNotificationPreferences();
     _loadProfile();
   }
 
@@ -307,6 +314,24 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
+  Future<void> _loadNotificationPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+
+    setState(() {
+      _habitNotifications = prefs.getBool('flumea_notify_habits') ?? true;
+      _taskNotifications = prefs.getBool('flumea_notify_tasks') ?? true;
+      _achievementNotifications =
+          prefs.getBool('flumea_notify_achievements') ?? true;
+      _waterNotifications = prefs.getBool('flumea_notify_water') ?? true;
+    });
+  }
+
+  Future<void> _setNotificationPreference(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
+
   Future<void> _showNotifications() async {
     if (!mounted) return;
 
@@ -321,110 +346,149 @@ class _AccountScreenState extends State<AccountScreen> {
     await showDialog<void>(
       context: context,
       builder: (dialogContext) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: AlertDialog(
-            backgroundColor: surface,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-              side: BorderSide(color: border),
-            ),
-            titlePadding: const EdgeInsets.fromLTRB(24, 22, 24, 8),
-            contentPadding: const EdgeInsets.fromLTRB(18, 8, 18, 20),
-            title: Row(
-              children: [
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: blue.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: const Icon(
-                    Icons.notifications_none_rounded,
-                    color: blue,
-                    size: 25,
-                  ),
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return Directionality(
+              textDirection: TextDirection.rtl,
+              child: AlertDialog(
+                backgroundColor: surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  side: BorderSide(color: border),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'الإشعارات',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      color: primary,
-                      fontSize: 21,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _notificationItem(
-                  icon: Icons.check_circle_outline_rounded,
-                  color: const Color(0xFF20C997),
-                  title: 'العادات',
-                  message: 'تابع عاداتك اليومية وحافظ على تقدمك.',
-                  primary: primary,
-                  secondary: secondary,
-                ),
-                const SizedBox(height: 10),
-                _notificationItem(
-                  icon: Icons.flag_outlined,
-                  color: const Color(0xFF1976D2),
-                  title: 'المهام',
-                  message: 'راجع مهامك القادمة وأكمل ما عليك.',
-                  primary: primary,
-                  secondary: secondary,
-                ),
-                const SizedBox(height: 10),
-                _notificationItem(
-                  icon: Icons.emoji_events_outlined,
-                  color: const Color(0xFFFFA726),
-                  title: 'إنجاز جديد',
-                  message: 'استمر في التقدم نحو أهدافك.',
-                  primary: primary,
-                  secondary: secondary,
-                ),
-                const SizedBox(height: 10),
-                _notificationItem(
-                  icon: Icons.water_drop_outlined,
-                  color: const Color(0xFF42A5F5),
-                  title: 'حان وقت شرب الماء',
-                  message: '💧 خذ لحظة واشرب بعض الماء لتحافظ على ترطيبك.',
-                  primary: primary,
-                  secondary: secondary,
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: TextButton(
-                    onPressed: () => Navigator.of(dialogContext).pop(),
-                    style: TextButton.styleFrom(
-                      backgroundColor: isDark
-                          ? const Color(0xFF223247)
-                          : const Color(0xFFEAF3FF),
-                      foregroundColor: blue,
-                      padding: const EdgeInsets.symmetric(vertical: 13),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                titlePadding: const EdgeInsets.fromLTRB(24, 22, 24, 8),
+                contentPadding: const EdgeInsets.fromLTRB(18, 8, 18, 20),
+                title: Row(
+                  textDirection: TextDirection.rtl,
+                  children: [
+                    Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: blue.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: const Icon(
+                        Icons.notifications_none_rounded,
+                        color: blue,
+                        size: 25,
                       ),
                     ),
-                    child: const Text(
-                      'إغلاق',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'الإشعارات',
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: primary,
+                          fontSize: 21,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _notificationItem(
+                      icon: Icons.check_circle_outline_rounded,
+                      color: const Color(0xFF20C997),
+                      title: 'العادات',
+                      message: 'تابع عاداتك اليومية وحافظ على تقدمك.',
+                      enabled: _habitNotifications,
+                      primary: primary,
+                      secondary: secondary,
+                      onChanged: (value) {
+                        setDialogState(() => _habitNotifications = value);
+                        _setNotificationPreference(
+                          'flumea_notify_habits',
+                          value,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    _notificationItem(
+                      icon: Icons.flag_outlined,
+                      color: const Color(0xFF1976D2),
+                      title: 'المهام',
+                      message: 'راجع مهامك القادمة وأكمل ما عليك.',
+                      enabled: _taskNotifications,
+                      primary: primary,
+                      secondary: secondary,
+                      onChanged: (value) {
+                        setDialogState(() => _taskNotifications = value);
+                        _setNotificationPreference(
+                          'flumea_notify_tasks',
+                          value,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    _notificationItem(
+                      icon: Icons.emoji_events_outlined,
+                      color: const Color(0xFFFFA726),
+                      title: 'إنجاز جديد',
+                      message: 'استمر في التقدم نحو أهدافك.',
+                      enabled: _achievementNotifications,
+                      primary: primary,
+                      secondary: secondary,
+                      onChanged: (value) {
+                        setDialogState(
+                          () => _achievementNotifications = value,
+                        );
+                        _setNotificationPreference(
+                          'flumea_notify_achievements',
+                          value,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    _notificationItem(
+                      icon: Icons.water_drop_outlined,
+                      color: const Color(0xFF42A5F5),
+                      title: 'حان وقت شرب الماء',
+                      message: 'خذ لحظة واشرب بعض الماء لتحافظ على ترطيبك. 💧',
+                      enabled: _waterNotifications,
+                      primary: primary,
+                      secondary: secondary,
+                      onChanged: (value) {
+                        setDialogState(() => _waterNotifications = value);
+                        _setNotificationPreference(
+                          'flumea_notify_water',
+                          value,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                        style: TextButton.styleFrom(
+                          backgroundColor: isDark
+                              ? const Color(0xFF223247)
+                              : const Color(0xFFEAF3FF),
+                          foregroundColor: blue,
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: const Text(
+                          'إغلاق',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -435,8 +499,10 @@ class _AccountScreenState extends State<AccountScreen> {
     required Color color,
     required String title,
     required String message,
+    required bool enabled,
     required Color primary,
     required Color secondary,
+    required ValueChanged<bool> onChanged,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background =
@@ -446,7 +512,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(13),
+      padding: const EdgeInsets.fromLTRB(10, 10, 13, 10),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(17),
@@ -455,18 +521,9 @@ class _AccountScreenState extends State<AccountScreen> {
       child: Row(
         textDirection: TextDirection.rtl,
         children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(13),
-            ),
-            child: Icon(icon, color: color, size: 23),
-          ),
-          const SizedBox(width: 11),
           Expanded(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
@@ -490,6 +547,23 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
               ],
             ),
+          ),
+          const SizedBox(width: 10),
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.14),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 23),
+          ),
+          const SizedBox(width: 8),
+          Switch.adaptive(
+            value: enabled,
+            onChanged: onChanged,
+            activeTrackColor: const Color(0xFF20C997),
+            activeThumbColor: Colors.white,
           ),
         ],
       ),
