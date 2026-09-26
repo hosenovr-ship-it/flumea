@@ -389,6 +389,15 @@ class _AccountScreenState extends State<AccountScreen> {
                   primary: primary,
                   secondary: secondary,
                 ),
+                const SizedBox(height: 10),
+                _notificationItem(
+                  icon: Icons.water_drop_outlined,
+                  color: const Color(0xFF42A5F5),
+                  title: 'حان وقت شرب الماء',
+                  message: '💧 خذ لحظة واشرب بعض الماء لتحافظ على ترطيبك.',
+                  primary: primary,
+                  secondary: secondary,
+                ),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
