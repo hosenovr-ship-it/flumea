@@ -519,18 +519,21 @@ class _AccountScreenState extends State<AccountScreen> {
         border: Border.all(color: border),
       ),
       child: Row(
-        textDirection: TextDirection.ltr,
+        textDirection: TextDirection.rtl,
         children: [
-          Switch.adaptive(
-            value: enabled,
-            onChanged: onChanged,
-            activeTrackColor: const Color(0xFF20C997),
-            activeThumbColor: Colors.white,
+          // الأيقونة في أقصى اليمين.
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.14),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 23),
           ),
-          const SizedBox(width: 10),
-          const Spacer(),
-          Flexible(
-            fit: FlexFit.loose,
+          const SizedBox(width: 8),
+          // الكلمات مباشرة بجانب الأيقونة ومحاذاة إلى اليمين.
+          Expanded(
             child: Directionality(
               textDirection: TextDirection.rtl,
               child: Column(
@@ -564,15 +567,13 @@ class _AccountScreenState extends State<AccountScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.14),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 23),
+          const SizedBox(width: 10),
+          // زر التشغيل/الإيقاف في أقصى اليسار.
+          Switch.adaptive(
+            value: enabled,
+            onChanged: onChanged,
+            activeTrackColor: const Color(0xFF20C997),
+            activeThumbColor: Colors.white,
           ),
         ],
       ),
