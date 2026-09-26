@@ -21,13 +21,10 @@ class _PlanScreenState extends State<PlanScreen> {
   Color get background => _isDark ? const Color(0xFF0B141D) : const Color(0xFFF7FBFF);
   Color get _surface => _isDark ? const Color(0xFF111217) : Colors.white;
   Color get _border => _isDark ? const Color(0xFF34404D) : const Color(0xFFE5EAF0);
-  Color get _muted => _isDark ? const Color(0xFFA8B2BF) : const Color(0xFF7B8798);
   Color get _subtle => _isDark ? const Color(0xFFB5C0CB) : const Color(0xFF52647A);
   Color get _soft => _isDark ? const Color(0xFF151B23) : const Color(0xFFF5F8FC);
   Color get _summary => _isDark ? const Color(0xFF10283A) : const Color(0xFFEAF9F4);
   Color get _taskAdd => _isDark ? const Color(0xFF202A35) : const Color(0xFFEAF4FF);
-  Color get _divider => _isDark ? const Color(0xFF2B3440) : const Color(0xFFE8EDF2);
-  Color get _progressBg => _isDark ? const Color(0xFF35424F) : const Color(0xFFDDE4ED);
   Color get _habitDone => _isDark ? const Color(0xFF12302F) : const Color(0xFFF1FBF9);
   Color get _habitDoneBorder => _isDark ? const Color(0xFF24504C) : const Color(0xFFD5F0EB);
   Color get _habitUndone => _isDark ? const Color(0xFF17191E) : const Color(0xFFF8FAFC);
@@ -1333,7 +1330,9 @@ class _PlanScreenState extends State<PlanScreen> {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: _taskAdd,
+                  color: const Color(
+                    0xFFEAF4FF,
+                  ),
                   borderRadius:
                       BorderRadius.circular(22),
                 ),
@@ -1906,7 +1905,7 @@ class _PlanScreenState extends State<PlanScreen> {
 
                               final selected = await showModalBottomSheet<String>(
                                 context: dialogContext,
-                                backgroundColor: _surface,
+                                backgroundColor: Colors.white,
                                 shape: const RoundedRectangleBorder(
                                   borderRadius: BorderRadius.vertical(
                                     top: Radius.circular(28),
