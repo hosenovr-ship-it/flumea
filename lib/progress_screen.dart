@@ -17,11 +17,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
   static const Color lightBlue = Color(0xFFEAF4FF);
   static const Color lightGreen = Color(0xFFEAF9F2);
   static const Color lightYellow = Color(0xFFFFF8E8);
-  static const TextStyle _smallText = TextStyle(
-    fontSize: 11,
-    color: Color(0xFF7B8798),
-  );
-
   final SupabaseClient _supabase = Supabase.instance.client;
   int _selectedPeriod = 0;
   bool _loading = true;
@@ -724,12 +719,50 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return rounded > 0 ? '+$rounded%' : '$rounded%';
   }
 
+  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
+
+  Color get _pageBackground =>
+      _isDark ? const Color(0xFF08111A) : const Color(0xFFF7FAFD);
+
+  Color get _cardBackground =>
+      _isDark ? const Color(0xFF101116) : Colors.white;
+
+  Color get _primaryText =>
+      _isDark ? const Color(0xFFF2F5F7) : navy;
+
+  Color get _secondaryText =>
+      _isDark ? const Color(0xFF9AA7B8) : const Color(0xFF7B8798);
+
+  Color get _borderColor =>
+      _isDark ? const Color(0xFF2B3542) : const Color(0xFFE5EBF1);
+
+  Color get _periodBackground =>
+      _isDark ? const Color(0xFF172A3A) : const Color(0xFFEAF4FF);
+
+  Color get _greenBackground =>
+      _isDark ? const Color(0xFF103833) : lightGreen;
+
+  Color get _blueBackground =>
+      _isDark ? const Color(0xFF102A42) : lightBlue;
+
+  Color get _yellowBackground =>
+      _isDark ? const Color(0xFF3A2F18) : lightYellow;
+
+  Color get _progressTrack =>
+      _isDark ? const Color(0xFF28343D) : const Color(0xFFE5EEE9);
+
+  Color get _circleTrack =>
+      _isDark ? const Color(0xFF29323C) : const Color(0xFFE9EEF4);
+
+  Color get _dividerColor =>
+      _isDark ? const Color(0xFF303844) : const Color(0xFFE9EEF4);
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF7FAFD),
+        backgroundColor: _pageBackground,
         body: SafeArea(
           child: RefreshIndicator(
             onRefresh: _loadProgress,
@@ -781,17 +814,17 @@ class _ProgressScreenState extends State<ProgressScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.cloud_off_rounded, color: navy, size: 45),
+            Icon(Icons.cloud_off_rounded, color: _primaryText, size: 45),
             const SizedBox(height: 12),
             Text(
               _error!,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: navy, fontSize: 15),
+              style: TextStyle(color: _primaryText, fontSize: 15),
             ),
             const SizedBox(height: 14),
             ElevatedButton(
               onPressed: _loadProgress,
-              child: const Text('إعادة المحاولة'),
+              child: Text('إعادة المحاولة'),
             ),
           ],
         ),
@@ -800,27 +833,27 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _header() {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(Icons.bar_chart_rounded, color: navy, size: 30),
-            SizedBox(width: 8),
+            Icon(Icons.bar_chart_rounded, color: _primaryText, size: 30),
+            const SizedBox(width: 8),
             Text(
               'التقدم',
               style: TextStyle(
-                color: navy,
+                color: _primaryText,
                 fontSize: 30,
                 fontWeight: FontWeight.w800,
               ),
             ),
           ],
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           'رحلتك نحو نسخة أفضل من نفسك',
-          style: TextStyle(color: Color(0xFF7B8798), fontSize: 16),
+          style: TextStyle(color: _secondaryText, fontSize: 16),
         ),
       ],
     );
@@ -831,9 +864,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return Container(
       height: 52,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _cardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE4EAF1)),
+        border: Border.all(color: _borderColor),
       ),
       child: Row(
         children: List.generate(titles.length, (index) {
@@ -849,7 +882,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 margin: const EdgeInsets.all(3),
                 decoration: BoxDecoration(
                   color: _selectedPeriod == index
-                      ? const Color(0xFFEAF4FF)
+                      ? _periodBackground
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -857,7 +890,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 child: Text(
                   titles[index],
                   style: TextStyle(
-                    color: _selectedPeriod == index ? blue : navy,
+                    color: _selectedPeriod == index ? blue : _primaryText,
                     fontSize: 15,
                     fontWeight: _selectedPeriod == index
                         ? FontWeight.w800
@@ -880,7 +913,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             icon: Icons.local_fire_department_rounded,
             value: '${_data.activityDays}',
             title: 'أيام النشاط',
-            background: lightGreen,
+            background: _greenBackground,
             iconColor: green,
           ),
         ),
@@ -890,7 +923,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             icon: Icons.track_changes_rounded,
             value: '${_data.completedHabitLogs}',
             title: 'العادات المكتملة',
-            background: lightBlue,
+            background: _blueBackground,
             iconColor: blue,
           ),
         ),
@@ -900,7 +933,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             icon: Icons.flag_rounded,
             value: '${_data.goalsInProgress}',
             title: 'الأهداف قيد العمل',
-            background: lightYellow,
+            background: _yellowBackground,
             iconColor: Colors.orange,
           ),
         ),
@@ -929,8 +962,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
           const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(
-              color: navy,
+            style: TextStyle(
+              color: _primaryText,
               fontSize: 27,
               fontWeight: FontWeight.w800,
             ),
@@ -940,7 +973,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             title,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: iconColor == blue ? blue : navy,
+              color: iconColor == blue ? blue : _primaryText,
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
@@ -954,22 +987,22 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _cardBackground,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFFE5EBF1)),
+        border: Border.all(color: _borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              const Icon(Icons.bar_chart_rounded, color: navy, size: 25),
+              Icon(Icons.bar_chart_rounded, color: _primaryText, size: 25),
               const SizedBox(width: 6),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'معدل إكمال العادات',
                   style: TextStyle(
-                    color: navy,
+                    color: _primaryText,
                     fontSize: 21,
                     fontWeight: FontWeight.w800,
                   ),
@@ -978,22 +1011,22 @@ class _ProgressScreenState extends State<ProgressScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
                 decoration: BoxDecoration(
-                  color: lightGreen,
+                  color: _greenBackground,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Column(
                   children: [
                     Text(
                       _formatPercent(_data.dailyRate),
-                      style: const TextStyle(
-                        color: navy,
+                      style: TextStyle(
+                        color: _primaryText,
                         fontSize: 19,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const Text(
+                    Text(
                       'معدل اليوم',
-                      style: TextStyle(color: navy, fontSize: 12),
+                      style: TextStyle(color: _primaryText, fontSize: 12),
                     ),
                   ],
                 ),
@@ -1004,7 +1037,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           Text(
             '${_periodLabel(_selectedPeriod)} · ${_todayArabicDate()}',
             textAlign: TextAlign.right,
-            style: const TextStyle(color: Color(0xFF7B8798), fontSize: 13),
+            style: TextStyle(color: _secondaryText, fontSize: 13),
           ),
           const SizedBox(height: 16),
           _habitOverallProgressBar(),
@@ -1041,8 +1074,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Color(0xFF66758A),
+                          style: TextStyle(
+                            color: _secondaryText,
                             fontSize: 11,
                           ),
                         ),
@@ -1065,11 +1098,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
       children: [
         Row(
           children: [
-            const Expanded(
+            Expanded(
               child: Text(
                 'معدل إكمال العادة اليوم',
                 style: TextStyle(
-                  color: navy,
+                  color: _primaryText,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
@@ -1077,7 +1110,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             ),
             Text(
               _formatPercent(value),
-              style: const TextStyle(
+              style: TextStyle(
                 color: green,
                 fontSize: 13,
                 fontWeight: FontWeight.w800,
@@ -1091,7 +1124,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           child: LinearProgressIndicator(
             minHeight: 8,
             value: value,
-            backgroundColor: const Color(0xFFE5EEE9),
+            backgroundColor: _progressTrack,
             valueColor: const AlwaysStoppedAnimation<Color>(green),
           ),
         ),
@@ -1144,26 +1177,26 @@ class _ProgressScreenState extends State<ProgressScreen> {
       height: 310,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _cardBackground,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFFE5EBF1)),
+        border: Border.all(color: _borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Row(
+          Row(
             children: [
               Expanded(
                 child: Text(
                   'معدل إكمال المهام',
                   style: TextStyle(
-                    color: navy,
+                    color: _primaryText,
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
-              Icon(Icons.access_time_rounded, color: navy),
+              Icon(Icons.access_time_rounded, color: _primaryText),
             ],
           ),
           const SizedBox(height: 4),
@@ -1171,7 +1204,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             _data.timeSummary.completedTasks == 0
                 ? 'لا توجد مهام مكتملة في ${_periodLabel(_selectedPeriod)}'
                 : '${_data.timeSummary.completedTasks} مهام مكتملة في ${_periodLabel(_selectedPeriod)}',
-            style: const TextStyle(color: Color(0xFF7B8798), fontSize: 12),
+            style: TextStyle(color: _secondaryText, fontSize: 12),
           ),
           const SizedBox(height: 20),
           Expanded(
@@ -1188,7 +1221,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                         child: CircularProgressIndicator(
                           value: _data.timeSummary.completedTasks == 0 ? 0 : 1,
                           strokeWidth: 20,
-                          backgroundColor: const Color(0xFFE9EEF4),
+                          backgroundColor: _circleTrack,
                           valueColor: const AlwaysStoppedAnimation<Color>(blue),
                         ),
                       ),
@@ -1197,15 +1230,15 @@ class _ProgressScreenState extends State<ProgressScreen> {
                         children: [
                           Text(
                             '${_data.timeSummary.completedTasks}',
-                            style: const TextStyle(
-                              color: navy,
+                            style: TextStyle(
+                              color: _primaryText,
                               fontSize: 24,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
-                          const Text(
+                          Text(
                             'مهام',
-                            style: TextStyle(color: Color(0xFF7B8798), fontSize: 12),
+                            style: TextStyle(color: _secondaryText, fontSize: 12),
                           ),
                         ],
                       ),
@@ -1251,32 +1284,32 @@ class _ProgressScreenState extends State<ProgressScreen> {
       height: 310,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _cardBackground,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFFE5EBF1)),
+        border: Border.all(color: _borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'تحسنك عبر الوقت',
                   style: TextStyle(
-                    color: navy,
+                    color: _primaryText,
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
-              const Icon(Icons.trending_up_rounded, color: navy),
+              Icon(Icons.trending_up_rounded, color: _primaryText),
             ],
           ),
           const SizedBox(height: 3),
           Text(
             _data.improvementLabel,
-            style: const TextStyle(color: Color(0xFF7B8798), fontSize: 12),
+            style: TextStyle(color: _secondaryText, fontSize: 12),
           ),
           const SizedBox(height: 18),
           Row(
@@ -1301,7 +1334,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           ),
           Text(
             improvement == 0 ? 'لا يوجد تغير' : 'تغير في معدل الإكمال',
-            style: const TextStyle(color: Color(0xFF7B8798), fontSize: 12),
+            style: TextStyle(color: _secondaryText, fontSize: 12),
           ),
           const SizedBox(height: 12),
           Expanded(
@@ -1316,13 +1349,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
             children: [
               Text(
                 _data.trendLabels.isEmpty ? 'البداية' : _data.trendLabels.first,
-                style: _smallText,
+                style: TextStyle(fontSize: 11, color: _secondaryText),
               ),
               Text(
                 _data.trendLabels.length < 2
                     ? 'الآن'
                     : _data.trendLabels.last,
-                style: _smallText,
+                style: TextStyle(fontSize: 11, color: _secondaryText),
               ),
             ],
           ),
@@ -1334,9 +1367,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
   Widget _achievementsCard() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _cardBackground,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFFE5EBF1)),
+        border: Border.all(color: _borderColor),
       ),
       child: Column(
         children: [
@@ -1344,13 +1377,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
             padding: const EdgeInsets.fromLTRB(18, 16, 18, 8),
             child: Row(
               children: [
-                const Icon(Icons.emoji_events_rounded, color: navy, size: 25),
+                Icon(Icons.emoji_events_rounded, color: _primaryText, size: 25),
                 const SizedBox(width: 6),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'أبرز إنجازاتك',
                     style: TextStyle(
-                      color: navy,
+                      color: _primaryText,
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                     ),
@@ -1376,7 +1409,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
       decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: Color(0xFFE9EEF4))),
+        border: Border(top: BorderSide(color: _dividerColor)),
       ),
       child: Row(
         children: [
@@ -1397,8 +1430,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 Text(
                   title,
                   textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    color: navy,
+                  style: TextStyle(
+                    color: _primaryText,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                   ),
@@ -1407,7 +1440,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 Text(
                   subtitle,
                   textAlign: TextAlign.right,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Color(0xFF7B8798),
                     fontSize: 12,
                   ),
@@ -1555,7 +1588,12 @@ class _Legend extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             value,
-            style: const TextStyle(fontSize: 12, color: Color(0xFF7B8798)),
+            style: TextStyle(
+               fontSize: 12,
+               color: Theme.of(context).brightness == Brightness.dark
+                   ? const Color(0xFF9AA7B8)
+                   : const Color(0xFF7B8798),
+             ),
           ),
         ],
       ),
@@ -1565,13 +1603,19 @@ class _Legend extends StatelessWidget {
 
 class _LineChartPainter extends CustomPainter {
   final List<double> values;
+  final bool isDark;
 
-  const _LineChartPainter({required this.values});
+  const _LineChartPainter({
+    required this.values,
+    required this.isDark,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final gridPaint = Paint()
-      ..color = const Color(0xFFE8EEF4)
+      ..color = isDark
+          ? const Color(0xFF27313B)
+          : const Color(0xFFE8EEF4)
       ..strokeWidth = 1;
 
     final linePaint = Paint()
@@ -1625,6 +1669,7 @@ class _LineChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _LineChartPainter oldDelegate) {
+    if (oldDelegate.isDark != isDark) return true;
     if (oldDelegate.values.length != values.length) return true;
     for (int i = 0; i < values.length; i++) {
       if (oldDelegate.values[i] != values[i]) return true;
