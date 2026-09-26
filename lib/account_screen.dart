@@ -528,16 +528,6 @@ class _AccountScreenState extends State<AccountScreen> {
             activeThumbColor: Colors.white,
           ),
           const SizedBox(width: 10),
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.14),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 23),
-          ),
-          const SizedBox(width: 10),
           Expanded(
             child: Directionality(
               textDirection: TextDirection.rtl,
@@ -567,6 +557,16 @@ class _AccountScreenState extends State<AccountScreen> {
                 ],
               ),
             ),
+          ),
+          const SizedBox(width: 10),
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.14),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 23),
           ),
         ],
       ),
