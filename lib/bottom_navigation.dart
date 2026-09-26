@@ -22,19 +22,15 @@ class FlumeaBottomNavigation extends StatelessWidget {
       case 0:
         page = const HomeScreen();
         break;
-
       case 1:
         page = const PlanScreen();
         break;
-
       case 2:
         page = const ProgressScreen();
         break;
-
       case 3:
         page = const AccountScreen();
         break;
-
       default:
         return;
     }
@@ -51,24 +47,34 @@ class FlumeaBottomNavigation extends StatelessWidget {
   Widget build(BuildContext context) {
     const turquoise = Color(0xFF20C7B7);
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Keep the existing light design and make the navigation
+    // match the dark theme when dark mode is enabled.
+    final navigationBackground =
+        isDark ? const Color(0xFF111217) : Colors.white;
+
+    final topBorderColor =
+        isDark ? const Color(0xFF2B3440) : const Color(0xFFEFE5EE);
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: SafeArea(
         top: false,
         child: Container(
           height: 78,
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: navigationBackground,
             border: Border(
               top: BorderSide(
-                color: Color(0xFFE5E9EE),
+                color: topBorderColor,
                 width: 1,
               ),
             ),
           ),
           child: Row(
             children: [
-              // 1️⃣ الرئيسية — أقصى اليمين
+              // 1 — الرئيسية
               Expanded(
                 child: _NavItem(
                   icon: Icons.home_outlined,
@@ -80,7 +86,7 @@ class FlumeaBottomNavigation extends StatelessWidget {
                 ),
               ),
 
-              // 2️⃣ الخطة
+              // 2 — الخطة
               Expanded(
                 child: _NavItem(
                   icon: Icons.calendar_month_outlined,
@@ -92,7 +98,7 @@ class FlumeaBottomNavigation extends StatelessWidget {
                 ),
               ),
 
-              // 3️⃣ التقدم
+              // 3 — التقدم
               Expanded(
                 child: _NavItem(
                   icon: Icons.bar_chart_outlined,
@@ -104,7 +110,7 @@ class FlumeaBottomNavigation extends StatelessWidget {
                 ),
               ),
 
-              // 4️⃣ الحساب — أقصى اليسار
+              // 4 — الحساب
               Expanded(
                 child: _NavItem(
                   icon: Icons.person_outline,
