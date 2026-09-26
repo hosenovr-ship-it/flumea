@@ -1330,9 +1330,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(
-                    0xFFEAF4FF,
-                  ),
+                  color: _taskAdd,
                   borderRadius:
                       BorderRadius.circular(22),
                 ),
@@ -1905,7 +1903,7 @@ class _PlanScreenState extends State<PlanScreen> {
 
                               final selected = await showModalBottomSheet<String>(
                                 context: dialogContext,
-                                backgroundColor: Colors.white,
+                                backgroundColor: _surface,
                                 shape: const RoundedRectangleBorder(
                                   borderRadius: BorderRadius.vertical(
                                     top: Radius.circular(28),
