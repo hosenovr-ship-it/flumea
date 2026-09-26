@@ -519,65 +519,77 @@ class _AccountScreenState extends State<AccountScreen> {
         border: Border.all(color: border),
       ),
       child: Row(
-        textDirection: TextDirection.rtl,
+        // LTR هنا حتى يبقى زر التشغيل في أقصى اليسار دائماً.
+        textDirection: TextDirection.ltr,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // الأيقونة في أقصى اليمين.
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.14),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 23),
-          ),
-          const SizedBox(width: 8),
-          // الكلمات مباشرة بجانب الأيقونة ومحاذاة إلى اليمين.
-          // النص قريب جداً من الأيقونة ومحاذاته إلى اليمين.
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      title,
-                      textAlign: TextAlign.right,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: primary,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      message,
-                      textAlign: TextAlign.right,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: secondary,
-                        fontSize: 12.5,
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          // زر التشغيل/الإيقاف في أقصى اليسار.
           Switch.adaptive(
             value: enabled,
             onChanged: onChanged,
             activeTrackColor: const Color(0xFF20C997),
             activeThumbColor: Colors.white,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Row(
+              // RTL: الأيقونة أقصى اليمين، والنص مباشرة إلى يسارها.
+              textDirection: TextDirection.rtl,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.14),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 23,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        child: Text(
+                          title,
+                          textAlign: TextAlign.right,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: primary,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Text(
+                          message,
+                          textAlign: TextAlign.right,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: secondary,
+                            fontSize: 12.5,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
