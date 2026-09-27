@@ -169,11 +169,13 @@ class PrivacyScreen extends StatelessWidget {
                       : const Color(0xFFF0ECFF),
                   cardColor: card,
                   borderColor: border,
-                  onTap: () => _showInfo(
-                    context,
-                    'سياسة الخصوصية',
-                    'سنضع هنا نص سياسة الخصوصية الكامل الخاص بـ FLUMEA قبل إطلاق التطبيق.',
-                  ),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const PrivacyPolicyDetailsScreen(),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 24),
                 Container(
@@ -1993,6 +1995,344 @@ class _AccountDataError extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+
+class PrivacyPolicyDetailsScreen extends StatelessWidget {
+  const PrivacyPolicyDetailsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primary = theme.colorScheme.onSurface;
+    final secondary = isDark
+        ? const Color(0xFFB8C2CC)
+        : const Color(0xFF8290A2);
+    final background = theme.scaffoldBackgroundColor;
+    final card = isDark ? const Color(0xFF121820) : Colors.white;
+    final border = isDark ? const Color(0xFF2A3540) : const Color(0xFFE4EBF2);
+
+    return Scaffold(
+      backgroundColor: background,
+      body: SafeArea(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  textDirection: TextDirection.ltr,
+                  children: [
+                    Text(
+                      'FLUMEA',
+                      style: TextStyle(
+                        color: isDark
+                            ? const Color(0xFF6EA7E6)
+                            : PrivacyScreen.navy,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 4,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      tooltip: 'رجوع',
+                      icon: Icon(
+                        Icons.arrow_forward,
+                        color: primary,
+                        size: 28,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 22),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 58,
+                      height: 58,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF2D2746)
+                            : const Color(0xFFF0ECFF),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: const Icon(
+                        Icons.description_outlined,
+                        color: Color(0xFF8067D8),
+                        size: 31,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'سياسة الخصوصية',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              color: primary,
+                              fontSize: 31,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'تعرف على كيفية جمع واستخدام وحماية بياناتك.',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              color: secondary,
+                              fontSize: 15,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 28),
+                _PolicyCard(
+                  title: '1. البيانات التي نجمعها',
+                  icon: Icons.person_outline_rounded,
+                  iconColor: PrivacyScreen.blue,
+                  iconBackground: isDark
+                      ? const Color(0xFF1C3857)
+                      : PrivacyScreen.lightBlue,
+                  card: card,
+                  border: border,
+                  primary: primary,
+                  secondary: secondary,
+                  children: const [
+                    'قد يحتفظ FLUMEA ببيانات الحساب التي تدخلها مثل الاسم والبريد الإلكتروني وصورة الملف الشخصي.',
+                    'قد تُحفظ أيضًا البيانات التي تنشئها داخل التطبيق، مثل المهام والعادات والأهداف وسجلات الطعام والتقدم.',
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _PolicyCard(
+                  title: '2. كيف نستخدم بياناتك',
+                  icon: Icons.settings_outlined,
+                  iconColor: PrivacyScreen.mint,
+                  iconBackground: isDark
+                      ? const Color(0xFF12372F)
+                      : const Color(0xFFE4F8F3),
+                  card: card,
+                  border: border,
+                  primary: primary,
+                  secondary: secondary,
+                  children: const [
+                    'نستخدم البيانات لتشغيل ميزات FLUMEA وعرض معلومات حسابك وحفظ خططك ومهامك وعاداتك وأهدافك.',
+                    'قد نستخدم بياناتك لتقديم الميزات التي تطلبها وتحسين تجربة استخدام التطبيق.',
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _PolicyCard(
+                  title: '3. حماية بياناتك',
+                  icon: Icons.verified_user_outlined,
+                  iconColor: PrivacyScreen.mint,
+                  iconBackground: isDark
+                      ? const Color(0xFF12372F)
+                      : const Color(0xFFE4F8F3),
+                  card: card,
+                  border: border,
+                  primary: primary,
+                  secondary: secondary,
+                  children: const [
+                    'نستخدم خدمات Supabase لإدارة المصادقة وقاعدة البيانات والتخزين وفق إعدادات الأمان المطبقة على المشروع.',
+                    'لا تشارك كلمة مرور حسابك مع أي شخص، وحافظ على بيانات تسجيل الدخول الخاصة بك.',
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _PolicyCard(
+                  title: '4. مشاركة البيانات',
+                  icon: Icons.share_outlined,
+                  iconColor: const Color(0xFFE79B22),
+                  iconBackground: isDark
+                      ? const Color(0xFF3A2D18)
+                      : const Color(0xFFFFF5DF),
+                  card: card,
+                  border: border,
+                  primary: primary,
+                  secondary: secondary,
+                  children: const [
+                    'لا نبيع بياناتك الشخصية. قد تتم معالجة البيانات عبر الخدمات الضرورية لتشغيل ميزات التطبيق، وفق إعدادات تلك الخدمات.',
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _PolicyCard(
+                  title: '5. حذف بياناتك',
+                  icon: Icons.delete_outline_rounded,
+                  iconColor: const Color(0xFFE45B5B),
+                  iconBackground: isDark
+                      ? const Color(0xFF3A2024)
+                      : const Color(0xFFFFE9E9),
+                  card: card,
+                  border: border,
+                  primary: primary,
+                  secondary: secondary,
+                  children: const [
+                    'يمكنك استخدام خيار حذف الحساب من إعدادات الخصوصية لبدء حذف حسابك والبيانات المرتبطة به.',
+                    'حذف الحساب إجراء نهائي ولا يمكن التراجع عنه بعد اكتماله.',
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _PolicyCard(
+                  title: '6. تحديث سياسة الخصوصية',
+                  icon: Icons.update_outlined,
+                  iconColor: const Color(0xFF8067D8),
+                  iconBackground: isDark
+                      ? const Color(0xFF2D2746)
+                      : const Color(0xFFF0ECFF),
+                  card: card,
+                  border: border,
+                  primary: primary,
+                  secondary: secondary,
+                  children: const [
+                    'قد نحدّث هذه السياسة عند إضافة ميزات أو تغييرات جديدة إلى FLUMEA. سيتم عرض النسخة المحدثة داخل التطبيق.',
+                  ],
+                ),
+                const SizedBox(height: 22),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF102C29)
+                        : const Color(0xFFEAFBF7),
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF22534C)
+                          : const Color(0xFFD1F2EA),
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 54,
+                        height: 54,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF17443D)
+                              : const Color(0xFFDDF7F0),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.shield_outlined,
+                          color: PrivacyScreen.mint,
+                          size: 29,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Text(
+                          'خصوصيتك مهمة بالنسبة لنا، ونحرص على أن تكون بياناتك تحت سيطرتك.',
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            color: primary,
+                            fontSize: 15,
+                            height: 1.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PolicyCard extends StatelessWidget {
+  const _PolicyCard({
+    required this.title,
+    required this.icon,
+    required this.iconColor,
+    required this.iconBackground,
+    required this.card,
+    required this.border,
+    required this.primary,
+    required this.secondary,
+    required this.children,
+  });
+
+  final String title;
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBackground;
+  final Color card;
+  final Color border;
+  final Color primary;
+  final Color secondary;
+  final List<String> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+      decoration: BoxDecoration(
+        color: card,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: iconBackground,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(icon, color: iconColor, size: 27),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    color: primary,
+                    fontSize: 19,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ...children.map(
+            (text) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                text,
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  color: secondary,
+                  fontSize: 14.5,
+                  height: 1.65,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
