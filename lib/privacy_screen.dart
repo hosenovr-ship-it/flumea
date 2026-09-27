@@ -2037,6 +2037,33 @@ class PrivacyPolicyDetailsScreen extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'سياسة الخصوصية',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: primary,
+                              fontSize: 31,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'تعرف على كيفية جمع واستخدام وحماية بياناتك.',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: secondary,
+                              fontSize: 15,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 14),
                     Container(
                       width: 58,
                       height: 58,
@@ -2050,33 +2077,6 @@ class PrivacyPolicyDetailsScreen extends StatelessWidget {
                         Icons.description_outlined,
                         color: Color(0xFF8067D8),
                         size: 31,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'سياسة الخصوصية',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                              color: primary,
-                              fontSize: 31,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'تعرف على كيفية جمع واستخدام وحماية بياناتك.',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                              color: secondary,
-                              fontSize: 15,
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
                       ),
                     ),
                   ],
@@ -2198,6 +2198,19 @@ class PrivacyPolicyDetailsScreen extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      Expanded(
+                        child: Text(
+                          'خصوصيتك مهمة بالنسبة لنا، ونحرص على أن تكون بياناتك تحت سيطرتك.',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            color: primary,
+                            fontSize: 15,
+                            height: 1.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
                       Container(
                         width: 54,
                         height: 54,
@@ -2211,19 +2224,6 @@ class PrivacyPolicyDetailsScreen extends StatelessWidget {
                           Icons.shield_outlined,
                           color: PrivacyScreen.mint,
                           size: 29,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Text(
-                          'خصوصيتك مهمة بالنسبة لنا، ونحرص على أن تكون بياناتك تحت سيطرتك.',
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                            color: primary,
-                            fontSize: 15,
-                            height: 1.5,
-                            fontWeight: FontWeight.w600,
-                          ),
                         ),
                       ),
                     ],
@@ -2275,6 +2275,18 @@ class _PolicyCard extends StatelessWidget {
         children: [
           Row(
             children: [
+              Expanded(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    color: primary,
+                    fontSize: 19,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
               Container(
                 width: 50,
                 height: 50,
@@ -2284,18 +2296,6 @@ class _PolicyCard extends StatelessWidget {
                 ),
                 child: Icon(icon, color: iconColor, size: 27),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Text(
-                  title,
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    color: primary,
-                    fontSize: 19,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -2304,7 +2304,7 @@ class _PolicyCard extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
                 text,
-                textAlign: TextAlign.left,
+                textAlign: TextAlign.right,
                 style: TextStyle(
                   color: secondary,
                   fontSize: 14.5,
