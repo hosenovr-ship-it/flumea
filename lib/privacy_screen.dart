@@ -132,11 +132,13 @@ class PrivacyScreen extends StatelessWidget {
                   iconBackground: iconBlue,
                   cardColor: card,
                   borderColor: border,
-                  onTap: () => _showInfo(
-                    context,
-                    'بيانات الحساب',
-                    'بيانات حسابك محفوظة في ملفك الشخصي ويمكنك تعديل الاسم والصورة من صفحة الحساب.',
-                  ),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const AccountDataScreen(),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 16),
                 _PrivacyOption(
@@ -849,6 +851,480 @@ class _PrivacyOption extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+
+class AccountDataScreen extends StatefulWidget {
+  const AccountDataScreen({super.key});
+
+  @override
+  State<AccountDataScreen> createState() => _AccountDataScreenState();
+}
+
+class _AccountDataScreenState extends State<AccountDataScreen> {
+  late Future<Map<String, dynamic>?> _profileFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileFuture = _loadProfile();
+  }
+
+  Future<Map<String, dynamic>?> _loadProfile() async {
+    final client = Supabase.instance.client;
+    final user = client.auth.currentUser;
+
+    if (user == null) {
+      return null;
+    }
+
+    final result = await client
+        .from('profiles')
+        .select('full_name, avatar_url, created_at')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    return result;
+  }
+
+  Future<void> _refresh() async {
+    setState(() {
+      _profileFuture = _loadProfile();
+    });
+    await _profileFuture;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primary = theme.colorScheme.onSurface;
+    final secondary = isDark
+        ? const Color(0xFFB8C2CC)
+        : const Color(0xFF8290A2);
+    final background = theme.scaffoldBackgroundColor;
+    final card = isDark ? const Color(0xFF121820) : Colors.white;
+    final border = isDark
+        ? const Color(0xFF2A3540)
+        : const Color(0xFFE4EBF2);
+
+    return Scaffold(
+      backgroundColor: background,
+      body: SafeArea(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: RefreshIndicator(
+            onRefresh: _refresh,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(24, 18, 24, 30),
+              child: FutureBuilder<Map<String, dynamic>?>(
+                future: _profileFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.7,
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    return _AccountDataError(
+                      message: 'تعذر تحميل بيانات الحساب.',
+                      onRetry: _refresh,
+                    );
+                  }
+
+                  final user = Supabase.instance.client.auth.currentUser;
+                  final profile = snapshot.data;
+                  final fullName =
+                      (profile?['full_name'] as String?)?.trim() ?? '';
+                  final avatarUrl =
+                      (profile?['avatar_url'] as String?)?.trim() ?? '';
+                  final email = user?.email ?? 'غير متوفر';
+                  final createdAt =
+                      (profile?['created_at'] as String?) ?? user?.createdAt;
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        textDirection: TextDirection.ltr,
+                        children: [
+                          Text(
+                            'FLUMEA',
+                            style: TextStyle(
+                              color: isDark
+                                  ? const Color(0xFF6EA7E6)
+                                  : PrivacyScreen.navy,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 4,
+                            ),
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            tooltip: 'رجوع',
+                            icon: Icon(
+                              Icons.arrow_forward,
+                              color: primary,
+                              size: 28,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 22),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 58,
+                            height: 58,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF1C3857)
+                                  : PrivacyScreen.lightBlue,
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Icon(
+                              Icons.person_outline_rounded,
+                              color: isDark
+                                  ? const Color(0xFF6EA7E6)
+                                  : PrivacyScreen.blue,
+                              size: 31,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'بيانات الحساب',
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                    color: primary,
+                                    fontSize: 31,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'عرض وإدارة بياناتك الشخصية',
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                    color: secondary,
+                                    fontSize: 15,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 30),
+                      Container(
+                        padding: const EdgeInsets.all(22),
+                        decoration: BoxDecoration(
+                          color: card,
+                          borderRadius: BorderRadius.circular(28),
+                          border: Border.all(color: border),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Center(
+                              child: CircleAvatar(
+                                radius: 46,
+                                backgroundColor: isDark
+                                    ? const Color(0xFF1C3857)
+                                    : PrivacyScreen.lightBlue,
+                                backgroundImage: avatarUrl.isNotEmpty
+                                    ? NetworkImage(avatarUrl)
+                                    : null,
+                                child: avatarUrl.isEmpty
+                                    ? Icon(
+                                        Icons.person_rounded,
+                                        size: 48,
+                                        color: isDark
+                                            ? const Color(0xFF6EA7E6)
+                                            : PrivacyScreen.blue,
+                                      )
+                                    : null,
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            Text(
+                              fullName.isEmpty ? 'لم يتم تحديد الاسم' : fullName,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: primary,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              email,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: secondary,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      _AccountDataItem(
+                        icon: Icons.person_outline_rounded,
+                        title: 'الاسم',
+                        value:
+                            fullName.isEmpty ? 'لم يتم تحديد الاسم' : fullName,
+                        cardColor: card,
+                        borderColor: border,
+                        iconColor: PrivacyScreen.blue,
+                        iconBackground: isDark
+                            ? const Color(0xFF1C3857)
+                            : PrivacyScreen.lightBlue,
+                      ),
+                      const SizedBox(height: 14),
+                      _AccountDataItem(
+                        icon: Icons.email_outlined,
+                        title: 'البريد الإلكتروني',
+                        value: email,
+                        cardColor: card,
+                        borderColor: border,
+                        iconColor: PrivacyScreen.mint,
+                        iconBackground: isDark
+                            ? const Color(0xFF12372F)
+                            : const Color(0xFFE4F8F3),
+                      ),
+                      const SizedBox(height: 14),
+                      _AccountDataItem(
+                        icon: Icons.calendar_today_outlined,
+                        title: 'تاريخ إنشاء الحساب',
+                        value: _formatDate(createdAt),
+                        cardColor: card,
+                        borderColor: border,
+                        iconColor: const Color(0xFF8067D8),
+                        iconBackground: isDark
+                            ? const Color(0xFF2D2746)
+                            : const Color(0xFFF0ECFF),
+                      ),
+                      const SizedBox(height: 24),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF102C29)
+                              : const Color(0xFFEAFBF7),
+                          borderRadius: BorderRadius.circular(28),
+                          border: Border.all(
+                            color: isDark
+                                ? const Color(0xFF22534C)
+                                : const Color(0xFFD1F2EA),
+                          ),
+                        ),
+                        child: Row(
+                          textDirection: TextDirection.rtl,
+                          children: [
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? const Color(0xFF17443D)
+                                    : const Color(0xFFDDF7F0),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.verified_user_outlined,
+                                color: PrivacyScreen.mint,
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Text(
+                                'هذه البيانات تخص حسابك الحالي ويتم تحميلها مباشرة من حسابك في FLUMEA.',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  color: primary,
+                                  fontSize: 14,
+                                  height: 1.5,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'غير متوفر';
+    }
+
+    final date = DateTime.tryParse(value);
+    if (date == null) {
+      return 'غير متوفر';
+    }
+
+    final local = date.toLocal();
+    final day = local.day.toString().padLeft(2, '0');
+    final month = local.month.toString().padLeft(2, '0');
+    final year = local.year.toString();
+
+    return '$day/$month/$year';
+  }
+}
+
+class _AccountDataItem extends StatelessWidget {
+  const _AccountDataItem({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.cardColor,
+    required this.borderColor,
+    required this.iconColor,
+    required this.iconBackground,
+  });
+
+  final IconData icon;
+  final String title;
+  final String value;
+  final Color cardColor;
+  final Color borderColor;
+  final Color iconColor;
+  final Color iconBackground;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.onSurface;
+    final secondary = Theme.of(context).brightness == Brightness.dark
+        ? const Color(0xFFB8C2CC)
+        : const Color(0xFF8290A2);
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        textDirection: TextDirection.rtl,
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: iconBackground,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              icon,
+              color: iconColor,
+              size: 27,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    color: secondary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  textAlign: TextAlign.left,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: primary,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AccountDataError extends StatelessWidget {
+  const _AccountDataError({
+    required this.message,
+    required this.onRetry,
+  });
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.onSurface;
+    final secondary = Theme.of(context).brightness == Brightness.dark
+        ? const Color(0xFFB8C2CC)
+        : const Color(0xFF8290A2);
+
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.7,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline_rounded,
+              size: 52,
+              color: secondary,
+            ),
+            const SizedBox(height: 14),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: primary,
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 14),
+            ElevatedButton(
+              onPressed: onRetry,
+              child: const Text('إعادة المحاولة'),
+            ),
+          ],
         ),
       ),
     );
