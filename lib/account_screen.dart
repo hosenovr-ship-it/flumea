@@ -1396,22 +1396,9 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Row(
+                  textDirection: TextDirection.rtl,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      width: 68,
-                      height: 68,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEAF3FF),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Icon(
-                        Icons.headset_mic_rounded,
-                        color: blue,
-                        size: 35,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -1436,6 +1423,20 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Container(
+                      width: 68,
+                      height: 68,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEAF3FF),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.headset_mic_rounded,
+                        color: blue,
+                        size: 35,
                       ),
                     ),
                   ],
@@ -1602,54 +1603,85 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
   }
 
   void _showContactSnackBar(String message, {required IconData icon}) {
-    final messenger = ScaffoldMessenger.of(context);
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.fromLTRB(18, 0, 18, 18),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          backgroundColor: const Color(0xFF102A4C),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-          duration: const Duration(seconds: 3),
-          content: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    message,
-                    textAlign: TextAlign.right,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w600,
-                      height: 1.35,
+    final overlay = Overlay.of(context);
+    late final OverlayEntry entry;
+
+    entry = OverlayEntry(
+      builder: (overlayContext) {
+        final top = MediaQuery.of(overlayContext).padding.top + 12;
+
+        return Positioned(
+          top: top,
+          left: 18,
+          right: 18,
+          child: Material(
+            color: Colors.transparent,
+            child: SafeArea(
+              bottom: false,
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 64),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF102A4C),
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x33000000),
+                      blurRadius: 18,
+                      offset: Offset(0, 7),
                     ),
+                  ],
+                ),
+                child: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          icon,
+                          color: const Color(0xFF55D6B2),
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          message,
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w600,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: const Color(0xFF55D6B2),
-                    size: 22,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      );
+        );
+      },
+    );
+
+    overlay.insert(entry);
+
+    Future<void>.delayed(const Duration(seconds: 3), () {
+      if (entry.mounted) {
+        entry.remove();
+      }
+    });
   }
 
   @override
@@ -1693,21 +1725,9 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                 ),
                 const SizedBox(height: 10),
                 Row(
+                  textDirection: TextDirection.rtl,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      width: 68,
-                      height: 68,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEAF3FF),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Icon(
-                        Icons.mail_outline_rounded,
-                        color: blue,
-                        size: 35,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -1732,6 +1752,20 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Container(
+                      width: 68,
+                      height: 68,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEAF3FF),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.mail_outline_rounded,
+                        color: blue,
+                        size: 35,
                       ),
                     ),
                   ],
