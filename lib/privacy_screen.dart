@@ -429,7 +429,6 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
         ? const Color(0xFF2A3540)
         : const Color(0xFFE4EBF2);
 
-    final dangerCard = isDark ? const Color(0xFF24181B) : const Color(0xFFFFFBFB);
     final dangerBorder =
         isDark ? const Color(0xFF5A3038) : const Color(0xFFFFD0D0);
     final inputFill = isDark ? const Color(0xFF1A2028) : const Color(0xFFF5F7FA);
