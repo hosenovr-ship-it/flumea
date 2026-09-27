@@ -361,7 +361,7 @@ class _AccountScreenState extends State<AccountScreen> {
       title: title,
       body: message,
       type: FlumeaNotificationType.general,
-      payload: 'icon=${icon.codePoint};accent=${accent.value}',
+      payload: 'icon=${icon.codePoint};accent=${accent.toARGB32()}',
     );
   }
 
