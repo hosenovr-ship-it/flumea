@@ -691,6 +691,43 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _signOut() async {
+    if (!mounted) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            title: const Text(
+              'تسجيل الخروج',
+              textAlign: TextAlign.right,
+            ),
+            content: const Text(
+              'هل أنت متأكد أنك تريد تسجيل الخروج من حسابك؟',
+              textAlign: TextAlign.right,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: const Text('إلغاء'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFD93B3B),
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('نعم، تسجيل الخروج'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+
     try {
       await _supabase.auth.signOut();
     } catch (_) {
@@ -981,6 +1018,13 @@ class _AccountScreenState extends State<AccountScreen> {
                       title: 'مركز المساعدة',
                       subtitle: 'الأسئلة الشائعة',
                       color: blue,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const FlumeaHelpCenterScreen(),
+                          ),
+                        );
+                      },
                     ),
                     _settingRow(
                       icon: Icons.mail_outline,
@@ -988,6 +1032,13 @@ class _AccountScreenState extends State<AccountScreen> {
                       subtitle: 'نحن هنا لمساعدتك',
                       color: navy,
                       last: true,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const FlumeaContactScreen(),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -1164,6 +1215,477 @@ class _AccountScreenState extends State<AccountScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class FlumeaHelpCenterScreen extends StatelessWidget {
+  const FlumeaHelpCenterScreen({super.key});
+
+  static const Color navy = Color(0xFF102A4C);
+  static const Color blue = Color(0xFF1976D2);
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.onSurface;
+    final secondary =
+        isDark ? const Color(0xFFB8C2CC) : const Color(0xFF8290A2);
+
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 30),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  textDirection: TextDirection.ltr,
+                  children: [
+                    const Text(
+                      'FLUMEA',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: navy,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.arrow_forward_rounded),
+                      color: navy,
+                      tooltip: 'رجوع',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 68,
+                      height: 68,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEAF3FF),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.headset_mic_rounded,
+                        color: blue,
+                        size: 35,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'مركز المساعدة',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: primary,
+                              fontSize: 30,
+                              height: 1.05,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            'إجابات سريعة لأهم الأسئلة حول FLUMEA.',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: secondary,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _faqCard(
+                  context,
+                  icon: Icons.person_outline_rounded,
+                  color: const Color(0xFF1976D2),
+                  question: 'كيف أعدل بيانات حسابي؟',
+                  answer:
+                      'من صفحة الحساب اضغط على «تعديل الملف الشخصي» لتغيير اسمك أو صورة الحساب.',
+                  primary: primary,
+                  secondary: secondary,
+                ),
+                _faqCard(
+                  context,
+                  icon: Icons.check_circle_outline_rounded,
+                  color: const Color(0xFF20C997),
+                  question: 'كيف أتابع المهام والعادات؟',
+                  answer:
+                      'استخدم صفحة الخطة لإضافة مهامك وعاداتك اليومية، ثم تابع تقدمك من صفحة التقدم.',
+                  primary: primary,
+                  secondary: secondary,
+                ),
+                _faqCard(
+                  context,
+                  icon: Icons.restaurant_outlined,
+                  color: const Color(0xFFE6A62C),
+                  question: 'كيف أسجل الطعام والسعرات؟',
+                  answer:
+                      'يمكنك إضافة وجباتك من قسم الطعام وتسجيل السعرات ومتابعة ما تم اختياره ضمن هدفك اليومي.',
+                  primary: primary,
+                  secondary: secondary,
+                ),
+                _faqCard(
+                  context,
+                  icon: Icons.notifications_none_rounded,
+                  color: const Color(0xFF42A5F5),
+                  question: 'كيف أتحكم بالإشعارات؟',
+                  answer:
+                      'من صفحة الحساب ثم «الإشعارات» يمكنك تشغيل أو إيقاف أنواع التنبيهات التي تريدها.',
+                  primary: primary,
+                  secondary: secondary,
+                ),
+                _faqCard(
+                  context,
+                  icon: Icons.lock_outline_rounded,
+                  color: navy,
+                  question: 'أين أجد إعدادات الخصوصية؟',
+                  answer:
+                      'من صفحة الحساب افتح «الخصوصية» للوصول إلى بيانات الحساب وحذف الحساب وسياسة الخصوصية.',
+                  primary: primary,
+                  secondary: secondary,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _faqCard(
+    BuildContext context, {
+    required IconData icon,
+    required Color color,
+    required String question,
+    required String answer,
+    required Color primary,
+    required Color secondary,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: const Color(0xFFE4EBF2),
+        ),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          childrenPadding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+          leading: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Icon(icon, color: color, size: 25),
+          ),
+          title: Text(
+            question,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: primary,
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: Text(
+                answer,
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  color: secondary,
+                  fontSize: 14,
+                  height: 1.6,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class FlumeaContactScreen extends StatefulWidget {
+  const FlumeaContactScreen({super.key});
+
+  @override
+  State<FlumeaContactScreen> createState() => _FlumeaContactScreenState();
+}
+
+class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
+  static const Color navy = Color(0xFF102A4C);
+  static const Color blue = Color(0xFF1976D2);
+
+  final TextEditingController _messageController = TextEditingController();
+  final TextEditingController _subjectController = TextEditingController();
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _subjectController.dispose();
+    super.dispose();
+  }
+
+  void _sendMessage() {
+    final message = _messageController.text.trim();
+    if (message.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('اكتب رسالتك أولاً.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    _messageController.clear();
+    _subjectController.clear();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('تم استلام رسالتك، شكرًا لتواصلك معنا. ❤️'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.onSurface;
+    final secondary =
+        isDark ? const Color(0xFFB8C2CC) : const Color(0xFF8290A2);
+    final fieldFill = isDark ? const Color(0xFF151A20) : const Color(0xFFF7F9FC);
+    final border = isDark ? const Color(0xFF2A3540) : const Color(0xFFE4EBF2);
+
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 30),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  textDirection: TextDirection.ltr,
+                  children: [
+                    const Text(
+                      'FLUMEA',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: navy,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.arrow_forward_rounded),
+                      color: navy,
+                      tooltip: 'رجوع',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Container(
+                      width: 68,
+                      height: 68,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEAF3FF),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.mail_outline_rounded,
+                        color: blue,
+                        size: 35,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'تواصل معنا',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: primary,
+                              fontSize: 30,
+                              height: 1.05,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            'نحن هنا لمساعدتك والإجابة عن استفساراتك.',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: secondary,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'أرسل لنا رسالتك',
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: primary,
+                          fontSize: 21,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _subjectController,
+                        textAlign: TextAlign.right,
+                        textDirection: TextDirection.rtl,
+                        decoration: InputDecoration(
+                          labelText: 'الموضوع',
+                          hintText: 'اكتب موضوع الرسالة',
+                          filled: true,
+                          fillColor: fieldFill,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(color: border),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(color: border),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      TextField(
+                        controller: _messageController,
+                        minLines: 6,
+                        maxLines: 8,
+                        textAlign: TextAlign.right,
+                        textDirection: TextDirection.rtl,
+                        decoration: InputDecoration(
+                          labelText: 'الرسالة',
+                          hintText: 'اكتب رسالتك هنا...',
+                          alignLabelWithHint: true,
+                          filled: true,
+                          fillColor: fieldFill,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(color: border),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(color: border),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      SizedBox(
+                        height: 54,
+                        child: FilledButton.icon(
+                          onPressed: _sendMessage,
+                          icon: const Icon(Icons.send_rounded),
+                          label: const Text(
+                            'إرسال الرسالة',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: blue,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(17),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF17212B)
+                        : const Color(0xFFEFFBF8),
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF2A3540)
+                          : const Color(0xFFD7F1EA),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.support_agent_rounded,
+                        color: Color(0xFF20B995),
+                        size: 32,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'خصوصيتك مهمة بالنسبة لنا، لذلك لا تكتب كلمات المرور أو أي بيانات حساسة داخل الرسالة.',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            color: primary,
+                            fontSize: 13.5,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
