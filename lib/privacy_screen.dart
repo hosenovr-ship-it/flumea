@@ -2035,29 +2035,36 @@ class PrivacyPolicyDetailsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 22),
                 Row(
+                  textDirection: TextDirection.rtl,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text(
-                            'سياسة الخصوصية',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              color: primary,
-                              fontSize: 31,
-                              fontWeight: FontWeight.w800,
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              'سياسة الخصوصية',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: primary,
+                                fontSize: 31,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Text(
-                            'تعرف على كيفية جمع واستخدام وحماية بياناتك.',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              color: secondary,
-                              fontSize: 15,
-                              height: 1.4,
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              'تعرف على كيفية جمع واستخدام وحماية بياناتك.',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: secondary,
+                                fontSize: 15,
+                                height: 1.4,
+                              ),
                             ),
                           ),
                         ],
