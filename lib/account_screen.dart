@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'bottom_navigation.dart';
 import 'theme_controller.dart';
 import 'services/flumea_notification_service.dart';
+import 'privacy_screen.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -958,6 +959,13 @@ class _AccountScreenState extends State<AccountScreen> {
                       subtitle: 'إدارة بياناتك',
                       color: navy,
                       last: true,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const PrivacyScreen(),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
