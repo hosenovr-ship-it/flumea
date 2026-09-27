@@ -266,43 +266,45 @@ class PrivacyScreen extends StatelessWidget {
   }
 
   static void _showDeleteNotice(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text(
-          'حذف الحساب',
-          textAlign: TextAlign.left,
-        ),
-        content: const Text(
-          'هل أنت متأكد من حذف حسابك؟\\n\\nسيتم حذف حسابك وبياناتك المرتبطة به نهائيًا، ولا يمكن التراجع عن هذا الإجراء.',
-          textAlign: TextAlign.left,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('إلغاء'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFE45B5B),
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () async {
-              Navigator.of(dialogContext).pop();
-              await _deleteAccount(context);
-            },
-            child: const Text('نعم، حذف الحساب'),
-          ),
-        ],
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const DeleteAccountScreen(),
       ),
     );
   }
+}
 
-  static Future<void> _deleteAccount(BuildContext context) async {
+
+class DeleteAccountScreen extends StatefulWidget {
+  const DeleteAccountScreen({super.key});
+
+  @override
+  State<DeleteAccountScreen> createState() => _DeleteAccountScreenState();
+}
+
+class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
+  final TextEditingController _passwordController = TextEditingController();
+
+  bool _obscurePassword = true;
+  bool _isDeleting = false;
+
+  static const Color danger = Color(0xFFE45B5B);
+  static const Color dangerLight = Color(0xFFFFE9E9);
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _deleteAccount() async {
     final messenger = ScaffoldMessenger.of(context);
+    final password = _passwordController.text.trim();
+    final client = Supabase.instance.client;
+    final user = client.auth.currentUser;
+    final email = user?.email;
 
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) {
+    if (user == null || email == null || email.isEmpty) {
       messenger
         ..hideCurrentSnackBar()
         ..showSnackBar(
@@ -317,58 +319,68 @@ class PrivacyScreen extends StatelessWidget {
       return;
     }
 
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (loadingContext) => const PopScope(
-        canPop: false,
-        child: AlertDialog(
-          content: Row(
-            textDirection: TextDirection.rtl,
-            children: [
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                ),
-              ),
-              SizedBox(width: 18),
-              Expanded(
-                child: Text(
-                  'جارٍ حذف الحساب...',
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
+    if (password.isEmpty) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text(
+              'أدخل كلمة المرور لتأكيد حذف الحساب.',
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.right,
+            ),
           ),
-        ),
-      ),
-    );
+        );
+      return;
+    }
+
+    setState(() => _isDeleting = true);
 
     try {
-      await Supabase.instance.client.rpc('delete_my_account');
+      // نتحقق من كلمة المرور أولًا قبل تنفيذ الحذف النهائي.
+      await client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
 
-      if (!context.mounted) return;
+      await client.rpc('delete_my_account');
+
+      if (!mounted) return;
 
       try {
-        await Supabase.instance.client.auth.signOut(
-          scope: SignOutScope.local,
-        );
+        await client.auth.signOut(scope: SignOutScope.local);
       } catch (_) {}
 
-      if (!context.mounted) return;
+      if (!mounted) return;
 
-      Navigator.of(context).pop();
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute<void>(
           builder: (_) => const LoginScreen(),
         ),
         (route) => false,
       );
+    } on AuthException catch (error) {
+      if (!mounted) return;
+
+      setState(() => _isDeleting = false);
+
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              error.message.isNotEmpty
+                  ? 'كلمة المرور غير صحيحة.'
+                  : 'تعذر التحقق من كلمة المرور.',
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.right,
+            ),
+          ),
+        );
     } on PostgrestException catch (error) {
-      if (!context.mounted) return;
-      Navigator.of(context).pop();
+      if (!mounted) return;
+
+      setState(() => _isDeleting = false);
 
       messenger
         ..hideCurrentSnackBar()
@@ -384,8 +396,9 @@ class PrivacyScreen extends StatelessWidget {
           ),
         );
     } catch (_) {
-      if (!context.mounted) return;
-      Navigator.of(context).pop();
+      if (!mounted) return;
+
+      setState(() => _isDeleting = false);
 
       messenger
         ..hideCurrentSnackBar()
@@ -399,6 +412,543 @@ class PrivacyScreen extends StatelessWidget {
           ),
         );
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primary = theme.colorScheme.onSurface;
+    final secondary = isDark
+        ? const Color(0xFFB8C2CC)
+        : const Color(0xFF8290A2);
+
+    final background = theme.scaffoldBackgroundColor;
+    final card = isDark ? const Color(0xFF121820) : Colors.white;
+    final border = isDark
+        ? const Color(0xFF2A3540)
+        : const Color(0xFFE4EBF2);
+
+    final dangerCard = isDark ? const Color(0xFF24181B) : const Color(0xFFFFFBFB);
+    final dangerBorder =
+        isDark ? const Color(0xFF5A3038) : const Color(0xFFFFD0D0);
+    final inputFill = isDark ? const Color(0xFF1A2028) : const Color(0xFFF5F7FA);
+
+    return Scaffold(
+      backgroundColor: background,
+      body: SafeArea(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 18, 24, 28),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  textDirection: TextDirection.ltr,
+                  children: [
+                    Text(
+                      'FLUMEA',
+                      style: TextStyle(
+                        color: isDark ? const Color(0xFF6EA7E6) : PrivacyScreen.navy,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 4,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: _isDeleting
+                          ? null
+                          : () => Navigator.of(context).pop(),
+                      tooltip: 'رجوع',
+                      icon: Icon(
+                        Icons.arrow_forward,
+                        color: primary,
+                        size: 28,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // عنوان الصفحة
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 58,
+                      height: 58,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF3A2024)
+                            : dangerLight,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: const Icon(
+                        Icons.delete_outline_rounded,
+                        color: danger,
+                        size: 31,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'حذف الحساب',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              color: primary,
+                              fontSize: 31,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'حذف حسابك وجميع بياناتك نهائيًا.',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              color: secondary,
+                              fontSize: 15,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 28),
+
+                // تنبيه مهم
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF2A171A) : const Color(0xFFFFF2F2),
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(color: dangerBorder),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF6D2C35)
+                              : const Color(0xFFFFDCDC),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.priority_high_rounded,
+                          color: danger,
+                          size: 30,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'تنبيه مهم',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                color: isDark
+                                    ? const Color(0xFFFF8D8D)
+                                    : const Color(0xFFAA2D2D),
+                                fontSize: 21,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'سيتم حذف حسابك وبياناتك المرتبطة به نهائيًا، ولا يمكن التراجع عن هذا الإجراء.',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                color: primary,
+                                fontSize: 15,
+                                height: 1.6,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 22),
+
+                // البيانات التي سيتم حذفها
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+                  decoration: BoxDecoration(
+                    color: card,
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(color: border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'ما الذي سيتم حذفه؟',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          color: primary,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 7),
+                      Text(
+                        'سيتم حذف جميع بياناتك بشكل نهائي، بما في ذلك:',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          color: secondary,
+                          fontSize: 15,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _DeleteDataRow(
+                        icon: Icons.person_outline_rounded,
+                        iconColor: PrivacyScreen.blue,
+                        iconBackground: isDark
+                            ? const Color(0xFF1C3857)
+                            : PrivacyScreen.lightBlue,
+                        title: 'بيانات ملفك الشخصي',
+                        subtitle: 'الاسم، الصورة، ومعلومات الحساب.',
+                        primary: primary,
+                        secondary: secondary,
+                        border: border,
+                      ),
+                      _DeleteDataRow(
+                        icon: Icons.task_alt_rounded,
+                        iconColor: PrivacyScreen.mint,
+                        iconBackground: isDark
+                            ? const Color(0xFF12372F)
+                            : const Color(0xFFE4F8F3),
+                        title: 'الخطط والمهام والعادات',
+                        subtitle: 'جميع خططك اليومية وسجلات العادات.',
+                        primary: primary,
+                        secondary: secondary,
+                        border: border,
+                      ),
+                      _DeleteDataRow(
+                        icon: Icons.restaurant_outlined,
+                        iconColor: const Color(0xFFE79B22),
+                        iconBackground: isDark
+                            ? const Color(0xFF3A2D18)
+                            : const Color(0xFFFFF5DF),
+                        title: 'سجلات الطعام والسعرات',
+                        subtitle: 'جميع وجباتك وسجلات السعرات الغذائية.',
+                        primary: primary,
+                        secondary: secondary,
+                        border: border,
+                      ),
+                      _DeleteDataRow(
+                        icon: Icons.bar_chart_rounded,
+                        iconColor: const Color(0xFF8067D8),
+                        iconBackground: isDark
+                            ? const Color(0xFF2D2746)
+                            : const Color(0xFFF0ECFF),
+                        title: 'الأهداف وإحصائيات التقدم',
+                        subtitle: 'جميع أهدافك وإحصائياتك.',
+                        primary: primary,
+                        secondary: secondary,
+                        border: border,
+                      ),
+                      _DeleteDataRow(
+                        icon: Icons.description_outlined,
+                        iconColor: isDark
+                            ? const Color(0xFFB8C2CC)
+                            : const Color(0xFF7B8794),
+                        iconBackground: isDark
+                            ? const Color(0xFF252B33)
+                            : const Color(0xFFF0F3F6),
+                        title: 'جميع البيانات الأخرى',
+                        subtitle: 'أي بيانات أخرى مرتبطة بحسابك في FLUMEA.',
+                        primary: primary,
+                        secondary: secondary,
+                        border: border,
+                        showDivider: false,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 22),
+
+                // تأكيد كلمة المرور
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
+                  decoration: BoxDecoration(
+                    color: card,
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(color: border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF1C3857)
+                                  : PrivacyScreen.lightBlue,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: const Icon(
+                              Icons.lock_outline_rounded,
+                              color: PrivacyScreen.blue,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'تأكيد كلمة المرور',
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                    color: primary,
+                                    fontSize: 19,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'أدخل كلمة مرور حسابك لتأكيد الحذف.',
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                    color: secondary,
+                                    fontSize: 14,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        textDirection: TextDirection.ltr,
+                        textAlign: TextAlign.right,
+                        enabled: !_isDeleting,
+                        decoration: InputDecoration(
+                          hintText: 'كلمة المرور',
+                          hintTextDirection: TextDirection.rtl,
+                          filled: true,
+                          fillColor: inputFill,
+                          prefixIcon: IconButton(
+                            onPressed: _isDeleting
+                                ? null
+                                : () {
+                                    setState(() {
+                                      _obscurePassword = !_obscurePassword;
+                                    });
+                                  },
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: isDark
+                                  ? const Color(0xFF9AA7B4)
+                                  : const Color(0xFF8290A2),
+                            ),
+                          ),
+                          suffixIcon: const Icon(
+                            Icons.lock_outline_rounded,
+                            color: PrivacyScreen.blue,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            borderSide: BorderSide(
+                              color: border,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            borderSide: const BorderSide(
+                              color: PrivacyScreen.blue,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 22),
+
+                // أزرار الإجراء
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 58,
+                        child: OutlinedButton(
+                          onPressed: _isDeleting
+                              ? null
+                              : () => Navigator.of(context).pop(),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: isDark
+                                ? const Color(0xFF1B2940)
+                                : const Color(0xFFEAF1FF),
+                            foregroundColor:
+                                isDark ? const Color(0xFFBFD9FF) : PrivacyScreen.navy,
+                            side: BorderSide.none,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: const Text(
+                            'إلغاء',
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: SizedBox(
+                        height: 58,
+                        child: FilledButton(
+                          onPressed: _isDeleting ? null : _deleteAccount,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: danger,
+                            foregroundColor: Colors.white,
+                            disabledBackgroundColor:
+                                isDark ? const Color(0xFF673238) : const Color(0xFFF3A5A5),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: _isDeleting
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'نعم، حذف الحساب',
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DeleteDataRow extends StatelessWidget {
+  const _DeleteDataRow({
+    required this.icon,
+    required this.iconColor,
+    required this.iconBackground,
+    required this.title,
+    required this.subtitle,
+    required this.primary,
+    required this.secondary,
+    required this.border,
+    this.showDivider = true,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBackground;
+  final String title;
+  final String subtitle;
+  final Color primary;
+  final Color secondary;
+  final Color border;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        border: showDivider
+            ? Border(bottom: BorderSide(color: border))
+            : null,
+      ),
+      child: Row(
+        textDirection: TextDirection.rtl,
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: iconBackground,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              icon,
+              color: iconColor,
+              size: 27,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    color: primary,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    color: secondary,
+                    fontSize: 13.5,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
