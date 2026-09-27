@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -115,6 +116,42 @@ class FlumeaNotificationService {
     return true;
   }
 
+
+
+  /// يعرض رسالة أنيقة من أعلى الصفحة داخل التطبيق بدل SnackBar السفلي.
+  static void showTopMessage(
+    BuildContext context,
+    String message, {
+    bool? success,
+  }) {
+    if (!context.mounted) return;
+
+    final overlay = Overlay.maybeOf(context);
+    if (overlay == null) return;
+
+    final isError = message.contains('تعذر') ||
+        message.contains('خطأ') ||
+        message.contains('فشل');
+    final isSuccess = success ?? !isError;
+
+    late final OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (overlayContext) => _FlumeaTopMessage(
+        message: message,
+        success: isSuccess,
+        onDismiss: () {
+          if (entry.mounted) entry.remove();
+        },
+      ),
+    );
+
+    overlay.insert(entry);
+
+    Future<void>.delayed(const Duration(seconds: 3), () {
+      if (entry.mounted) entry.remove();
+    });
+  }
+
   Future<bool> _isEnabled(FlumeaNotificationType type) async {
     if (type == FlumeaNotificationType.general) return true;
 
@@ -132,5 +169,155 @@ class FlumeaNotificationService {
       case FlumeaNotificationType.general:
         return true;
     }
+  }
+}
+
+
+class _FlumeaTopMessage extends StatefulWidget {
+  const _FlumeaTopMessage({
+    required this.message,
+    required this.success,
+    required this.onDismiss,
+  });
+
+  final String message;
+  final bool success;
+  final VoidCallback onDismiss;
+
+  @override
+  State<_FlumeaTopMessage> createState() => _FlumeaTopMessageState();
+}
+
+class _FlumeaTopMessageState extends State<_FlumeaTopMessage>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<Offset> _slide;
+  late final Animation<double> _fade;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+      reverseDuration: const Duration(milliseconds: 180),
+    );
+    _slide = Tween<Offset>(
+      begin: const Offset(0, -1.15),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    ));
+    _fade = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+    );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = isDark
+        ? const Color(0xFF171C23)
+        : const Color(0xFFFFFFFF);
+    final foreground = isDark
+        ? const Color(0xFFF4F7FA)
+        : const Color(0xFF15263B);
+    final accent = widget.success
+        ? const Color(0xFF19B77A)
+        : const Color(0xFFE85D5D);
+
+    return Positioned(
+      top: MediaQuery.of(context).padding.top + 10,
+      left: 18,
+      right: 18,
+      child: IgnorePointer(
+        ignoring: false,
+        child: FadeTransition(
+          opacity: _fade,
+          child: SlideTransition(
+            position: _slide,
+            child: Material(
+              color: Colors.transparent,
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: GestureDetector(
+                  onTap: widget.onDismiss,
+                  child: Container(
+                    constraints: const BoxConstraints(minHeight: 58),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 15,
+                      vertical: 11,
+                    ),
+                    decoration: BoxDecoration(
+                      color: background,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: accent.withValues(alpha: 0.18),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.16),
+                          blurRadius: 22,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: accent.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            widget.success
+                                ? Icons.check_rounded
+                                : Icons.error_outline_rounded,
+                            color: accent,
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(width: 11),
+                        Expanded(
+                          child: Text(
+                            widget.message,
+                            textAlign: TextAlign.right,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: foreground,
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w700,
+                              height: 1.35,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.close_rounded,
+                          size: 18,
+                          color: foreground.withValues(alpha: 0.45),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
