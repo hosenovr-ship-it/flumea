@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'bottom_navigation.dart';
 import 'services/task_service.dart';
 import 'services/habit_service.dart';
+import 'services/flumea_notification_service.dart';
 
 class PlanScreen extends StatefulWidget {
   const PlanScreen({super.key});
@@ -461,6 +462,14 @@ class _PlanScreenState extends State<PlanScreen> {
         id: id,
         completed: newValue,
       );
+
+      if (newValue) {
+        await FlumeaNotificationService.instance.show(
+          title: 'تم إكمال العادة اليومية! 🎯',
+          body: 'أحسنت! استمر على هذا التقدم.',
+          type: FlumeaNotificationType.habit,
+        );
+      }
     } catch (error) {
       if (!mounted) {
         return;
@@ -599,6 +608,14 @@ class _PlanScreenState extends State<PlanScreen> {
         id: id,
         completed: newValue,
       );
+
+      if (newValue) {
+        await FlumeaNotificationService.instance.show(
+          title: 'تم إكمال المهمة! 📝',
+          body: 'أحسنت! استمر في تنفيذ مهامك اليومية.',
+          type: FlumeaNotificationType.task,
+        );
+      }
     } catch (error) {
       if (!mounted) {
         return;
@@ -719,6 +736,12 @@ class _PlanScreenState extends State<PlanScreen> {
           ),
         ),
       );
+
+      await FlumeaNotificationService.instance.show(
+        title: 'تمت إعادة المهمة',
+        body: 'يمكنك تنفيذ المهمة مرة أخرى الآن.',
+      );
+
     } catch (error) {
       if (!mounted) {
         return;
@@ -2124,6 +2147,14 @@ class _PlanScreenState extends State<PlanScreen> {
                                                 ),
                                               ),
                                             );
+
+                                            await FlumeaNotificationService
+                                                .instance
+                                                .show(
+                                              title: 'لديك مهمة جديدة! 📝',
+                                              body: 'حان وقت تنفيذ مهمتك التالية.',
+                                              type: FlumeaNotificationType.task,
+                                            );
                                           } catch (error) {
                                             if (!mounted) {
                                               return;
@@ -2779,6 +2810,12 @@ class _PlanScreenState extends State<PlanScreen> {
                                       'تم حفظ العادة بنجاح ✅',
                                     ),
                                   ),
+                                );
+
+                                await FlumeaNotificationService.instance.show(
+                                  title: 'تذكير بالعادات 📈',
+                                  body: 'تمت إضافة عادة جديدة إلى خطتك اليومية.',
+                                  type: FlumeaNotificationType.habit,
                                 );
                               } catch (error) {
                                 if (!mounted) {
