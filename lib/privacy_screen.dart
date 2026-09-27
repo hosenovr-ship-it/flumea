@@ -75,11 +75,11 @@ class PrivacyScreen extends StatelessWidget {
                     const SizedBox(width: 14),
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'الخصوصية',
-                            textAlign: TextAlign.right,
+                            textAlign: TextAlign.left,
                             style: TextStyle(
                               color: primary,
                               fontSize: 31,
@@ -89,7 +89,7 @@ class PrivacyScreen extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             'تحكم في بياناتك وأمان حسابك وخصوصيتك',
-                            textAlign: TextAlign.right,
+                            textAlign: TextAlign.left,
                             style: TextStyle(
                               color: secondary,
                               fontSize: 15,
@@ -180,11 +180,11 @@ class PrivacyScreen extends StatelessWidget {
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'بياناتك آمنة معنا',
-                              textAlign: TextAlign.right,
+                              textAlign: TextAlign.left,
                               style: TextStyle(
                                 color: primary,
                                 fontSize: 19,
@@ -194,7 +194,7 @@ class PrivacyScreen extends StatelessWidget {
                             const SizedBox(height: 6),
                             Text(
                               'نحرص على حماية بياناتك الشخصية وفق أعلى معايير الأمان والخصوصية.',
-                              textAlign: TextAlign.right,
+                              textAlign: TextAlign.left,
                               style: TextStyle(
                                 color: secondary,
                                 fontSize: 14,
@@ -219,8 +219,8 @@ class PrivacyScreen extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(title, textAlign: TextAlign.right),
-        content: Text(message, textAlign: TextAlign.right),
+        title: Text(title, textAlign: TextAlign.left),
+        content: Text(message, textAlign: TextAlign.left),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
@@ -235,10 +235,10 @@ class PrivacyScreen extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('حذف الحساب', textAlign: TextAlign.right),
+        title: const Text('حذف الحساب', textAlign: TextAlign.left),
         content: const Text(
           'حذف الحساب إجراء نهائي. لن ننفذه الآن حتى نتأكد من إعداد آلية الحذف الآمنة وربطها بقاعدة البيانات.',
-          textAlign: TextAlign.right,
+          textAlign: TextAlign.left,
         ),
         actions: [
           TextButton(
@@ -302,11 +302,11 @@ class _PrivacyOption extends StatelessWidget {
               const Spacer(),
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      textAlign: TextAlign.right,
+                      textAlign: TextAlign.left,
                       style: TextStyle(
                         color: primary,
                         fontSize: 19,
@@ -316,7 +316,7 @@ class _PrivacyOption extends StatelessWidget {
                     const SizedBox(height: 5),
                     Text(
                       subtitle,
-                      textAlign: TextAlign.right,
+                      textAlign: TextAlign.left,
                       style: TextStyle(
                         color: secondary,
                         fontSize: 14,
