@@ -211,13 +211,7 @@ class _PlanScreenState extends State<PlanScreen> {
         _isLoadingTasks = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر تحميل المهام: $error',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تعذر تحميل المهام: $error');
     }
   }
 
@@ -331,13 +325,7 @@ class _PlanScreenState extends State<PlanScreen> {
         _isLoadingTasks = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر إنشاء المهام الأولية: $error',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تعذر إنشاء المهام الأولية: $error');
     }
   }
   // ============================================================
@@ -394,13 +382,7 @@ class _PlanScreenState extends State<PlanScreen> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر تحميل العادات: $error',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تعذر تحميل العادات: $error');
     }
   }
 
@@ -479,13 +461,7 @@ class _PlanScreenState extends State<PlanScreen> {
         habits[index]['completed'] = completed;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر تحديث العادة: $error',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تعذر تحديث العادة: $error');
     }
   }
 
@@ -523,13 +499,7 @@ class _PlanScreenState extends State<PlanScreen> {
         habits[index]['completed'] = oldValue;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر إعادة العادة: $error',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تعذر إعادة العادة: $error');
     }
   }
 
@@ -567,13 +537,7 @@ class _PlanScreenState extends State<PlanScreen> {
         habits.insert(index, removedHabit);
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر حذف العادة: $error',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تعذر حذف العادة: $error');
     }
   }
 
@@ -625,13 +589,7 @@ class _PlanScreenState extends State<PlanScreen> {
         tasks[index]['completed'] = oldValue;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر تحديث المهمة: $error',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تعذر تحديث المهمة: $error');
     }
   }
 
@@ -665,13 +623,7 @@ class _PlanScreenState extends State<PlanScreen> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تم حذف المهمة',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تم حذف المهمة');
     } catch (error) {
       if (!mounted) {
         return;
@@ -684,13 +636,7 @@ class _PlanScreenState extends State<PlanScreen> {
         );
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر حذف المهمة: $error',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تعذر حذف المهمة: $error');
     }
   }
 
@@ -729,13 +675,7 @@ class _PlanScreenState extends State<PlanScreen> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تمت إعادة المهمة',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تمت إعادة المهمة');
 
       await FlumeaNotificationService.instance.show(
         title: 'تمت إعادة المهمة',
@@ -751,13 +691,7 @@ class _PlanScreenState extends State<PlanScreen> {
         tasks[index]['completed'] = oldValue;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر إعادة المهمة: $error',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تعذر إعادة المهمة: $error');
     }
   }
 
@@ -2076,14 +2010,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                               nameController.text.trim();
 
                                           if (name.isEmpty) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  'اكتب اسم المهمة أولاً',
-                                                ),
-                                              ),
-                                            );
+                                            FlumeaNotificationService.showTopMessage(context, 'اكتب اسم المهمة أولاً');
                                             return;
                                           }
 
@@ -2139,14 +2066,7 @@ class _PlanScreenState extends State<PlanScreen> {
 
                                             Navigator.of(dialogContext).pop();
 
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  'تم حفظ المهمة بنجاح ✅',
-                                                ),
-                                              ),
-                                            );
+                                            FlumeaNotificationService.showTopMessage(context, 'تم حفظ المهمة بنجاح ✅');
 
                                             await FlumeaNotificationService
                                                 .instance
@@ -2164,14 +2084,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                               _isSavingTask = false;
                                             });
 
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  'تعذر حفظ المهمة: $error',
-                                                ),
-                                              ),
-                                            );
+                                            FlumeaNotificationService.showTopMessage(context, 'تعذر حفظ المهمة: $error');
                                           }
                                         },
                                   icon: Icon(
@@ -2804,13 +2717,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                   return;
                                 }
 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'تم حفظ العادة بنجاح ✅',
-                                    ),
-                                  ),
-                                );
+                                FlumeaNotificationService.showTopMessage(context, 'تم حفظ العادة بنجاح ✅');
 
                                 await FlumeaNotificationService.instance.show(
                                   title: 'تذكير بالعادات 📈',
@@ -2826,13 +2733,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                   _isSavingHabit = false;
                                 });
 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'تعذر حفظ العادة: $error',
-                                    ),
-                                  ),
-                                );
+                                FlumeaNotificationService.showTopMessage(context, 'تعذر حفظ العادة: $error');
                               }
                             },
                       style: ElevatedButton.styleFrom(
