@@ -594,7 +594,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                     children: [
                       Text(
                         'ما الذي سيتم حذفه؟',
-                        textAlign: TextAlign.left,
+                        textAlign: TextAlign.right,
                         style: TextStyle(
                           color: primary,
                           fontSize: 22,
@@ -604,7 +604,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                       const SizedBox(height: 7),
                       Text(
                         'سيتم حذف جميع بياناتك بشكل نهائي، بما في ذلك:',
-                        textAlign: TextAlign.left,
+                        textAlign: TextAlign.right,
                         style: TextStyle(
                           color: secondary,
                           fontSize: 15,
