@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'bottom_navigation.dart';
 import 'theme_controller.dart';
+import 'services/flumea_notification_service.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -33,9 +33,6 @@ class _AccountScreenState extends State<AccountScreen> {
   bool _taskNotifications = true;
   bool _achievementNotifications = true;
   bool _waterNotifications = true;
-
-  OverlayEntry? _notificationOverlay;
-  Timer? _notificationTimer;
 
   @override
   void initState() {
@@ -354,75 +351,18 @@ class _AccountScreenState extends State<AccountScreen> {
     await prefs.setBool(key, value);
   }
 
-  @override
-  void dispose() {
-    _notificationTimer?.cancel();
-    _notificationOverlay?.remove();
-    _notificationOverlay = null;
-    super.dispose();
-  }
-
-  void _showFlumeaNotification({
+  Future<void> _showFlumeaNotification({
     required String title,
     required String message,
     required IconData icon,
     required Color accent,
-  }) {
-    if (!mounted) return;
-
-    _notificationTimer?.cancel();
-    _notificationOverlay?.remove();
-
-    final overlay = Overlay.of(context);
-    late OverlayEntry entry;
-
-    entry = OverlayEntry(
-      builder: (overlayContext) {
-        final top = MediaQuery.of(overlayContext).padding.top + 12;
-
-        return Positioned(
-          top: top,
-          left: 12,
-          right: 12,
-          child: Material(
-            color: Colors.transparent,
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: 1),
-                duration: const Duration(milliseconds: 280),
-                curve: Curves.easeOutCubic,
-                builder: (context, value, child) {
-                  return Opacity(
-                    opacity: value,
-                    child: Transform.translate(
-                      offset: Offset(0, -18 * (1 - value)),
-                      child: child,
-                    ),
-                  );
-                },
-                child: _FlumeaNotificationCard(
-                  title: title,
-                  message: message,
-                  icon: icon,
-                  accent: accent,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
+  }) async {
+    await FlumeaNotificationService.instance.show(
+      title: title,
+      body: message,
+      type: FlumeaNotificationType.general,
+      payload: 'icon=${icon.codePoint};accent=${accent.value}',
     );
-
-    _notificationOverlay = entry;
-    overlay.insert(entry);
-
-    _notificationTimer = Timer(const Duration(seconds: 4), () {
-      if (_notificationOverlay == entry) {
-        entry.remove();
-        _notificationOverlay = null;
-      }
-    });
   }
 
   Future<void> _showNotifications() async {
@@ -1220,206 +1160,4 @@ class _AccountScreenState extends State<AccountScreen> {
       ),
     );
   }
-}
-
-class _FlumeaNotificationCard extends StatelessWidget {
-  const _FlumeaNotificationCard({
-    required this.title,
-    required this.message,
-    required this.icon,
-    required this.accent,
-  });
-
-  final String title;
-  final String message;
-  final IconData icon;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minHeight: 94, maxWidth: 520),
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.97),
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.16),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        textDirection: TextDirection.rtl,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const _FlumeaMiniLogo(),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Row(
-                  textDirection: TextDirection.rtl,
-                  children: [
-                    const Text(
-                      'FLUMEA',
-                      style: TextStyle(
-                        color: Color(0xFF5E6B7A),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  title,
-                  textAlign: TextAlign.right,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Color(0xFF101820),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  message,
-                  textAlign: TextAlign.right,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Color(0xFF718096),
-                    fontSize: 12.5,
-                    height: 1.25,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 50,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'الآن',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Color(0xFF6F7B89),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Container(
-                  width: 45,
-                  height: 45,
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.13),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, color: accent, size: 24),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FlumeaMiniLogo extends StatelessWidget {
-  const _FlumeaMiniLogo();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 48,
-      height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FBFF),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE4EDF5)),
-      ),
-      child: const CustomPaint(
-        painter: _FlumeaLogoPainter(),
-        size: Size(32, 30),
-      ),
-    );
-  }
-}
-
-class _FlumeaLogoPainter extends CustomPainter {
-  const _FlumeaLogoPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final strokeWidth = size.height * 0.16;
-
-    final paintTop = Paint()
-      ..color = const Color(0xFF18D79B)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final paintMiddle = Paint()
-      ..color = const Color(0xFF16BFE7)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final paintBottom = Paint()
-      ..color = const Color(0xFF1787F2)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    Path wave(double y, double curve) {
-      final path = Path();
-      path.moveTo(size.width * 0.08, y);
-      path.cubicTo(
-        size.width * 0.28,
-        y,
-        size.width * 0.35,
-        y,
-        size.width * 0.48,
-        y - curve,
-      );
-      path.cubicTo(
-        size.width * 0.60,
-        y - curve * 1.55,
-        size.width * 0.70,
-        y - curve,
-        size.width * 0.92,
-        y - curve,
-      );
-      return path;
-    }
-
-    canvas.drawPath(wave(size.height * 0.20, size.height * 0.06), paintTop);
-    canvas.drawPath(
-      wave(size.height * 0.50, size.height * 0.06),
-      paintMiddle,
-    );
-    canvas.drawPath(
-      wave(size.height * 0.80, size.height * 0.06),
-      paintBottom,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _FlumeaLogoPainter oldDelegate) => false;
 }
