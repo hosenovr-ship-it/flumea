@@ -695,8 +695,6 @@ class _AccountScreenState extends State<AccountScreen> {
 
     final confirmed = await showDialog<bool>(
       context: context,
-      barrierDismissible: true,
-      barrierColor: Colors.black54,
       builder: (dialogContext) {
         final isDark = Theme.of(dialogContext).brightness == Brightness.dark;
         final surface = Theme.of(dialogContext).colorScheme.surface;
@@ -706,112 +704,95 @@ class _AccountScreenState extends State<AccountScreen> {
 
         return Directionality(
           textDirection: TextDirection.rtl,
-          child: Dialog(
-            backgroundColor: Colors.transparent,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
-              decoration: BoxDecoration(
-                color: surface,
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: isDark
-                      ? const Color(0xFF2A3540)
-                      : const Color(0xFFE4EBF2),
+          child: AlertDialog(
+            backgroundColor: surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+            ),
+            contentPadding: const EdgeInsets.fromLTRB(24, 22, 24, 10),
+            titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+            title: Column(
+              children: [
+                Container(
+                  width: 66,
+                  height: 66,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFE7E7),
+                    borderRadius: BorderRadius.circular(21),
+                  ),
+                  child: const Icon(
+                    Icons.logout_rounded,
+                    color: Color(0xFFD93B3B),
+                    size: 32,
+                  ),
                 ),
+                const SizedBox(height: 16),
+                Text(
+                  'تسجيل الخروج',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: primary,
+                    fontSize: 23,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+            content: Text(
+              'هل أنت متأكد أنك تريد تسجيل الخروج؟\nيمكنك تسجيل الدخول مرة أخرى في أي وقت.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: secondary,
+                fontSize: 14.5,
+                height: 1.6,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+            ),
+            actionsPadding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+            actions: [
+              Row(
                 children: [
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFE7E7),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Icon(
-                      Icons.logout_rounded,
-                      color: Color(0xFFD93B3B),
-                      size: 32,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'تسجيل الخروج',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: primary,
-                      fontSize: 23,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'هل أنت متأكد أنك تريد تسجيل الخروج من حسابك؟',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: secondary,
-                      fontSize: 14.5,
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () =>
-                              Navigator.of(dialogContext).pop(false),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: primary,
-                            side: BorderSide(
-                              color: isDark
-                                  ? const Color(0xFF3A4652)
-                                  : const Color(0xFFDDE5EC),
-                            ),
-                            minimumSize: const Size.fromHeight(50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          child: const Text(
-                            'إلغاء',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(false),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: blue,
+                        side: BorderSide(
+                          color: isDark
+                              ? const Color(0xFF3B4B5B)
+                              : const Color(0xFFD9E4EF),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: FilledButton(
-                          onPressed: () =>
-                              Navigator.of(dialogContext).pop(true),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFFD93B3B),
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size.fromHeight(50),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          child: const Text(
-                            'تسجيل الخروج',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                      child: const Text(
+                        'البقاء',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(true),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFFD93B3B),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                    ],
+                      child: const Text(
+                        'تسجيل الخروج',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
+            ],
           ),
         );
       },
@@ -1270,6 +1251,12 @@ class _AccountScreenState extends State<AccountScreen> {
                       size: 27,
                     ),
                   ),
+                  const SizedBox(width: 10),
+                  const Icon(
+                    Icons.chevron_left,
+                    color: Color(0xFF718096),
+                    size: 27,
+                  ),
                   const Spacer(),
                   Expanded(
                     child: Column(
@@ -1302,12 +1289,6 @@ class _AccountScreenState extends State<AccountScreen> {
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(
-                    Icons.chevron_left,
-                    color: Color(0xFF718096),
-                    size: 27,
                   ),
                 ]
               : [
@@ -1365,7 +1346,6 @@ class _AccountScreenState extends State<AccountScreen> {
                   ),
                 ],
         ),
-
       ),
     );
   }
@@ -1601,14 +1581,12 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
     super.dispose();
   }
 
-  Future<void> _sendMessage() async {
+  void _sendMessage() {
     final message = _messageController.text.trim();
     if (message.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('اكتب رسالتك أولاً.'),
-          behavior: SnackBarBehavior.floating,
-        ),
+      _showContactSnackBar(
+        'اكتب رسالتك أولاً.',
+        icon: Icons.edit_note_rounded,
       );
       return;
     }
@@ -1617,12 +1595,61 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
     _messageController.clear();
     _subjectController.clear();
 
-    await FlumeaNotificationService.instance.show(
-      title: 'تم إرسال رسالتك! ❤️',
-      body: 'شكرًا لتواصلك معنا، سنراجع رسالتك قريبًا.',
-      type: FlumeaNotificationType.general,
-      payload: 'contact_message_sent',
+    _showContactSnackBar(
+      'تم إرسال رسالتك بنجاح! شكرًا لتواصلك معنا. ❤️',
+      icon: Icons.check_circle_rounded,
     );
+  }
+
+  void _showContactSnackBar(String message, {required IconData icon}) {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          backgroundColor: const Color(0xFF102A4C),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          duration: const Duration(seconds: 3),
+          content: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    message,
+                    textAlign: TextAlign.right,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w600,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: const Color(0xFF55D6B2),
+                    size: 22,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
   }
 
   @override
