@@ -695,32 +695,123 @@ class _AccountScreenState extends State<AccountScreen> {
 
     final confirmed = await showDialog<bool>(
       context: context,
+      barrierDismissible: true,
+      barrierColor: Colors.black54,
       builder: (dialogContext) {
+        final isDark = Theme.of(dialogContext).brightness == Brightness.dark;
+        final surface = Theme.of(dialogContext).colorScheme.surface;
+        final primary = Theme.of(dialogContext).colorScheme.onSurface;
+        final secondary =
+            isDark ? const Color(0xFFB8C2CC) : const Color(0xFF718096);
+
         return Directionality(
           textDirection: TextDirection.rtl,
-          child: AlertDialog(
-            title: const Text(
-              'تسجيل الخروج',
-              textAlign: TextAlign.right,
-            ),
-            content: const Text(
-              'هل أنت متأكد أنك تريد تسجيل الخروج من حسابك؟',
-              textAlign: TextAlign.right,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: const Text('إلغاء'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(dialogContext).pop(true),
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFFD93B3B),
-                  foregroundColor: Colors.white,
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+              decoration: BoxDecoration(
+                color: surface,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: isDark
+                      ? const Color(0xFF2A3540)
+                      : const Color(0xFFE4EBF2),
                 ),
-                child: const Text('نعم، تسجيل الخروج'),
               ),
-            ],
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFE7E7),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Icon(
+                      Icons.logout_rounded,
+                      color: Color(0xFFD93B3B),
+                      size: 32,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'تسجيل الخروج',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: primary,
+                      fontSize: 23,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'هل أنت متأكد أنك تريد تسجيل الخروج من حسابك؟',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: secondary,
+                      fontSize: 14.5,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () =>
+                              Navigator.of(dialogContext).pop(false),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: primary,
+                            side: BorderSide(
+                              color: isDark
+                                  ? const Color(0xFF3A4652)
+                                  : const Color(0xFFDDE5EC),
+                            ),
+                            minimumSize: const Size.fromHeight(50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: const Text(
+                            'إلغاء',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: () =>
+                              Navigator.of(dialogContext).pop(true),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFFD93B3B),
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size.fromHeight(50),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: const Text(
+                            'تسجيل الخروج',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         );
       },
@@ -1018,6 +1109,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       title: 'مركز المساعدة',
                       subtitle: 'الأسئلة الشائعة',
                       color: blue,
+                      iconOnLeft: true,
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -1032,6 +1124,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       subtitle: 'نحن هنا لمساعدتك',
                       color: navy,
                       last: true,
+                      iconOnLeft: true,
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -1133,6 +1226,7 @@ class _AccountScreenState extends State<AccountScreen> {
     required String subtitle,
     required Color color,
     bool last = false,
+    bool iconOnLeft = false,
     VoidCallback? onTap,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -1161,61 +1255,117 @@ class _AccountScreenState extends State<AccountScreen> {
         child: Row(
           textDirection: TextDirection.ltr,
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.chevron_left,
-              color: Color(0xFF718096),
-              size: 27,
-            ),
-            const Spacer(),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    child: Text(
-                      title,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: primary,
-                      ),
+          children: iconOnLeft
+              ? [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: iconBackground,
+                      borderRadius: BorderRadius.circular(17),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: color,
+                      size: 27,
                     ),
                   ),
-                  const SizedBox(height: 3),
-                  SizedBox(
-                    width: double.infinity,
-                    child: Text(
-                      subtitle,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: secondary,
-                      ),
+                  const Spacer(),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          child: Text(
+                            title,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: primary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        SizedBox(
+                          width: double.infinity,
+                          child: Text(
+                            subtitle,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: secondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(
+                    Icons.chevron_left,
+                    color: Color(0xFF718096),
+                    size: 27,
+                  ),
+                ]
+              : [
+                  const Icon(
+                    Icons.chevron_left,
+                    color: Color(0xFF718096),
+                    size: 27,
+                  ),
+                  const Spacer(),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          child: Text(
+                            title,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: primary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        SizedBox(
+                          width: double.infinity,
+                          child: Text(
+                            subtitle,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: secondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: iconBackground,
+                      borderRadius: BorderRadius.circular(17),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: color,
+                      size: 27,
                     ),
                   ),
                 ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: iconBackground,
-                borderRadius: BorderRadius.circular(17),
-              ),
-              child: Icon(
-                icon,
-                color: color,
-                size: 27,
-              ),
-            ),
-          ],
         ),
+
       ),
     );
   }
@@ -1451,7 +1601,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
     super.dispose();
   }
 
-  void _sendMessage() {
+  Future<void> _sendMessage() async {
     final message = _messageController.text.trim();
     if (message.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1467,11 +1617,11 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
     _messageController.clear();
     _subjectController.clear();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('تم استلام رسالتك، شكرًا لتواصلك معنا. ❤️'),
-        behavior: SnackBarBehavior.floating,
-      ),
+    await FlumeaNotificationService.instance.show(
+      title: 'تم إرسال رسالتك! ❤️',
+      body: 'شكرًا لتواصلك معنا، سنراجع رسالتك قريبًا.',
+      type: FlumeaNotificationType.general,
+      payload: 'contact_message_sent',
     );
   }
 
