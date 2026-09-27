@@ -247,25 +247,6 @@ class PrivacyScreen extends StatelessWidget {
     );
   }
 
-  static void _showInfo(
-    BuildContext context,
-    String title,
-    String message,
-  ) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(title, textAlign: TextAlign.left),
-        content: Text(message, textAlign: TextAlign.left),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('حسنًا'),
-          ),
-        ],
-      ),
-    );
-  }
 
   static void _showDeleteNotice(BuildContext context) {
     Navigator.of(context).push(
