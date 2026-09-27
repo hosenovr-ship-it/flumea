@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'bottom_navigation.dart';
+import 'services/flumea_notification_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
@@ -86,6 +88,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
         _data = data;
         _loading = false;
       });
+
+      await _maybeNotifyAchievement(data);
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -93,6 +97,31 @@ class _ProgressScreenState extends State<ProgressScreen> {
         _data = _ProgressData.empty();
         _error = null;
       });
+    }
+  }
+
+  Future<void> _maybeNotifyAchievement(_ProgressData data) async {
+    if (data.achievements.isEmpty) return;
+
+    final achievement = data.achievements.first;
+    if (achievement.title == 'ابدأ تسجيل إنجازاتك') return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final today = _dateKey(DateTime.now());
+    final key = 'flumea_progress_notification_$today';
+    final fingerprint = '${achievement.title}|${achievement.subtitle}';
+
+    if (prefs.getString(key) == fingerprint) return;
+
+    final shown = await FlumeaNotificationService.instance.show(
+      title: 'إنجاز جديد! 🏆',
+      body: achievement.title,
+      type: FlumeaNotificationType.achievement,
+      requestPermission: false,
+    );
+
+    if (shown) {
+      await prefs.setString(key, fingerprint);
     }
   }
 
