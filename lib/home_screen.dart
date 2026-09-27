@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'bottom_navigation.dart';
 import 'food_tracking_screen.dart';
+import 'services/flumea_notification_service.dart';
 
 class HomeScreen extends StatefulWidget {
   static const darkBlue = Color(0xFF102A4C);
@@ -186,6 +187,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       await _supabase.from('tasks').update({'completed': newValue}).eq('id', id);
+
+      if (newValue) {
+        await FlumeaNotificationService.instance.show(
+          title: 'تم إكمال المهمة! 📝',
+          body: 'أحسنت! استمر في تنفيذ مهامك اليومية.',
+          type: FlumeaNotificationType.task,
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() => task['completed'] = oldValue);
@@ -239,6 +248,14 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       } catch (logError) {
         debugPrint('FLUMEA optional habit log error: $logError');
+      }
+
+      if (newValue) {
+        await FlumeaNotificationService.instance.show(
+          title: 'تم إكمال العادة اليومية! 🎯',
+          body: 'أحسنت! استمر على هذا التقدم.',
+          type: FlumeaNotificationType.habit,
+        );
       }
     } catch (e) {
       if (!mounted) return;
