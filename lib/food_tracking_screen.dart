@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'services/flumea_notification_service.dart';
 
 class FoodTrackingScreen extends StatefulWidget {
   const FoodTrackingScreen({super.key});
@@ -115,8 +116,10 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('تعذر تحميل الطعام: $error')),
+      FlumeaNotificationService.showTopMessage(
+        context,
+        'تعذر تحميل الطعام: $error',
+        success: false,
       );
     }
   }
@@ -208,8 +211,10 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
     final user = _supabase.auth.currentUser;
     if (user == null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يجب تسجيل الدخول أولاً لحفظ الطعام.')),
+      FlumeaNotificationService.showTopMessage(
+        context,
+        'يجب تسجيل الدخول أولاً لحفظ الطعام.',
+        success: false,
       );
       return;
     }
@@ -243,14 +248,21 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
         _saving = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم حفظ الطعام بنجاح ❤️‍🔥')),
+      FlumeaNotificationService.showTopMessage(
+        context,
+        'تم حفظ الطعام بنجاح ❤️‍🔥',
+      );
+      await FlumeaNotificationService.instance.show(
+        title: 'تم تسجيل الطعام 🍽️',
+        body: 'تمت إضافة ${item.name} إلى ${meal.title} بنجاح.',
       );
     } catch (error) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('تعذر حفظ الطعام: $error')),
+      FlumeaNotificationService.showTopMessage(
+        context,
+        'تعذر حفظ الطعام: $error',
+        success: false,
       );
     }
   }
@@ -265,13 +277,20 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
       await _supabase.from('food_logs').delete().eq('id', item.id!);
       if (!mounted) return;
       setState(() => meal.items.removeWhere((food) => food.id == item.id));
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم حذف الوجبة.')),
+      FlumeaNotificationService.showTopMessage(
+        context,
+        'تم حذف الوجبة 🗑️',
+      );
+      await FlumeaNotificationService.instance.show(
+        title: 'تم حذف الوجبة 🗑️',
+        body: 'تم حذف ${item.name} من ${meal.title}.',
       );
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('تعذر حذف الوجبة: $error')),
+      FlumeaNotificationService.showTopMessage(
+        context,
+        'تعذر حذف الوجبة: $error',
+        success: false,
       );
     }
   }
@@ -312,13 +331,20 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
         }
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم تعديل الوجبة بنجاح ❤️‍🔥')),
+      FlumeaNotificationService.showTopMessage(
+        context,
+        'تم تعديل الوجبة بنجاح ❤️‍🔥',
+      );
+      await FlumeaNotificationService.instance.show(
+        title: 'تم تعديل الوجبة ✏️',
+        body: 'تم تحديث ${result.name} في ${meal.title} بنجاح.',
       );
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('تعذر تعديل الوجبة: $error')),
+      FlumeaNotificationService.showTopMessage(
+        context,
+        'تعذر تعديل الوجبة: $error',
+        success: false,
       );
     }
   }
@@ -923,11 +949,25 @@ class _FoodTrackingScreenState extends State<FoodTrackingScreen> {
           .from('food_logs')
           .update({'selected': nextValue})
           .eq('id', item.id!);
+
+      if (nextValue) {
+        await FlumeaNotificationService.instance.show(
+          title: 'تم تسجيل الوجبة ضمن السعرات 🔥',
+          body: 'تم احتساب ${item.name} ضمن سعرات اليوم.',
+        );
+      } else {
+        await FlumeaNotificationService.instance.show(
+          title: 'تم إلغاء تسجيل الوجبة',
+          body: 'تم استبعاد ${item.name} من سعرات اليوم.',
+        );
+      }
     } catch (error) {
       if (!mounted) return;
       setState(() => item.selected = !nextValue);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('تعذر حفظ حالة الطعام: $error')),
+      FlumeaNotificationService.showTopMessage(
+        context,
+        'تعذر حفظ حالة الطعام: $error',
+        success: false,
       );
     }
   }
@@ -1045,8 +1085,10 @@ class _AddCustomFoodScreenState extends State<AddCustomFoodScreen> {
     final amount = amountController.text.trim();
 
     if (name.isEmpty || calories == null || amount.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('أكمل معلومات الطعام أولاً')),
+      FlumeaNotificationService.showTopMessage(
+        context,
+        'أكمل معلومات الطعام أولاً',
+        success: false,
       );
       return;
     }
