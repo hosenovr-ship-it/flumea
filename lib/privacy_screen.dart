@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'login_screen.dart';
 
 class PrivacyScreen extends StatelessWidget {
   const PrivacyScreen({super.key});
@@ -268,9 +269,12 @@ class PrivacyScreen extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('حذف الحساب', textAlign: TextAlign.left),
+        title: const Text(
+          'حذف الحساب',
+          textAlign: TextAlign.left,
+        ),
         content: const Text(
-          'حذف الحساب إجراء نهائي. لن ننفذه الآن حتى نتأكد من إعداد آلية الحذف الآمنة وربطها بقاعدة البيانات.',
+          'هل أنت متأكد من حذف حسابك؟\\n\\nسيتم حذف حسابك وبياناتك المرتبطة به نهائيًا، ولا يمكن التراجع عن هذا الإجراء.',
           textAlign: TextAlign.left,
         ),
         actions: [
@@ -278,9 +282,123 @@ class PrivacyScreen extends StatelessWidget {
             onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('إلغاء'),
           ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFE45B5B),
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              await _deleteAccount(context);
+            },
+            child: const Text('نعم، حذف الحساب'),
+          ),
         ],
       ),
     );
+  }
+
+  static Future<void> _deleteAccount(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text(
+              'لم يتم العثور على الحساب الحالي.',
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.right,
+            ),
+          ),
+        );
+      return;
+    }
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (loadingContext) => const PopScope(
+        canPop: false,
+        child: AlertDialog(
+          content: Row(
+            textDirection: TextDirection.rtl,
+            children: [
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                ),
+              ),
+              SizedBox(width: 18),
+              Expanded(
+                child: Text(
+                  'جارٍ حذف الحساب...',
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    try {
+      await Supabase.instance.client.rpc('delete_my_account');
+
+      if (!context.mounted) return;
+
+      try {
+        await Supabase.instance.client.auth.signOut(
+          scope: SignOutScope.local,
+        );
+      } catch (_) {}
+
+      if (!context.mounted) return;
+
+      Navigator.of(context).pop();
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute<void>(
+          builder: (_) => const LoginScreen(),
+        ),
+        (route) => false,
+      );
+    } on PostgrestException catch (error) {
+      if (!context.mounted) return;
+      Navigator.of(context).pop();
+
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              error.message.isNotEmpty
+                  ? error.message
+                  : 'تعذر حذف الحساب. حاول مرة أخرى.',
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.right,
+            ),
+          ),
+        );
+    } catch (_) {
+      if (!context.mounted) return;
+      Navigator.of(context).pop();
+
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text(
+              'حدث خطأ أثناء حذف الحساب. حاول مرة أخرى.',
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.right,
+            ),
+          ),
+        );
+    }
   }
 }
 
