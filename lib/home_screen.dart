@@ -198,9 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => task['completed'] = oldValue);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تعذر حفظ حالة المهمة')),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تعذر حفظ حالة المهمة');
     }
   }
 
@@ -260,9 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _habitCompleted[habitId] = oldValue);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تعذر حفظ حالة العادة')),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تعذر حفظ حالة العادة');
     }
   }
 
@@ -903,11 +899,6 @@ class _HomeTask extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: Container(
         constraints: const BoxConstraints(minHeight: 51),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: Theme.of(context).dividerColor),
-          ),
-        ),
         child: Row(
           children: [
             Container(
