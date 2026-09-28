@@ -67,34 +67,40 @@ class _PlanScreenState extends State<PlanScreen> {
 
   Future<void> _loadActiveDays() async {
     try {
-      final allTasks = await _taskService.getTasks();
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        if (mounted) {
+          setState(() => _activeDays = 0);
+        }
+        return;
+      }
+
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       final sunday = today.subtract(Duration(days: today.weekday % 7));
       final saturday = sunday.add(const Duration(days: 6));
+
+      // يوم النشاط الحقيقي = يوم داخل هذا الأسبوع أُنجزت فيه مهمة واحدة على الأقل.
+      // نقرأه مباشرة من Supabase حتى لا نعتمد على قائمة المهام المعروضة حاليًا.
+      final response = await _supabase
+          .from('tasks')
+          .select('due_date')
+          .eq('user_id', userId)
+          .eq('completed', true)
+          .gte('due_date', _dateKey(sunday))
+          .lte('due_date', _dateKey(saturday));
+
       final activeDates = <String>{};
-
-      for (final task in allTasks) {
-        if (!_safeBool(task['completed'])) {
-          continue;
-        }
-
-        final dueDateText = _safeString(task['due_date']);
-        final dueDate = DateTime.tryParse(dueDateText);
-        if (dueDate == null) {
-          continue;
-        }
-
-        final day = DateTime(dueDate.year, dueDate.month, dueDate.day);
-        if (!day.isBefore(sunday) && !day.isAfter(saturday)) {
-          activeDates.add(_dateKey(day));
+      for (final row in response) {
+        final date = _safeString(row['due_date']);
+        if (date.isNotEmpty) {
+          activeDates.add(date.length >= 10 ? date.substring(0, 10) : date);
         }
       }
 
       if (!mounted) return;
-
       setState(() {
-        _activeDays = activeDates.length;
+        _activeDays = activeDates.length.clamp(0, 7);
       });
     } catch (_) {
       // لا نوقف الصفحة إذا تعذر حساب الأيام النشطة.
@@ -1349,7 +1355,7 @@ class _PlanScreenState extends State<PlanScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    'المهام اليوم',
+                    'مهام اليوم',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight:
@@ -1504,16 +1510,7 @@ class _PlanScreenState extends State<PlanScreen> {
         horizontal: 16,
         vertical: 14,
       ),
-      decoration:
-          BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: Color(
-              0xFFE8EDF2,
-            ),
-          ),
-        ),
-      ),
+      decoration: const BoxDecoration(),
       child: Row(
         children: [
           GestureDetector(
@@ -1727,7 +1724,7 @@ class _PlanScreenState extends State<PlanScreen> {
       onSelected:
           (value) {
         if (value == 'reset') {
-          _resetTask(index);
+          _showResetTaskDialog(index);
         }
 
         if (value == 'delete') {
@@ -1781,6 +1778,108 @@ class _PlanScreenState extends State<PlanScreen> {
     );
   }
     // ============================================================
+  // معلومات المهمة عند إعادة المهمة
+  // ============================================================
+
+  void _showResetTaskDialog(int index) {
+    if (index < 0 || index >= tasks.length) return;
+
+    final task = tasks[index];
+    final title = _safeString(task['title'], fallback: 'مهمة جديدة');
+    final time = _safeString(task['time'], fallback: 'بدون وقت');
+    final tag = _safeString(task['tag'], fallback: 'عام');
+    final emoji = _safeString(task['emoji'], fallback: '📝');
+    final description = _safeString(task['description'], fallback: 'مهمة جديدة');
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (dialogContext) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            backgroundColor: _surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(26),
+            ),
+            title: Text(
+              'معلومات المهمة',
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: navy,
+                fontSize: 23,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _infoRow('اسم المهمة', title),
+                _infoRow('الوقت', time),
+                _infoRow('التصنيف', '$tag  $emoji'),
+                if (description.isNotEmpty) _infoRow('الوصف', description),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text('إلغاء', style: TextStyle(color: _subtle)),
+              ),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  Navigator.pop(dialogContext);
+                  await _resetTask(index);
+                },
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('إعادة المهمة'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: blue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _infoRow(String label, String value) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: _inputBackground,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: _inputBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            label,
+            style: TextStyle(color: _subtle, fontSize: 11),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: navy,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
   // نافذة إضافة مهمة جديدة
   // ============================================================
 
@@ -2153,29 +2252,37 @@ class _PlanScreenState extends State<PlanScreen> {
                                           });
 
                                           try {
-                                            final newTask =
-                                                await _taskService.addTask(
-                                              title: name,
-                                              description: '',
-                                              time: time.isEmpty
+                                            final userId =
+                                                _supabase.auth.currentUser?.id;
+                                            if (userId == null) {
+                                              throw Exception('يجب تسجيل الدخول أولاً');
+                                            }
+
+                                            // حفظ المهمة في طلب واحد فقط لتقليل التأخير.
+                                            final response = await _supabase
+                                                .from('tasks')
+                                                .insert({
+                                              'user_id': userId,
+                                              'title': name,
+                                              'description': '',
+                                              'time': time.isEmpty
                                                   ? 'بدون وقت'
                                                   : time,
-                                              tag: category.isEmpty
+                                              'tag': category.isEmpty
                                                   ? 'عام'
                                                   : category,
-                                              emoji: emoji.isEmpty
+                                              'emoji': emoji.isEmpty
                                                   ? '📝'
                                                   : emoji,
-                                              color: '#1478D4',
-                                              completed: false,
-                                            );
+                                              'color': '#1478D4',
+                                              'completed': false,
+                                              'due_date': _dateKey(_selectedDate),
+                                            })
+                                                .select()
+                                                .single();
 
-                                            await _saveTaskDate(
-                                              _safeString(newTask['id']),
-                                              _selectedDate,
-                                            );
-                                            newTask['due_date'] =
-                                                _dateKey(_selectedDate);
+                                            final newTask =
+                                                Map<String, dynamic>.from(response);
 
                                             if (!mounted) {
                                               return;
@@ -2488,16 +2595,7 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
             onSelected: (value) async {
               if (value == 'reset') {
-                setState(() {
-                  _weeklyGoals[index]['current'] = 0;
-                });
-                await _saveWeeklyGoals();
-                if (mounted) {
-                  FlumeaNotificationService.showTopMessage(
-                    context,
-                    'تمت إعادة الهدف',
-                  );
-                }
+                _showResetGoalDialog(index);
               } else if (value == 'delete') {
                 setState(() {
                   _weeklyGoals.removeAt(index);
@@ -2578,6 +2676,77 @@ class _PlanScreenState extends State<PlanScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showResetGoalDialog(int index) {
+    if (index < 0 || index >= _weeklyGoals.length) return;
+
+    final goal = _weeklyGoals[index];
+    final title = _safeString(goal['title'], fallback: 'هدف أسبوعي');
+    final current = (goal['current'] as int?) ?? 0;
+    final total = (goal['total'] as int?) ?? 1;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            backgroundColor: _surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(26),
+            ),
+            title: Text(
+              'معلومات الهدف',
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: navy,
+                fontSize: 23,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _infoRow('اسم الهدف', title),
+                _infoRow('التقدم', '$current/$total'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text('إلغاء', style: TextStyle(color: _subtle)),
+              ),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  setState(() {
+                    _weeklyGoals[index]['current'] = 0;
+                  });
+                  await _saveWeeklyGoals();
+                  if (!dialogContext.mounted) return;
+                  Navigator.pop(dialogContext);
+                  if (mounted) {
+                    FlumeaNotificationService.showTopMessage(
+                      context,
+                      'تمت إعادة الهدف',
+                    );
+                  }
+                },
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('إعادة الهدف'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: blue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -2778,6 +2947,77 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   // ============================================================
+  // معلومات العادة عند إعادة العادة
+  // ============================================================
+
+  void _showResetHabitDialog(String id) {
+    final index = habits.indexWhere(
+      (habit) => _safeString(habit['id']) == id,
+    );
+    if (index == -1) return;
+
+    final habit = habits[index];
+    final title = _safeString(habit['title'], fallback: 'عادة');
+    final description = _safeString(habit['description']);
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            backgroundColor: _surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(26),
+            ),
+            title: Text(
+              'معلومات العادة',
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: navy,
+                fontSize: 23,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _infoRow('اسم العادة', title),
+                if (description.isNotEmpty) _infoRow('الوصف', description),
+                _infoRow(
+                  'الحالة',
+                  _safeBool(habit['completed']) ? 'مكتملة' : 'غير مكتملة',
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text('إلغاء', style: TextStyle(color: _subtle)),
+              ),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  Navigator.pop(dialogContext);
+                  await _resetHabit(id);
+                },
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('إعادة العادة'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: blue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // ============================================================
   // بطاقة العادة
   // ============================================================
 
@@ -2847,7 +3087,7 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
             onSelected: (value) async {
               if (value == 'reset') {
-                await _resetHabit(id);
+                _showResetHabitDialog(id);
               } else if (value == 'delete') {
                 await _deleteHabit(id);
               }
