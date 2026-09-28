@@ -1457,7 +1457,6 @@ class FlumeaEditProfileScreen extends StatefulWidget {
 class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
   static const Color navy = Color(0xFF102A4C);
   static const Color blue = Color(0xFF1976D2);
-  static const Color mint = Color(0xFF20B995);
 
   final SupabaseClient _supabase = Supabase.instance.client;
   final ImagePicker _picker = ImagePicker();
@@ -1770,7 +1769,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                                 ? Image.network(
                                     _avatarUrl!,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => Icon(
+                                    errorBuilder: (_, _, _) => Icon(
                                       Icons.person_rounded,
                                       size: 68,
                                       color: isDark ? Colors.white70 : navy,
@@ -2168,7 +2167,6 @@ class FlumeaContactScreen extends StatefulWidget {
 }
 
 class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
-  static const Color navy = Color(0xFF102A4C);
   static const Color blue = Color(0xFF1976D2);
 
   final TextEditingController _messageController = TextEditingController();
