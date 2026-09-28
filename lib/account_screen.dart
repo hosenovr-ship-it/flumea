@@ -194,12 +194,6 @@ class _AccountScreenState extends State<AccountScreen> {
         _uploadingAvatar = false;
       });
 
-      _showFlumeaNotification(
-        title: 'تم تحديث صورة الحساب!',
-        message: 'أحسنت! تم حفظ الصورة بنجاح.',
-        icon: Icons.check_rounded,
-        accent: const Color(0xFF20C997),
-      );
     } on StorageException catch (e) {
       if (!mounted) return;
       setState(() => _uploadingAvatar = false);
@@ -263,12 +257,6 @@ class _AccountScreenState extends State<AccountScreen> {
     if (!mounted || result == null || result.trim().isEmpty) return;
     await _loadProfile();
 
-    _showFlumeaNotification(
-      title: 'تم تحديث الملف الشخصي!',
-      message: 'تم حفظ بياناتك بنجاح.',
-      icon: Icons.check_rounded,
-      accent: const Color(0xFF20C997),
-    );
   }
 
   Future<void> _loadNotificationPreferences() async {
@@ -570,14 +558,13 @@ class _AccountScreenState extends State<AccountScreen> {
   Future<void> _showAppearance() async {
     final currentMode = FlumeaThemeController.mode.value;
 
-    final selectedMode = await showModalBottomSheet<ThemeMode>(
+    final selectedMode = await showDialog<ThemeMode>(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        final isDark = Theme.of(sheetContext).brightness == Brightness.dark;
-        final surface = Theme.of(sheetContext).colorScheme.surface;
-        final primary = Theme.of(sheetContext).colorScheme.onSurface;
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        final isDark = Theme.of(dialogContext).brightness == Brightness.dark;
+        final surface = Theme.of(dialogContext).colorScheme.surface;
+        final primary = Theme.of(dialogContext).colorScheme.onSurface;
         final secondary = isDark
             ? const Color(0xFFB8C2CC)
             : const Color(0xFF8290A2);
@@ -598,7 +585,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
           return InkWell(
             borderRadius: BorderRadius.circular(20),
-            onTap: () => Navigator.of(sheetContext).pop(mode),
+            onTap: () => Navigator.of(dialogContext).pop(mode),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
               padding: const EdgeInsets.all(14),
@@ -665,94 +652,95 @@ class _AccountScreenState extends State<AccountScreen> {
           );
         }
 
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(18, 12, 18, 20),
-              decoration: BoxDecoration(
-                color: surface,
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: border),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x26000000),
-                    blurRadius: 28,
-                    offset: Offset(0, -8),
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 20),
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: border),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x33000000),
+                  blurRadius: 30,
+                  offset: Offset(0, 12),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 42,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: secondary.withValues(alpha: 0.45),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 42,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: secondary.withValues(alpha: 0.45),
-                      borderRadius: BorderRadius.circular(20),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  textDirection: TextDirection.rtl,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF1B2B3D)
+                            : lightBlue,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.palette_outlined,
+                        color: blue,
+                        size: 27,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
-                    textDirection: TextDirection.rtl,
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: lightBlue,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Icon(
-                          Icons.palette_outlined,
-                          color: blue,
-                          size: 27,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              'المظهر',
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                color: primary,
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'المظهر',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: primary,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
                             ),
-                            Text(
-                              'اختر الشكل الذي يناسب تجربتك في FLUMEA',
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                color: secondary,
-                                fontSize: 12.5,
-                              ),
+                          ),
+                          Text(
+                            'اختر الشكل الذي يناسب تجربتك في FLUMEA',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: secondary,
+                              fontSize: 12.5,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  option(
-                    mode: ThemeMode.light,
-                    icon: Icons.light_mode_rounded,
-                    title: 'فاتح',
-                    subtitle: 'ألوان واضحة ومشرقة',
-                  ),
-                  const SizedBox(height: 10),
-                  option(
-                    mode: ThemeMode.dark,
-                    icon: Icons.dark_mode_rounded,
-                    title: 'داكن',
-                    subtitle: 'مظهر هادئ ومريح للعين',
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                option(
+                  mode: ThemeMode.light,
+                  icon: Icons.light_mode_rounded,
+                  title: 'فاتح',
+                  subtitle: 'ألوان واضحة ومشرقة',
+                ),
+                const SizedBox(height: 10),
+                option(
+                  mode: ThemeMode.dark,
+                  icon: Icons.dark_mode_rounded,
+                  title: 'داكن',
+                  subtitle: 'مظهر هادئ ومريح للعين',
+                ),
+              ],
             ),
           ),
         );
@@ -762,21 +750,6 @@ class _AccountScreenState extends State<AccountScreen> {
     if (selectedMode == null || selectedMode == currentMode) return;
 
     await FlumeaThemeController.setMode(selectedMode);
-
-    if (!mounted) return;
-
-    _showFlumeaNotification(
-      title: selectedMode == ThemeMode.dark
-          ? 'تم تفعيل الوضع الداكن!'
-          : 'تم تفعيل الوضع الفاتح!',
-      message: selectedMode == ThemeMode.dark
-          ? '🌙 تم حفظ اختيارك وسيبقى مفعّلًا.'
-          : '☀️ تم حفظ اختيارك وسيبقى مفعّلًا.',
-      icon: selectedMode == ThemeMode.dark
-          ? Icons.dark_mode_rounded
-          : Icons.light_mode_rounded,
-      accent: blue,
-    );
   }
 
   Future<void> _signOut() async {
@@ -921,30 +894,32 @@ class _AccountScreenState extends State<AccountScreen> {
                     textDirection: TextDirection.ltr,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'FLUMEA',
                         textAlign: TextAlign.left,
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
-                          color: navy,
+                          color: isDark ? const Color(0xFF6EA8FF) : navy,
                         ),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
-                          children: const [
+                          children: [
                             SizedBox(
                               width: double.infinity,
                               child: Text(
-                                'حسابي',
+                                'الحساب',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
                                   fontSize: 30,
                                   height: 1.05,
                                   fontWeight: FontWeight.bold,
-                                  color: navy,
+                                  color: isDark
+                                      ? const Color(0xFFF2F6FA)
+                                      : navy,
                                 ),
                               ),
                             ),
@@ -956,7 +931,9 @@ class _AccountScreenState extends State<AccountScreen> {
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: Color(0xFF7B8798),
+                                  color: isDark
+                                      ? const Color(0xFFB8C2CC)
+                                      : const Color(0xFF7B8798),
                                 ),
                               ),
                             ),
@@ -1012,7 +989,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                   ? Image.network(
                                       _avatarUrl!,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, error, stackTrace) => const Icon(
+                                      errorBuilder: (context, error, stackTrace) => const Icon(
                                         Icons.person,
                                         size: 58,
                                         color: navy,
@@ -1769,7 +1746,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                                 ? Image.network(
                                     _avatarUrl!,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) => Icon(
+                                    errorBuilder: (context, error, stackTrace) => Icon(
                                       Icons.person_rounded,
                                       size: 68,
                                       color: isDark ? Colors.white70 : navy,
