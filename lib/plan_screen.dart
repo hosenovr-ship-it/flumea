@@ -80,22 +80,58 @@ class _PlanScreenState extends State<PlanScreen> {
       final sunday = today.subtract(Duration(days: today.weekday % 7));
       final saturday = sunday.add(const Duration(days: 6));
 
-      // يوم النشاط الحقيقي = يوم داخل هذا الأسبوع أُنجزت فيه مهمة واحدة على الأقل.
-      // نقرأه مباشرة من Supabase حتى لا نعتمد على قائمة المهام المعروضة حاليًا.
-      final response = await _supabase
+      // يوم النشاط الحقيقي = أي يوم خلال هذا الأسبوع حدث فيه إنجاز فعلي.
+      final activeDates = <String>{};
+
+      final taskResponse = await _supabase
           .from('tasks')
-          .select('due_date')
+          .select('due_date, completed')
           .eq('user_id', userId)
           .eq('completed', true)
           .gte('due_date', _dateKey(sunday))
           .lte('due_date', _dateKey(saturday));
 
-      final activeDates = <String>{};
-      for (final row in response) {
+      for (final row in taskResponse) {
         final date = _safeString(row['due_date']);
         if (date.isNotEmpty) {
           activeDates.add(date.length >= 10 ? date.substring(0, 10) : date);
         }
+      }
+
+      // سجلات العادات تعطي التاريخ الحقيقي للإنجازات السابقة، إن كان الجدول موجوداً.
+      try {
+        final habitLogs = await _supabase
+            .from('habit_logs')
+            .select('*')
+            .eq('user_id', userId);
+
+        for (final row in habitLogs) {
+          final completed = row['completed'] == null
+              ? true
+              : _safeBool(row['completed']);
+          if (!completed) continue;
+
+          final rawDate = row['date'] ??
+              row['log_date'] ??
+              row['completed_at'] ??
+              row['created_at'] ??
+              row['updated_at'];
+          final dateText = _safeString(rawDate);
+          if (dateText.length >= 10) {
+            final date = dateText.substring(0, 10);
+            if (date.compareTo(_dateKey(sunday)) >= 0 &&
+                date.compareTo(_dateKey(saturday)) <= 0) {
+              activeDates.add(date);
+            }
+          }
+        }
+      } catch (_) {
+        // جدول habit_logs اختياري؛ لا نوقف حساب الأيام النشطة بسببه.
+      }
+
+      // إذا كانت عادة اليوم مكتملة الآن، فهذا نشاط حقيقي لليوم الحالي.
+      if (habits.any((habit) => _safeBool(habit['completed']))) {
+        activeDates.add(_dateKey(today));
       }
 
       if (!mounted) return;
@@ -486,6 +522,7 @@ class _PlanScreenState extends State<PlanScreen> {
             habits.add(_habitMap(habit));
           }
         });
+        await _loadActiveDays();
         return;
       }
 
@@ -495,6 +532,7 @@ class _PlanScreenState extends State<PlanScreen> {
           habits.add(_habitMap(habit));
         }
       });
+      await _loadActiveDays();
     } catch (error) {
       if (!mounted) {
         return;
@@ -562,6 +600,8 @@ class _PlanScreenState extends State<PlanScreen> {
         id: id,
         completed: newValue,
       );
+
+      await _loadActiveDays();
 
       if (newValue) {
         await FlumeaNotificationService.instance.show(
@@ -1784,67 +1824,10 @@ class _PlanScreenState extends State<PlanScreen> {
   void _showResetTaskDialog(int index) {
     if (index < 0 || index >= tasks.length) return;
 
-    final task = tasks[index];
-    final title = _safeString(task['title'], fallback: 'مهمة جديدة');
-    final time = _safeString(task['time'], fallback: 'بدون وقت');
-    final tag = _safeString(task['tag'], fallback: 'عام');
-    final emoji = _safeString(task['emoji'], fallback: '📝');
-    final description = _safeString(task['description'], fallback: 'مهمة جديدة');
-
-    showDialog(
-      context: context,
-      barrierColor: Colors.black54,
-      builder: (dialogContext) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: AlertDialog(
-            backgroundColor: _surface,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(26),
-            ),
-            title: Text(
-              'معلومات المهمة',
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                color: navy,
-                fontSize: 23,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _infoRow('اسم المهمة', title),
-                _infoRow('الوقت', time),
-                _infoRow('التصنيف', '$tag  $emoji'),
-                if (description.isNotEmpty) _infoRow('الوصف', description),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: Text('إلغاء', style: TextStyle(color: _subtle)),
-              ),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  Navigator.pop(dialogContext);
-                  await _resetTask(index);
-                },
-                icon: const Icon(Icons.refresh_rounded),
-                label: const Text('إعادة المهمة'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: blue,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+    final task = Map<String, dynamic>.from(tasks[index]);
+    _showAddTaskDialog(
+      initialTask: task,
+      taskIndex: index,
     );
   }
 
@@ -1883,13 +1866,25 @@ class _PlanScreenState extends State<PlanScreen> {
   // نافذة إضافة مهمة جديدة
   // ============================================================
 
-  void _showAddTaskDialog() {
-    final nameController = TextEditingController();
-    final timeController = TextEditingController();
-    final categoryController = TextEditingController();
-    final emojiController = TextEditingController();
+  void _showAddTaskDialog({
+    Map<String, dynamic>? initialTask,
+    int? taskIndex,
+  }) {
+    final nameController = TextEditingController(
+      text: _safeString(initialTask?['title']),
+    );
+    final timeController = TextEditingController(
+      text: _safeString(initialTask?['time']),
+    );
+    final categoryController = TextEditingController(
+      text: _safeString(initialTask?['tag']),
+    );
+    final emojiController = TextEditingController(
+      text: _safeString(initialTask?['emoji']),
+    );
 
-    String selectedCategory = '';
+    String selectedCategory = _safeString(initialTask?['tag']);
+    final isReset = initialTask != null && taskIndex != null;
 
     showDialog(
       context: context,
@@ -2258,13 +2253,11 @@ class _PlanScreenState extends State<PlanScreen> {
                                               throw Exception('يجب تسجيل الدخول أولاً');
                                             }
 
-                                            // حفظ المهمة في طلب واحد فقط لتقليل التأخير.
-                                            final response = await _supabase
-                                                .from('tasks')
-                                                .insert({
-                                              'user_id': userId,
+                                            final values = {
                                               'title': name,
-                                              'description': '',
+                                              'description': _safeString(
+                                                initialTask?['description'],
+                                              ),
                                               'time': time.isEmpty
                                                   ? 'بدون وقت'
                                                   : time,
@@ -2274,40 +2267,80 @@ class _PlanScreenState extends State<PlanScreen> {
                                               'emoji': emoji.isEmpty
                                                   ? '📝'
                                                   : emoji,
-                                              'color': '#1478D4',
                                               'completed': false,
-                                              'due_date': _dateKey(_selectedDate),
-                                            })
-                                                .select()
-                                                .single();
+                                            };
 
-                                            final newTask =
-                                                Map<String, dynamic>.from(response);
+                                            if (isReset) {
+                                              final id = _safeString(initialTask?['id']);
+                                              if (id.isEmpty) {
+                                                throw Exception('معرّف المهمة غير موجود');
+                                              }
 
-                                            if (!mounted) {
-                                              return;
+                                              final response = await _supabase
+                                                  .from('tasks')
+                                                  .update(values)
+                                                  .eq('id', id)
+                                                  .eq('user_id', userId)
+                                                  .select()
+                                                  .single();
+
+                                              final updatedTask =
+                                                  Map<String, dynamic>.from(response);
+
+                                              if (!mounted) return;
+
+                                              setState(() {
+                                                tasks[taskIndex!] = updatedTask;
+                                                _isSavingTask = false;
+                                              });
+
+                                              await _loadActiveDays();
+
+                                              if (!dialogContext.mounted) return;
+                                              Navigator.of(dialogContext).pop();
+
+                                              FlumeaNotificationService.showTopMessage(
+                                                context,
+                                                'تم تحديث المهمة وإعادتها بنجاح ✅',
+                                              );
+                                            } else {
+                                              final response = await _supabase
+                                                  .from('tasks')
+                                                  .insert({
+                                                'user_id': userId,
+                                                ...values,
+                                                'color': '#1478D4',
+                                                'due_date': _dateKey(_selectedDate),
+                                              })
+                                                  .select()
+                                                  .single();
+
+                                              final newTask =
+                                                  Map<String, dynamic>.from(response);
+
+                                              if (!mounted) return;
+
+                                              setState(() {
+                                                tasks.add(newTask);
+                                                _isSavingTask = false;
+                                              });
+
+                                              if (!dialogContext.mounted) return;
+                                              Navigator.of(dialogContext).pop();
+
+                                              FlumeaNotificationService.showTopMessage(
+                                                context,
+                                                'تم حفظ المهمة بنجاح ✅',
+                                              );
+
+                                              await FlumeaNotificationService
+                                                  .instance
+                                                  .show(
+                                                title: 'لديك مهمة جديدة! 📝',
+                                                body: 'حان وقت تنفيذ مهمتك التالية.',
+                                                type: FlumeaNotificationType.task,
+                                              );
                                             }
-
-                                            setState(() {
-                                              tasks.add(newTask);
-                                              _isSavingTask = false;
-                                            });
-
-                                            if (!dialogContext.mounted) {
-                                              return;
-                                            }
-
-                                            Navigator.of(dialogContext).pop();
-
-                                            FlumeaNotificationService.showTopMessage(context, 'تم حفظ المهمة بنجاح ✅');
-
-                                            await FlumeaNotificationService
-                                                .instance
-                                                .show(
-                                              title: 'لديك مهمة جديدة! 📝',
-                                              body: 'حان وقت تنفيذ مهمتك التالية.',
-                                              type: FlumeaNotificationType.task,
-                                            );
                                           } catch (error) {
                                             if (!mounted) {
                                               return;
@@ -2682,76 +2715,19 @@ class _PlanScreenState extends State<PlanScreen> {
   void _showResetGoalDialog(int index) {
     if (index < 0 || index >= _weeklyGoals.length) return;
 
-    final goal = _weeklyGoals[index];
-    final title = _safeString(goal['title'], fallback: 'هدف أسبوعي');
-    final current = (goal['current'] as int?) ?? 0;
-    final total = (goal['total'] as int?) ?? 1;
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: AlertDialog(
-            backgroundColor: _surface,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(26),
-            ),
-            title: Text(
-              'معلومات الهدف',
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                color: navy,
-                fontSize: 23,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _infoRow('اسم الهدف', title),
-                _infoRow('التقدم', '$current/$total'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: Text('إلغاء', style: TextStyle(color: _subtle)),
-              ),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  setState(() {
-                    _weeklyGoals[index]['current'] = 0;
-                  });
-                  await _saveWeeklyGoals();
-                  if (!dialogContext.mounted) return;
-                  Navigator.pop(dialogContext);
-                  if (mounted) {
-                    FlumeaNotificationService.showTopMessage(
-                      context,
-                      'تمت إعادة الهدف',
-                    );
-                  }
-                },
-                icon: const Icon(Icons.refresh_rounded),
-                label: const Text('إعادة الهدف'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: blue,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+    _showAddWeeklyGoalDialog(goalIndex: index);
   }
 
-  void _showAddWeeklyGoalDialog() {
-    final titleController = TextEditingController();
+  void _showAddWeeklyGoalDialog({
+    int? goalIndex,
+  }) {
+    final initialTitle = goalIndex != null &&
+            goalIndex >= 0 &&
+            goalIndex < _weeklyGoals.length
+        ? _safeString(_weeklyGoals[goalIndex]['title'])
+        : '';
+    final titleController = TextEditingController(text: initialTitle);
+    final isReset = goalIndex != null;
 
     showDialog(
       context: context,
@@ -2806,7 +2782,35 @@ class _PlanScreenState extends State<PlanScreen> {
               ElevatedButton.icon(
                 onPressed: () async {
                   final title = titleController.text.trim();
-                  if (title.isEmpty || _weeklyGoals.length >= 3) {
+                  if (title.isEmpty) {
+                    return;
+                  }
+
+                  if (isReset) {
+                    if (goalIndex! < 0 || goalIndex >= _weeklyGoals.length) {
+                      return;
+                    }
+
+                    setState(() {
+                      _weeklyGoals[goalIndex]['title'] = title;
+                      _weeklyGoals[goalIndex]['current'] = 0;
+                    });
+
+                    await _saveWeeklyGoals();
+
+                    if (!dialogContext.mounted) return;
+                    Navigator.pop(dialogContext);
+
+                    if (mounted) {
+                      FlumeaNotificationService.showTopMessage(
+                        context,
+                        'تم تحديث الهدف وإعادته بنجاح ✅',
+                      );
+                    }
+                    return;
+                  }
+
+                  if (_weeklyGoals.length >= 3) {
                     return;
                   }
 
@@ -2956,66 +2960,13 @@ class _PlanScreenState extends State<PlanScreen> {
     );
     if (index == -1) return;
 
-    final habit = habits[index];
-    final title = _safeString(habit['title'], fallback: 'عادة');
-    final description = _safeString(habit['description']);
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: AlertDialog(
-            backgroundColor: _surface,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(26),
-            ),
-            title: Text(
-              'معلومات العادة',
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                color: navy,
-                fontSize: 23,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _infoRow('اسم العادة', title),
-                if (description.isNotEmpty) _infoRow('الوصف', description),
-                _infoRow(
-                  'الحالة',
-                  _safeBool(habit['completed']) ? 'مكتملة' : 'غير مكتملة',
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: Text('إلغاء', style: TextStyle(color: _subtle)),
-              ),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  Navigator.pop(dialogContext);
-                  await _resetHabit(id);
-                },
-                icon: const Icon(Icons.refresh_rounded),
-                label: const Text('إعادة العادة'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: blue,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+    final habit = Map<String, dynamic>.from(habits[index]);
+    _showAddHabitDialog(
+      initialHabit: habit,
+      habitId: id,
     );
   }
+
 
   // ============================================================
   // بطاقة العادة
@@ -3157,8 +3108,14 @@ class _PlanScreenState extends State<PlanScreen> {
   // نافذة إضافة عادة
   // ============================================================
 
-  void _showAddHabitDialog() {
-    final nameController = TextEditingController();
+  void _showAddHabitDialog({
+    Map<String, dynamic>? initialHabit,
+    String? habitId,
+  }) {
+    final nameController = TextEditingController(
+      text: _safeString(initialHabit?['title']),
+    );
+    final isReset = initialHabit != null && habitId != null;
 
     showDialog(
       context: context,
@@ -3231,39 +3188,81 @@ class _PlanScreenState extends State<PlanScreen> {
                               });
 
                               try {
-                                final created =
-                                    await _habitService.addHabit(
-                                  name: name,
-                                  description: '',
-                                  completed: false,
-                                );
+                                if (isReset) {
+                                  final userId = _supabase.auth.currentUser?.id;
+                                  if (userId == null) {
+                                    throw Exception('يجب تسجيل الدخول أولاً');
+                                  }
 
-                                if (!mounted) {
-                                  return;
+                                  final response = await _supabase
+                                      .from('habits')
+                                      .update({
+                                        'name': name,
+                                        'completed': false,
+                                      })
+                                      .eq('id', habitId!)
+                                      .eq('user_id', userId)
+                                      .select()
+                                      .single();
+
+                                  final updated = _habitMap(
+                                    Map<String, dynamic>.from(response),
+                                  );
+
+                                  if (!mounted) return;
+
+                                  final index = habits.indexWhere(
+                                    (habit) =>
+                                        _safeString(habit['id']) == habitId,
+                                  );
+
+                                  setState(() {
+                                    if (index != -1) {
+                                      habits[index] = updated;
+                                    }
+                                    _isSavingHabit = false;
+                                  });
+
+                                  await _loadActiveDays();
+
+                                  if (!dialogContext.mounted) return;
+                                  Navigator.pop(dialogContext);
+
+                                  FlumeaNotificationService.showTopMessage(
+                                    context,
+                                    'تم تحديث العادة وإعادتها بنجاح ✅',
+                                  );
+                                } else {
+                                  final created =
+                                      await _habitService.addHabit(
+                                    name: name,
+                                    description: '',
+                                    completed: false,
+                                  );
+
+                                  if (!mounted) return;
+
+                                  setState(() {
+                                    habits.add(_habitMap(created));
+                                    _isSavingHabit = false;
+                                  });
+
+                                  if (!dialogContext.mounted) return;
+                                  Navigator.pop(dialogContext);
+
+                                  if (!mounted) return;
+
+                                  FlumeaNotificationService.showTopMessage(
+                                    context,
+                                    'تم حفظ العادة بنجاح ✅',
+                                  );
+
+                                  await FlumeaNotificationService.instance.show(
+                                    title: 'تذكير بالعادات 📈',
+                                    body: 'تمت إضافة عادة جديدة إلى خطتك اليومية.',
+                                    type: FlumeaNotificationType.habit,
+                                  );
                                 }
-
-                                setState(() {
-                                  habits.add(_habitMap(created));
-                                  _isSavingHabit = false;
-                                });
-
-                                if (!dialogContext.mounted) {
-                                  return;
-                                }
-
-                                Navigator.pop(dialogContext);
-
-                                if (!mounted) {
-                                  return;
-                                }
-
-                                FlumeaNotificationService.showTopMessage(context, 'تم حفظ العادة بنجاح ✅');
-
-                                await FlumeaNotificationService.instance.show(
-                                  title: 'تذكير بالعادات 📈',
-                                  body: 'تمت إضافة عادة جديدة إلى خطتك اليومية.',
-                                  type: FlumeaNotificationType.habit,
-                                );
                               } catch (error) {
                                 if (!mounted) {
                                   return;
