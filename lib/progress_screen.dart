@@ -170,13 +170,16 @@ class _ProgressScreenState extends State<ProgressScreen> {
           _asBool(log['completed']);
     }).toList();
 
-    final periodTasks = tasks.where((task) {
+    final periodAllTasks = tasks.where((task) {
       final date = _readDate(task['due_date']) ?? _readDate(task['created_at']);
       return date != null &&
           !date.isBefore(range.start) &&
-          !date.isAfter(range.end) &&
-          _asBool(task['completed']);
+          !date.isAfter(range.end);
     }).toList();
+
+    final periodTasks = periodAllTasks
+        .where((task) => _asBool(task['completed']))
+        .toList();
 
     // الصفحة الرئيسية تعتمد على قيمة completed الموجودة في habits،
     // بينما habit_logs يسجل إكمال كل يوم. نستخدم المصدرين معًا حتى
@@ -328,7 +331,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
         habits: habits,
         completedTodayIds: completedTodayIds,
       ),
-      timeSummary: _buildTimeSummary(tasks, range),
+      timeSummary: _buildTimeSummary(periodAllTasks, periodTasks),
     );
   }
 
@@ -469,10 +472,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     _DateRange range,
   ) {
     if (habits.isEmpty) {
-      return const _ChartData(
-        values: [0, 0, 0, 0, 0, 0, 0],
-        names: ['الصحة', 'الرياضة', 'الدراسة', 'القراءة', 'العمل', 'الماء', 'التأمل'],
-      );
+      return const _ChartData(values: [], names: []);
     }
 
     final sortedHabits = [...habits]..sort((a, b) {
@@ -481,7 +481,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
       return aDate.compareTo(bDate);
     });
 
-    final selected = sortedHabits.take(7).toList();
+    final selected = sortedHabits.take(5).toList();
     final today = _dateOnly(DateTime.now());
     final values = <double>[];
     final names = <String>[];
@@ -532,31 +532,15 @@ class _ProgressScreenState extends State<ProgressScreen> {
           : 'عادة');
     }
 
-    while (values.length < 7) {
-      values.add(0);
-      names.add('');
-    }
-
     return _ChartData(values: values, names: names);
   }
 
   _TimeSummary _buildTimeSummary(
-    List<Map<String, dynamic>> tasks,
-    _DateRange range,
+    List<Map<String, dynamic>> allTasks,
+    List<Map<String, dynamic>> completedTasks,
   ) {
-    final periodTasks = tasks.where((task) {
-      final date = _readDate(task['due_date']) ?? _readDate(task['created_at']);
-      return date != null &&
-          !date.isBefore(range.start) &&
-          !date.isAfter(range.end) &&
-          _asBool(task['completed']);
-    }).toList();
-
-    // The current tasks table stores `time` as a clock-time text (for example
-    // "11:29 ص"), not as a duration. Therefore we do not turn clock times into
-    // fake hours. We show the completed-task count until a duration column exists.
     final tagCounts = <String, int>{};
-    for (final task in periodTasks) {
+    for (final task in completedTasks) {
       final tag = task['tag']?.toString().trim();
       if (tag != null && tag.isNotEmpty) {
         tagCounts[tag] = (tagCounts[tag] ?? 0) + 1;
@@ -567,8 +551,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
       ..sort((a, b) => b.value.compareTo(a.value));
 
     return _TimeSummary(
-      completedTasks: periodTasks.length,
-      topTags: entries.take(5).toList(),
+      totalTasks: allTasks.length,
+      completedTasks: completedTasks.length,
+      inProgressTasks: allTasks.where((task) => !_asBool(task['completed']) &&
+          _readDate(task['due_date']) != null &&
+          _readDate(task['due_date'])!.isAfter(_dateOnly(DateTime.now()))).length,
+      unfinishedTasks: allTasks.length - completedTasks.length,
+      topTags: entries.take(3).toList(),
     );
   }
 
@@ -824,8 +813,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                 Expanded(child: _improvementCard()),
                               ],
                             ),
-                            const SizedBox(height: 14),
-                            _achievementsCard(),
                           ],
                         ),
             ),
@@ -863,26 +850,45 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
   Widget _header() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           children: [
-            Icon(Icons.bar_chart_rounded, color: _primaryText, size: 30),
-            const SizedBox(width: 8),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Icon(Icons.bar_chart_rounded, color: _primaryText, size: 30),
+                  const SizedBox(width: 8),
+                  Text(
+                    'التقدم',
+                    style: TextStyle(
+                      color: _primaryText,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Text(
-              'التقدم',
+              'FLUMEA',
               style: TextStyle(
                 color: _primaryText,
-                fontSize: 30,
+                fontSize: 24,
                 fontWeight: FontWeight.w800,
+                letterSpacing: 4,
               ),
             ),
           ],
         ),
         const SizedBox(height: 4),
-        Text(
-          'رحلتك نحو نسخة أفضل من نفسك',
-          style: TextStyle(color: _secondaryText, fontSize: 16),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Text(
+            'رحلتك نحو نسخة أفضل من نفسك',
+            style: TextStyle(color: _secondaryText, fontSize: 16),
+          ),
         ),
       ],
     );
@@ -959,9 +965,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
         const SizedBox(width: 10),
         Expanded(
           child: _statCard(
-            icon: Icons.flag_rounded,
-            value: '${_data.goalsInProgress}',
-            title: 'الأهداف قيد العمل',
+            icon: Icons.task_alt_rounded,
+            value: '${_data.timeSummary.completedTasks}',
+            title: 'المهام المكتملة',
             background: _yellowBackground,
             iconColor: Colors.orange,
           ),
@@ -1013,6 +1019,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _habitChart() {
+    final values = _data.chartValues;
+    final names = _data.chartNames;
+    final count = values.length;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
       decoration: BoxDecoration(
@@ -1069,97 +1079,123 @@ class _ProgressScreenState extends State<ProgressScreen> {
             style: TextStyle(color: _secondaryText, fontSize: 13),
           ),
           const SizedBox(height: 16),
-          _habitOverallProgressBar(),
-          const SizedBox(height: 14),
           SizedBox(
-            height: 190,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: List.generate(_data.chartValues.length, (index) {
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.bottomCenter,
-                            child: Container(
-                              width: 28,
-                              height: 130 * _data.chartValues[index],
-                              decoration: BoxDecoration(
-                                color: green,
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(7),
+            height: 265,
+            child: count == 0
+                ? Center(
+                    child: Text(
+                      'أضف عاداتك لتظهر بيانات التقدم هنا',
+                      style: TextStyle(color: _secondaryText, fontSize: 13),
+                    ),
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: List.generate(count, (index) {
+                      final value = values[index].clamp(0.0, 1.0).toDouble();
+                      final barColor = _habitColors[index % _habitColors.length];
+                      return Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                _formatPercent(value),
+                                style: TextStyle(
+                                  color: barColor,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w800,
                                 ),
                               ),
-                            ),
+                              const SizedBox(height: 7),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: Container(
+                                    width: 44,
+                                    height: 175 * value,
+                                    decoration: BoxDecoration(
+                                      color: barColor.withValues(alpha: 0.10),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                                    alignment: Alignment.bottomCenter,
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 175 * value,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topCenter,
+                                          end: Alignment.bottomCenter,
+                                          colors: [
+                                            barColor.withValues(alpha: 0.72),
+                                            barColor,
+                                          ],
+                                        ),
+                                        borderRadius: const BorderRadius.vertical(
+                                          top: Radius.circular(12),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: barColor.withValues(alpha: 0.10),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  _habitIcons[index % _habitIcons.length],
+                                  color: barColor,
+                                  size: 21,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                names[index],
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: _secondaryText,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _data.chartNames[index],
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: _secondaryText,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
+                      );
+                    }),
                   ),
-                );
-              }),
-            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _habitOverallProgressBar() {
-    final value = _data.dailyRate.clamp(0.0, 1.0).toDouble();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                'معدل إكمال العادة اليوم',
-                style: TextStyle(
-                  color: _primaryText,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            Text(
-              _formatPercent(value),
-              style: TextStyle(
-                color: green,
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 7),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: LinearProgressIndicator(
-            minHeight: 8,
-            value: value,
-            backgroundColor: _progressTrack,
-            valueColor: const AlwaysStoppedAnimation<Color>(green),
-          ),
-        ),
-      ],
-    );
-  }
+  static const List<Color> _habitColors = [
+    Color(0xFF1E88E5),
+    Color(0xFF7E3FF2),
+    Color(0xFFFF8A00),
+    Color(0xFF16B978),
+    Color(0xFF1E88E5),
+    Color(0xFF8E5CF6),
+    Color(0xFF18B77A),
+  ];
+
+  static const List<IconData> _habitIcons = [
+    Icons.water_drop_outlined,
+    Icons.sports_soccer_rounded,
+    Icons.fitness_center_rounded,
+    Icons.menu_book_rounded,
+    Icons.eco_rounded,
+    Icons.nightlight_round,
+    Icons.favorite_rounded,
+  ];
 
   String _todayArabicDate() {
     final now = DateTime.now();
@@ -1190,17 +1226,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _timeCard() {
-    final entries = _data.timeSummary.topTags;
-    final labels = <String>[];
-    final values = <String>[];
-    for (final entry in entries.take(5)) {
-      labels.add(entry.key);
-      values.add('${entry.value} مهمة');
-    }
-    while (labels.length < 5) {
-      labels.add('');
-      values.add('');
-    }
+    final summary = _data.timeSummary;
+    final total = summary.totalTasks;
+    final completed = summary.completedTasks;
+    final inProgress = summary.inProgressTasks;
+    final unfinished = summary.unfinishedTasks;
+    final rate = total == 0 ? 0.0 : (completed / total).clamp(0.0, 1.0).toDouble();
 
     return Container(
       height: 310,
@@ -1217,7 +1248,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             children: [
               Expanded(
                 child: Text(
-                  'معدل إكمال المهام',
+                  'معدل إكمال المهمة',
                   style: TextStyle(
                     color: _primaryText,
                     fontSize: 18,
@@ -1230,26 +1261,24 @@ class _ProgressScreenState extends State<ProgressScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            _data.timeSummary.completedTasks == 0
-                ? 'لا توجد مهام مكتملة في ${_periodLabel(_selectedPeriod)}'
-                : '${_data.timeSummary.completedTasks} مهام مكتملة في ${_periodLabel(_selectedPeriod)}',
+            '$completed من $total ${total == 1 ? 'مهمة' : 'مهام'} مكتملة في ${_periodLabel(_selectedPeriod)}',
             style: TextStyle(color: _secondaryText, fontSize: 12),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Expanded(
             child: Row(
               children: [
                 SizedBox(
-                  width: 125,
+                  width: 145,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       SizedBox(
-                        width: 120,
-                        height: 120,
+                        width: 125,
+                        height: 125,
                         child: CircularProgressIndicator(
-                          value: _data.timeSummary.completedTasks == 0 ? 0 : 1,
-                          strokeWidth: 20,
+                          value: rate,
+                          strokeWidth: 18,
                           backgroundColor: _circleTrack,
                           valueColor: const AlwaysStoppedAnimation<Color>(blue),
                         ),
@@ -1258,15 +1287,15 @@ class _ProgressScreenState extends State<ProgressScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            '${_data.timeSummary.completedTasks}',
+                            _formatPercent(rate),
                             style: TextStyle(
                               color: _primaryText,
-                              fontSize: 24,
+                              fontSize: 25,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
                           Text(
-                            'مهام',
+                            'معدل الإكمال',
                             style: TextStyle(color: _secondaryText, fontSize: 12),
                           ),
                         ],
@@ -1274,19 +1303,16 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 5),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: List.generate(5, (index) {
-                      if (labels[index].isEmpty) return const SizedBox(height: 31);
-                      return _Legend(
-                        color: _legendColors[index],
-                        title: labels[index],
-                        value: values[index],
-                      );
-                    }),
+                    children: [
+                      _Legend(color: green, title: 'مكتملة', value: '$completed'),
+                      _Legend(color: blue, title: 'قيد التنفيذ', value: '$inProgress'),
+                      _Legend(color: Colors.red, title: 'لم تنجز', value: '$unfinished'),
+                    ],
                   ),
                 ),
               ],
@@ -1297,18 +1323,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     );
   }
 
-  static const List<Color> _legendColors = [
-    blue,
-    green,
-    Colors.orange,
-    Colors.purple,
-    Color(0xFF9AA7B8),
-  ];
-
   Widget _improvementCard() {
-    final improvement = _data.improvement;
-    final color = improvement >= 0 ? green : Colors.redAccent;
-
     return Container(
       height: 310,
       padding: const EdgeInsets.all(14),
@@ -1335,59 +1350,15 @@ class _ProgressScreenState extends State<ProgressScreen> {
               Icon(Icons.trending_up_rounded, color: _primaryText),
             ],
           ),
-          const SizedBox(height: 3),
-          Text(
-            _data.improvementLabel,
-            style: TextStyle(color: _secondaryText, fontSize: 12),
-          ),
-          const SizedBox(height: 18),
-          Row(
-            children: [
-              Icon(
-                improvement >= 0
-                    ? Icons.arrow_upward_rounded
-                    : Icons.arrow_downward_rounded,
-                color: color,
-                size: 25,
-              ),
-              const SizedBox(width: 5),
-              Text(
-                _formatImprovement(improvement),
-                style: TextStyle(
-                  color: color,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-          Text(
-            improvement == 0 ? 'لا يوجد تغير' : 'تغير في معدل الإكمال',
-            style: TextStyle(color: _secondaryText, fontSize: 12),
-          ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Expanded(
             child: CustomPaint(
               painter: _LineChartPainter(
                 values: _data.trendValues,
+                labels: _data.trendLabels,
                 isDark: _isDark,
               ),
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                _data.trendLabels.isEmpty ? 'البداية' : _data.trendLabels.first,
-                style: TextStyle(fontSize: 11, color: _secondaryText),
-              ),
-              Text(
-                _data.trendLabels.length < 2
-                    ? 'الآن'
-                    : _data.trendLabels.last,
-                style: TextStyle(fontSize: 11, color: _secondaryText),
-              ),
-            ],
           ),
         ],
       ),
@@ -1535,7 +1506,7 @@ class _ProgressData {
             'أكمل عادة أو مهمة لتظهر إنجازاتك هنا.',
           ),
         ],
-        timeSummary: _TimeSummary(completedTasks: 0, topTags: []),
+        timeSummary: _TimeSummary(totalTasks: 0, completedTasks: 0, inProgressTasks: 0, unfinishedTasks: 0, topTags: []),
       );
 }
 
@@ -1573,10 +1544,19 @@ class _AchievementData {
 }
 
 class _TimeSummary {
+  final int totalTasks;
   final int completedTasks;
+  final int inProgressTasks;
+  final int unfinishedTasks;
   final List<MapEntry<String, int>> topTags;
 
-  const _TimeSummary({required this.completedTasks, required this.topTags});
+  const _TimeSummary({
+    required this.totalTasks,
+    required this.completedTasks,
+    required this.inProgressTasks,
+    required this.unfinishedTasks,
+    required this.topTags,
+  });
 }
 
 class _Legend extends StatelessWidget {
@@ -1633,10 +1613,12 @@ class _Legend extends StatelessWidget {
 
 class _LineChartPainter extends CustomPainter {
   final List<double> values;
+  final List<String> labels;
   final bool isDark;
 
   const _LineChartPainter({
     required this.values,
+    required this.labels,
     required this.isDark,
   });
 
@@ -1669,7 +1651,7 @@ class _LineChartPainter extends CustomPainter {
     for (int i = 0; i < safeValues.length; i++) {
       final x = safeValues.length == 1
           ? size.width / 2
-          : size.width * i / (safeValues.length - 1);
+          : size.width * (safeValues.length - 1 - i) / (safeValues.length - 1);
       final normalized = safeValues[i].clamp(0.0, 1.0).toDouble();
       final y = size.height * (0.85 - normalized * 0.65);
       points.add(Offset(x, y));
@@ -1693,7 +1675,28 @@ class _LineChartPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     for (final point in points) {
-      canvas.drawCircle(point, 4, dotPaint);
+      canvas.drawCircle(point, 5, dotPaint);
+      canvas.drawCircle(point, 7, Paint()
+        ..color = const Color(0xFF1976D2).withValues(alpha: 0.10)
+        ..style = PaintingStyle.fill);
+    }
+
+    final labelStyle = TextStyle(
+      color: isDark ? const Color(0xFF9AA7B8) : const Color(0xFF7B8798),
+      fontSize: 10,
+    );
+    final textPainter = TextPainter(textDirection: TextDirection.rtl);
+    final safeLabels = labels.isEmpty ? <String>[] : labels;
+    for (int i = 0; i < safeLabels.length; i++) {
+      final x = safeLabels.length == 1
+          ? size.width / 2
+          : size.width * (safeLabels.length - 1 - i) / (safeLabels.length - 1);
+      textPainter.text = TextSpan(text: safeLabels[i], style: labelStyle);
+      textPainter.layout(maxWidth: 58);
+      textPainter.paint(
+        canvas,
+        Offset(x - textPainter.width / 2, size.height - textPainter.height),
+      );
     }
   }
 
@@ -1701,8 +1704,12 @@ class _LineChartPainter extends CustomPainter {
   bool shouldRepaint(covariant _LineChartPainter oldDelegate) {
     if (oldDelegate.isDark != isDark) return true;
     if (oldDelegate.values.length != values.length) return true;
+    if (oldDelegate.labels.length != labels.length) return true;
     for (int i = 0; i < values.length; i++) {
       if (oldDelegate.values[i] != values[i]) return true;
+    }
+    for (int i = 0; i < labels.length; i++) {
+      if (oldDelegate.labels[i] != labels[i]) return true;
     }
     return false;
   }
