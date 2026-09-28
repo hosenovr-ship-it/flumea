@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'bottom_navigation.dart';
 import 'services/task_service.dart';
@@ -59,19 +62,32 @@ class _PlanScreenState extends State<PlanScreen> {
     _loadTasks();
     _loadHabits();
     _loadActiveDays();
+    _loadWeeklyGoals();
   }
 
   Future<void> _loadActiveDays() async {
     try {
       final allTasks = await _taskService.getTasks();
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final sunday = today.subtract(Duration(days: today.weekday % 7));
+      final saturday = sunday.add(const Duration(days: 6));
       final activeDates = <String>{};
 
       for (final task in allTasks) {
-        if (_safeBool(task['completed'])) {
-          final dueDate = _safeString(task['due_date']);
-          if (dueDate.isNotEmpty) {
-            activeDates.add(dueDate);
-          }
+        if (!_safeBool(task['completed'])) {
+          continue;
+        }
+
+        final dueDateText = _safeString(task['due_date']);
+        final dueDate = DateTime.tryParse(dueDateText);
+        if (dueDate == null) {
+          continue;
+        }
+
+        final day = DateTime(dueDate.year, dueDate.month, dueDate.day);
+        if (!day.isBefore(sunday) && !day.isAfter(saturday)) {
+          activeDates.add(_dateKey(day));
         }
       }
 
@@ -82,6 +98,73 @@ class _PlanScreenState extends State<PlanScreen> {
       });
     } catch (_) {
       // لا نوقف الصفحة إذا تعذر حساب الأيام النشطة.
+    }
+  }
+
+  String get _weeklyGoalsStorageKey {
+    final userId = _supabase.auth.currentUser?.id ?? 'guest';
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final sunday = today.subtract(Duration(days: today.weekday % 7));
+    return 'flumea_weekly_goals_${userId}_${_dateKey(sunday)}';
+  }
+
+  Future<void> _loadWeeklyGoals() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_weeklyGoalsStorageKey);
+
+      if (raw == null || raw.isEmpty) {
+        if (mounted) {
+          setState(() {
+            _weeklyGoals.clear();
+          });
+        }
+        return;
+      }
+
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return;
+
+      final loaded = decoded
+          .whereType<Map>()
+          .map<Map<String, dynamic>>((item) => {
+                'title': _safeString(item['title']),
+                'current': int.tryParse(
+                      _safeString(item['current'], fallback: '0'),
+                    ) ??
+                    0,
+                'total': 1,
+                'color': _safeString(
+                  item['color'],
+                  fallback: '#1478D4',
+                ),
+              })
+          .where((goal) => _safeString(goal['title']).isNotEmpty)
+          .take(3)
+          .toList();
+
+      if (!mounted) return;
+
+      setState(() {
+        _weeklyGoals
+          ..clear()
+          ..addAll(loaded);
+      });
+    } catch (_) {
+      // لا نوقف الصفحة إذا تعذر تحميل الأهداف المحفوظة.
+    }
+  }
+
+  Future<void> _saveWeeklyGoals() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        _weeklyGoalsStorageKey,
+        jsonEncode(_weeklyGoals),
+      );
+    } catch (_) {
+      // الحفظ المحلي لا يجب أن يعطل الصفحة.
     }
   }
 
@@ -793,25 +876,12 @@ class _PlanScreenState extends State<PlanScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text(
-            'FLUMEA',
-            style: TextStyle(
-              color: navy,
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 4,
-            ),
-          ),
-        ),
-        const Spacer(),
         Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
                   'الخطة',
@@ -841,6 +911,19 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ],
         ),
+        const Spacer(),
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            'FLUMEA',
+            style: TextStyle(
+              color: navy,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 4,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -852,7 +935,7 @@ class _PlanScreenState extends State<PlanScreen> {
   Widget _buildTodayButton() {
     return Row(
       mainAxisAlignment:
-          MainAxisAlignment.end,
+          MainAxisAlignment.start,
       children: [
         GestureDetector(
           onTap: () {
@@ -880,8 +963,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   style: TextStyle(
                     color: navy,
                     fontSize: 16,
-                    fontWeight:
-                        FontWeight.w800,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 SizedBox(width: 8),
@@ -1033,11 +1115,11 @@ class _PlanScreenState extends State<PlanScreen> {
               Expanded(
                 child: Column(
                   crossAxisAlignment:
-                      CrossAxisAlignment.end,
+                      CrossAxisAlignment.start,
                   children: [
                     Row(
                       mainAxisAlignment:
-                          MainAxisAlignment.end,
+                          MainAxisAlignment.start,
                       children: [
                         Text(
                           'خطة اليوم',
@@ -1265,12 +1347,6 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.format_list_bulleted,
-                  color: navy,
-                  size: 27,
-                ),
-                SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'المهام اليوم',
@@ -1281,6 +1357,11 @@ class _PlanScreenState extends State<PlanScreen> {
                       color: navy,
                     ),
                   ),
+                ),
+                Icon(
+                  Icons.format_list_bulleted,
+                  color: navy,
+                  size: 27,
                 ),
               ],
             ),
@@ -2266,15 +2347,13 @@ class _PlanScreenState extends State<PlanScreen> {
       decoration: BoxDecoration(
         color: _surface,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: _border,
-        ),
+        border: Border.all(color: _border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
                 'أهداف الأسبوع',
@@ -2293,62 +2372,53 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             ],
           ),
-          if (_weeklyGoals.isNotEmpty) ...[
+          if (_weeklyGoals.isEmpty) ...[
+            const SizedBox(height: 18),
+            Text(
+              'لا توجد أهداف أسبوعية بعد',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: _subtle,
+                fontSize: 13,
+              ),
+            ),
+          ] else ...[
             const SizedBox(height: 16),
             ...List.generate(
               _weeklyGoals.length,
               (index) => Padding(
                 padding: EdgeInsets.only(
-                  bottom: index == _weeklyGoals.length - 1 ? 0 : 14,
+                  bottom: index == _weeklyGoals.length - 1 ? 0 : 10,
                 ),
-                child: _goalRow(
-                  index,
-                  _weeklyGoals[index],
-                ),
+                child: _goalRow(index, _weeklyGoals[index]),
               ),
             ),
           ],
-          const SizedBox(height: 16),
-          GestureDetector(
-            onTap: _weeklyGoals.length >= 3
+          const SizedBox(height: 14),
+          OutlinedButton.icon(
+            onPressed: _weeklyGoals.length >= 3
                 ? null
                 : _showAddWeeklyGoalDialog,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 13),
-              decoration: BoxDecoration(
-                color: _taskAdd,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: _weeklyGoals.length >= 3
-                      ? _border
-                      : blue,
-                ),
+            icon: Icon(
+              _weeklyGoals.length >= 3
+                  ? Icons.block_outlined
+                  : Icons.add,
+              size: 20,
+            ),
+            label: Text(
+              _weeklyGoals.length >= 3 ? 'الحد الأقصى 3 أهداف' : 'إضافة هدف',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.add,
-                    color: _weeklyGoals.length >= 3
-                        ? _subtle
-                        : blue,
-                    size: 23,
-                  ),
-                  const SizedBox(width: 5),
-                  Text(
-                    _weeklyGoals.length >= 3
-                        ? 'تم الوصول إلى الحد الأقصى'
-                        : 'إضافة هدف',
-                    style: TextStyle(
-                      color: _weeklyGoals.length >= 3
-                          ? _subtle
-                          : blue,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: blue,
+              disabledForegroundColor: _subtle,
+              side: BorderSide(color: blue, width: 1.3),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
           ),
@@ -2357,133 +2427,153 @@ class _PlanScreenState extends State<PlanScreen> {
     );
   }
 
-  Widget _goalRow(
-    int index,
-    Map<String, dynamic> goal,
-  ) {
-    final title = _safeString(
-      goal['title'],
-      fallback: 'هدف أسبوعي',
-    );
+  Widget _goalRow(int index, Map<String, dynamic> goal) {
+    final title = _safeString(goal['title'], fallback: 'هدف أسبوعي');
     final current = (goal['current'] as int?) ?? 0;
-    final total = (goal['total'] as int?) ?? 1;
-    final color = _safeColor(goal['color']);
-
-    final progress = total <= 0
-        ? 0.0
-        : (current / total).clamp(0.0, 1.0);
+    const total = 1;
+    final completed = current >= total;
 
     return Container(
-      padding: const EdgeInsets.all(11),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 13,
+        vertical: 12,
+      ),
       decoration: BoxDecoration(
-        color: _soft,
+        color: completed ? _habitDone : _habitUndone,
         borderRadius: BorderRadius.circular(17),
         border: Border.all(
-          color: _border,
+          color: completed ? _habitDoneBorder : _habitUndoneBorder,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Row(
         children: [
-          Row(
-            children: [
-              PopupMenuButton<String>(
-                tooltip: 'خيارات الهدف',
-                padding: EdgeInsets.zero,
-                icon: Icon(
-                  Icons.more_vert,
-                  color: _subtle,
-                  size: 22,
-                ),
-                onSelected: (value) {
-                  if (value == 'reset') {
-                    setState(() {
-                      _weeklyGoals[index]['current'] = 0;
-                    });
-                    FlumeaNotificationService.showTopMessage(
-                      context,
-                      'تمت إعادة الهدف',
-                    );
-                  } else if (value == 'delete') {
-                    setState(() {
-                      _weeklyGoals.removeAt(index);
-                    });
-                    FlumeaNotificationService.showTopMessage(
-                      context,
-                      'تم حذف الهدف',
-                    );
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem<String>(
-                    value: 'reset',
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          'إعادة الهدف 🔄',
-                          style: TextStyle(
-                            color: navy,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'delete',
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        const Text(
-                          'حذف الهدف 🗑️',
-                          style: TextStyle(
-                            color: Color(0xFFD64545),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: completed
+                  ? cyan.withValues(alpha: 0.12)
+                  : blue.withValues(alpha: 0.08),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              completed ? Icons.check : Icons.flag_outlined,
+              color: completed ? cyan : blue,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              title,
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: navy,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                decoration: completed ? TextDecoration.lineThrough : null,
               ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  title,
-                  textAlign: TextAlign.right,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: navy,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                  ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          PopupMenuButton<String>(
+            tooltip: 'خيارات الهدف',
+            padding: EdgeInsets.zero,
+            icon: Icon(
+              Icons.more_vert_rounded,
+              color: const Color(0xFF7B8798),
+              size: 21,
+            ),
+            onSelected: (value) async {
+              if (value == 'reset') {
+                setState(() {
+                  _weeklyGoals[index]['current'] = 0;
+                });
+                await _saveWeeklyGoals();
+                if (mounted) {
+                  FlumeaNotificationService.showTopMessage(
+                    context,
+                    'تمت إعادة الهدف',
+                  );
+                }
+              } else if (value == 'delete') {
+                setState(() {
+                  _weeklyGoals.removeAt(index);
+                });
+                await _saveWeeklyGoals();
+                if (mounted) {
+                  FlumeaNotificationService.showTopMessage(
+                    context,
+                    'تم حذف الهدف',
+                  );
+                }
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem<String>(
+                value: 'reset',
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Icon(Icons.refresh_rounded, color: blue),
+                    const SizedBox(width: 10),
+                    Text(
+                      'إعادة الهدف',
+                      style: TextStyle(
+                        color: navy,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Text(
-                '$current/$total',
-                style: TextStyle(
-                  color: color,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
+              PopupMenuItem<String>(
+                value: 'delete',
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: const [
+                    Icon(Icons.delete_outline_rounded, color: Colors.red),
+                    SizedBox(width: 10),
+                    Text(
+                      'حذف الهدف',
+                      style: TextStyle(
+                        color: Color(0xFFD64545),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 7),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 7,
-              backgroundColor: _isDark
-                  ? const Color(0xFF303844)
-                  : const Color(0xFFE8EDF3),
-              valueColor: AlwaysStoppedAnimation<Color>(color),
+          const SizedBox(width: 4),
+          GestureDetector(
+            onTap: () async {
+              setState(() {
+                _weeklyGoals[index]['current'] = completed ? 0 : 1;
+              });
+              await _saveWeeklyGoals();
+            },
+            child: Container(
+              width: 23,
+              height: 23,
+              decoration: BoxDecoration(
+                color: completed ? cyan : Colors.white,
+                borderRadius: BorderRadius.circular(7),
+                border: Border.all(
+                  color: completed ? cyan : _unselectedControlBorder,
+                  width: 1.5,
+                ),
+              ),
+              child: completed
+                  ? const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 16,
+                    )
+                  : null,
             ),
           ),
         ],
@@ -2493,7 +2583,6 @@ class _PlanScreenState extends State<PlanScreen> {
 
   void _showAddWeeklyGoalDialog() {
     final titleController = TextEditingController();
-    final totalController = TextEditingController(text: '1');
 
     showDialog(
       context: context,
@@ -2514,90 +2603,67 @@ class _PlanScreenState extends State<PlanScreen> {
                 fontWeight: FontWeight.w800,
               ),
             ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleController,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(color: navy),
-                  decoration: InputDecoration(
-                    hintText: 'اسم الهدف',
-                    hintStyle: TextStyle(color: _subtle),
-                    filled: true,
-                    fillColor: _inputBackground,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: _inputBorder),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: _inputBorder),
-                    ),
-                  ),
+            content: TextField(
+              controller: titleController,
+              textAlign: TextAlign.right,
+              style: TextStyle(color: navy),
+              decoration: InputDecoration(
+                labelText: 'اسم الهدف',
+                hintText: 'اسم الهدف',
+                hintStyle: TextStyle(color: _subtle),
+                labelStyle: TextStyle(color: navy),
+                filled: true,
+                fillColor: _inputBackground,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: _inputBorder),
                 ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: totalController,
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(color: navy),
-                  decoration: InputDecoration(
-                    hintText: 'العدد المستهدف',
-                    hintStyle: TextStyle(color: _subtle),
-                    filled: true,
-                    fillColor: _inputBackground,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: _inputBorder),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: _inputBorder),
-                    ),
-                  ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: _inputBorder),
                 ),
-              ],
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: blue, width: 1.5),
+                ),
+              ),
             ),
             actionsAlignment: MainAxisAlignment.spaceBetween,
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: Text(
-                  'إلغاء',
-                  style: TextStyle(color: _subtle),
-                ),
+                child: Text('إلغاء', style: TextStyle(color: _subtle)),
               ),
-              ElevatedButton(
-                onPressed: () {
+              ElevatedButton.icon(
+                onPressed: () async {
                   final title = titleController.text.trim();
-                  final total =
-                      int.tryParse(totalController.text.trim()) ?? 1;
-
-                  if (title.isEmpty || total <= 0) {
+                  if (title.isEmpty || _weeklyGoals.length >= 3) {
                     return;
                   }
 
-                  final colors = [
+                  const colors = [
                     blue,
                     cyan,
-                    const Color(0xFF8E44AD),
+                    Color(0xFF8E44AD),
                   ];
-
                   final colorIndex = _weeklyGoals.length.clamp(0, 2);
 
                   setState(() {
                     _weeklyGoals.add({
                       'title': title,
                       'current': 0,
-                      'total': total,
-                      'color':
-                          '#${colors[colorIndex].toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}',
+                      'total': 1,
+                      'color': '#${colors[colorIndex].toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}',
                     });
                   });
 
+                  await _saveWeeklyGoals();
+
+                  if (!dialogContext.mounted) return;
                   Navigator.pop(dialogContext);
                 },
+                icon: const Icon(Icons.add),
+                label: const Text('إضافة'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: blue,
                   foregroundColor: Colors.white,
@@ -2605,7 +2671,6 @@ class _PlanScreenState extends State<PlanScreen> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                 ),
-                child: const Text('إضافة'),
               ),
             ],
           ),
@@ -2632,7 +2697,7 @@ class _PlanScreenState extends State<PlanScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
                 'عادات اليوم',
