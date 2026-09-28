@@ -763,9 +763,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
   Color get _circleTrack =>
       _isDark ? const Color(0xFF29323C) : const Color(0xFFE9EEF4);
 
-  Color get _dividerColor =>
-      _isDark ? const Color(0xFF303844) : const Color(0xFFE9EEF4);
-
   @override
   Widget build(BuildContext context) {
     return Directionality(
