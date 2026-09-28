@@ -1401,25 +1401,31 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'مركز المساعدة',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              color: primary,
-                              fontSize: 30,
-                              height: 1.05,
-                              fontWeight: FontWeight.bold,
+                          SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              'مركز المساعدة',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: primary,
+                                fontSize: 30,
+                                height: 1.05,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 5),
-                          Text(
-                            'إجابات سريعة لأهم الأسئلة حول FLUMEA.',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              color: secondary,
-                              fontSize: 15,
+                          SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              'إجابات سريعة لأهم الأسئلة حول FLUMEA.',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: secondary,
+                                fontSize: 15,
+                              ),
                             ),
                           ),
                         ],
@@ -1730,25 +1736,31 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                   children: [
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'تواصل معنا',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              color: primary,
-                              fontSize: 30,
-                              height: 1.05,
-                              fontWeight: FontWeight.bold,
+                          SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              'تواصل معنا',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: primary,
+                                fontSize: 30,
+                                height: 1.05,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 5),
-                          Text(
-                            'نحن هنا لمساعدتك والإجابة عن استفساراتك.',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              color: secondary,
-                              fontSize: 15,
+                          SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              'نحن هنا لمساعدتك والإجابة عن استفساراتك.',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: secondary,
+                                fontSize: 15,
+                              ),
                             ),
                           ),
                         ],
