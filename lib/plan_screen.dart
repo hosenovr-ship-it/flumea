@@ -624,44 +624,6 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   // ============================================================
-  // إعادة العادة
-  // ============================================================
-
-  Future<void> _resetHabit(String id) async {
-    if (id.isEmpty) {
-      return;
-    }
-
-    final index = habits.indexWhere(
-      (habit) => _safeString(habit['id']) == id,
-    );
-
-    if (index == -1) {
-      return;
-    }
-
-    final oldValue = _safeBool(habits[index]['completed']);
-
-    setState(() {
-      habits[index]['completed'] = false;
-    });
-
-    try {
-      await _habitService.resetHabit(id);
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        habits[index]['completed'] = oldValue;
-      });
-
-      FlumeaNotificationService.showTopMessage(context, 'تعذر إعادة العادة: $error');
-    }
-  }
-
-  // ============================================================
   // حذف العادة
   // ============================================================
 
@@ -797,63 +759,6 @@ class _PlanScreenState extends State<PlanScreen> {
       });
 
       FlumeaNotificationService.showTopMessage(context, 'تعذر حذف المهمة: $error');
-    }
-  }
-
-  // ============================================================
-  // إعادة المهمة
-  // ============================================================
-
-  Future<void> _resetTask(int index) async {
-    if (index < 0 || index >= tasks.length) {
-      return;
-    }
-
-    final id = _safeString(
-      tasks[index]['id'],
-    );
-
-    if (id.isEmpty) {
-      return;
-    }
-
-    final oldValue = _safeBool(
-      tasks[index]['completed'],
-    );
-
-    setState(() {
-      tasks[index]['completed'] = false;
-    });
-
-    try {
-      await _taskService.updateTask(
-        id: id,
-        completed: false,
-      );
-
-      await _loadActiveDays();
-
-      if (!mounted) {
-        return;
-      }
-
-      FlumeaNotificationService.showTopMessage(context, 'تمت إعادة المهمة');
-
-      await FlumeaNotificationService.instance.show(
-        title: 'تمت إعادة المهمة',
-        body: 'يمكنك تنفيذ المهمة مرة أخرى الآن.',
-      );
-
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        tasks[index]['completed'] = oldValue;
-      });
-
-      FlumeaNotificationService.showTopMessage(context, 'تعذر إعادة المهمة: $error');
     }
   }
 
@@ -1831,37 +1736,6 @@ class _PlanScreenState extends State<PlanScreen> {
     );
   }
 
-  Widget _infoRow(String label, String value) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: _inputBackground,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _inputBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            label,
-            style: TextStyle(color: _subtle, fontSize: 11),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            textAlign: TextAlign.right,
-            style: TextStyle(
-              color: navy,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   // ============================================================
   // نافذة إضافة مهمة جديدة
   // ============================================================
@@ -2271,7 +2145,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                             };
 
                                             if (isReset) {
-                                              final id = _safeString(initialTask?['id']);
+                                              final id = _safeString(initialTask['id']);
                                               if (id.isEmpty) {
                                                 throw Exception('معرّف المهمة غير موجود');
                                               }
@@ -2290,15 +2164,17 @@ class _PlanScreenState extends State<PlanScreen> {
                                               if (!mounted) return;
 
                                               setState(() {
-                                                tasks[taskIndex!] = updatedTask;
+                                                tasks[taskIndex] = updatedTask;
                                                 _isSavingTask = false;
                                               });
 
                                               await _loadActiveDays();
 
+                                              if (!mounted) return;
                                               if (!dialogContext.mounted) return;
                                               Navigator.of(dialogContext).pop();
 
+                                              if (!mounted) return;
                                               FlumeaNotificationService.showTopMessage(
                                                 context,
                                                 'تم تحديث المهمة وإعادتها بنجاح ✅',
@@ -2787,7 +2663,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   }
 
                   if (isReset) {
-                    if (goalIndex! < 0 || goalIndex >= _weeklyGoals.length) {
+                    if (goalIndex < 0 || goalIndex >= _weeklyGoals.length) {
                       return;
                     }
 
@@ -3200,7 +3076,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                         'name': name,
                                         'completed': false,
                                       })
-                                      .eq('id', habitId!)
+                                      .eq('id', habitId)
                                       .eq('user_id', userId)
                                       .select()
                                       .single();
@@ -3225,9 +3101,11 @@ class _PlanScreenState extends State<PlanScreen> {
 
                                   await _loadActiveDays();
 
+                                  if (!mounted) return;
                                   if (!dialogContext.mounted) return;
                                   Navigator.pop(dialogContext);
 
+                                  if (!mounted) return;
                                   FlumeaNotificationService.showTopMessage(
                                     context,
                                     'تم تحديث العادة وإعادتها بنجاح ✅',
