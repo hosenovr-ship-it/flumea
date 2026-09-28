@@ -731,12 +731,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return '${(value * 100).round()}%';
   }
 
-  String _formatImprovement(double value) {
-    final rounded = value.round();
-    if (rounded == 0) return '0%';
-    return rounded > 0 ? '+$rounded%' : '$rounded%';
-  }
-
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
   Color get _pageBackground =>
@@ -765,9 +759,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
   Color get _yellowBackground =>
       _isDark ? const Color(0xFF3A2F18) : lightYellow;
-
-  Color get _progressTrack =>
-      _isDark ? const Color(0xFF28343D) : const Color(0xFFE5EEE9);
 
   Color get _circleTrack =>
       _isDark ? const Color(0xFF29323C) : const Color(0xFFE9EEF4);
@@ -1359,42 +1350,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 isDark: _isDark,
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _achievementsCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: _cardBackground,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: _borderColor),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 16, 18, 8),
-            child: Row(
-              children: [
-                Icon(Icons.emoji_events_rounded, color: _primaryText, size: 25),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    'أبرز إنجازاتك',
-                    style: TextStyle(
-                      color: _primaryText,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ..._data.achievements.map(
-            (item) => _achievement(item.icon, item.color, item.title, item.subtitle),
           ),
         ],
       ),
