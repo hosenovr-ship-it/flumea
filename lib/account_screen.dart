@@ -251,87 +251,24 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _editProfile() async {
-    String editedName = _fullName;
-
-    final newName = await showDialog<String>(
-      context: context,
-      barrierDismissible: true,
-      builder: (dialogContext) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: AlertDialog(
-            title: const Text('تعديل الملف الشخصي'),
-            content: TextFormField(
-              initialValue: _fullName,
-              textInputAction: TextInputAction.done,
-              onChanged: (value) {
-                editedName = value;
-              },
-              onFieldSubmitted: (value) {
-                final trimmed = value.trim();
-                if (trimmed.isNotEmpty) {
-                  Navigator.of(dialogContext).pop(trimmed);
-                }
-              },
-              decoration: const InputDecoration(
-                labelText: 'الاسم',
-                hintText: 'اكتب اسمك',
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop();
-                },
-                child: const Text('إلغاء'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  final value = editedName.trim();
-                  if (value.isNotEmpty) {
-                    Navigator.of(dialogContext).pop(value);
-                  }
-                },
-                child: const Text('حفظ'),
-              ),
-            ],
-          ),
-        );
-      },
+    final result = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => FlumeaEditProfileScreen(
+          initialName: _fullName,
+          initialAvatarUrl: _avatarUrl,
+        ),
+      ),
     );
 
-    if (newName == null || newName.trim().isEmpty) return;
+    if (!mounted || result == null || result.trim().isEmpty) return;
+    await _loadProfile();
 
-    final trimmedName = newName.trim();
-    if (trimmedName == _fullName.trim()) return;
-
-    final user = _supabase.auth.currentUser;
-    if (user == null) return;
-
-    try {
-      await _supabase.from('profiles').upsert({
-        'id': user.id,
-        'full_name': trimmedName,
-        'updated_at': DateTime.now().toIso8601String(),
-      });
-
-      if (!mounted) return;
-      setState(() => _fullName = trimmedName);
-      _showFlumeaNotification(
-        title: 'تم تحديث الاسم!',
-        message: 'تم حفظ اسمك بنجاح.',
-        icon: Icons.check_rounded,
-        accent: const Color(0xFF20C997),
-      );
-    } catch (_) {
-      if (!mounted) return;
-      _showFlumeaNotification(
-        title: 'تعذر حفظ الاسم',
-        message: 'حاول مرة أخرى.',
-        icon: Icons.error_outline_rounded,
-        accent: const Color(0xFFE53935),
-      );
-    }
+    _showFlumeaNotification(
+      title: 'تم تحديث الملف الشخصي!',
+      message: 'تم حفظ بياناتك بنجاح.',
+      icon: Icons.check_rounded,
+      accent: const Color(0xFF20C997),
+    );
   }
 
   Future<void> _loadNotificationPreferences() async {
@@ -633,37 +570,189 @@ class _AccountScreenState extends State<AccountScreen> {
   Future<void> _showAppearance() async {
     final currentMode = FlumeaThemeController.mode.value;
 
-    final selectedMode = await showDialog<ThemeMode>(
+    final selectedMode = await showModalBottomSheet<ThemeMode>(
       context: context,
-      builder: (dialogContext) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: AlertDialog(
-            title: const Text('المظهر'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.light_mode),
-                  title: const Text('فاتح'),
-                  trailing: Icon(
-                    currentMode == ThemeMode.light
-                        ? Icons.check_circle
-                        : Icons.radio_button_unchecked,
-                  ),
-                  onTap: () => Navigator.of(dialogContext).pop(ThemeMode.light),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        final isDark = Theme.of(sheetContext).brightness == Brightness.dark;
+        final surface = Theme.of(sheetContext).colorScheme.surface;
+        final primary = Theme.of(sheetContext).colorScheme.onSurface;
+        final secondary = isDark
+            ? const Color(0xFFB8C2CC)
+            : const Color(0xFF8290A2);
+        final border = isDark
+            ? const Color(0xFF2A3540)
+            : const Color(0xFFE4EBF2);
+
+        Widget option({
+          required ThemeMode mode,
+          required IconData icon,
+          required String title,
+          required String subtitle,
+        }) {
+          final selected = currentMode == mode;
+          final accent = mode == ThemeMode.dark
+              ? const Color(0xFF6EA8FF)
+              : const Color(0xFFF2A93B);
+
+          return InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () => Navigator.of(sheetContext).pop(mode),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: selected
+                    ? (isDark
+                        ? const Color(0xFF1B2B3D)
+                        : const Color(0xFFEAF3FF))
+                    : surface,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: selected ? accent : border,
+                  width: selected ? 1.6 : 1,
                 ),
-                ListTile(
-                  leading: const Icon(Icons.dark_mode),
-                  title: const Text('داكن'),
-                  trailing: Icon(
-                    currentMode == ThemeMode.dark
-                        ? Icons.check_circle
-                        : Icons.radio_button_unchecked,
+              ),
+              child: Row(
+                textDirection: TextDirection.rtl,
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(icon, color: accent, size: 27),
                   ),
-                  onTap: () => Navigator.of(dialogContext).pop(ThemeMode.dark),
-                ),
-              ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          title,
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            color: primary,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          subtitle,
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            color: secondary,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    selected
+                        ? Icons.check_circle_rounded
+                        : Icons.radio_button_unchecked_rounded,
+                    color: selected ? accent : secondary,
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(18, 12, 18, 20),
+              decoration: BoxDecoration(
+                color: surface,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: border),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x26000000),
+                    blurRadius: 28,
+                    offset: Offset(0, -8),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 42,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: secondary.withValues(alpha: 0.45),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Row(
+                    textDirection: TextDirection.rtl,
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: lightBlue,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.palette_outlined,
+                          color: blue,
+                          size: 27,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'المظهر',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: primary,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'اختر الشكل الذي يناسب تجربتك في FLUMEA',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: secondary,
+                                fontSize: 12.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  option(
+                    mode: ThemeMode.light,
+                    icon: Icons.light_mode_rounded,
+                    title: 'فاتح',
+                    subtitle: 'ألوان واضحة ومشرقة',
+                  ),
+                  const SizedBox(height: 10),
+                  option(
+                    mode: ThemeMode.dark,
+                    icon: Icons.dark_mode_rounded,
+                    title: 'داكن',
+                    subtitle: 'مظهر هادئ ومريح للعين',
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -1090,7 +1179,6 @@ class _AccountScreenState extends State<AccountScreen> {
                       title: 'مركز المساعدة',
                       subtitle: 'الأسئلة الشائعة',
                       color: blue,
-                      iconOnLeft: true,
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -1105,7 +1193,6 @@ class _AccountScreenState extends State<AccountScreen> {
                       subtitle: 'نحن هنا لمساعدتك',
                       color: navy,
                       last: true,
-                      iconOnLeft: true,
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -1351,6 +1438,497 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 }
 
+
+class FlumeaEditProfileScreen extends StatefulWidget {
+  const FlumeaEditProfileScreen({
+    super.key,
+    required this.initialName,
+    required this.initialAvatarUrl,
+  });
+
+  final String initialName;
+  final String? initialAvatarUrl;
+
+  @override
+  State<FlumeaEditProfileScreen> createState() =>
+      _FlumeaEditProfileScreenState();
+}
+
+class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
+  static const Color navy = Color(0xFF102A4C);
+  static const Color blue = Color(0xFF1976D2);
+  static const Color mint = Color(0xFF20B995);
+
+  final SupabaseClient _supabase = Supabase.instance.client;
+  final ImagePicker _picker = ImagePicker();
+  late final TextEditingController _nameController;
+
+  String? _avatarUrl;
+  bool _saving = false;
+  bool _uploadingAvatar = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.initialName);
+    _avatarUrl = widget.initialAvatarUrl;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickAvatar() async {
+    if (_uploadingAvatar) return;
+
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (sheetContext) {
+        final primary = Theme.of(sheetContext).colorScheme.onSurface;
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 12, 18, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 42,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade400,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    'تغيير صورة الحساب',
+                    style: TextStyle(
+                      color: primary,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    leading: const CircleAvatar(
+                      backgroundColor: Color(0xFFEAF3FF),
+                      child: Icon(Icons.photo_library_rounded, color: blue),
+                    ),
+                    title: const Text('اختيار من المعرض'),
+                    onTap: () =>
+                        Navigator.pop(sheetContext, ImageSource.gallery),
+                  ),
+                  ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    leading: const CircleAvatar(
+                      backgroundColor: Color(0xFFEAF3FF),
+                      child: Icon(Icons.camera_alt_rounded, color: navy),
+                    ),
+                    title: const Text('التقاط صورة بالكاميرا'),
+                    onTap: () =>
+                        Navigator.pop(sheetContext, ImageSource.camera),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    if (source == null) return;
+
+    try {
+      final picked = await _picker.pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 1200,
+        maxHeight: 1200,
+      );
+      if (picked == null) return;
+      await _uploadAvatar(picked);
+    } catch (_) {
+      if (!mounted) return;
+      _showMessage('تعذر اختيار الصورة.');
+    }
+  }
+
+  Future<void> _uploadAvatar(XFile picked) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    setState(() => _uploadingAvatar = true);
+
+    try {
+      final extension = _extensionFor(picked.path);
+      final contentType = _contentTypeFor(extension);
+      final path = '${user.id}/avatar.$extension';
+
+      await _supabase.storage.from('avatars').upload(
+        path,
+        File(picked.path),
+        fileOptions: FileOptions(
+          upsert: true,
+          contentType: contentType,
+        ),
+      );
+
+      final publicUrl = _supabase.storage.from('avatars').getPublicUrl(path);
+      final cacheBustedUrl =
+          '$publicUrl?v=${DateTime.now().millisecondsSinceEpoch}';
+
+      await _supabase.from('profiles').upsert({
+        'id': user.id,
+        'avatar_url': cacheBustedUrl,
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+
+      if (!mounted) return;
+      setState(() {
+        _avatarUrl = cacheBustedUrl;
+        _uploadingAvatar = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _uploadingAvatar = false);
+      _showMessage('تعذر حفظ الصورة، حاول مرة أخرى.');
+    }
+  }
+
+  String _extensionFor(String path) {
+    final dot = path.lastIndexOf('.');
+    if (dot == -1) return 'jpg';
+    final ext = path.substring(dot + 1).toLowerCase();
+    return ['jpg', 'jpeg', 'png', 'webp', 'heic'].contains(ext)
+        ? (ext == 'jpeg' ? 'jpg' : ext)
+        : 'jpg';
+  }
+
+  String _contentTypeFor(String extension) {
+    switch (extension) {
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      case 'heic':
+        return 'image/heic';
+      default:
+        return 'image/jpeg';
+    }
+  }
+
+  Future<void> _save() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      _showMessage('اكتب اسمك أولاً.');
+      return;
+    }
+
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    setState(() => _saving = true);
+
+    try {
+      await _supabase.from('profiles').upsert({
+        'id': user.id,
+        'full_name': name,
+        'avatar_url': _avatarUrl,
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+
+      if (!mounted) return;
+      Navigator.of(context).pop(name);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      _showMessage('تعذر حفظ الملف الشخصي، حاول مرة أخرى.');
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          textAlign: TextAlign.right,
+          textDirection: TextDirection.rtl,
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.onSurface;
+    final secondary =
+        isDark ? const Color(0xFFB8C2CC) : const Color(0xFF8290A2);
+    final surface = Theme.of(context).colorScheme.surface;
+    final border =
+        isDark ? const Color(0xFF2A3540) : const Color(0xFFE4EBF2);
+
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(
+          elevation: 0,
+          centerTitle: true,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          surfaceTintColor: Colors.transparent,
+          leading: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Container(
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFF182433)
+                    : const Color(0xFFEAF3FF),
+                shape: BoxShape.circle,
+                border: Border.all(color: border),
+              ),
+              child: IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_forward_rounded),
+                color: primary,
+                tooltip: 'رجوع',
+              ),
+            ),
+          ),
+          title: Text(
+            'تعديل الملف الشخصي',
+            style: TextStyle(
+              color: primary,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 30),
+          child: Column(
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: isDark
+                        ? const [Color(0xFF17212B), Color(0xFF1B2733)]
+                        : const [Color(0xFFEFFBF8), Color(0xFFF4F8FF)],
+                  ),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: border),
+                ),
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      onTap: _pickAvatar,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 124,
+                            height: 124,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isDark
+                                  ? const Color(0xFF243140)
+                                  : const Color(0xFFE3F5F1),
+                              border: Border.all(
+                                color: isDark
+                                    ? const Color(0xFF3A4B5F)
+                                    : Colors.white,
+                                width: 5,
+                              ),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x18000000),
+                                  blurRadius: 18,
+                                  offset: Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: _avatarUrl != null && _avatarUrl!.isNotEmpty
+                                ? Image.network(
+                                    _avatarUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Icon(
+                                      Icons.person_rounded,
+                                      size: 68,
+                                      color: isDark ? Colors.white70 : navy,
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.person_rounded,
+                                    size: 68,
+                                    color: isDark ? Colors.white70 : navy,
+                                  ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            left: -2,
+                            child: Container(
+                              width: 42,
+                              height: 42,
+                              decoration: const BoxDecoration(
+                                color: navy,
+                                shape: BoxShape.circle,
+                              ),
+                              child: _uploadingAvatar
+                                  ? const Padding(
+                                      padding: EdgeInsets.all(10),
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          Colors.white,
+                                        ),
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.camera_alt_rounded,
+                                      color: Colors.white,
+                                      size: 21,
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'صورتك، هويتك في FLUMEA',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: primary,
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      'اضغط على الصورة لتغييرها',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: secondary, fontSize: 13.5),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: surface,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'معلوماتك الشخصية',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        color: primary,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    TextField(
+                      controller: _nameController,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
+                      textInputAction: TextInputAction.done,
+                      decoration: InputDecoration(
+                        labelText: 'الاسم',
+                        hintText: 'اكتب اسمك',
+                        prefixIcon: const Icon(
+                          Icons.person_outline_rounded,
+                          color: blue,
+                        ),
+                        filled: true,
+                        fillColor:
+                            isDark ? const Color(0xFF151A20) : const Color(0xFFF7F9FC),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide(color: border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide(color: border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: const BorderSide(color: blue, width: 1.5),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: FilledButton.icon(
+                  onPressed: _saving ? null : _save,
+                  icon: _saving
+                      ? const SizedBox(
+                          width: 21,
+                          height: 21,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Icon(Icons.check_rounded),
+                  label: Text(
+                    _saving ? 'جارٍ الحفظ...' : 'حفظ التغييرات',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: blue,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: blue.withValues(alpha: 0.55),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
 class FlumeaHelpCenterScreen extends StatelessWidget {
   const FlumeaHelpCenterScreen({super.key});
 
@@ -1377,20 +1955,35 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                 Row(
                   textDirection: TextDirection.ltr,
                   children: [
-                    const Text(
+                    Text(
                       'FLUMEA',
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
-                        color: navy,
+                        color: primary,
                       ),
                     ),
                     const Spacer(),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_forward_rounded),
-                      color: navy,
-                      tooltip: 'رجوع',
+                    Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF182433)
+                            : const Color(0xFFEAF3FF),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF314155)
+                              : const Color(0xFFDCE7F2),
+                        ),
+                      ),
+                      child: IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.arrow_forward_rounded),
+                        color: primary,
+                        tooltip: 'رجوع',
+                      ),
                     ),
                   ],
                 ),
@@ -1712,20 +2305,35 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                 Row(
                   textDirection: TextDirection.ltr,
                   children: [
-                    const Text(
+                    Text(
                       'FLUMEA',
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
-                        color: navy,
+                        color: primary,
                       ),
                     ),
                     const Spacer(),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_forward_rounded),
-                      color: navy,
-                      tooltip: 'رجوع',
+                    Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF182433)
+                            : const Color(0xFFEAF3FF),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF314155)
+                              : const Color(0xFFDCE7F2),
+                        ),
+                      ),
+                      child: IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.arrow_forward_rounded),
+                        color: primary,
+                        tooltip: 'رجوع',
+                      ),
                     ),
                   ],
                 ),
