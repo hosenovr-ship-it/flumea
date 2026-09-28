@@ -623,7 +623,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             color: primary,
-                            fontSize: 17,
+                            fontSize: 20,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
