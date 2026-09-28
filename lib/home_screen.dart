@@ -27,6 +27,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final _supabase = Supabase.instance.client;
 
   bool _loading = true;
+  String _profileName = '';
+  String? _profileAvatarUrl;
   List<Map<String, dynamic>> _tasks = [];
   List<Map<String, dynamic>> _habits = [];
   final Map<String, bool> _habitCompleted = {};
@@ -64,6 +66,23 @@ class _HomeScreenState extends State<HomeScreen> {
     List<Map<String, dynamic>> tasks = [];
     List<Map<String, dynamic>> habits = [];
     final completedMap = <String, bool>{};
+
+    // Load the same profile data used by AccountScreen so the Home
+    // screen always shows the saved account name and profile image.
+    String profileName = '';
+    String? profileAvatarUrl;
+    try {
+      final profile = await _supabase
+          .from('profiles')
+          .select('full_name,avatar_url')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      profileName = profile?['full_name']?.toString().trim() ?? '';
+      profileAvatarUrl = profile?['avatar_url']?.toString();
+    } catch (e) {
+      debugPrint('FLUMEA profile load error: $e');
+    }
 
     // Load tasks independently so an error in another table
     // cannot make the whole Home screen look empty.
@@ -162,6 +181,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
 
     setState(() {
+      _profileName = profileName;
+      _profileAvatarUrl = profileAvatarUrl;
       _tasks = tasks;
       _habits = habits;
       _habitCompleted
@@ -321,17 +342,30 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHeader() {
     final user = _supabase.auth.currentUser;
     final metadata = user?.userMetadata;
-    final rawName = metadata?['full_name'] ?? metadata?['name'] ?? metadata?['display_name'];
-    final avatarUrl = metadata?['avatar_url']?.toString();
 
-    String userName = rawName?.toString().trim() ?? '';
+    // Prefer the profile table because AccountScreen saves the user's
+    // name and avatar there. Keep auth metadata/email only as a fallback.
+    String userName = _profileName.trim();
+    if (userName.isEmpty) {
+      final rawName =
+          metadata?['full_name'] ?? metadata?['name'] ?? metadata?['display_name'];
+      userName = rawName?.toString().trim() ?? '';
+    }
     if (userName.isEmpty && user?.email != null) {
       userName = user!.email!.split('@').first.trim();
     }
     if (userName.isEmpty) userName = 'صديقي';
 
+    final avatarUrl = (_profileAvatarUrl != null &&
+            _profileAvatarUrl!.trim().isNotEmpty)
+        ? _profileAvatarUrl!.trim()
+        : metadata?['avatar_url']?.toString();
+
     final hour = DateTime.now().hour;
     final greeting = hour >= 5 && hour < 12 ? 'صباح الخير' : 'مساء الخير';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final flumeaColor =
+        isDark ? const Color(0xFFD9E9F7) : darkBlue;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -339,12 +373,12 @@ class _HomeScreenState extends State<HomeScreen> {
         Row(
           textDirection: TextDirection.ltr,
           children: [
-            const Padding(
-              padding: EdgeInsets.only(top: 8),
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
               child: Text(
                 'FLUMEA',
                 style: TextStyle(
-                  color: darkBlue,
+                  color: flumeaColor,
                   fontSize: 16,
                   letterSpacing: 4.0,
                   fontWeight: FontWeight.w700,
@@ -359,7 +393,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? NetworkImage(avatarUrl)
                   : null,
               child: avatarUrl == null || avatarUrl.isEmpty
-                  ? Icon(Icons.person_rounded, color: Theme.of(context).colorScheme.onSurface, size: 28)
+                  ? const Icon(
+                      Icons.person_rounded,
+                      color: darkBlue,
+                      size: 28,
+                    )
                   : null,
             ),
           ],
