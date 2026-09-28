@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'bottom_navigation.dart';
 import 'services/task_service.dart';
 import 'services/habit_service.dart';
+import 'services/flumea_notification_service.dart';
 
 class PlanScreen extends StatefulWidget {
   const PlanScreen({super.key});
@@ -12,48 +13,76 @@ class PlanScreen extends StatefulWidget {
 }
 
 class _PlanScreenState extends State<PlanScreen> {
-  static const Color navy = Color(0xFF102A4C);
   static const Color blue = Color(0xFF1478D4);
   static const Color cyan = Color(0xFF20C7B7);
-  static const Color background = Color(0xFFF7FBFF);
+
+  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
+
+  Color get navy => _isDark ? const Color(0xFFF2F5F8) : const Color(0xFF102A4C);
+  Color get background => _isDark ? const Color(0xFF0B141D) : const Color(0xFFF7FBFF);
+  Color get _surface => _isDark ? const Color(0xFF111217) : Colors.white;
+  Color get _border => _isDark ? const Color(0xFF34404D) : const Color(0xFFE5EAF0);
+  Color get _subtle => _isDark ? const Color(0xFFB5C0CB) : const Color(0xFF52647A);
+  Color get _soft => _isDark ? const Color(0xFF151B23) : const Color(0xFFF5F8FC);
+  Color get _summary => _isDark ? const Color(0xFF10283A) : const Color(0xFFEAF9F4);
+  Color get _taskAdd => _isDark ? const Color(0xFF202A35) : const Color(0xFFEAF4FF);
+  Color get _habitDone => _isDark ? const Color(0xFF12302F) : const Color(0xFFF1FBF9);
+  Color get _habitDoneBorder => _isDark ? const Color(0xFF24504C) : const Color(0xFFD5F0EB);
+  Color get _habitUndone => _isDark ? const Color(0xFF17191E) : const Color(0xFFF8FAFC);
+  Color get _habitUndoneBorder => _isDark ? const Color(0xFF303844) : const Color(0xFFE7ECF2);
+  Color get _inputBackground => _isDark ? const Color(0xFF1A2028) : const Color(0xFFFBFCFE);
+  Color get _inputBorder => _isDark ? const Color(0xFF34414F) : const Color(0xFFDCE3EC);
+  Color get _softButton => _isDark ? const Color(0xFF202832) : const Color(0xFFF0F3F8);
+  Color get _unselectedControlBorder => _isDark ? const Color(0xFF66727F) : const Color(0xFFB8C2CE);
 
   final TaskService _taskService = TaskService();
-final HabitService _habitService = HabitService();
+  final HabitService _habitService = HabitService();
+  final SupabaseClient _supabase = Supabase.instance.client;
   int selectedDay = DateTime.now().weekday % 7;
-  int _activeDays = 0;
-
-  // أهداف الأسبوع تبدأ فارغة، ويمكن للمستخدم إضافتها لاحقًا.
-  final List<Map<String, dynamic>> _weeklyGoals = [];
 
   bool _isLoadingTasks = true;
   bool _isSavingTask = false;
+  bool _isSavingHabit = false;
 
   List<Map<String, dynamic>> tasks = [];
 
-  final List<Map<String, dynamic>> habits = [
-    {
-      'title': 'شرب الماء',
-      'icon': Icons.water_drop_outlined,
-      'completed': true,
-    },
-    {
-      'title': 'الرياضة',
-      'icon': Icons.fitness_center_outlined,
-      'completed': true,
-    },
-    {
-      'title': 'القراءة',
-      'icon': Icons.menu_book_outlined,
-      'completed': true,
-    },
-  ];
+  final List<Map<String, dynamic>> habits = [];
+
+  // أهداف الأسبوع تبدأ فارغة، ويمكن إضافة ثلاثة أهداف كحد أقصى.
+  final List<Map<String, dynamic>> _weeklyGoals = [];
+  int _activeDays = 0;
 
   @override
   void initState() {
     super.initState();
+    selectedDay = DateTime.now().weekday % 7;
     _loadTasks();
     _loadHabits();
     _loadActiveDays();
+  }
+
+  Future<void> _loadActiveDays() async {
+    try {
+      final allTasks = await _taskService.getTasks();
+      final activeDates = <String>{};
+
+      for (final task in allTasks) {
+        if (_safeBool(task['completed'])) {
+          final dueDate = _safeString(task['due_date']);
+          if (dueDate.isNotEmpty) {
+            activeDates.add(dueDate);
+          }
+        }
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _activeDays = activeDates.length;
+      });
+    } catch (_) {
+      // لا نوقف الصفحة إذا تعذر حساب الأيام النشطة.
+    }
   }
 
   String _safeString(
@@ -117,6 +146,41 @@ final HabitService _habitService = HabitService();
   // SUPABASE - تحميل المهام
   // ============================================================
 
+  DateTime get _selectedDate {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final daysFromSunday = today.weekday % 7;
+
+    return today
+        .subtract(Duration(days: daysFromSunday))
+        .add(Duration(days: selectedDay));
+  }
+
+  String _dateKey(DateTime date) {
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return '${date.year}-$month-$day';
+  }
+
+  Future<void> _saveTaskDate(
+    String id,
+    DateTime date,
+  ) async {
+    final userId = _supabase.auth.currentUser?.id;
+
+    if (userId == null || id.isEmpty) {
+      throw Exception('يجب تسجيل الدخول أولاً');
+    }
+
+    await _supabase
+        .from('tasks')
+        .update({
+          'due_date': _dateKey(date),
+        })
+        .eq('id', id)
+        .eq('user_id', userId);
+  }
+
   Future<void> _loadTasks() async {
     if (!mounted) {
       return;
@@ -127,20 +191,46 @@ final HabitService _habitService = HabitService();
     });
 
     try {
-      final loadedTasks = await _taskService.getTasks();
+      final allTasks = await _taskService.getTasks();
 
       if (!mounted) {
         return;
       }
 
-      if (loadedTasks.isEmpty) {
+      if (allTasks.isEmpty) {
         await _createInitialTasks();
-      } else {
-        setState(() {
-          tasks = loadedTasks;
-          _isLoadingTasks = false;
-        });
+        return;
       }
+
+      // المهام القديمة التي لا تملك تاريخاً تُربط باليوم الحالي المعروض
+      // مرة واحدة حتى لا تختفي من التطبيق بعد إضافة نظام الأيام.
+      for (final task in allTasks) {
+        final id = _safeString(task['id']);
+        final dueDate = _safeString(task['due_date']);
+
+        if (id.isNotEmpty && dueDate.isEmpty) {
+          try {
+            await _saveTaskDate(id, _selectedDate);
+            task['due_date'] = _dateKey(_selectedDate);
+          } catch (_) {
+            // لا نوقف تحميل بقية المهام إذا تعذر تحديث مهمة قديمة.
+          }
+        }
+      }
+
+      final selectedDateKey = _dateKey(_selectedDate);
+      final selectedTasks = allTasks.where((task) {
+        return _safeString(task['due_date']) == selectedDateKey;
+      }).toList();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        tasks = selectedTasks;
+        _isLoadingTasks = false;
+      });
     } catch (error) {
       if (!mounted) {
         return;
@@ -150,13 +240,7 @@ final HabitService _habitService = HabitService();
         _isLoadingTasks = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر تحميل المهام: $error',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تعذر تحميل المهام: $error');
     }
   }
 
@@ -245,6 +329,11 @@ final HabitService _habitService = HabitService();
           completed: task['completed'] as bool,
         );
 
+        await _saveTaskDate(
+          _safeString(created['id']),
+          _selectedDate,
+        );
+        created['due_date'] = _dateKey(_selectedDate);
         createdTasks.add(created);
       }
 
@@ -265,54 +354,222 @@ final HabitService _habitService = HabitService();
         _isLoadingTasks = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر إنشاء المهام الأولية: $error',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تعذر إنشاء المهام الأولية: $error');
     }
   }
   // ============================================================
-// Supabase - تحميل العادات
-// ============================================================
+  // Supabase - تحميل العادات
+  // ============================================================
 
-Future<void> _loadHabits() async {
-  try {
-    final loadedHabits = await _habitService.getHabits();
+  Future<void> _loadHabits() async {
+    try {
+      final loadedHabits = await _habitService.getHabits();
 
-    if (!mounted) {
+      if (!mounted) {
+        return;
+      }
+
+      if (loadedHabits.isEmpty) {
+        const defaultNames = [
+          'شرب الماء',
+          'الرياضة',
+          'القراءة',
+        ];
+
+        final createdHabits = <Map<String, dynamic>>[];
+
+        for (final name in defaultNames) {
+          final created = await _habitService.addHabit(
+            name: name,
+            description: '',
+            completed: false,
+          );
+          createdHabits.add(created);
+        }
+
+        if (!mounted) {
+          return;
+        }
+
+        setState(() {
+          habits.clear();
+          for (final habit in createdHabits) {
+            habits.add(_habitMap(habit));
+          }
+        });
+        return;
+      }
+
+      setState(() {
+        habits.clear();
+        for (final habit in loadedHabits) {
+          habits.add(_habitMap(habit));
+        }
+      });
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      FlumeaNotificationService.showTopMessage(context, 'تعذر تحميل العادات: $error');
+    }
+  }
+
+  Map<String, dynamic> _habitMap(Map<String, dynamic> habit) {
+    final name = _safeString(habit['name']);
+
+    return {
+      'id': habit['id'],
+      'title': name,
+      'description': _safeString(habit['description']),
+      'completed': _safeBool(habit['completed']),
+      'icon': _habitIconForName(name),
+    };
+  }
+
+  IconData _habitIconForName(String name) {
+    switch (name.trim()) {
+      case 'شرب الماء':
+        return Icons.water_drop_outlined;
+      case 'الرياضة':
+        return Icons.fitness_center_outlined;
+      case 'القراءة':
+        return Icons.menu_book_outlined;
+      case 'النوم':
+        return Icons.bed_outlined;
+      default:
+        return Icons.check_circle_outline;
+    }
+  }
+
+  // ============================================================
+  // Supabase - تحديث حالة العادة
+  // ============================================================
+
+  Future<void> _toggleHabit(
+    String id,
+    bool completed,
+  ) async {
+    if (id.isEmpty) {
       return;
     }
+
+    final index = habits.indexWhere(
+      (habit) => _safeString(habit['id']) == id,
+    );
+
+    if (index == -1) {
+      return;
+    }
+
+    final newValue = !completed;
 
     setState(() {
-      habits.clear();
-
-      for (final habit in loadedHabits) {
-        habits.add({
-          'id': habit['id'],
-          'title': habit['name'] ?? '',
-          'description': habit['description'] ?? '',
-          'completed': habit['completed'] ?? false,
-          'icon': Icons.check_circle_outline,
-        });
-      }
+      habits[index]['completed'] = newValue;
     });
-  } catch (error) {
-    if (!mounted) {
+
+    try {
+      await _habitService.updateHabit(
+        id: id,
+        completed: newValue,
+      );
+
+      if (newValue) {
+        await FlumeaNotificationService.instance.show(
+          title: 'تم إكمال العادة اليومية! 🎯',
+          body: 'أحسنت! استمر على هذا التقدم.',
+          type: FlumeaNotificationType.habit,
+        );
+      }
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        habits[index]['completed'] = completed;
+      });
+
+      FlumeaNotificationService.showTopMessage(context, 'تعذر تحديث العادة: $error');
+    }
+  }
+
+  // ============================================================
+  // إعادة العادة
+  // ============================================================
+
+  Future<void> _resetHabit(String id) async {
+    if (id.isEmpty) {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'تعذر تحميل العادات: $error',
-        ),
-      ),
+    final index = habits.indexWhere(
+      (habit) => _safeString(habit['id']) == id,
     );
+
+    if (index == -1) {
+      return;
+    }
+
+    final oldValue = _safeBool(habits[index]['completed']);
+
+    setState(() {
+      habits[index]['completed'] = false;
+    });
+
+    try {
+      await _habitService.resetHabit(id);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        habits[index]['completed'] = oldValue;
+      });
+
+      FlumeaNotificationService.showTopMessage(context, 'تعذر إعادة العادة: $error');
+    }
   }
-}
+
+  // ============================================================
+  // حذف العادة
+  // ============================================================
+
+  Future<void> _deleteHabit(String id) async {
+    if (id.isEmpty) {
+      return;
+    }
+
+    final index = habits.indexWhere(
+      (habit) => _safeString(habit['id']) == id,
+    );
+
+    if (index == -1) {
+      return;
+    }
+
+    final removedHabit = Map<String, dynamic>.from(habits[index]);
+
+    setState(() {
+      habits.removeAt(index);
+    });
+
+    try {
+      await _habitService.deleteHabit(id);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        habits.insert(index, removedHabit);
+      });
+
+      FlumeaNotificationService.showTopMessage(context, 'تعذر حذف العادة: $error');
+    }
+  }
+
     // ============================================================
   // تحديث حالة المهمة في Supabase
   // ============================================================
@@ -344,6 +601,16 @@ Future<void> _loadHabits() async {
         id: id,
         completed: newValue,
       );
+
+      await _loadActiveDays();
+
+      if (newValue) {
+        await FlumeaNotificationService.instance.show(
+          title: 'تم إكمال المهمة! 📝',
+          body: 'أحسنت! استمر في تنفيذ مهامك اليومية.',
+          type: FlumeaNotificationType.task,
+        );
+      }
     } catch (error) {
       if (!mounted) {
         return;
@@ -353,13 +620,7 @@ Future<void> _loadHabits() async {
         tasks[index]['completed'] = oldValue;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر تحديث المهمة: $error',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تعذر تحديث المهمة: $error');
     }
   }
 
@@ -393,13 +654,7 @@ Future<void> _loadHabits() async {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'تم حذف المهمة',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تم حذف المهمة');
     } catch (error) {
       if (!mounted) {
         return;
@@ -412,13 +667,7 @@ Future<void> _loadHabits() async {
         );
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر حذف المهمة: $error',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تعذر حذف المهمة: $error');
     }
   }
 
@@ -453,17 +702,19 @@ Future<void> _loadHabits() async {
         completed: false,
       );
 
+      await _loadActiveDays();
+
       if (!mounted) {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'تمت إعادة المهمة',
-          ),
-        ),
+      FlumeaNotificationService.showTopMessage(context, 'تمت إعادة المهمة');
+
+      await FlumeaNotificationService.instance.show(
+        title: 'تمت إعادة المهمة',
+        body: 'يمكنك تنفيذ المهمة مرة أخرى الآن.',
       );
+
     } catch (error) {
       if (!mounted) {
         return;
@@ -473,13 +724,7 @@ Future<void> _loadHabits() async {
         tasks[index]['completed'] = oldValue;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'تعذر إعادة المهمة: $error',
-          ),
-        ),
-      );
+      FlumeaNotificationService.showTopMessage(context, 'تعذر إعادة المهمة: $error');
     }
   }
 
@@ -495,7 +740,7 @@ Future<void> _loadHabits() async {
         backgroundColor: background,
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               18,
               12,
               18,
@@ -506,15 +751,15 @@ Future<void> _loadHabits() async {
                   CrossAxisAlignment.stretch,
               children: [
                 _buildHeader(),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 _buildTodayButton(),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 _buildDays(),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 _buildSummary(),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 _buildTasks(),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 Row(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
@@ -522,7 +767,7 @@ Future<void> _loadHabits() async {
                     Expanded(
                       child: _buildWeeklyGoals(),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: _buildDailyHabits(),
                     ),
@@ -546,55 +791,55 @@ Future<void> _loadHabits() async {
 
   Widget _buildHeader() {
     return Row(
-      textDirection: TextDirection.ltr,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'FLUMEA',
-          textAlign: TextAlign.left,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 4.0,
-            color: navy,
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            'FLUMEA',
+            style: TextStyle(
+              color: navy,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 4,
+            ),
           ),
         ),
         const Spacer(),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                textDirection: TextDirection.rtl,
-                children: [
-                  const Text(
-                    'الخطة',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w800,
-                      color: navy,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(
-                    Icons.calendar_month_outlined,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  'الخطة',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w800,
                     color: navy,
-                    size: 30,
                   ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'نظم يومك وحقق أهدافك',
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Color(0xFF7B8798),
                 ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.calendar_month_outlined,
+                  color: navy,
+                  size: 30,
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'نظم يومك وحقق أهدافك',
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: 16,
+                color: _subtle,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ],
     );
@@ -606,24 +851,28 @@ Future<void> _loadHabits() async {
 
   Widget _buildTodayButton() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment:
+          MainAxisAlignment.end,
       children: [
         GestureDetector(
           onTap: () {
             setState(() {
               selectedDay = DateTime.now().weekday % 7;
             });
+            _loadTasks();
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(
+            padding:
+                EdgeInsets.symmetric(
               horizontal: 20,
               vertical: 11,
             ),
             decoration: BoxDecoration(
-              color: const Color(0xFFEAF9F4),
-              borderRadius: BorderRadius.circular(28),
+              color: _summary,
+              borderRadius:
+                  BorderRadius.circular(28),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
@@ -631,7 +880,8 @@ Future<void> _loadHabits() async {
                   style: TextStyle(
                     color: navy,
                     fontSize: 16,
-                    fontWeight: FontWeight.w800,
+                    fontWeight:
+                        FontWeight.w800,
                   ),
                 ),
                 SizedBox(width: 8),
@@ -663,26 +913,30 @@ Future<void> _loadHabits() async {
     ];
 
     final now = DateTime.now();
-    final sunday = now.subtract(Duration(days: now.weekday % 7));
+    final today = DateTime(now.year, now.month, now.day);
+    final sunday = today.subtract(Duration(days: today.weekday % 7));
+    final days = List.generate(7, (index) {
+      final date = sunday.add(Duration(days: index));
+      return [dayNames[index], date.day.toString()];
+    });
 
     return SizedBox(
       height: 82,
       child: Row(
         children: List.generate(
-          7,
+          days.length,
           (index) {
-            final date = sunday.add(Duration(days: index));
-
             return Expanded(
               child: GestureDetector(
                 onTap: () {
                   setState(() {
                     selectedDay = index;
                   });
+                  _loadTasks();
                 },
                 child: _dayBox(
-                  dayNames[index],
-                  '${date.day}',
+                  days[index][0],
+                  days[index][1],
                   selectedDay == index,
                 ),
               ),
@@ -700,19 +954,19 @@ Future<void> _loadHabits() async {
   ) {
     return Container(
       margin:
-          const EdgeInsets.symmetric(
+          EdgeInsets.symmetric(
         horizontal: 3,
       ),
       decoration: BoxDecoration(
         color: selected
             ? blue
-            : const Color(0xFFF5F8FC),
+            : _soft,
         borderRadius:
             BorderRadius.circular(16),
         border: Border.all(
           color: selected
               ? blue
-              : const Color(0xFFE7ECF2),
+              : _habitUndoneBorder,
         ),
       ),
       child: Column(
@@ -729,10 +983,10 @@ Future<void> _loadHabits() async {
                   FontWeight.w700,
               color: selected
                   ? Colors.white
-                  : const Color(0xFF52647A),
+                  : _subtle,
             ),
           ),
-          const SizedBox(height: 5),
+          SizedBox(height: 5),
           Text(
             number,
             style: TextStyle(
@@ -766,9 +1020,9 @@ Future<void> _loadHabits() async {
     return Container(
       width: double.infinity,
       padding:
-          const EdgeInsets.all(16),
+          EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFEAF9F4),
+        color: _summary,
         borderRadius:
             BorderRadius.circular(24),
       ),
@@ -785,7 +1039,7 @@ Future<void> _loadHabits() async {
                       mainAxisAlignment:
                           MainAxisAlignment.end,
                       children: [
-                        const Text(
+                        Text(
                           'خطة اليوم',
                           style: TextStyle(
                             fontSize: 21,
@@ -794,10 +1048,10 @@ Future<void> _loadHabits() async {
                             color: navy,
                           ),
                         ),
-                        const SizedBox(
+                        SizedBox(
                           width: 7,
                         ),
-                        const Text(
+                        Text(
                           '☀️',
                           style: TextStyle(
                             fontSize: 22,
@@ -805,10 +1059,10 @@ Future<void> _loadHabits() async {
                         ),
                       ],
                     ),
-                    const SizedBox(
+                    SizedBox(
                       height: 7,
                     ),
-                    const Text(
+                    Text(
                       'خطوات صغيرة تصنع فرقاً كبيراً',
                       textAlign:
                           TextAlign.right,
@@ -824,7 +1078,7 @@ Future<void> _loadHabits() async {
             ],
           ),
 
-          const SizedBox(
+          SizedBox(
             height: 16,
           ),
 
@@ -869,61 +1123,6 @@ Future<void> _loadHabits() async {
     );
   }
 
-  Future<void> _loadActiveDays() async {
-    final user = Supabase.instance.client.auth.currentUser;
-
-    if (user == null) {
-      if (mounted) {
-        setState(() => _activeDays = 0);
-      }
-      return;
-    }
-
-    final activeDates = <String>{};
-
-    try {
-      final taskRows = await Supabase.instance.client
-          .from('tasks')
-          .select('due_date,completed')
-          .eq('user_id', user.id)
-          .eq('completed', true);
-
-      for (final row in taskRows) {
-        final date = _safeString(row['due_date']);
-        if (date.isNotEmpty) {
-          activeDates.add(date);
-        }
-      }
-    } catch (_) {
-      // لا نوقف الصفحة إذا تعذر تحميل سجل المهام.
-    }
-
-    try {
-      final logRows = await Supabase.instance.client
-          .from('habit_logs')
-          .select('completed_date,completed')
-          .eq('user_id', user.id)
-          .eq('completed', true);
-
-      for (final row in logRows) {
-        final date = _safeString(row['completed_date']);
-        if (date.isNotEmpty) {
-          activeDates.add(date);
-        }
-      }
-    } catch (_) {
-      // سجل العادات اختياري؛ نستمر بالبيانات المتاحة.
-    }
-
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _activeDays = activeDates.length;
-    });
-  }
-
   Widget _summaryItem(
     IconData icon,
     String number,
@@ -948,13 +1147,13 @@ Future<void> _loadHabits() async {
           ),
         ),
 
-        const SizedBox(
+        SizedBox(
           height: 5,
         ),
 
         Text(
           number,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 19,
             fontWeight:
                 FontWeight.w800,
@@ -966,9 +1165,9 @@ Future<void> _loadHabits() async {
           title,
           textAlign:
               TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 10,
-            color: Color(0xFF66758A),
+            color: _subtle,
           ),
         ),
       ],
@@ -1019,14 +1218,14 @@ Future<void> _loadHabits() async {
               Text(
                 '$completed/${tasks.length}',
                 style:
-                    const TextStyle(
+                    TextStyle(
                   fontSize: 15,
                   fontWeight:
                       FontWeight.w800,
                   color: navy,
                 ),
               ),
-              const Text(
+              Text(
                 'مكتملة',
                 style: TextStyle(
                   fontSize: 9,
@@ -1048,17 +1247,17 @@ Future<void> _loadHabits() async {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _surface,
         borderRadius:
             BorderRadius.circular(24),
         border: Border.all(
-          color: const Color(0xFFE5EAF0),
+          color: _border,
         ),
       ),
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               18,
               15,
               18,
@@ -1066,13 +1265,13 @@ Future<void> _loadHabits() async {
             ),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.format_list_bulleted,
                   color: navy,
                   size: 27,
                 ),
-                const SizedBox(width: 8),
-                const Expanded(
+                SizedBox(width: 8),
+                Expanded(
                   child: Text(
                     'المهام اليوم',
                     style: TextStyle(
@@ -1088,7 +1287,7 @@ Future<void> _loadHabits() async {
           ),
 
           if (_isLoadingTasks)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(
                 vertical: 30,
               ),
@@ -1097,7 +1296,7 @@ Future<void> _loadHabits() async {
               ),
             )
           else if (tasks.isEmpty)
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(
                 vertical: 25,
                 horizontal: 20,
@@ -1106,7 +1305,7 @@ Future<void> _loadHabits() async {
                 'لا توجد مهام بعد',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Color(0xFF7B8798),
+                  color: _subtle,
                   fontSize: 14,
                 ),
               ),
@@ -1121,7 +1320,7 @@ Future<void> _loadHabits() async {
             ),
 
           Padding(
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.all(14),
             child: GestureDetector(
               onTap: _isSavingTask
                   ? null
@@ -1129,13 +1328,11 @@ Future<void> _loadHabits() async {
               child: Container(
                 width: double.infinity,
                 padding:
-                    const EdgeInsets.symmetric(
+                    EdgeInsets.symmetric(
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(
-                    0xFFEAF4FF,
-                  ),
+                  color: _taskAdd,
                   borderRadius:
                       BorderRadius.circular(22),
                 ),
@@ -1150,12 +1347,12 @@ Future<void> _loadHabits() async {
                       color: blue,
                       size: 24,
                     ),
-                    const SizedBox(width: 5),
+                    SizedBox(width: 5),
                     Text(
                       _isSavingTask
                           ? 'جاري الحفظ...'
                           : 'إضافة مهمة جديدة',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: blue,
                         fontSize: 16,
                         fontWeight:
@@ -1222,12 +1419,12 @@ Future<void> _loadHabits() async {
 
     return Container(
       padding:
-          const EdgeInsets.symmetric(
+          EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 14,
       ),
       decoration:
-          const BoxDecoration(
+          BoxDecoration(
         border: Border(
           top: BorderSide(
             color: Color(
@@ -1264,7 +1461,7 @@ Future<void> _loadHabits() async {
                 ),
               ),
               child: completed
-                  ? const Icon(
+                  ? Icon(
                       Icons.check,
                       color:
                           Colors.white,
@@ -1274,7 +1471,7 @@ Future<void> _loadHabits() async {
             ),
           ),
 
-          const SizedBox(
+          SizedBox(
             width: 12,
           ),
 
@@ -1319,13 +1516,13 @@ Future<void> _loadHabits() async {
                         ),
                       ),
 
-                      const SizedBox(
+                      SizedBox(
                         width: 8,
                       ),
 
                       Container(
                         padding:
-                            const EdgeInsets
+                            EdgeInsets
                                 .symmetric(
                           horizontal: 10,
                           vertical: 6,
@@ -1357,13 +1554,13 @@ Future<void> _loadHabits() async {
                                         .w800,
                               ),
                             ),
-                            const SizedBox(
+                            SizedBox(
                               width: 3,
                             ),
                             Text(
                               emoji,
                               style:
-                                  const TextStyle(
+                                  TextStyle(
                                 fontSize: 13,
                               ),
                             ),
@@ -1373,7 +1570,7 @@ Future<void> _loadHabits() async {
                     ],
                   ),
 
-                  const SizedBox(
+                  SizedBox(
                     height: 4,
                   ),
 
@@ -1385,7 +1582,7 @@ Future<void> _loadHabits() async {
                     overflow:
                         TextOverflow.ellipsis,
                     style:
-                        const TextStyle(
+                        TextStyle(
                       fontSize: 12,
                       color:
                           Color(0xFF7B8798),
@@ -1396,7 +1593,7 @@ Future<void> _loadHabits() async {
             ),
           ),
 
-          const SizedBox(
+          SizedBox(
             width: 12,
           ),
 
@@ -1407,7 +1604,7 @@ Future<void> _loadHabits() async {
               textAlign:
                   TextAlign.left,
               style:
-                  const TextStyle(
+                  TextStyle(
                 fontSize: 13,
                 color:
                     Color(0xFF52647A),
@@ -1417,7 +1614,7 @@ Future<void> _loadHabits() async {
             ),
           ),
 
-          const SizedBox(
+          SizedBox(
             width: 5,
           ),
 
@@ -1440,7 +1637,7 @@ Future<void> _loadHabits() async {
       padding:
           EdgeInsets.zero,
       icon:
-          const Icon(
+          Icon(
         Icons.more_vert,
         color:
             Color(0xFF6E7A88),
@@ -1459,7 +1656,7 @@ Future<void> _loadHabits() async {
       itemBuilder:
           (context) {
         return [
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'reset',
             child: Row(
               mainAxisAlignment:
@@ -1478,7 +1675,7 @@ Future<void> _loadHabits() async {
               ],
             ),
           ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'delete',
             child: Row(
               mainAxisAlignment:
@@ -1507,431 +1704,557 @@ Future<void> _loadHabits() async {
   // ============================================================
 
   void _showAddTaskDialog() {
-    final nameController =
-        TextEditingController();
+    final nameController = TextEditingController();
+    final timeController = TextEditingController();
+    final categoryController = TextEditingController();
+    final emojiController = TextEditingController();
 
-    final descriptionController =
-        TextEditingController();
-
-    final timeController =
-        TextEditingController();
-
-    final categoryController =
-        TextEditingController();
-
-    final emojiController =
-        TextEditingController();
+    String selectedCategory = '';
 
     showDialog(
       context: context,
+      barrierColor: Colors.black54,
       builder: (dialogContext) {
         return Directionality(
-          textDirection:
-              TextDirection.rtl,
-          child: AlertDialog(
-            backgroundColor:
-                Colors.white,
-            shape:
-                RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(28),
+          textDirection: TextDirection.rtl,
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: EdgeInsets.symmetric(
+              horizontal: 18,
+              vertical: 24,
             ),
-            title: const Text(
-              'إضافة مهمة جديدة',
-              textAlign:
-                  TextAlign.center,
-              style: TextStyle(
-                color: navy,
-                fontSize: 24,
-                fontWeight:
-                    FontWeight.w800,
-              ),
-            ),
-            content:
-                SingleChildScrollView(
-              child: Column(
-                mainAxisSize:
-                    MainAxisSize.min,
-                children: [
-                  const Text(
-                    'ابدأ بخطوة صغيرة نحو هدفك الكبير',
-                    textAlign:
-                        TextAlign.center,
-                    style: TextStyle(
-                      color:
-                          Color(0xFF7B8798),
-                      fontSize: 13,
+            child: StatefulBuilder(
+              builder: (dialogContext, setDialogState) {
+                return ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: 520,
+                    maxHeight: 760,
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: _surface,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x33000000),
+                          blurRadius: 28,
+                          offset: Offset(0, 12),
+                        ),
+                      ],
                     ),
-                  ),
-
-                  const SizedBox(
-                    height: 18,
-                  ),
-
-                  _dialogField(
-                    controller:
-                        nameController,
-                    label:
-                        'اسم المهمة *',
-                    icon:
-                        Icons.edit_outlined,
-                  ),
-
-                  const SizedBox(
-                    height: 12,
-                  ),
-
-                  _dialogField(
-                    controller:
-                        timeController,
-                    label:
-                        'الوقت',
-                    icon:
-                        Icons.access_time,
-                  ),
-
-                  const SizedBox(
-                    height: 12,
-                  ),
-
-                  _dialogField(
-                    controller:
-                        categoryController,
-                    label:
-                        'التصنيف',
-                    icon:
-                        Icons.local_offer_outlined,
-                  ),
-
-                  const SizedBox(
-                    height: 12,
-                  ),
-
-                  _dialogField(
-                    controller:
-                        emojiController,
-                    label:
-                        'الإيموجي',
-                    icon:
-                        Icons.sentiment_satisfied_alt,
-                  ),
-
-                  const SizedBox(
-                    height: 12,
-                  ),
-
-                  TextField(
-                    controller:
-                        descriptionController,
-                    maxLines: 3,
-                    maxLength: 100,
-                    textAlign:
-                        TextAlign.right,
-                    decoration:
-                        InputDecoration(
-                      labelText:
-                          'الوصف',
-                      alignLabelWithHint:
-                          true,
-                      prefixIcon:
-                          const Icon(
-                        Icons
-                            .description_outlined,
-                        color:
-                            Color(0xFFE5AA27),
-                      ),
-                      border:
-                          OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius
-                                .circular(
-                          18,
-                        ),
-                      ),
-                      focusedBorder:
-                          OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius
-                                .circular(
-                          18,
-                        ),
-                        borderSide:
-                            const BorderSide(
-                          color: blue,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actionsPadding:
-                const EdgeInsets
-                    .fromLTRB(
-              16,
-              0,
-              16,
-              16,
-            ),
-            actions: [
-              Row(
-                children: [
-                  Expanded(
-                    child:
-                        TextButton(
-                      onPressed: () {
-                        Navigator.pop(
-                          dialogContext,
-                        );
-                      },
-                      style:
-                          TextButton
-                              .styleFrom(
-                        backgroundColor:
-                            const Color(
-                          0xFFF1F4F8,
-                        ),
-                        padding:
-                            const EdgeInsets
-                                .symmetric(
-                          vertical: 14,
-                        ),
-                        shape:
-                            RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius
-                                  .circular(
-                            18,
+                    clipBehavior: Clip.antiAlias,
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.fromLTRB(18, 18, 18, 18),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(top: 4),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        'إضافة مهمة جديدة',
+                                        textAlign: TextAlign.right,
+                                        style: TextStyle(
+                                          color: navy,
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w800,
+                                          height: 1.2,
+                                        ),
+                                      ),
+                                      SizedBox(height: 7),
+                                      Text(
+                                        'ابدأ بخطوة صغيرة نحو هدفك الكبير',
+                                        textAlign: TextAlign.right,
+                                        style: TextStyle(
+                                          color: _subtle,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          height: 1.35,
+                                        ),
+                                      ),
+                                      SizedBox(height: 12),
+                                      Container(
+                                        width: 62,
+                                        height: 4,
+                                        decoration: BoxDecoration(
+                                          color: blue,
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 12),
+                              Container(
+                                width: 94,
+                                height: 94,
+                                decoration: BoxDecoration(
+                                  color: _taskAdd,
+                                  borderRadius: BorderRadius.circular(28),
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.assignment_outlined,
+                                      color: blue,
+                                      size: 58,
+                                    ),
+                                    Positioned(
+                                      right: 10,
+                                      bottom: 8,
+                                      child: Container(
+                                        width: 34,
+                                        height: 34,
+                                        decoration: BoxDecoration(
+                                          color: cyan,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.add,
+                                          color: Colors.white,
+                                          size: 23,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
-                      child:
-                          const Text(
-                        'إلغاء',
-                        style:
-                            TextStyle(
-                          color: navy,
-                          fontSize: 16,
-                          fontWeight:
-                              FontWeight
-                                  .w800,
-                        ),
-                      ),
-                    ),
-                  ),
 
-                  const SizedBox(
-                    width: 12,
-                  ),
+                          SizedBox(height: 18),
 
-                  Expanded(
-                    child:
-                        ElevatedButton(
-                      onPressed:
-                          _isSavingTask
-                              ? null
-                              : () async {
-                                  final name =
-                                      nameController
-                                          .text
-                                          .trim();
+                          _modernTaskField(
+                            controller: nameController,
+                            label: 'اسم المهمة *',
+                            hint: '',
+                            icon: Icons.edit_outlined,
+                            iconBackground: _taskAdd,
+                            iconColor: blue,
+                          ),
 
-                                  if (name.isEmpty) {
-                                    return;
-                                  }
+                          SizedBox(height: 11),
 
-                                  final time =
-                                      timeController
-                                          .text
-                                          .trim();
-
-                                  final category =
-                                      categoryController
-                                          .text
-                                          .trim();
-
-                                  final emoji =
-                                      emojiController
-                                          .text
-                                          .trim();
-
-                                  final description =
-                                      descriptionController
-                                          .text
-                                          .trim();
-
-                                  setState(() {
-                                    _isSavingTask =
-                                        true;
-                                  });
-
-                                  try {
-                                    final newTask =
-                                        await _taskService
-                                            .addTask(
-                                      title: name,
-                                      description:
-                                          description,
-                                      time: time.isEmpty
-                                          ? 'بدون وقت'
-                                          : time,
-                                      tag: category.isEmpty
-                                          ? 'عام'
-                                          : category,
-                                      emoji: emoji.isEmpty
-                                          ? '📝'
-                                          : emoji,
-                                      color:
-                                          '#1478D4',
-                                      completed:
-                                          false,
-                                    );
-
-                                    if (!mounted) {
-                                      return;
-                                    }
-
-                                    setState(() {
-                                      tasks.add(
-                                        newTask,
-                                      );
-                                      _isSavingTask =
-                                          false;
-                                    });
-
-                                    if (!mounted) {
-  return;
-}
-
-Navigator.of(context).pop();
-                                      
-                                    
-
-                                    ScaffoldMessenger
-                                        .of(
-                                      context,
-                                    ).showSnackBar(
-                                      const SnackBar(
-                                        content:
-                                            Text(
-                                          'تم حفظ المهمة بنجاح ✅',
-                                        ),
-                                      ),
-                                    );
-                                  } catch (error) {
-                                    if (!mounted) {
-                                      return;
-                                    }
-
-                                    setState(() {
-                                      _isSavingTask =
-                                          false;
-                                    });
-
-                                    ScaffoldMessenger
-                                        .of(
-                                      context,
-                                    ).showSnackBar(
-                                      SnackBar(
-                                        content:
-                                            Text(
-                                          'تعذر حفظ المهمة: $error',
-                                        ),
-                                      ),
-                                    );
-                                  }
+                          GestureDetector(
+                            onTap: () async {
+                              final picked = await showTimePicker(
+                                context: dialogContext,
+                                initialTime: TimeOfDay.now(),
+                                builder: (context, child) {
+                                  return Directionality(
+                                    textDirection: TextDirection.rtl,
+                                    child: child!,
+                                  );
                                 },
-                      style:
-                          ElevatedButton
-                              .styleFrom(
-                        backgroundColor:
-                            blue,
-                        foregroundColor:
-                            Colors.white,
-                        padding:
-                            const EdgeInsets
-                                .symmetric(
-                          vertical: 14,
-                        ),
-                        elevation: 0,
-                        shape:
-                            RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius
-                                  .circular(
-                            18,
+                              );
+
+                              if (picked == null) {
+                                return;
+                              }
+
+                              final hour = picked.hourOfPeriod == 0
+                                  ? 12
+                                  : picked.hourOfPeriod;
+                              final minute = picked.minute
+                                  .toString()
+                                  .padLeft(2, '0');
+                              final period = picked.period == DayPeriod.am
+                                  ? 'ص'
+                                  : 'م';
+
+                              setDialogState(() {
+                                timeController.text = '$hour:$minute $period';
+                              });
+                            },
+                            child: AbsorbPointer(
+                              child: _modernTaskField(
+                                controller: timeController,
+                                label: 'الوقت *',
+                                hint: '',
+                                icon: Icons.access_time_rounded,
+                                iconBackground: const Color(0xFFFFEEF0),
+                                iconColor: const Color(0xFFEF5350),
+                                suffixIcon: Icons.keyboard_arrow_down_rounded,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      child:
-                          const Text(
-                        'إضافة المهمة +',
-                        style:
-                            TextStyle(
-                          fontSize: 16,
-                          fontWeight:
-                              FontWeight
-                                  .w800,
-                        ),
+
+                          SizedBox(height: 11),
+
+                          GestureDetector(
+                            onTap: () async {
+                              final categories = [
+                                'دراسة',
+                                'صحة',
+                                'إنتاجية',
+                                'تطوير الذات',
+                                'شخصي',
+                                'مراجعة',
+                                'عام',
+                              ];
+
+                              final selected = await showModalBottomSheet<String>(
+                                context: dialogContext,
+                                backgroundColor: _surface,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(28),
+                                  ),
+                                ),
+                                builder: (sheetContext) {
+                                  return Directionality(
+                                    textDirection: TextDirection.rtl,
+                                    child: SafeArea(
+                                      child: Padding(
+                                        padding: EdgeInsets.fromLTRB(
+                                          18,
+                                          18,
+                                          18,
+                                          12,
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              width: 42,
+                                              height: 4,
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFD9E1EA),
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                            ),
+                                            SizedBox(height: 14),
+                                            Text(
+                                              'اختر التصنيف',
+                                              style: TextStyle(
+                                                color: navy,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            ),
+                                            SizedBox(height: 8),
+                                            ...categories.map(
+                                              (category) => ListTile(
+                                                contentPadding:
+                                                    EdgeInsets.symmetric(
+                                                  horizontal: 4,
+                                                ),
+                                                title: Text(
+                                                  category,
+                                                  textAlign: TextAlign.right,
+                                                  style: TextStyle(
+                                                    color: navy,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                                leading: Icon(
+                                                  Icons.local_offer_outlined,
+                                                  color: blue,
+                                                ),
+                                                onTap: () {
+                                                  Navigator.of(sheetContext)
+                                                      .pop(category);
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+
+                              if (selected == null) {
+                                return;
+                              }
+
+                              setDialogState(() {
+                                selectedCategory = selected;
+                                categoryController.text = selected;
+                              });
+                            },
+                            child: AbsorbPointer(
+                              child: _modernTaskField(
+                                controller: categoryController,
+                                label: 'التصنيف *',
+                                hint: '',
+                                icon: Icons.local_offer_outlined,
+                                iconBackground: const Color(0xFFFFF3DD),
+                                iconColor: const Color(0xFFE5A623),
+                                suffixIcon:
+                                    Icons.keyboard_arrow_down_rounded,
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(height: 11),
+
+                          _modernTaskField(
+                            controller: emojiController,
+                            label: 'الإيموجي',
+                            hint: '',
+                            icon: Icons.sentiment_satisfied_alt_outlined,
+                            iconBackground: const Color(0xFFEDEBFF),
+                            iconColor: const Color(0xFF6C63C7),
+                          ),
+
+                          SizedBox(height: 11),
+
+                          SizedBox(height: 16),
+
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextButton(
+                                  onPressed: _isSavingTask
+                                      ? null
+                                      : () {
+                                          Navigator.of(dialogContext).pop();
+                                        },
+                                  style: TextButton.styleFrom(
+                                    backgroundColor:
+                                        _softButton,
+                                    foregroundColor: navy,
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 15,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(19),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'إلغاء',
+                                    style: TextStyle(
+                                      color: navy,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 12),
+                              Expanded(
+                                flex: 1,
+                                child: ElevatedButton.icon(
+                                  onPressed: _isSavingTask
+                                      ? null
+                                      : () async {
+                                          final name =
+                                              nameController.text.trim();
+
+                                          if (name.isEmpty) {
+                                            FlumeaNotificationService.showTopMessage(context, 'اكتب اسم المهمة أولاً');
+                                            return;
+                                          }
+
+                                          final time =
+                                              timeController.text.trim();
+                                          final category =
+                                              selectedCategory.isEmpty
+                                                  ? categoryController.text.trim()
+                                                  : selectedCategory;
+                                          final emoji =
+                                              emojiController.text.trim();
+                                          setState(() {
+                                            _isSavingTask = true;
+                                          });
+
+                                          try {
+                                            final newTask =
+                                                await _taskService.addTask(
+                                              title: name,
+                                              description: '',
+                                              time: time.isEmpty
+                                                  ? 'بدون وقت'
+                                                  : time,
+                                              tag: category.isEmpty
+                                                  ? 'عام'
+                                                  : category,
+                                              emoji: emoji.isEmpty
+                                                  ? '📝'
+                                                  : emoji,
+                                              color: '#1478D4',
+                                              completed: false,
+                                            );
+
+                                            await _saveTaskDate(
+                                              _safeString(newTask['id']),
+                                              _selectedDate,
+                                            );
+                                            newTask['due_date'] =
+                                                _dateKey(_selectedDate);
+
+                                            if (!mounted) {
+                                              return;
+                                            }
+
+                                            setState(() {
+                                              tasks.add(newTask);
+                                              _isSavingTask = false;
+                                            });
+
+                                            if (!dialogContext.mounted) {
+                                              return;
+                                            }
+
+                                            Navigator.of(dialogContext).pop();
+
+                                            FlumeaNotificationService.showTopMessage(context, 'تم حفظ المهمة بنجاح ✅');
+
+                                            await FlumeaNotificationService
+                                                .instance
+                                                .show(
+                                              title: 'لديك مهمة جديدة! 📝',
+                                              body: 'حان وقت تنفيذ مهمتك التالية.',
+                                              type: FlumeaNotificationType.task,
+                                            );
+                                          } catch (error) {
+                                            if (!mounted) {
+                                              return;
+                                            }
+
+                                            setState(() {
+                                              _isSavingTask = false;
+                                            });
+
+                                            FlumeaNotificationService.showTopMessage(context, 'تعذر حفظ المهمة: $error');
+                                          }
+                                        },
+                                  icon: Icon(
+                                    Icons.add,
+                                    size: 23,
+                                  ),
+                                  label: Text(
+                                    'إضافة المهمة',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: blue,
+                                    foregroundColor: Colors.white,
+                                    disabledBackgroundColor:
+                                        const Color(0xFFB8CBE0),
+                                    disabledForegroundColor: Colors.white,
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 15,
+                                    ),
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(19),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              ),
-            ],
+                );
+              },
+            ),
           ),
         );
       },
     );
   }
 
-  // ============================================================
-  // حقول نافذة إضافة المهمة
-  // ============================================================
-
-  Widget _dialogField({
-    required TextEditingController
-        controller,
+  Widget _modernTaskField({
+    required TextEditingController controller,
     required String label,
+    required String hint,
     required IconData icon,
+    required Color iconBackground,
+    required Color iconColor,
+    IconData? suffixIcon,
   }) {
-    return TextField(
-      controller:
-          controller,
-      textAlign:
-          TextAlign.right,
-      decoration:
-          InputDecoration(
-        labelText:
-            label,
-        prefixIcon:
-            Icon(
-          icon,
-          color: blue,
+    return Container(
+      decoration: BoxDecoration(
+        color: _inputBackground,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: _inputBorder,
+          width: 1.2,
         ),
-        border:
-            OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(
-            18,
-          ),
+      ),
+      child: TextField(
+        controller: controller,
+        textAlign: TextAlign.right,
+        style: TextStyle(
+          color: navy,
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
         ),
-        focusedBorder:
-            OutlineInputBorder(
-          borderRadius:
-              BorderRadius.circular(
-            18,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: hint.isEmpty ? null : hint,
+          hintStyle: TextStyle(
+            color: Color(0xFF8B98A8),
+            fontSize: 14,
           ),
-          borderSide:
-              const BorderSide(
-            color: blue,
-            width: 2,
+          labelText: label,
+          labelStyle: TextStyle(
+            color: navy,
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
           ),
+          floatingLabelBehavior: FloatingLabelBehavior.auto,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 17,
+          ),
+          prefixIcon: Padding(
+            padding: EdgeInsets.only(
+              left: 10,
+              right: 12,
+            ),
+            child: Align(
+              widthFactor: 1,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: iconBackground,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Icon(
+                  icon,
+                  color: iconColor,
+                  size: 22,
+                ),
+              ),
+            ),
+          ),
+          suffixIcon: suffixIcon == null
+              ? null
+              : Icon(
+                  suffixIcon,
+                  color: navy,
+                  size: 25,
+                ),
         ),
       ),
     );
   }
+
+  // ============================================================
+  // حقول نافذة إضافة المهمة
+  // ============================================================
 
   // ============================================================
   // أهداف الأسبوع
@@ -1941,10 +2264,10 @@ Navigator.of(context).pop();
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _surface,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: const Color(0xFFE5EAF0),
+          color: _border,
         ),
       ),
       child: Column(
@@ -1953,7 +2276,7 @@ Navigator.of(context).pop();
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const Text(
+              Text(
                 'أهداف الأسبوع',
                 textAlign: TextAlign.right,
                 style: TextStyle(
@@ -1963,19 +2286,376 @@ Navigator.of(context).pop();
                 ),
               ),
               const SizedBox(width: 7),
-              const Icon(
+              Icon(
                 Icons.flag_outlined,
                 color: navy,
                 size: 21,
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          if (_weeklyGoals.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
+          if (_weeklyGoals.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            ...List.generate(
+              _weeklyGoals.length,
+              (index) => Padding(
+                padding: EdgeInsets.only(
+                  bottom: index == _weeklyGoals.length - 1 ? 0 : 14,
+                ),
+                child: _goalRow(
+                  index,
+                  _weeklyGoals[index],
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+          GestureDetector(
+            onTap: _weeklyGoals.length >= 3
+                ? null
+                : _showAddWeeklyGoalDialog,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              decoration: BoxDecoration(
+                color: _taskAdd,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: _weeklyGoals.length >= 3
+                      ? _border
+                      : blue,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add,
+                    color: _weeklyGoals.length >= 3
+                        ? _subtle
+                        : blue,
+                    size: 23,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    _weeklyGoals.length >= 3
+                        ? 'تم الوصول إلى الحد الأقصى'
+                        : 'إضافة هدف',
+                    style: TextStyle(
+                      color: _weeklyGoals.length >= 3
+                          ? _subtle
+                          : blue,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _goalRow(
+    int index,
+    Map<String, dynamic> goal,
+  ) {
+    final title = _safeString(
+      goal['title'],
+      fallback: 'هدف أسبوعي',
+    );
+    final current = (goal['current'] as int?) ?? 0;
+    final total = (goal['total'] as int?) ?? 1;
+    final color = _safeColor(goal['color']);
+
+    final progress = total <= 0
+        ? 0.0
+        : (current / total).clamp(0.0, 1.0);
+
+    return Container(
+      padding: const EdgeInsets.all(11),
+      decoration: BoxDecoration(
+        color: _soft,
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(
+          color: _border,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              PopupMenuButton<String>(
+                tooltip: 'خيارات الهدف',
+                padding: EdgeInsets.zero,
+                icon: Icon(
+                  Icons.more_vert,
+                  color: _subtle,
+                  size: 22,
+                ),
+                onSelected: (value) {
+                  if (value == 'reset') {
+                    setState(() {
+                      _weeklyGoals[index]['current'] = 0;
+                    });
+                    FlumeaNotificationService.showTopMessage(
+                      context,
+                      'تمت إعادة الهدف',
+                    );
+                  } else if (value == 'delete') {
+                    setState(() {
+                      _weeklyGoals.removeAt(index);
+                    });
+                    FlumeaNotificationService.showTopMessage(
+                      context,
+                      'تم حذف الهدف',
+                    );
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem<String>(
+                    value: 'reset',
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          'إعادة الهدف 🔄',
+                          style: TextStyle(
+                            color: navy,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'delete',
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const Text(
+                          'حذف الهدف 🗑️',
+                          style: TextStyle(
+                            color: Color(0xFFD64545),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.right,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: navy,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '$current/$total',
+                style: TextStyle(
+                  color: color,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 7),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 7,
+              backgroundColor: _isDark
+                  ? const Color(0xFF303844)
+                  : const Color(0xFFE8EDF3),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddWeeklyGoalDialog() {
+    final titleController = TextEditingController();
+    final totalController = TextEditingController(text: '1');
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (dialogContext) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            backgroundColor: _surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(26),
+            ),
+            title: Text(
+              'إضافة هدف أسبوعي',
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: navy,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(color: navy),
+                  decoration: InputDecoration(
+                    hintText: 'اسم الهدف',
+                    hintStyle: TextStyle(color: _subtle),
+                    filled: true,
+                    fillColor: _inputBackground,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: _inputBorder),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: _inputBorder),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: totalController,
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(color: navy),
+                  decoration: InputDecoration(
+                    hintText: 'العدد المستهدف',
+                    hintStyle: TextStyle(color: _subtle),
+                    filled: true,
+                    fillColor: _inputBackground,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: _inputBorder),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: _inputBorder),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actionsAlignment: MainAxisAlignment.spaceBetween,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text(
+                  'إلغاء',
+                  style: TextStyle(color: _subtle),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  final title = titleController.text.trim();
+                  final total =
+                      int.tryParse(totalController.text.trim()) ?? 1;
+
+                  if (title.isEmpty || total <= 0) {
+                    return;
+                  }
+
+                  final colors = [
+                    blue,
+                    cyan,
+                    const Color(0xFF8E44AD),
+                  ];
+
+                  final colorIndex = _weeklyGoals.length.clamp(0, 2);
+
+                  setState(() {
+                    _weeklyGoals.add({
+                      'title': title,
+                      'current': 0,
+                      'total': total,
+                      'color':
+                          '#${colors[colorIndex].value.toRadixString(16).padLeft(8, '0').substring(2)}',
+                    });
+                  });
+
+                  Navigator.pop(dialogContext);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: blue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+                child: const Text('إضافة'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // ============================================================
+  // عادات اليوم
+  // ============================================================
+
+  Widget _buildDailyHabits() {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _surface,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: _border,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                'عادات اليوم',
+                style: TextStyle(
+                  color: navy,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              SizedBox(width: 7),
+              Icon(
+                Icons.repeat,
+                color: navy,
+                size: 21,
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+          if (habits.isEmpty)
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
               child: Text(
-                'لا توجد أهداف أسبوعية بعد',
+                'لا توجد عادات بعد',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Color(0xFF7B8798),
@@ -1985,377 +2665,45 @@ Navigator.of(context).pop();
             )
           else
             ...List.generate(
-              _weeklyGoals.length,
+              habits.length,
               (index) {
-                final goal = _weeklyGoals[index];
+                final habit = habits[index];
                 return Padding(
                   padding: EdgeInsets.only(
-                    bottom: index == _weeklyGoals.length - 1 ? 0 : 15,
+                    bottom: index == habits.length - 1 ? 0 : 10,
                   ),
-                  child: _goalRow(
-                    _safeString(goal['title'], fallback: 'هدف'),
-                    (goal['current'] as int?) ?? 0,
-                    (goal['total'] as int?) ?? 1,
-                    _safeColor(goal['color']),
+                  child: _buildHabitRow(
+                    id: _safeString(habit['id']),
+                    title: _safeString(habit['title']),
+                    icon: _safeIcon(habit['icon']),
+                    completed: _safeBool(habit['completed']),
                   ),
                 );
               },
             ),
-          const SizedBox(height: 8),
+          SizedBox(height: 14),
           OutlinedButton.icon(
-            onPressed: _showAddWeeklyGoalDialog,
-            icon: const Icon(Icons.add, size: 19),
-            label: const Text(
-              'إضافة هدف',
+            onPressed: _isSavingHabit ? null : _showAddHabitDialog,
+            icon: Icon(
+              _isSavingHabit ? Icons.hourglass_top : Icons.add,
+              size: 20,
+            ),
+            label: Text(
+              _isSavingHabit ? 'جاري الحفظ...' : 'إضافة عادة',
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 14,
                 fontWeight: FontWeight.w800,
               ),
             ),
             style: OutlinedButton.styleFrom(
               foregroundColor: blue,
-              side: const BorderSide(color: blue, width: 1.2),
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAddWeeklyGoalDialog() {
-    final nameController = TextEditingController();
-    final totalController = TextEditingController(text: '1');
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: AlertDialog(
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(28),
-            ),
-            title: const Text(
-              'إضافة هدف أسبوعي',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: navy,
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController,
-                  textAlign: TextAlign.right,
-                  decoration: InputDecoration(
-                    labelText: 'اسم الهدف',
-                    prefixIcon: const Icon(Icons.flag_outlined, color: blue),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: totalController,
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.right,
-                  decoration: InputDecoration(
-                    labelText: 'عدد مرات الهدف',
-                    prefixIcon: const Icon(Icons.numbers, color: blue),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            actions: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(dialogContext),
-                      child: const Text(
-                        'إلغاء',
-                        style: TextStyle(
-                          color: navy,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        final title = nameController.text.trim();
-                        final total = int.tryParse(totalController.text.trim()) ?? 0;
-                        if (title.isEmpty || total <= 0) {
-                          return;
-                        }
-
-                        setState(() {
-                          _weeklyGoals.add({
-                            'title': title,
-                            'current': 0,
-                            'total': total,
-                            'color': '#1478D4',
-                          });
-                        });
-                        Navigator.pop(dialogContext);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: blue,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                      ),
-                      child: const Text(
-                        'إضافة',
-                        style: TextStyle(fontWeight: FontWeight.w800),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _goalRow(
-    String title,
-    int current,
-    int total,
-    Color color,
-  ) {
-    final progress =
-        total <= 0
-            ? 0.0
-            : (current / total)
-                .clamp(
-              0.0,
-              1.0,
-            );
-
-    return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment
-              .stretch,
-      children: [
-        Row(
-          mainAxisAlignment:
-              MainAxisAlignment
-                  .spaceBetween,
-          children: [
-            Text(
-              '$current/$total',
-              style:
-                  TextStyle(
-                color: color,
-                fontSize: 12,
-                fontWeight:
-                    FontWeight.w800,
-              ),
-            ),
-            Text(
-              title,
-              style:
-                  const TextStyle(
-                color: navy,
-                fontSize: 13,
-                fontWeight:
-                    FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(
-          height: 7,
-        ),
-
-        ClipRRect(
-          borderRadius:
-              BorderRadius.circular(
-            10,
-          ),
-          child:
-              LinearProgressIndicator(
-            value:
-                progress,
-            minHeight: 7,
-            backgroundColor:
-                const Color(
-              0xFFE8EDF3,
-            ),
-            valueColor:
-                AlwaysStoppedAnimation<
-                    Color>(
-              color,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-    // ============================================================
-  // عادات اليوم
-  // ============================================================
-
-  Widget _buildDailyHabits() {
-    return Container(
-      padding:
-          const EdgeInsets.all(
-        16,
-      ),
-      decoration:
-          BoxDecoration(
-        color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(
-          22,
-        ),
-        border: Border.all(
-          color: const Color(
-            0xFFE5EAF0,
-          ),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            mainAxisAlignment:
-                MainAxisAlignment.end,
-            children: [
-              const Text(
-                'عادات اليوم',
-                style: TextStyle(
-                  color: navy,
-                  fontSize: 17,
-                  fontWeight:
-                      FontWeight.w800,
-                ),
-              ),
-              const SizedBox(
-                width: 7,
-              ),
-              const Icon(
-                Icons.repeat,
-                color: navy,
-                size: 21,
-              ),
-            ],
-          ),
-
-          const SizedBox(
-            height: 16,
-          ),
-
-          ...List.generate(
-            habits.length,
-            (index) {
-              final habit =
-                  habits[index];
-
-              final title =
-                  _safeString(
-                habit['title'],
-            
-              );
-
-              final icon =
-                  _safeIcon(
-                habit['icon'],
-                
-              );
-
-              final completed =
-                  _safeBool(
-                habit['completed'],
-              );
-
-              return Padding(
-                padding:
-                    EdgeInsets.only(
-                  bottom:
-                      index ==
-                              habits.length -
-                                  1
-                          ? 0
-                          : 10,
-                ),
-                child:
-                    _buildHabitRow(
-    id: _safeString(habit['id']),
-    title: title,
-    icon: icon,
-    completed: completed,
-),
-                  
-                  
-                  
-                      
-                
-              );
-            },
-          ),
-
-          const SizedBox(
-            height: 14,
-          ),
-
-          OutlinedButton.icon(
-            onPressed:
-                _showAddHabitDialog,
-            icon: const Icon(
-              Icons.add,
-              size: 20,
-            ),
-            label: const Text(
-              'إضافة عادة',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight:
-                    FontWeight.w800,
-              ),
-            ),
-            style:
-                OutlinedButton.styleFrom(
-              foregroundColor:
-                  blue,
-              side:
-                  const BorderSide(
+              side: BorderSide(
                 color: blue,
                 width: 1.3,
               ),
-              padding:
-                  const EdgeInsets
-                      .symmetric(
-                vertical: 12,
-              ),
-              shape:
-                  RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(
-                  16,
-                ),
+              padding: EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
           ),
@@ -2363,48 +2711,11 @@ Navigator.of(context).pop();
       ),
     );
   }
-// ============================================================
-// Supabase - تحديث حالة العادة
-// ============================================================
 
-Future<void> _toggleHabit(String id, bool completed) async {
-  if (id.isEmpty) {
-    return;
-  }
+  // ============================================================
+  // بطاقة العادة
+  // ============================================================
 
-  try {
-    await _habitService.updateHabit(
-      id: id,
-      completed: !completed,
-    );
-
-    if (!mounted) {
-      return;
-    }
-
-    final index = habits.indexWhere(
-      (habit) => _safeString(habit['id']) == id,
-    );
-
-    if (index != -1) {
-      setState(() {
-        habits[index]['completed'] = !completed;
-      });
-    }
-  } catch (error) {
-    if (!mounted) {
-      return;
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'تعذر تحديث العادة: $error',
-        ),
-      ),
-    );
-  }
-}
   Widget _buildHabitRow({
     required String title,
     required IconData icon,
@@ -2412,32 +2723,19 @@ Future<void> _toggleHabit(String id, bool completed) async {
     required String id,
   }) {
     return Container(
-      padding:
-          const EdgeInsets.symmetric(
+      padding: EdgeInsets.symmetric(
         horizontal: 13,
         vertical: 12,
       ),
-      decoration:
-          BoxDecoration(
+      decoration: BoxDecoration(
         color: completed
-            ? const Color(
-                0xFFF1FBF9,
-              )
-            : const Color(
-                0xFFF8FAFC,
-              ),
-        borderRadius:
-            BorderRadius.circular(
-          17,
-        ),
+            ? _habitDone
+            : _habitUndone,
+        borderRadius: BorderRadius.circular(17),
         border: Border.all(
           color: completed
-              ? const Color(
-                  0xFFD5F0EB,
-                )
-              : const Color(
-                  0xFFE7ECF2,
-                ),
+              ? _habitDoneBorder
+              : _habitUndoneBorder,
         ),
       ),
       child: Row(
@@ -2445,91 +2743,106 @@ Future<void> _toggleHabit(String id, bool completed) async {
           Container(
             width: 38,
             height: 38,
-            decoration:
-                BoxDecoration(
+            decoration: BoxDecoration(
               color: completed
                   ? cyan.withValues(alpha: 0.12)
-                      
-                  
-                  : blue.withValues(alpha: 0.08)
-                      
-                    ,
-              shape:
-                  BoxShape.circle,
+                  : blue.withValues(alpha: 0.08),
+              shape: BoxShape.circle,
             ),
             child: Icon(
-              completed
-                  ? Icons.check
-                  : icon,
-              color: completed
-                  ? cyan
-                  : blue,
+              completed ? Icons.check : icon,
+              color: completed ? cyan : blue,
               size: 20,
             ),
           ),
-
-          const SizedBox(
-            width: 12,
-          ),
-
+          SizedBox(width: 12),
           Expanded(
             child: Text(
               title,
-              textAlign:
-                  TextAlign.right,
+              textAlign: TextAlign.right,
               style: TextStyle(
                 color: navy,
                 fontSize: 14,
-                fontWeight:
-                    FontWeight.w700,
-                decoration:
-                    completed
-                        ? TextDecoration
-                            .lineThrough
-                        : null,
-                decorationColor:
-                    navy,
+                fontWeight: FontWeight.w700,
+                decoration: completed
+                    ? TextDecoration.lineThrough
+                    : null,
+                decorationColor: navy,
               ),
             ),
           ),
-
-          const SizedBox(
-            width: 10,
+          SizedBox(width: 4),
+          PopupMenuButton<String>(
+            tooltip: 'خيارات العادة',
+            padding: EdgeInsets.zero,
+            icon: Icon(
+              Icons.more_vert_rounded,
+              color: Color(0xFF7B8798),
+              size: 21,
+            ),
+            onSelected: (value) async {
+              if (value == 'reset') {
+                await _resetHabit(id);
+              } else if (value == 'delete') {
+                await _deleteHabit(id);
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem<String>(
+                value: 'reset',
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Icon(
+                      Icons.refresh_rounded,
+                      color: blue,
+                    ),
+                    SizedBox(width: 10),
+                    Text('إعادة العادة'),
+                  ],
+                ),
+              ),
+              PopupMenuItem<String>(
+                value: 'delete',
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Icon(
+                      Icons.delete_outline_rounded,
+                      color: Colors.red,
+                    ),
+                    SizedBox(width: 10),
+                    Text('حذف العادة'),
+                  ],
+                ),
+              ),
+            ],
           ),
-
+          SizedBox(width: 4),
           GestureDetector(
-  onTap: () => _toggleHabit(id, completed),
-  child: Container(
-            width: 23,
-            height: 23,
-            decoration:
-                BoxDecoration(
-              color: completed
-                  ? cyan
-                  : Colors.white,
-              borderRadius:
-                  BorderRadius.circular(
-                7,
+            onTap: () => _toggleHabit(id, completed),
+            child: Container(
+              width: 23,
+              height: 23,
+              decoration: BoxDecoration(
+                color: completed ? cyan : Colors.white,
+                borderRadius: BorderRadius.circular(7),
+                border: Border.all(
+                  color: completed
+                      ? cyan
+                      : _unselectedControlBorder,
+                  width: 1.5,
+                ),
               ),
-              border: Border.all(
-                color: completed
-                    ? cyan
-                    : const Color(
-                        0xFFB9C4D0,
-                      ),
-                width: 1.5,
-              ),
+              child: completed
+                  ? Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 16,
+                    )
+                  : null,
             ),
-            child: completed
-                ? const Icon(
-                    Icons.check,
-                    color:
-                        Colors.white,
-                    size: 16,
-                  )
-                : null,
           ),
-            ),
         ],
       ),
     );
@@ -2540,48 +2853,33 @@ Future<void> _toggleHabit(String id, bool completed) async {
   // ============================================================
 
   void _showAddHabitDialog() {
-    final nameController =
-        TextEditingController();
+    final nameController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (dialogContext) {
         return Directionality(
-          textDirection:
-              TextDirection.rtl,
+          textDirection: TextDirection.rtl,
           child: AlertDialog(
-            backgroundColor:
-                Colors.white,
-            shape:
-                RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(
-                28,
-              ),
+            backgroundColor: _surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
             ),
-            title: const Text(
+            title: Text(
               'إضافة عادة جديدة',
-              textAlign:
-                  TextAlign.center,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 color: navy,
                 fontSize: 23,
-                fontWeight:
-                    FontWeight.w800,
+                fontWeight: FontWeight.w800,
               ),
             ),
-            content:
-                _habitDialogField(
-              controller:
-                  nameController,
-              label:
-                  'اسم العادة',
-              icon:
-                  Icons.repeat,
+            content: _habitDialogField(
+              controller: nameController,
+              label: 'اسم العادة',
+              icon: Icons.repeat,
             ),
-            actionsPadding:
-                const EdgeInsets
-                    .fromLTRB(
+            actionsPadding: EdgeInsets.fromLTRB(
               16,
               0,
               16,
@@ -2591,124 +2889,102 @@ Future<void> _toggleHabit(String id, bool completed) async {
               Row(
                 children: [
                   Expanded(
-                    child:
-                        TextButton(
+                    child: TextButton(
                       onPressed: () {
-                        Navigator.pop(
-                          dialogContext,
-                        );
+                        Navigator.pop(dialogContext);
                       },
-                      style:
-                          TextButton
-                              .styleFrom(
-                        backgroundColor:
-                            const Color(
-                          0xFFF1F4F8,
-                        ),
-                        padding:
-                            const EdgeInsets
-                                .symmetric(
-                          vertical: 14,
-                        ),
-                        shape:
-                            RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius
-                                  .circular(
-                            18,
-                          ),
+                      style: TextButton.styleFrom(
+                        backgroundColor: _softButton,
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
                         ),
                       ),
-                      child:
-                          const Text(
+                      child: Text(
                         'إلغاء',
-                        style:
-                            TextStyle(
+                        style: TextStyle(
                           color: navy,
                           fontSize: 16,
-                          fontWeight:
-                              FontWeight
-                                  .w800,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
                   ),
-
-                  const SizedBox(
-                    width: 12,
-                  ),
-
+                  SizedBox(width: 12),
                   Expanded(
-                    child:
-                        ElevatedButton(
-                      onPressed: () {
-                        final name =
-                            nameController
-                                .text
-                                .trim();
+                    child: ElevatedButton(
+                      onPressed: _isSavingHabit
+                          ? null
+                          : () async {
+                              final name = nameController.text.trim();
+                              if (name.isEmpty) {
+                                return;
+                              }
 
-                        if (name.isEmpty) {
-                          return;
-                        }
+                              setState(() {
+                                _isSavingHabit = true;
+                              });
 
-                        setState(() {
-                          habits.add({
-                            'title': name,
-                            'icon':
-                                Icons
-                                    .check_circle_outline,
-                            'completed':
-                                false,
-                          });
-                        });
+                              try {
+                                final created =
+                                    await _habitService.addHabit(
+                                  name: name,
+                                  description: '',
+                                  completed: false,
+                                );
 
-                        Navigator.pop(
-                          dialogContext,
-                        );
+                                if (!mounted) {
+                                  return;
+                                }
 
-                        ScaffoldMessenger
-                            .of(
-                          context,
-                        ).showSnackBar(
-                          const SnackBar(
-                            content:
-                                Text(
-                              'تمت إضافة العادة ✅',
-                            ),
-                          ),
-                        );
-                      },
-                      style:
-                          ElevatedButton
-                              .styleFrom(
-                        backgroundColor:
-                            blue,
-                        foregroundColor:
-                            Colors.white,
-                        padding:
-                            const EdgeInsets
-                                .symmetric(
-                          vertical: 14,
-                        ),
+                                setState(() {
+                                  habits.add(_habitMap(created));
+                                  _isSavingHabit = false;
+                                });
+
+                                if (!dialogContext.mounted) {
+                                  return;
+                                }
+
+                                Navigator.pop(dialogContext);
+
+                                if (!mounted) {
+                                  return;
+                                }
+
+                                FlumeaNotificationService.showTopMessage(context, 'تم حفظ العادة بنجاح ✅');
+
+                                await FlumeaNotificationService.instance.show(
+                                  title: 'تذكير بالعادات 📈',
+                                  body: 'تمت إضافة عادة جديدة إلى خطتك اليومية.',
+                                  type: FlumeaNotificationType.habit,
+                                );
+                              } catch (error) {
+                                if (!mounted) {
+                                  return;
+                                }
+
+                                setState(() {
+                                  _isSavingHabit = false;
+                                });
+
+                                FlumeaNotificationService.showTopMessage(context, 'تعذر حفظ العادة: $error');
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: blue,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 14),
                         elevation: 0,
-                        shape:
-                            RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius
-                                  .circular(
-                            18,
-                          ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
                         ),
                       ),
-                      child:
-                          const Text(
+                      child: Text(
                         'إضافة',
-                        style:
-                            TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
-                          fontWeight:
-                              FontWeight
-                                  .w800,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
@@ -2760,7 +3036,7 @@ Future<void> _toggleHabit(String id, bool completed) async {
             18,
           ),
           borderSide:
-              const BorderSide(
+              BorderSide(
             color: blue,
             width: 2,
           ),
