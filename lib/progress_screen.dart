@@ -863,7 +863,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               'FLUMEA',
               style: TextStyle(
                 color: _primaryText,
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 4,
               ),
