@@ -398,17 +398,17 @@ class _ProgressScreenState extends State<ProgressScreen> {
     }
 
     final totalDays = _daysBetween(range.start, range.end);
-    int step = 1;
 
-    // نحافظ على الرسم مقروءًا بدل إنشاء عشرات النقاط في "كل الوقت".
-    if (totalDays > 31) {
-      step = (totalDays / 7).ceil();
-    }
-
+    // في الشهر/الفترات الطويلة نعرض 7 نقاط فقط موزعة على كامل الفترة،
+    // حتى لا تتداخل تواريخ الأيام فوق بعضها.
+    final pointCount = totalDays <= 7 ? totalDays : 7;
     final values = <double>[];
     final labels = <String>[];
 
-    for (int offset = 0; offset < totalDays; offset += step) {
+    for (int i = 0; i < pointCount; i++) {
+      final offset = pointCount == 1
+          ? 0
+          : ((totalDays - 1) * i / (pointCount - 1)).round();
       final date = range.start.add(Duration(days: offset));
       final value = _dailyCompletionRate(
         date: date,
@@ -481,7 +481,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
       return aDate.compareTo(bDate);
     });
 
-    final selected = sortedHabits.take(5).toList();
+    final selected = sortedHabits;
     final today = _dateOnly(DateTime.now());
     final values = <double>[];
     final names = <String>[];
@@ -1080,7 +1080,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: List.generate(count, (index) {
                       final value = values[index].clamp(0.0, 1.0).toDouble();
-                      final barColor = _habitColors[index % _habitColors.length];
+                      final habitName = names[index];
+                      final barColor = _habitColorFor(habitName);
+                      final habitEmoji = _habitEmojiFor(habitName);
                       return Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -1136,10 +1138,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                   color: barColor.withValues(alpha: 0.10),
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(
-                                  _habitIcons[index % _habitIcons.length],
-                                  color: barColor,
-                                  size: 21,
+                                child: Text(
+                                  habitEmoji,
+                                  style: const TextStyle(fontSize: 21),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
                               const SizedBox(height: 5),
@@ -1165,6 +1167,102 @@ class _ProgressScreenState extends State<ProgressScreen> {
     );
   }
 
+  Color _habitColorFor(String name) {
+    final value = name.trim().toLowerCase();
+
+    // لون ثابت لكل اسم عادة حتى لا يتغير عند إعادة فتح صفحة التقدم،
+    // مع توزيع الألوان بين مجموعة ألوان جميلة.
+    var hash = 0;
+    for (final codeUnit in value.codeUnits) {
+      hash = (hash * 31 + codeUnit) & 0x7fffffff;
+    }
+
+    return _habitColors[hash % _habitColors.length];
+  }
+
+  String _habitEmojiFor(String name) {
+    final value = name.trim().toLowerCase();
+
+    if (value.contains('كرة القدم') ||
+        value.contains('كرة قدم') ||
+        value.contains('football') ||
+        value.contains('soccer')) {
+      return '⚽';
+    }
+
+    if (value.contains('ماء') ||
+        value.contains('شرب') ||
+        value.contains('water')) {
+      return '💧';
+    }
+
+    if (value.contains('دراسة') ||
+        value.contains('تعلم') ||
+        value.contains('مدرسة') ||
+        value.contains('جامعة') ||
+        value.contains('study') ||
+        value.contains('learn')) {
+      return '📚';
+    }
+
+    if (value.contains('رياضة') ||
+        value.contains('تمرين') ||
+        value.contains('جيم') ||
+        value.contains('gym') ||
+        value.contains('exercise') ||
+        value.contains('workout')) {
+      return '🏋️';
+    }
+
+    if (value.contains('أكل') ||
+        value.contains('اكل') ||
+        value.contains('طعام') ||
+        value.contains('غذاء') ||
+        value.contains('food') ||
+        value.contains('eat')) {
+      return '🍎';
+    }
+
+    if (value.contains('نوم') ||
+        value.contains('نوم مبكر') ||
+        value.contains('sleep')) {
+      return '😴';
+    }
+
+    if (value.contains('قراءة') ||
+        value.contains('قراءه') ||
+        value.contains('كتاب') ||
+        value.contains('read')) {
+      return '📖';
+    }
+
+    if (value.contains('مشي') || value.contains('walk')) {
+      return '🚶';
+    }
+
+    if (value.contains('جري') ||
+        value.contains('ركض') ||
+        value.contains('run')) {
+      return '🏃';
+    }
+
+    if (value.contains('صلاة') || value.contains('صلاه')) {
+      return '🕌';
+    }
+
+    if (value.contains('تأمل') ||
+        value.contains('تامل') ||
+        value.contains('تنفس')) {
+      return '🧘';
+    }
+
+    if (value.contains('عمل') || value.contains('وظيفة')) {
+      return '💼';
+    }
+
+    return '🎯';
+  }
+
   static const List<Color> _habitColors = [
     Color(0xFF1E88E5),
     Color(0xFF7E3FF2),
@@ -1173,16 +1271,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
     Color(0xFF1E88E5),
     Color(0xFF8E5CF6),
     Color(0xFF18B77A),
-  ];
-
-  static const List<IconData> _habitIcons = [
-    Icons.water_drop_outlined,
-    Icons.sports_soccer_rounded,
-    Icons.fitness_center_rounded,
-    Icons.menu_book_rounded,
-    Icons.eco_rounded,
-    Icons.nightlight_round,
-    Icons.favorite_rounded,
   ];
 
   String _todayArabicDate() {
