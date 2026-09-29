@@ -1044,7 +1044,7 @@ class _AccountScreenState extends State<AccountScreen> {
                               child: Text(
                                 _loading ? '...' : _fullName,
                                 textAlign: TextAlign.right,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 25,
                                   height: 1.15,
                                   fontWeight: FontWeight.bold,
