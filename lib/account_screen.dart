@@ -898,7 +898,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         'FLUMEA',
                         textAlign: TextAlign.left,
                         style: TextStyle(
-                          fontSize: 17,
+                          fontSize: 23,
                           fontWeight: FontWeight.bold,
                           color: isDark ? const Color(0xFF6EA8FF) : navy,
                         ),
