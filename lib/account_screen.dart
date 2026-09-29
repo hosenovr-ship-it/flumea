@@ -900,7 +900,8 @@ class _AccountScreenState extends State<AccountScreen> {
                         style: TextStyle(
                           fontSize: 23,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? const Color(0xFF6EA8FF) : navy,
+                          letterSpacing: 4.0,
+                          color: isDark ? Colors.white : navy,
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -1047,7 +1048,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                   fontSize: 25,
                                   height: 1.15,
                                   fontWeight: FontWeight.bold,
-                                  color: navy,
+                                  color: isDark ? Colors.white : navy,
                                 ),
                               ),
                             ),
