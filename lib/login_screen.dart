@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'goal_screen.dart';
+import 'home_screen.dart';
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
@@ -243,11 +243,11 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
         _showMessage('تم تسجيل الدخول بنجاح ✅');
 
         Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(
-    builder: (context) => const GoalScreen(),
-  ),
-);
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomeScreen(),
+          ),
+        );
       } else {
         final response =
             await Supabase.instance.client.auth.signUp(
@@ -263,6 +263,15 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
           );
         } else {
           _showMessage('تم إنشاء الحساب بنجاح ✅');
+
+          if (!mounted) return;
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HomeScreen(),
+            ),
+          );
         }
       }
     } on AuthException catch (error) {
