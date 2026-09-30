@@ -12,7 +12,20 @@
           "package_name": "com.example.flumea"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "106036859936-koqkknit1ccft3ufil79m57gadc507tt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.flumea",
+            "certificate_hash": "0b953502ab10be22bc20c9c6e3e22e4c66892328"
+          }
+        },
+        {
+          "client_id": "106036859936-2seqm33h1h9um8pl5dusdatjuc4lhljt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCrerc3FMbm2jA6pqg_7Sg6SNUN6UcLa8A"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "106036859936-2seqm33h1h9um8pl5dusdatjuc4lhljt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
