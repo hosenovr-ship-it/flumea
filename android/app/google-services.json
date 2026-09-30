@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "106036859936",
+    "project_id": "flumea",
+    "storage_bucket": "flumea.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:106036859936:android:3145262054f931c2145845",
+        "android_client_info": {
+          "package_name": "com.example.flumea"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrerc3FMbm2jA6pqg_7Sg6SNUN6UcLa8A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
