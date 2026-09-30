@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'login_screen.dart';
@@ -49,54 +48,9 @@ class FlumeaApp extends StatelessWidget {
             scaffoldBackgroundColor: const Color(0xFF0F1720),
             useMaterial3: true,
           ),
-          home: const WelcomeScreen(),
+          home: const LoginScreen(),
         );
       },
-    );
-  }
-}
-
-class WelcomeScreen extends StatefulWidget {
-  const WelcomeScreen({super.key});
-
-  @override
-  State<WelcomeScreen> createState() => _WelcomeScreenState();
-}
-
-class _WelcomeScreenState extends State<WelcomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-
-    Timer(const Duration(seconds: 2), () {
-      if (!mounted) return;
-
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) {
-            return const LoginScreen();
-          },
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
-          },
-          transitionDuration: const Duration(milliseconds: 600),
-        ),
-      );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SizedBox.expand(
-        child: Image.asset(
-          'welcome_background.png',
-          fit: BoxFit.cover,
-        ),
-      ),
     );
   }
 }
