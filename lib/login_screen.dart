@@ -40,10 +40,6 @@ class _GoogleAuth {
       throw const AuthException('لم يتم الحصول على Google ID Token.');
     }
 
-    if (accessToken == null) {
-      throw const AuthException('لم يتم الحصول على Google Access Token.');
-    }
-
     return Supabase.instance.client.auth.signInWithIdToken(
       provider: OAuthProvider.google,
       idToken: idToken,
