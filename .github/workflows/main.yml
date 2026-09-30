@@ -27,6 +27,13 @@ jobs:
 
       - name: Get dependencies
         run: flutter pub get
+
+      - name: Get SHA-1
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew signingReport
+
       - name: Generate launcher icons
         run: dart run flutter_launcher_icons
       - name: Analyze
