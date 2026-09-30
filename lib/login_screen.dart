@@ -22,9 +22,15 @@ class _GoogleAuth {
     final googleAccount = await _signIn.authenticate();
 
     final googleAuthorization =
-        await googleAccount.authorizationClient.authorizeScopes(
+        await googleAccount.authorizationClient.authorizationForScopes(
       const <String>[],
     );
+
+    if (googleAuthorization == null) {
+      throw const AuthException(
+        'لم يتم الحصول على Google Access Token Authorization.',
+      );
+    }
 
     final googleAuthentication = googleAccount.authentication;
     final idToken = googleAuthentication.idToken;
@@ -32,6 +38,10 @@ class _GoogleAuth {
 
     if (idToken == null) {
       throw const AuthException('لم يتم الحصول على Google ID Token.');
+    }
+
+    if (accessToken == null) {
+      throw const AuthException('لم يتم الحصول على Google Access Token.');
     }
 
     return Supabase.instance.client.auth.signInWithIdToken(
