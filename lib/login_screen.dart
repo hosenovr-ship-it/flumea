@@ -1,113 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'home_screen.dart';
-
 const String _googleWebClientId =
     '106036859936-2seqm33h1h9um8pl5dusdatjuc4lhljt.apps.googleusercontent.com';
 
-final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
-Future<void>? _googleSignInInitialization;
+class _GoogleAuth {
+  static final GoogleSignIn _signIn = GoogleSignIn.instance;
+  static Future<void>? _initializeFuture;
 
-Future<void> _initializeGoogleSignIn() {
-  return _googleSignInInitialization ??= _googleSignIn.initialize(
-    serverClientId: _googleWebClientId,
-  );
-}
+  static Future<void> initialize() {
+    return _initializeFuture ??= _signIn.initialize(
+      serverClientId: _googleWebClientId,
+    );
+  }
 
-Future<void> _signInWithGoogle(BuildContext context) async {
-  try {
-    await _initializeGoogleSignIn();
+  static Future<AuthResponse> signIn() async {
+    await initialize();
 
-    if (!_googleSignIn.supportsAuthenticate()) {
-      throw Exception('تسجيل الدخول باستخدام Google غير متاح على هذا الجهاز.');
-    }
+    final googleAccount = await _signIn.authenticate();
 
-    final googleUser = await _googleSignIn.authenticate();
-
-    final googleAuth = googleUser.authentication;
-    final idToken = googleAuth.idToken;
-
-    if (idToken == null) {
-      throw Exception('لم يتم الحصول على Google ID Token.');
-    }
-
-    final authorization = await googleUser.authorizationClient.authorizeScopes(
-      <String>[
-        'email',
-        'profile',
-      ],
+    final googleAuthorization =
+        await googleAccount.authorizationClient.authorizationForScopes(
+      const <String>[],
     );
 
-    final accessToken = authorization.accessToken;
+    final googleAuthentication = googleAccount.authentication;
+    final idToken = googleAuthentication.idToken;
+    final accessToken = googleAuthorization.accessToken;
 
-    await Supabase.instance.client.auth.signInWithIdToken(
+    if (idToken == null) {
+      throw const AuthException('لم يتم الحصول على Google ID Token.');
+    }
+
+    if (accessToken == null) {
+      throw const AuthException('لم يتم الحصول على Google Access Token.');
+    }
+
+    return Supabase.instance.client.auth.signInWithIdToken(
       provider: OAuthProvider.google,
       idToken: idToken,
       accessToken: accessToken,
     );
-
-    if (!context.mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'تم تسجيل الدخول باستخدام Google بنجاح ✅',
-          textAlign: TextAlign.right,
-        ),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const HomeScreen(),
-      ),
-    );
-  } on GoogleSignInException catch (error) {
-    if (!context.mounted) return;
-
-    final message = error.code == GoogleSignInExceptionCode.canceled
-        ? 'تم إلغاء تسجيل الدخول باستخدام Google.'
-        : 'تعذر تسجيل الدخول باستخدام Google. حاول مرة أخرى.';
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          textAlign: TextAlign.right,
-        ),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  } on AuthException catch (error) {
-    if (!context.mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          error.message,
-          textAlign: TextAlign.right,
-        ),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  } catch (error) {
-    if (!context.mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'حدث خطأ أثناء تسجيل الدخول باستخدام Google. حاول مرة أخرى.',
-          textAlign: TextAlign.right,
-        ),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
 }
+
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
@@ -161,7 +99,66 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   text: 'متابعة باستخدام Google',
-                  onTap: () => _signInWithGoogle(context),
+                  onTap: () async {
+                    try {
+                      await _GoogleAuth.signIn();
+
+                      if (!context.mounted) return;
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'تم تسجيل الدخول باستخدام Google بنجاح ✅',
+                            textAlign: TextAlign.right,
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomeScreen(),
+                        ),
+                      );
+                    } on GoogleSignInException catch (error) {
+                      if (!context.mounted) return;
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'تعذر تسجيل الدخول باستخدام Google: ${error.code}',
+                            textAlign: TextAlign.right,
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    } on AuthException catch (error) {
+                      if (!context.mounted) return;
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            error.message,
+                            textAlign: TextAlign.right,
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    } catch (error) {
+                      if (!context.mounted) return;
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'حدث خطأ أثناء تسجيل الدخول باستخدام Google. حاول مرة أخرى.',
+                            textAlign: TextAlign.right,
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
                 ),
 
                 const SizedBox(height: 16),
