@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "106036859936-rm46ekjhhsmuu1hh7guc0mf27v4bo8m8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.flumea",
+            "certificate_hash": "d64f45dfb7db432df3a662e7d79eb0c3063e2b7a"
+          }
+        },
+        {
           "client_id": "106036859936-2seqm33h1h9um8pl5dusdatjuc4lhljt.apps.googleusercontent.com",
           "client_type": 3
         }
