@@ -126,10 +126,18 @@ class LoginScreen extends StatelessWidget {
                     } on GoogleSignInException catch (error) {
                       if (!context.mounted) return;
 
+                      final String description =
+                          error.description?.trim().isNotEmpty == true
+                              ? error.description!.trim()
+                              : 'لا توجد تفاصيل إضافية من Google.';
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
+                          duration: const Duration(seconds: 8),
                           content: Text(
-                            'تعذر تسجيل الدخول باستخدام Google: ${error.code}',
+                            'تعذر تسجيل الدخول باستخدام Google\n'
+                            'رمز الخطأ: ${error.code}\n'
+                            'التفاصيل: $description',
                             textAlign: TextAlign.right,
                           ),
                           behavior: SnackBarBehavior.floating,
