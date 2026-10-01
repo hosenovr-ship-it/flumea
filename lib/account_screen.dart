@@ -9,6 +9,7 @@ import 'bottom_navigation.dart';
 import 'theme_controller.dart';
 import 'services/flumea_notification_service.dart';
 import 'privacy_screen.dart';
+import 'login_screen.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -25,7 +26,7 @@ class _AccountScreenState extends State<AccountScreen> {
   final SupabaseClient _supabase = Supabase.instance.client;
   final ImagePicker _imagePicker = ImagePicker();
 
-  String _fullName = 'حسين';
+  String _fullName = 'صديقي';
   String? _avatarUrl;
   bool _loading = true;
   bool _uploadingAvatar = false;
@@ -56,12 +57,56 @@ class _AccountScreenState extends State<AccountScreen> {
           .eq('id', user.id)
           .maybeSingle();
 
+      final metadata = user.userMetadata;
+      final metadataName = (metadata?['full_name'] ??
+              metadata?['name'] ??
+              metadata?['display_name'])
+          ?.toString()
+          .trim();
+      final metadataAvatar = (metadata?['avatar_url'] ?? metadata?['picture'])
+          ?.toString()
+          .trim();
+      final emailName = user.email?.split('@').first.trim();
+
+      final storedName = data?['full_name']?.toString().trim() ?? '';
+      final storedAvatar = data?['avatar_url']?.toString().trim() ?? '';
+
+      // استخدم بيانات الحساب الحقيقية عند عدم وجود ملف شخصي،
+      // أو عند وجود الاسم الافتراضي القديم الذي كان يظهر ثابتاً.
+      final resolvedName = storedName.isNotEmpty && storedName != 'حسين'
+          ? storedName
+          : ((metadataName != null && metadataName.isNotEmpty)
+              ? metadataName
+              : ((emailName != null && emailName.isNotEmpty)
+                  ? emailName
+                  : 'صديقي'));
+      final resolvedAvatar = storedAvatar.isNotEmpty
+          ? storedAvatar
+          : ((metadataAvatar != null && metadataAvatar.isNotEmpty)
+              ? metadataAvatar
+              : null);
+
+      // احفظ القيم الحقيقية في profiles عند الحاجة حتى تستخدمها
+      // الصفحة الرئيسية وصفحة الحساب معاً.
+      final updates = <String, dynamic>{
+        'id': user.id,
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+      if (storedName.isEmpty || storedName == 'حسين') {
+        updates['full_name'] = resolvedName;
+      }
+      if (storedAvatar.isEmpty && resolvedAvatar != null) {
+        updates['avatar_url'] = resolvedAvatar;
+      }
+      if (updates.length > 2) {
+        await _supabase.from('profiles').upsert(updates);
+      }
+
       if (!mounted) return;
 
       setState(() {
-        final name = data?['full_name'] as String?;
-        _fullName = (name != null && name.trim().isNotEmpty) ? name : 'حسين';
-        _avatarUrl = data?['avatar_url'] as String?;
+        _fullName = resolvedName;
+        _avatarUrl = resolvedAvatar;
         _loading = false;
       });
     } catch (_) {
@@ -864,6 +909,12 @@ class _AccountScreenState extends State<AccountScreen> {
 
     try {
       await _supabase.auth.signOut();
+
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
     } catch (_) {
       if (!mounted) return;
       _showFlumeaNotification(
@@ -898,8 +949,8 @@ class _AccountScreenState extends State<AccountScreen> {
                         'FLUMEA',
                         textAlign: TextAlign.left,
                         style: TextStyle(
-                          fontSize: 23,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
                           letterSpacing: 4.0,
                           color: isDark ? Colors.white : navy,
                         ),
