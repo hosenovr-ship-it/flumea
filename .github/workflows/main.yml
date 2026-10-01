@@ -25,6 +25,19 @@ jobs:
           git clone https://github.com/flutter/flutter.git --depth 1 -b stable $HOME/flutter
           echo "$HOME/flutter/bin" >> $GITHUB_PATH
 
+      - name: Restore signing keystore
+        env:
+          FLUMEA_KEYSTORE_BASE64: ${{ secrets.FLUMEA_KEYSTORE_BASE64 }}
+          FLUMEA_KEYSTORE_PASSWORD: ${{ secrets.FLUMEA_KEYSTORE_PASSWORD }}
+        run: |
+          printf '%s' "$FLUMEA_KEYSTORE_BASE64" | base64 --decode > android/app/flumea-release.jks
+          cat > android/key.properties <<EOF
+          storePassword=$FLUMEA_KEYSTORE_PASSWORD
+          keyPassword=$FLUMEA_KEYSTORE_PASSWORD
+          keyAlias=flumea_release
+          storeFile=../app/flumea-release.jks
+          EOF
+
       - name: Get dependencies
         run: flutter pub get
 
@@ -35,16 +48,16 @@ jobs:
         run: flutter analyze
 
       - name: Build APK
-        run: flutter build apk --debug
+        run: flutter build apk --release
 
       - name: Get SHA-1
         run: |
           APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -1)
-          "$APKSIGNER" verify --print-certs build/app/outputs/flutter-apk/app-debug.apk | grep "SHA-1 digest:"
+          "$APKSIGNER" verify --print-certs build/app/outputs/flutter-apk/app-release.apk | grep "SHA-1 digest:"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: FLUMEA-APK
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
