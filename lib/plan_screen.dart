@@ -322,8 +322,38 @@ class _PlanScreenState extends State<PlanScreen> {
         return;
       }
 
+      // لا ننشئ مهاماً تجريبية للمستخدم الجديد.
+      // وإذا كانت النسخ القديمة قد أنشأت المهام الافتراضية لهذا المستخدم،
+      // نحذفها فقط عندما تكون كل مهامه من القائمة الافتراضية، حتى تبدأ الخطة فارغة.
+      const defaultTaskTitles = {
+        'الاستيقاظ',
+        'الرياضة',
+        'الإفطار',
+        'الدراسة',
+        'المهام الشخصية',
+        'القراءة',
+        'مراجعة اليوم',
+      };
+
+      if (allTasks.isNotEmpty &&
+          allTasks.every((task) =>
+              defaultTaskTitles.contains(_safeString(task['title'])))) {
+        for (final task in allTasks) {
+          final id = _safeString(task['id']);
+          if (id.isEmpty) continue;
+          try {
+            await _taskService.deleteTask(id);
+          } catch (_) {}
+        }
+        allTasks.clear();
+      }
+
       if (allTasks.isEmpty) {
-        await _createInitialTasks();
+        if (!mounted) return;
+        setState(() {
+          tasks = [];
+          _isLoadingTasks = false;
+        });
         return;
       }
 
@@ -370,119 +400,6 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   // ============================================================
-  // إنشاء المهام التجريبية أول مرة فقط
-  // ============================================================
-
-  Future<void> _createInitialTasks() async {
-    final initialTasks = [
-      {
-        'time': '6:00 ص',
-        'title': 'الاستيقاظ',
-        'description': 'ابدأ يومك بطاقة',
-        'tag': 'عادات',
-        'emoji': '☀️',
-        'color': '#20C7B7',
-        'completed': true,
-      },
-      {
-        'time': '6:30 ص',
-        'title': 'الرياضة',
-        'description': 'تمرين لمدة 45 دقيقة',
-        'tag': 'صحة',
-        'emoji': '🏋️',
-        'color': '#EF5350',
-        'completed': false,
-      },
-      {
-        'time': '8:00 ص',
-        'title': 'الإفطار',
-        'description': 'وجبة صحية ومتوازنة',
-        'tag': 'غذاء',
-        'emoji': '🍽️',
-        'color': '#FFA726',
-        'completed': true,
-      },
-      {
-        'time': '9:00 ص',
-        'title': 'الدراسة',
-        'description': 'مذاكرة المواد المهمة',
-        'tag': 'تعليم',
-        'emoji': '🎓',
-        'color': '#1478D4',
-        'completed': true,
-      },
-      {
-        'time': '12:00 م',
-        'title': 'المهام الشخصية',
-        'description': 'إنجاز الأعمال المطلوبة',
-        'tag': 'إنتاجية',
-        'emoji': '💼',
-        'color': '#E57C72',
-        'completed': true,
-      },
-      {
-        'time': '4:00 م',
-        'title': 'القراءة',
-        'description': 'قراءة 30 دقيقة',
-        'tag': 'تطوير الذات',
-        'emoji': '📖',
-        'color': '#8E44AD',
-        'completed': true,
-      },
-      {
-        'time': '7:00 م',
-        'title': 'مراجعة اليوم',
-        'description': 'تقييم ما تم إنجازه',
-        'tag': 'مراجعة',
-        'emoji': '📊',
-        'color': '#20C7B7',
-        'completed': true,
-      },
-    ];
-
-    try {
-      final createdTasks = <Map<String, dynamic>>[];
-
-      for (final task in initialTasks) {
-        final created = await _taskService.addTask(
-          title: task['title'] as String,
-          description: task['description'] as String,
-          time: task['time'] as String,
-          tag: task['tag'] as String,
-          emoji: task['emoji'] as String,
-          color: task['color'] as String,
-          completed: task['completed'] as bool,
-        );
-
-        await _saveTaskDate(
-          _safeString(created['id']),
-          _selectedDate,
-        );
-        created['due_date'] = _dateKey(_selectedDate);
-        createdTasks.add(created);
-      }
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        tasks = createdTasks;
-        _isLoadingTasks = false;
-      });
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _isLoadingTasks = false;
-      });
-
-      FlumeaNotificationService.showTopMessage(context, 'تعذر إنشاء المهام الأولية: $error');
-    }
-  }
-  // ============================================================
   // Supabase - تحميل العادات
   // ============================================================
 
@@ -494,33 +411,32 @@ class _PlanScreenState extends State<PlanScreen> {
         return;
       }
 
+      // لا ننشئ عادات افتراضية للمستخدم الجديد.
+      // وإذا كانت النسخ القديمة قد أنشأت العادات الافتراضية فقط، نحذفها
+      // حتى تبدأ صفحة الخطة فارغة.
+      const defaultHabitNames = {
+        'شرب الماء',
+        'الرياضة',
+        'القراءة',
+      };
+
+      if (loadedHabits.isNotEmpty &&
+          loadedHabits.every((habit) =>
+              defaultHabitNames.contains(_safeString(habit['name'])))) {
+        for (final habit in loadedHabits) {
+          final id = _safeString(habit['id']);
+          if (id.isEmpty) continue;
+          try {
+            await _habitService.deleteHabit(id);
+          } catch (_) {}
+        }
+        loadedHabits.clear();
+      }
+
       if (loadedHabits.isEmpty) {
-        const defaultNames = [
-          'شرب الماء',
-          'الرياضة',
-          'القراءة',
-        ];
-
-        final createdHabits = <Map<String, dynamic>>[];
-
-        for (final name in defaultNames) {
-          final created = await _habitService.addHabit(
-            name: name,
-            description: '',
-            completed: false,
-          );
-          createdHabits.add(created);
-        }
-
-        if (!mounted) {
-          return;
-        }
-
+        if (!mounted) return;
         setState(() {
           habits.clear();
-          for (final habit in createdHabits) {
-            habits.add(_habitMap(habit));
-          }
         });
         await _loadActiveDays();
         return;
