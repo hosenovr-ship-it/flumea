@@ -692,8 +692,8 @@ class _PlanScreenState extends State<PlanScreen> {
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(
               textScaler: TextScaler.linear(
-                (MediaQuery.sizeOf(context).width / 480.0)
-                    .clamp(0.84, 1.0)
+                (MediaQuery.sizeOf(context).width / 600.0)
+                    .clamp(0.76, 1.0)
                     .toDouble(),
               ),
             ),
@@ -1335,6 +1335,7 @@ class _PlanScreenState extends State<PlanScreen> {
     Map<String, dynamic> task,
     int index,
   ) {
+    final compact = MediaQuery.sizeOf(context).width < 600;
     final bool completed =
         _safeBool(
       task['completed'],
@@ -1378,8 +1379,8 @@ class _PlanScreenState extends State<PlanScreen> {
     return Container(
       padding:
           EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 14,
+        horizontal: compact ? 9 : 16,
+        vertical: compact ? 9 : 14,
       ),
       decoration: const BoxDecoration(),
       child: Row(
@@ -1389,8 +1390,8 @@ class _PlanScreenState extends State<PlanScreen> {
               _toggleTask(index);
             },
             child: Container(
-              width: 28,
-              height: 28,
+              width: compact ? 22 : 28,
+              height: compact ? 22 : 28,
               decoration:
                   BoxDecoration(
                 color: completed
@@ -1414,14 +1415,14 @@ class _PlanScreenState extends State<PlanScreen> {
                       Icons.check,
                       color:
                           Colors.white,
-                      size: 20,
+                      size: compact ? 15 : 20,
                     )
                   : null,
             ),
           ),
 
           SizedBox(
-            width: 12,
+            width: compact ? 7 : 12,
           ),
 
           Expanded(
@@ -1447,7 +1448,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               TextOverflow.ellipsis,
                           style:
                               TextStyle(
-                            fontSize: 16,
+                            fontSize: compact ? 12 : 16,
                             fontWeight:
                                 FontWeight.w800,
                             color: completed
@@ -1466,15 +1467,15 @@ class _PlanScreenState extends State<PlanScreen> {
                       ),
 
                       SizedBox(
-                        width: 8,
+                        width: compact ? 5 : 8,
                       ),
 
                       Container(
                         padding:
                             EdgeInsets
                                 .symmetric(
-                          horizontal: 10,
-                          vertical: 6,
+                          horizontal: compact ? 7 : 10,
+                          vertical: compact ? 4 : 6,
                         ),
                         decoration:
                             BoxDecoration(
@@ -1497,7 +1498,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               style:
                                   TextStyle(
                                 color: color,
-                                fontSize: 11,
+                                fontSize: compact ? 8 : 11,
                                 fontWeight:
                                     FontWeight
                                         .w800,
@@ -1510,7 +1511,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               emoji,
                               style:
                                   TextStyle(
-                                fontSize: 13,
+                                fontSize: compact ? 10 : 13,
                               ),
                             ),
                           ],
@@ -1532,7 +1533,7 @@ class _PlanScreenState extends State<PlanScreen> {
                         TextOverflow.ellipsis,
                     style:
                         TextStyle(
-                      fontSize: 12,
+                      fontSize: compact ? 10 : 12,
                       color:
                           Color(0xFF7B8798),
                     ),
@@ -1547,14 +1548,14 @@ class _PlanScreenState extends State<PlanScreen> {
           ),
 
           SizedBox(
-            width: 58,
+            width: compact ? 42 : 58,
             child: Text(
               time,
               textAlign:
                   TextAlign.left,
               style:
                   TextStyle(
-                fontSize: 13,
+                fontSize: compact ? 10 : 13,
                 color:
                     Color(0xFF52647A),
                 fontWeight:
@@ -2302,7 +2303,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   color: navy,
-                  fontSize: 17,
+                  fontSize: compact ? 14 : 17,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -2336,7 +2337,7 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             ),
           ],
-          const SizedBox(height: 14),
+          SizedBox(height: compact ? 10 : 14),
           OutlinedButton.icon(
             onPressed: _weeklyGoals.length >= 3
                 ? null
@@ -2370,6 +2371,7 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   Widget _goalRow(int index, Map<String, dynamic> goal) {
+    final compact = MediaQuery.sizeOf(context).width < 600;
     final title = _safeString(goal['title'], fallback: 'هدف أسبوعي');
     final current = (goal['current'] as int?) ?? 0;
     const total = 1;
@@ -2390,8 +2392,8 @@ class _PlanScreenState extends State<PlanScreen> {
       child: Row(
         children: [
           Container(
-            width: 38,
-            height: 38,
+            width: compact ? 30 : 38,
+            height: compact ? 30 : 38,
             decoration: BoxDecoration(
               color: completed
                   ? cyan.withValues(alpha: 0.12)
@@ -2413,20 +2415,20 @@ class _PlanScreenState extends State<PlanScreen> {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: navy,
-                fontSize: 14,
+                fontSize: compact ? 11 : 14,
                 fontWeight: FontWeight.w700,
                 decoration: completed ? TextDecoration.lineThrough : null,
               ),
             ),
           ),
-          const SizedBox(width: 4),
+          SizedBox(width: compact ? 2 : 4),
           PopupMenuButton<String>(
             tooltip: 'خيارات الهدف',
             padding: EdgeInsets.zero,
             icon: Icon(
               Icons.more_vert_rounded,
               color: const Color(0xFF7B8798),
-              size: 21,
+              size: compact ? 17 : 21,
             ),
             onSelected: (value) async {
               if (value == 'reset') {
@@ -2490,8 +2492,8 @@ class _PlanScreenState extends State<PlanScreen> {
               await _saveWeeklyGoals();
             },
             child: Container(
-              width: 23,
-              height: 23,
+              width: compact ? 19 : 23,
+              height: compact ? 19 : 23,
               decoration: BoxDecoration(
                 color: completed ? cyan : Colors.white,
                 borderRadius: BorderRadius.circular(7),
@@ -2504,7 +2506,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   ? const Icon(
                       Icons.check,
                       color: Colors.white,
-                      size: 16,
+                      size: compact ? 13 : 16,
                     )
                   : null,
             ),
@@ -2659,8 +2661,9 @@ class _PlanScreenState extends State<PlanScreen> {
   // ============================================================
 
   Widget _buildDailyHabits() {
+    final compact = MediaQuery.sizeOf(context).width < 600;
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(compact ? 10 : 16),
       decoration: BoxDecoration(
         color: _surface,
         borderRadius: BorderRadius.circular(22),
@@ -2682,18 +2685,18 @@ class _PlanScreenState extends State<PlanScreen> {
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              SizedBox(width: 7),
+              SizedBox(width: compact ? 5 : 7),
               Icon(
                 Icons.repeat,
                 color: navy,
-                size: 21,
+                size: compact ? 17 : 21,
               ),
             ],
           ),
-          SizedBox(height: 16),
+          SizedBox(height: compact ? 10 : 16),
           if (habits.isEmpty)
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
+              padding: EdgeInsets.symmetric(vertical: compact ? 8 : 12),
               child: Text(
                 'لا توجد عادات بعد',
                 textAlign: TextAlign.center,
@@ -2726,12 +2729,12 @@ class _PlanScreenState extends State<PlanScreen> {
             onPressed: _isSavingHabit ? null : _showAddHabitDialog,
             icon: Icon(
               _isSavingHabit ? Icons.hourglass_top : Icons.add,
-              size: 20,
+              size: compact ? 16 : 20,
             ),
             label: Text(
               _isSavingHabit ? 'جاري الحفظ...' : 'إضافة عادة',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: compact ? 11 : 14,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -2780,10 +2783,11 @@ class _PlanScreenState extends State<PlanScreen> {
     required bool completed,
     required String id,
   }) {
+    final compact = MediaQuery.sizeOf(context).width < 600;
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: 13,
-        vertical: 12,
+        horizontal: compact ? 8 : 13,
+        vertical: compact ? 8 : 12,
       ),
       decoration: BoxDecoration(
         color: completed
@@ -2810,10 +2814,10 @@ class _PlanScreenState extends State<PlanScreen> {
             child: Icon(
               completed ? Icons.check : icon,
               color: completed ? cyan : blue,
-              size: 20,
+              size: compact ? 16 : 20,
             ),
           ),
-          SizedBox(width: 12),
+          SizedBox(width: compact ? 7 : 12),
           Expanded(
             child: Text(
               title,
@@ -2876,7 +2880,7 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             ],
           ),
-          SizedBox(width: 4),
+          SizedBox(width: compact ? 2 : 4),
           GestureDetector(
             onTap: () => _toggleHabit(id, completed),
             child: Container(
