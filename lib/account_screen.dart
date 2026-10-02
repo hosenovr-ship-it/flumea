@@ -11,7 +11,6 @@ import 'services/flumea_notification_service.dart';
 import 'privacy_screen.dart';
 import 'login_screen.dart';
 
-
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
 
@@ -930,9 +929,6 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final width = MediaQuery.sizeOf(context).width;
-    final textScale = (width / 430.0).clamp(0.84, 1.0).toDouble();
-
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -940,283 +936,346 @@ class _AccountScreenState extends State<AccountScreen> {
         body: SafeArea(
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(textScale),
+              textScaler: TextScaler.linear(
+                (MediaQuery.sizeOf(context).width / 430.0)
+                    .clamp(0.84, 1.0)
+                    .toDouble(),
+              ),
             ),
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(
-                    height: 74,
-                    child: Row(
-                      textDirection: TextDirection.ltr,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'FLUMEA',
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 4.0,
-                            color: isDark ? Colors.white : navy,
-                          ),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: 74,
+                  child: Row(
+                    textDirection: TextDirection.ltr,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'FLUMEA',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 4.0,
+                          color: isDark ? Colors.white : navy,
                         ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              SizedBox(
-                                width: double.infinity,
-                                child: Text(
-                                  'الحساب',
-                                  textAlign: TextAlign.right,
-                                  style: TextStyle(
-                                    fontSize: 30,
-                                    height: 1.05,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark
-                                        ? const Color(0xFFF2F6FA)
-                                        : navy,
-                                  ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              child: Text(
+                                'الحساب',
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  height: 1.05,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark
+                                      ? const Color(0xFFF2F6FA)
+                                      : navy,
                                 ),
                               ),
-                              const SizedBox(height: 5),
-                              SizedBox(
-                                width: double.infinity,
-                                child: Text(
-                                  'إدارة حسابك وتخصيص تجربتك',
-                                  textAlign: TextAlign.right,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: isDark
-                                        ? const Color(0xFFB8C2CC)
-                                        : const Color(0xFF7B8798),
-                                  ),
+                            ),
+                            SizedBox(height: 5),
+                            SizedBox(
+                              width: double.infinity,
+                              child: Text(
+                                'إدارة حسابك وتخصيص تجربتك',
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: isDark
+                                      ? const Color(0xFFB8C2CC)
+                                      : const Color(0xFF7B8798),
                                 ),
                               ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // بطاقة الملف الشخصي
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                  constraints: const BoxConstraints(minHeight: 174),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: LinearGradient(
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                      colors: isDark
+                          ? const [
+                              Color(0xFF17212B),
+                              Color(0xFF1B2733),
+                            ]
+                          : const [
+                              Color(0xFFF2FBFA),
+                              Color(0xFFF8FBFF),
                             ],
-                          ),
-                        ),
-                      ],
+                    ),
+                    border: Border.all(
+                      color: Color(0xFFE4EBF2),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  // بطاقة الملف الشخصي
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-                    constraints: const BoxConstraints(minHeight: 174),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                      gradient: LinearGradient(
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
-                        colors: isDark
-                            ? const [Color(0xFF17212B), Color(0xFF1B2733)]
-                            : const [Color(0xFFF2FBFA), Color(0xFFF8FBFF)],
-                      ),
-                      border: Border.all(color: const Color(0xFFE4EBF2)),
-                    ),
-                    child: Row(
-                      textDirection: TextDirection.ltr,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: _pickAvatar,
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Container(
-                                width: 92,
-                                height: 92,
+                  child: Row(
+                    textDirection: TextDirection.ltr,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: _pickAvatar,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              width: 92,
+                              height: 92,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color(0xFFE3F5F1),
+                              ),
+                              clipBehavior: Clip.antiAlias,
+                              child: _avatarUrl != null && _avatarUrl!.isNotEmpty
+                                  ? Image.network(
+                                      _avatarUrl!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) => const Icon(
+                                        Icons.person,
+                                        size: 58,
+                                        color: navy,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.person,
+                                      size: 58,
+                                      color: navy,
+                                    ),
+                            ),
+                            Positioned(
+                              bottom: -2,
+                              left: -4,
+                              child: Container(
+                                width: 34,
+                                height: 34,
                                 decoration: const BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Color(0xFFE3F5F1),
+                                  color: navy,
                                 ),
-                                clipBehavior: Clip.antiAlias,
-                                child: _avatarUrl != null && _avatarUrl!.isNotEmpty
-                                    ? Image.network(
-                                        _avatarUrl!,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) =>
-                                            const Icon(Icons.person, size: 58, color: navy),
-                                      )
-                                    : const Icon(Icons.person, size: 58, color: navy),
-                              ),
-                              Positioned(
-                                bottom: -2,
-                                left: -4,
-                                child: Container(
-                                  width: 34,
-                                  height: 34,
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: navy,
-                                  ),
-                                  child: _uploadingAvatar
-                                      ? const Padding(
-                                          padding: EdgeInsets.all(8),
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                child: _uploadingAvatar
+                                    ? const Padding(
+                                        padding: EdgeInsets.all(8),
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                            Colors.white,
                                           ),
-                                        )
-                                      : const Icon(Icons.camera_alt, size: 18, color: Colors.white),
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.camera_alt,
+                                        size: 18,
+                                        color: Colors.white,
+                                      ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 18),
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              child: Text(
+                                _loading ? '...' : _fullName,
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  fontSize: 25,
+                                  height: 1.15,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white : navy,
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 18),
-                        Expanded(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              SizedBox(
-                                width: double.infinity,
-                                child: Text(
-                                  _loading ? '...' : _fullName,
+                            ),
+                            const SizedBox(height: 7),
+                            const SizedBox(
+                              width: double.infinity,
+                              child: Text(
+                                '✨  نسخة أفضل من نفسي كل يوم',
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0xFF718096),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: OutlinedButton.icon(
+                                onPressed: _editProfile,
+                                icon: const Icon(
+                                  Icons.edit,
+                                  size: 19,
+                                  color: blue,
+                                ),
+                                label: const Text(
+                                  'تعديل الملف الشخصي',
                                   textAlign: TextAlign.right,
                                   style: TextStyle(
-                                    fontSize: 25,
-                                    height: 1.15,
+                                    color: blue,
                                     fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : navy,
+                                  ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  side: const BorderSide(
+                                    color: Color(0xFFE4EBF2),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 15,
+                                    vertical: 10,
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 7),
-                              const SizedBox(
-                                width: double.infinity,
-                                child: Text(
-                                  '✨  نسخة أفضل من نفسي كل يوم',
-                                  textAlign: TextAlign.right,
-                                  style: TextStyle(fontSize: 14, color: Color(0xFF718096)),
-                                ),
-                              ),
-                              const SizedBox(height: 14),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: OutlinedButton.icon(
-                                  onPressed: _editProfile,
-                                  icon: const Icon(Icons.edit, size: 19, color: blue),
-                                  label: const Text(
-                                    'تعديل الملف الشخصي',
-                                    textAlign: TextAlign.right,
-                                    style: TextStyle(color: blue, fontWeight: FontWeight.bold),
-                                  ),
-                                  style: OutlinedButton.styleFrom(
-                                    backgroundColor: Colors.white,
-                                    side: const BorderSide(color: Color(0xFFE4EBF2)),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 22),
-                  _sectionCard(
-                    title: 'الإعدادات',
-                    icon: Icons.settings,
-                    children: [
-                      ValueListenableBuilder<ThemeMode>(
-                        valueListenable: FlumeaThemeController.mode,
-                        builder: (context, mode, _) => _settingRow(
+                ),
+
+                const SizedBox(height: 22),
+
+                _sectionCard(
+                  title: 'الإعدادات',
+                  icon: Icons.settings,
+                  children: [
+                    ValueListenableBuilder<ThemeMode>(
+                      valueListenable: FlumeaThemeController.mode,
+                      builder: (context, mode, _) {
+                        return _settingRow(
                           icon: Icons.dark_mode,
                           title: 'المظهر',
                           subtitle: mode == ThemeMode.dark ? 'داكن' : 'فاتح',
                           color: blue,
                           onTap: _showAppearance,
-                        ),
-                      ),
-                      _settingRow(
-                        icon: Icons.notifications_none_rounded,
-                        title: 'الإشعارات',
-                        subtitle: 'تنبيهات المهام والعادات',
-                        color: blue,
-                        onTap: _showNotifications,
-                      ),
-                      _settingRow(
-                        icon: Icons.lock,
-                        title: 'الخصوصية',
-                        subtitle: 'إدارة بياناتك',
-                        color: navy,
-                        last: true,
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const PrivacyScreen()),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  _sectionCard(
-                    title: 'الدعم والمساعدة',
-                    icon: Icons.help_outline,
-                    children: [
-                      _settingRow(
-                        icon: Icons.headset_mic,
-                        title: 'مركز المساعدة',
-                        subtitle: 'الأسئلة الشائعة',
-                        color: blue,
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const FlumeaHelpCenterScreen()),
-                          );
-                        },
-                      ),
-                      _settingRow(
-                        icon: Icons.mail_outline,
-                        title: 'تواصل معنا',
-                        subtitle: 'نحن هنا لمساعدتك',
-                        color: navy,
-                        last: true,
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const FlumeaContactScreen()),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    height: 58,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFE7E7),
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(color: const Color(0xFFFFD2D2)),
+                        );
+                      },
                     ),
-                    child: TextButton.icon(
-                      onPressed: _signOut,
-                      icon: const Icon(Icons.logout, color: Color(0xFFD93B3B)),
-                      label: const Text(
-                        'تسجيل الخروج',
-                        style: TextStyle(
-                          color: Color(0xFFD93B3B),
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    _settingRow(
+                      icon: Icons.notifications_none_rounded,
+                      title: 'الإشعارات',
+                      subtitle: 'تنبيهات المهام والعادات',
+                      color: blue,
+                      onTap: _showNotifications,
+                    ),
+                    _settingRow(
+                      icon: Icons.lock,
+                      title: 'الخصوصية',
+                      subtitle: 'إدارة بياناتك',
+                      color: navy,
+                      last: true,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const PrivacyScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                _sectionCard(
+                  title: 'الدعم والمساعدة',
+                  icon: Icons.help_outline,
+                  children: [
+                    _settingRow(
+                      icon: Icons.headset_mic,
+                      title: 'مركز المساعدة',
+                      subtitle: 'الأسئلة الشائعة',
+                      color: blue,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const FlumeaHelpCenterScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    _settingRow(
+                      icon: Icons.mail_outline,
+                      title: 'تواصل معنا',
+                      subtitle: 'نحن هنا لمساعدتك',
+                      color: navy,
+                      last: true,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const FlumeaContactScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                Container(
+                  height: 58,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFE7E7),
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(
+                      color: const Color(0xFFFFD2D2),
+                    ),
+                  ),
+                  child: TextButton.icon(
+                    onPressed: _signOut,
+                    icon: const Icon(
+                      Icons.logout,
+                      color: Color(0xFFD93B3B),
+                    ),
+                    label: const Text(
+                      'تسجيل الخروج',
+                      style: TextStyle(
+                        color: Color(0xFFD93B3B),
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
             ),
           ),
         ),
-        bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 3),
+        bottomNavigationBar: FlumeaBottomNavigation(
+          selectedIndex: 3,
+        ),
       ),
     );
   }
