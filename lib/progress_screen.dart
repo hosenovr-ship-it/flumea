@@ -5,7 +5,6 @@ import 'bottom_navigation.dart';
 import 'services/flumea_notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
 
@@ -766,9 +765,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final textScale = (width / 430.0).clamp(0.84, 1.0).toDouble();
-
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -776,7 +772,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
         body: SafeArea(
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(textScale),
+              textScaler: TextScaler.linear(
+                (MediaQuery.sizeOf(context).width / 430.0)
+                    .clamp(0.84, 1.0)
+                    .toDouble(),
+              ),
             ),
             child: RefreshIndicator(
               onRefresh: _loadProgress,
@@ -801,9 +801,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               const SizedBox(height: 16),
                               _habitChart(),
                               const SizedBox(height: 14),
-                              _timeCard(),
-                              const SizedBox(height: 14),
-                              _improvementCard(),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(child: _timeCard()),
+                                  const SizedBox(width: 12),
+                                  Expanded(child: _improvementCard()),
+                                ],
+                              ),
                             ],
                           ),
               ),
