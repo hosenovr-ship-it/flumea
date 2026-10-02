@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'home_screen.dart';
 const String _googleWebClientId =
     '106036859936-2seqm33h1h9um8pl5dusdatjuc4lhljt.apps.googleusercontent.com';
@@ -79,13 +79,17 @@ class LoginScreen extends StatelessWidget {
 
                 // Google
                 _loginButton(
-                  icon: const Text(
-                    'G',
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF4285F4),
-                    ),
+                  icon: SvgPicture.string(
+                    '''
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <path fill="#EA4335" d="M24 9.5c3.54 0 6.72 1.22 9.22 3.6l6.85-6.85C35.9 2.64 30.47 0 24 0 14.61 0 6.55 5.38 2.64 13.22l7.98 6.2C12.5 13.28 17.76 9.5 24 9.5z"/>
+  <path fill="#4285F4" d="M46.5 24.5c0-1.6-.15-3.14-.42-4.63H24v9.05h12.65c-.55 2.91-2.19 5.38-4.67 7.03l7.53 5.84C43.9 37.64 46.5 31.56 46.5 24.5z"/>
+  <path fill="#FBBC05" d="M10.62 28.58A14.48 14.48 0 0 1 9.5 24c0-1.59.4-3.12 1.12-4.58l-7.98-6.2A24 24 0 0 0 0 24c0 3.88.93 7.56 2.64 10.78l7.98-6.2z"/>
+  <path fill="#34A853" d="M24 48c6.47 0 11.9-2.14 15.84-5.82l-7.53-5.84c-2.08 1.4-4.74 2.23-8.31 2.23-6.24 0-11.5-3.78-13.38-9.42l-7.98 6.2C6.55 42.62 14.61 48 24 48z"/>
+</svg>
+                    ''',
+                    width: 30,
+                    height: 30,
                   ),
                   text: 'متابعة باستخدام Google',
                   onTap: () async {
@@ -156,19 +160,6 @@ class LoginScreen extends StatelessWidget {
                       );
                     }
                   },
-                ),
-
-                const SizedBox(height: 16),
-
-                // Apple
-                _loginButton(
-                  icon: const FaIcon(
-                    FontAwesomeIcons.apple,
-                    color: Colors.black,
-                    size: 27,
-                  ),
-                  text: 'متابعة باستخدام Apple',
-                  onTap: () {},
                 ),
 
                 const SizedBox(height: 28),
