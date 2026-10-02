@@ -4,6 +4,11 @@ import 'bottom_navigation.dart';
 import 'food_tracking_screen.dart';
 import 'services/flumea_notification_service.dart';
 
+double _flumeaResponsiveScale(double width) {
+  if (width >= 430) return 1.0;
+  return (width / 430.0).clamp(0.84, 1.0).toDouble();
+}
+
 class HomeScreen extends StatefulWidget {
   static const darkBlue = Color(0xFF102A4C);
   static const blue = Color(0xFF2870B5);
@@ -307,32 +312,46 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
-          child: _loading
-              ? const Center(
-                  child: CircularProgressIndicator(color: teal),
-                )
-              : RefreshIndicator(
-                  onRefresh: _loadHomeData,
-                  color: teal,
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(18, 14, 18, 105),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildHeader(),
-                        const SizedBox(height: 24),
-                        _buildDailyProgress(),
-                        const SizedBox(height: 20),
-                        _buildTodayPlan(),
-                        const SizedBox(height: 16),
-                        _buildHabitsAndFood(),
-                        const SizedBox(height: 16),
-                        _buildSmartAssistant(),
-                      ],
-                    ),
-                  ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final scale = _flumeaResponsiveScale(constraints.maxWidth);
+
+              return Transform.scale(
+                scale: scale,
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  width: constraints.maxWidth / scale,
+                  height: constraints.maxHeight / scale,
+                  child: _loading
+                      ? const Center(
+                          child: CircularProgressIndicator(color: teal),
+                        )
+                      : RefreshIndicator(
+                          onRefresh: _loadHomeData,
+                          color: teal,
+                          child: SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.fromLTRB(18, 14, 18, 105),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _buildHeader(),
+                                const SizedBox(height: 24),
+                                _buildDailyProgress(),
+                                const SizedBox(height: 20),
+                                _buildTodayPlan(),
+                                const SizedBox(height: 16),
+                                _buildHabitsAndFood(),
+                                const SizedBox(height: 16),
+                                _buildSmartAssistant(),
+                              ],
+                            ),
+                          ),
+                        ),
                 ),
+              );
+            },
+          ),
         ),
         bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 0),
       ),
