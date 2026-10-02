@@ -936,10 +936,7 @@ class _AccountScreenState extends State<AccountScreen> {
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 760),
-                child: Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SizedBox(
@@ -1264,9 +1261,6 @@ class _AccountScreenState extends State<AccountScreen> {
                   ),
                 ),
               ],
-            ),
-          ),
-        ),
             ),
           ),
         ),
