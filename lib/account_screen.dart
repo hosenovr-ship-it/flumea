@@ -16,6 +16,10 @@ double _flumeaResponsiveScale(double width) {
   return (width / 430.0).clamp(0.84, 1.0).toDouble();
 }
 
+double _flumeaResponsiveValue(BuildContext context, double value) {
+  return value * _flumeaResponsiveScale(MediaQuery.sizeOf(context).width);
+}
+
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
 
@@ -144,10 +148,10 @@ class _AccountScreenState extends State<AccountScreen> {
                   ),
                 ),
                 const SizedBox(height: 18),
-                const Text(
+                Text(
                   'اختيار صورة الحساب',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: _flumeaResponsiveValue(context, 20),
                     fontWeight: FontWeight.bold,
                     color: navy,
                   ),
@@ -158,7 +162,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     backgroundColor: lightBlue,
                     child: Icon(Icons.photo_library, color: blue),
                   ),
-                  title: const Text('اختيار من المعرض'),
+                  title: Text('اختيار من المعرض'),
                   onTap: () => Navigator.pop(context, ImageSource.gallery),
                 ),
                 ListTile(
@@ -166,7 +170,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     backgroundColor: lightBlue,
                     child: Icon(Icons.camera_alt, color: navy),
                   ),
-                  title: const Text('التقاط صورة بالكاميرا'),
+                  title: Text('التقاط صورة بالكاميرا'),
                   onTap: () => Navigator.pop(context, ImageSource.camera),
                 ),
               ],
@@ -377,10 +381,10 @@ class _AccountScreenState extends State<AccountScreen> {
                         color: blue.withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.notifications_none_rounded,
                         color: blue,
-                        size: 25,
+                        size: _flumeaResponsiveValue(context, 25),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -390,7 +394,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         textAlign: TextAlign.right,
                         style: TextStyle(
                           color: primary,
-                          fontSize: 21,
+                          fontSize: _flumeaResponsiveValue(context, 21),
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -484,10 +488,10 @@ class _AccountScreenState extends State<AccountScreen> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           'إغلاق',
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: _flumeaResponsiveValue(context, 15),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -556,7 +560,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   child: Icon(
                     icon,
                     color: color,
-                    size: 23,
+                    size: _flumeaResponsiveValue(context, 23),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -574,7 +578,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: primary,
-                            fontSize: 15,
+                            fontSize: _flumeaResponsiveValue(context, 15),
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -589,7 +593,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: secondary,
-                            fontSize: 12.5,
+                            fontSize: _flumeaResponsiveValue(context, 12.5),
                             height: 1.35,
                           ),
                         ),
@@ -661,7 +665,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       color: accent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Icon(icon, color: accent, size: 27),
+                    child: Icon(icon, color: accent, size: _flumeaResponsiveValue(context, 27)),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -673,7 +677,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             color: primary,
-                            fontSize: 20,
+                            fontSize: _flumeaResponsiveValue(context, 20),
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -683,7 +687,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             color: secondary,
-                            fontSize: 12.5,
+                            fontSize: _flumeaResponsiveValue(context, 12.5),
                           ),
                         ),
                       ],
@@ -743,10 +747,10 @@ class _AccountScreenState extends State<AccountScreen> {
                             : lightBlue,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.palette_outlined,
                         color: blue,
-                        size: 27,
+                        size: _flumeaResponsiveValue(context, 27),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -759,7 +763,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             textAlign: TextAlign.right,
                             style: TextStyle(
                               color: primary,
-                              fontSize: 22,
+                              fontSize: _flumeaResponsiveValue(context, 22),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -768,7 +772,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             textAlign: TextAlign.right,
                             style: TextStyle(
                               color: secondary,
-                              fontSize: 12.5,
+                              fontSize: _flumeaResponsiveValue(context, 12.5),
                             ),
                           ),
                         ],
@@ -832,10 +836,10 @@ class _AccountScreenState extends State<AccountScreen> {
                     color: const Color(0xFFFFE7E7),
                     borderRadius: BorderRadius.circular(21),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.logout_rounded,
                     color: Color(0xFFD93B3B),
-                    size: 32,
+                    size: _flumeaResponsiveValue(context, 32),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -844,7 +848,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: primary,
-                    fontSize: 23,
+                    fontSize: _flumeaResponsiveValue(context, 23),
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -855,7 +859,7 @@ class _AccountScreenState extends State<AccountScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: secondary,
-                fontSize: 14.5,
+                fontSize: _flumeaResponsiveValue(context, 14.5),
                 height: 1.6,
               ),
             ),
@@ -878,7 +882,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         'البقاء',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
@@ -896,7 +900,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         'تسجيل الخروج',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
@@ -941,15 +945,7 @@ class _AccountScreenState extends State<AccountScreen> {
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final scale = _flumeaResponsiveScale(constraints.maxWidth);
-
-              return Transform.scale(
-                scale: scale,
-                alignment: Alignment.topCenter,
-                child: SizedBox(
-                  width: constraints.maxWidth / scale,
-                  height: constraints.maxHeight / scale,
-                  child: SingleChildScrollView(
+              return SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -964,12 +960,10 @@ class _AccountScreenState extends State<AccountScreen> {
                         'FLUMEA',
                         textAlign: TextAlign.left,
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: _flumeaResponsiveValue(context, 20),
                           fontWeight: FontWeight.w700,
                           letterSpacing: 4.0,
-                          color: isDark ? Colors.white : navy,
-                        ),
-                      ),
+                          color: isDark ? Colors.white : navy,,
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
@@ -981,7 +975,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 'الحساب',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 30,
+                                  fontSize: _flumeaResponsiveValue(context, 30),
                                   height: 1.05,
                                   fontWeight: FontWeight.bold,
                                   color: isDark
@@ -997,7 +991,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 'إدارة حسابك وتخصيص تجربتك',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: _flumeaResponsiveValue(context, 16),
                                   color: isDark
                                       ? const Color(0xFFB8C2CC)
                                       : const Color(0xFF7B8798),
@@ -1056,15 +1050,15 @@ class _AccountScreenState extends State<AccountScreen> {
                                   ? Image.network(
                                       _avatarUrl!,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) => const Icon(
+                                      errorBuilder: (context, error, stackTrace) => Icon(
                                         Icons.person,
-                                        size: 58,
+                                        size: _flumeaResponsiveValue(context, 58),
                                         color: navy,
                                       ),
                                     )
-                                  : const Icon(
+                                  : Icon(
                                       Icons.person,
-                                      size: 58,
+                                      size: _flumeaResponsiveValue(context, 58),
                                       color: navy,
                                     ),
                             ),
@@ -1089,9 +1083,9 @@ class _AccountScreenState extends State<AccountScreen> {
                                           ),
                                         ),
                                       )
-                                    : const Icon(
+                                    : Icon(
                                         Icons.camera_alt,
-                                        size: 18,
+                                        size: _flumeaResponsiveValue(context, 18),
                                         color: Colors.white,
                                       ),
                               ),
@@ -1111,7 +1105,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 _loading ? '...' : _fullName,
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 25,
+                                  fontSize: _flumeaResponsiveValue(context, 25),
                                   height: 1.15,
                                   fontWeight: FontWeight.bold,
                                   color: isDark ? Colors.white : navy,
@@ -1125,7 +1119,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 '✨  نسخة أفضل من نفسي كل يوم',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: _flumeaResponsiveValue(context, 14),
                                   color: Color(0xFF718096),
                                 ),
                               ),
@@ -1135,12 +1129,12 @@ class _AccountScreenState extends State<AccountScreen> {
                               alignment: Alignment.centerRight,
                               child: OutlinedButton.icon(
                                 onPressed: _editProfile,
-                                icon: const Icon(
+                                icon: Icon(
                                   Icons.edit,
-                                  size: 19,
+                                  size: _flumeaResponsiveValue(context, 19),
                                   color: blue,
                                 ),
-                                label: const Text(
+                                label: Text(
                                   'تعديل الملف الشخصي',
                                   textAlign: TextAlign.right,
                                   style: TextStyle(
@@ -1261,15 +1255,15 @@ class _AccountScreenState extends State<AccountScreen> {
                   ),
                   child: TextButton.icon(
                     onPressed: _signOut,
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.logout,
                       color: Color(0xFFD93B3B),
                     ),
-                    label: const Text(
+                    label: Text(
                       'تسجيل الخروج',
                       style: TextStyle(
                         color: Color(0xFFD93B3B),
-                        fontSize: 17,
+                        fontSize: _flumeaResponsiveValue(context, 17),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1313,7 +1307,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 Icon(
                   icon,
                   color: navy,
-                  size: 28,
+                  size: _flumeaResponsiveValue(context, 28),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -1321,7 +1315,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     title,
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: _flumeaResponsiveValue(context, 22),
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
@@ -1383,14 +1377,14 @@ class _AccountScreenState extends State<AccountScreen> {
                     child: Icon(
                       icon,
                       color: color,
-                      size: 27,
+                      size: _flumeaResponsiveValue(context, 27),
                     ),
                   ),
                   const SizedBox(width: 10),
-                  const Icon(
+                  Icon(
                     Icons.chevron_left,
                     color: Color(0xFF718096),
-                    size: 27,
+                    size: _flumeaResponsiveValue(context, 27),
                   ),
                   const Spacer(),
                   Expanded(
@@ -1404,7 +1398,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             title,
                             textAlign: TextAlign.right,
                             style: TextStyle(
-                              fontSize: 17,
+                              fontSize: _flumeaResponsiveValue(context, 17),
                               fontWeight: FontWeight.bold,
                               color: primary,
                             ),
@@ -1417,7 +1411,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             subtitle,
                             textAlign: TextAlign.right,
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: _flumeaResponsiveValue(context, 13),
                               color: secondary,
                             ),
                           ),
@@ -1427,10 +1421,10 @@ class _AccountScreenState extends State<AccountScreen> {
                   ),
                 ]
               : [
-                  const Icon(
+                  Icon(
                     Icons.chevron_left,
                     color: Color(0xFF718096),
-                    size: 27,
+                    size: _flumeaResponsiveValue(context, 27),
                   ),
                   const Spacer(),
                   Expanded(
@@ -1444,7 +1438,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             title,
                             textAlign: TextAlign.right,
                             style: TextStyle(
-                              fontSize: 17,
+                              fontSize: _flumeaResponsiveValue(context, 17),
                               fontWeight: FontWeight.bold,
                               color: primary,
                             ),
@@ -1457,7 +1451,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             subtitle,
                             textAlign: TextAlign.right,
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: _flumeaResponsiveValue(context, 13),
                               color: secondary,
                             ),
                           ),
@@ -1476,7 +1470,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     child: Icon(
                       icon,
                       color: color,
-                      size: 27,
+                      size: _flumeaResponsiveValue(context, 27),
                     ),
                   ),
                 ],
@@ -1559,7 +1553,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                     'تغيير صورة الحساب',
                     style: TextStyle(
                       color: primary,
-                      fontSize: 20,
+                      fontSize: _flumeaResponsiveValue(context, 20),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1572,7 +1566,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                       backgroundColor: Color(0xFFEAF3FF),
                       child: Icon(Icons.photo_library_rounded, color: blue),
                     ),
-                    title: const Text('اختيار من المعرض'),
+                    title: Text('اختيار من المعرض'),
                     onTap: () =>
                         Navigator.pop(sheetContext, ImageSource.gallery),
                   ),
@@ -1584,7 +1578,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                       backgroundColor: Color(0xFFEAF3FF),
                       child: Icon(Icons.camera_alt_rounded, color: navy),
                     ),
-                    title: const Text('التقاط صورة بالكاميرا'),
+                    title: Text('التقاط صورة بالكاميرا'),
                     onTap: () =>
                         Navigator.pop(sheetContext, ImageSource.camera),
                   ),
@@ -1750,7 +1744,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
               ),
               child: IconButton(
                 onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.arrow_forward_rounded),
+                icon: Icon(Icons.arrow_forward_rounded),
                 color: primary,
                 tooltip: 'رجوع',
               ),
@@ -1760,7 +1754,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
             'تعديل الملف الشخصي',
             style: TextStyle(
               color: primary,
-              fontSize: 20,
+              fontSize: _flumeaResponsiveValue(context, 20),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -1819,13 +1813,13 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                                     fit: BoxFit.cover,
                                     errorBuilder: (context, error, stackTrace) => Icon(
                                       Icons.person_rounded,
-                                      size: 68,
+                                      size: _flumeaResponsiveValue(context, 68),
                                       color: isDark ? Colors.white70 : navy,
                                     ),
                                   )
                                 : Icon(
                                     Icons.person_rounded,
-                                    size: 68,
+                                    size: _flumeaResponsiveValue(context, 68),
                                     color: isDark ? Colors.white70 : navy,
                                   ),
                           ),
@@ -1850,10 +1844,10 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                                         ),
                                       ),
                                     )
-                                  : const Icon(
+                                  : Icon(
                                       Icons.camera_alt_rounded,
                                       color: Colors.white,
-                                      size: 21,
+                                      size: _flumeaResponsiveValue(context, 21),
                                     ),
                             ),
                           ),
@@ -1866,7 +1860,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: primary,
-                        fontSize: 19,
+                        fontSize: _flumeaResponsiveValue(context, 19),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1874,7 +1868,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                     Text(
                       'اضغط على الصورة لتغييرها',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: secondary, fontSize: 13.5),
+                      style: TextStyle(color: secondary, fontSize: _flumeaResponsiveValue(context, 13.5)),
                     ),
                   ],
                 ),
@@ -1896,7 +1890,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         color: primary,
-                        fontSize: 20,
+                        fontSize: _flumeaResponsiveValue(context, 20),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1909,7 +1903,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                       decoration: InputDecoration(
                         labelText: 'الاسم',
                         hintText: 'اكتب اسمك',
-                        prefixIcon: const Icon(
+                        prefixIcon: Icon(
                           Icons.person_outline_rounded,
                           color: blue,
                         ),
@@ -1949,11 +1943,11 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                                 AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Icon(Icons.check_rounded),
+                      : Icon(Icons.check_rounded),
                   label: Text(
                     _saving ? 'جارٍ الحفظ...' : 'حفظ التغييرات',
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: TextStyle(
+                      fontSize: _flumeaResponsiveValue(context, 16),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -2005,7 +1999,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                     Text(
                       'FLUMEA',
                       style: TextStyle(
-                        fontSize: 17,
+                        fontSize: _flumeaResponsiveValue(context, 17),
                         fontWeight: FontWeight.bold,
                         color: primary,
                       ),
@@ -2027,7 +2021,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                       ),
                       child: IconButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.arrow_forward_rounded),
+                        icon: Icon(Icons.arrow_forward_rounded),
                         color: primary,
                         tooltip: 'رجوع',
                       ),
@@ -2050,7 +2044,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: primary,
-                                fontSize: 30,
+                                fontSize: _flumeaResponsiveValue(context, 30),
                                 height: 1.05,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -2064,7 +2058,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: secondary,
-                                fontSize: 15,
+                                fontSize: _flumeaResponsiveValue(context, 15),
                               ),
                             ),
                           ),
@@ -2079,10 +2073,10 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                         color: const Color(0xFFEAF3FF),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.headset_mic_rounded,
                         color: blue,
-                        size: 35,
+                        size: _flumeaResponsiveValue(context, 35),
                       ),
                     ),
                   ],
@@ -2176,14 +2170,14 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
               color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(15),
             ),
-            child: Icon(icon, color: color, size: 25),
+            child: Icon(icon, color: color, size: _flumeaResponsiveValue(context, 25)),
           ),
           title: Text(
             question,
             textAlign: TextAlign.right,
             style: TextStyle(
               color: primary,
-              fontSize: 16,
+              fontSize: _flumeaResponsiveValue(context, 16),
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -2195,7 +2189,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   color: secondary,
-                  fontSize: 14,
+                  fontSize: _flumeaResponsiveValue(context, 14),
                   height: 1.6,
                 ),
               ),
@@ -2294,7 +2288,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                         child: Icon(
                           icon,
                           color: const Color(0xFF55D6B2),
-                          size: 22,
+                          size: _flumeaResponsiveValue(context, 22),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -2302,9 +2296,9 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                         child: Text(
                           message,
                           textAlign: TextAlign.right,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 14.5,
+                            fontSize: _flumeaResponsiveValue(context, 14.5),
                             fontWeight: FontWeight.w600,
                             height: 1.35,
                           ),
@@ -2354,7 +2348,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                     Text(
                       'FLUMEA',
                       style: TextStyle(
-                        fontSize: 17,
+                        fontSize: _flumeaResponsiveValue(context, 17),
                         fontWeight: FontWeight.bold,
                         color: primary,
                       ),
@@ -2376,7 +2370,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                       ),
                       child: IconButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.arrow_forward_rounded),
+                        icon: Icon(Icons.arrow_forward_rounded),
                         color: primary,
                         tooltip: 'رجوع',
                       ),
@@ -2399,7 +2393,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: primary,
-                                fontSize: 30,
+                                fontSize: _flumeaResponsiveValue(context, 30),
                                 height: 1.05,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -2413,7 +2407,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: secondary,
-                                fontSize: 15,
+                                fontSize: _flumeaResponsiveValue(context, 15),
                               ),
                             ),
                           ),
@@ -2428,10 +2422,10 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                         color: const Color(0xFFEAF3FF),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.mail_outline_rounded,
                         color: blue,
-                        size: 35,
+                        size: _flumeaResponsiveValue(context, 35),
                       ),
                     ),
                   ],
@@ -2452,7 +2446,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                         textAlign: TextAlign.right,
                         style: TextStyle(
                           color: primary,
-                          fontSize: 21,
+                          fontSize: _flumeaResponsiveValue(context, 21),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -2504,11 +2498,11 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                         height: 54,
                         child: FilledButton.icon(
                           onPressed: _sendMessage,
-                          icon: const Icon(Icons.send_rounded),
-                          label: const Text(
+                          icon: Icon(Icons.send_rounded),
+                          label: Text(
                             'إرسال الرسالة',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: _flumeaResponsiveValue(context, 16),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -2540,10 +2534,10 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.support_agent_rounded,
                         color: Color(0xFF20B995),
-                        size: 32,
+                        size: _flumeaResponsiveValue(context, 32),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -2552,7 +2546,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             color: primary,
-                            fontSize: 13.5,
+                            fontSize: _flumeaResponsiveValue(context, 13.5),
                             height: 1.5,
                           ),
                         ),
