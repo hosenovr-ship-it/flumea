@@ -310,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(
               textScaler: TextScaler.linear(
-                (MediaQuery.sizeOf(context).width / 430.0)
+                (MediaQuery.sizeOf(context).width / 480.0)
                     .clamp(0.84, 1.0)
                     .toDouble(),
               ),
@@ -812,27 +812,31 @@ class _DailyProgressRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 600;
+    final outer = compact ? 100.0 : 112.0;
+    final inner = compact ? 91.0 : 102.0;
+    final stroke = compact ? 8.0 : 9.0;
     return SizedBox(
-      width: 112,
-      height: 112,
+      width: outer,
+      height: outer,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          const SizedBox(
-            width: 102,
-            height: 102,
+          SizedBox(
+            width: inner,
+            height: inner,
             child: CircularProgressIndicator(
               value: 1,
-              strokeWidth: 9,
+              strokeWidth: stroke,
               color: Color(0xFF244B70),
             ),
           ),
           SizedBox(
-            width: 102,
-            height: 102,
+            width: inner,
+            height: inner,
             child: CircularProgressIndicator(
               value: progress,
-              strokeWidth: 9,
+              strokeWidth: stroke,
               strokeCap: StrokeCap.round,
               color: Color(0xFF18C5DE),
             ),
@@ -842,18 +846,18 @@ class _DailyProgressRing extends StatelessWidget {
             children: [
               Text(
                 '$percent%',
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 23,
+                  fontSize: compact ? 20 : 23,
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 1),
-              const Text(
+              Text(
                 'اليوم',
                 style: TextStyle(
                   color: Color(0xFF42C4DD),
-                  fontSize: 11,
+                  fontSize: compact ? 10 : 11,
                 ),
               ),
             ],
@@ -1156,27 +1160,31 @@ class _CaloriesRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 600;
+    final outer = compact ? 103.0 : 115.0;
+    final inner = compact ? 97.0 : 108.0;
+    final stroke = compact ? 7.0 : 8.0;
     return SizedBox(
-      width: 115,
-      height: 115,
+      width: outer,
+      height: outer,
       child: Stack(
         alignment: Alignment.center,
         children: [
           SizedBox(
-            width: 108,
-            height: 108,
+            width: inner,
+            height: inner,
             child: CircularProgressIndicator(
               value: 1,
-              strokeWidth: 8,
+              strokeWidth: stroke,
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
           ),
           SizedBox(
-            width: 108,
-            height: 108,
+            width: inner,
+            height: inner,
             child: CircularProgressIndicator(
               value: progress,
-              strokeWidth: 8,
+              strokeWidth: stroke,
               strokeCap: StrokeCap.round,
               color: HomeScreen.green,
             ),
@@ -1188,7 +1196,7 @@ class _CaloriesRing extends StatelessWidget {
                 value,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 20,
+                  fontSize: compact ? 18 : 20,
                   fontWeight: FontWeight.w800,
                 ),
               ),
