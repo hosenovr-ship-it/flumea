@@ -9,6 +9,10 @@ double _flumeaResponsiveScale(double width) {
   return (width / 430.0).clamp(0.84, 1.0).toDouble();
 }
 
+double _flumeaResponsiveValue(BuildContext context, double value) {
+  return value * _flumeaResponsiveScale(MediaQuery.sizeOf(context).width);
+}
+
 class HomeScreen extends StatefulWidget {
   static const darkBlue = Color(0xFF102A4C);
   static const blue = Color(0xFF2870B5);
@@ -314,15 +318,7 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final scale = _flumeaResponsiveScale(constraints.maxWidth);
-
-              return Transform.scale(
-                scale: scale,
-                alignment: Alignment.topCenter,
-                child: SizedBox(
-                  width: constraints.maxWidth / scale,
-                  height: constraints.maxHeight / scale,
-                  child: _loading
+              return _loading
                       ? const Center(
                           child: CircularProgressIndicator(color: teal),
                         )
@@ -344,9 +340,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 _buildHabitsAndFood(),
                                 const SizedBox(height: 16),
                                 _buildSmartAssistant(),
-                              ],
-                            ),
-                          ),
+                              ],,
                         ),
                 ),
               );
@@ -398,7 +392,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 'FLUMEA',
                 style: TextStyle(
                   color: flumeaColor,
-                  fontSize: 20,
+                  fontSize: _flumeaResponsiveValue(context, 20),
                   letterSpacing: 4.0,
                   fontWeight: FontWeight.w700,
                 ),
@@ -406,16 +400,16 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const Spacer(),
             CircleAvatar(
-              radius: 24,
+              radius: _flumeaResponsiveValue(context, 24),
               backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
                   ? NetworkImage(avatarUrl)
                   : null,
               child: avatarUrl == null || avatarUrl.isEmpty
-                  ? const Icon(
+                  ? Icon(
                       Icons.person_rounded,
                       color: darkBlue,
-                      size: 28,
+                      size: _flumeaResponsiveValue(context, 28),
                     )
                   : null,
             ),
@@ -426,18 +420,18 @@ class _HomeScreenState extends State<HomeScreen> {
           '$greeting، $userName 👋',
           textAlign: TextAlign.right,
           style: TextStyle(
-            fontSize: 25,
+            fontSize: _flumeaResponsiveValue(context, 25),
             height: 1.15,
             fontWeight: FontWeight.w800,
             color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 7),
-        const Text(
+        Text(
           'يوم جديد، فرصة جديدة لتصبح أفضل نسخة منك.',
           textAlign: TextAlign.right,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: _flumeaResponsiveValue(context, 14),
             height: 1.3,
             color: grayText,
             fontWeight: FontWeight.w500,
@@ -470,12 +464,12 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          Text(
             'تقدمك اليوم',
             textAlign: TextAlign.right,
             style: TextStyle(
               color: Colors.white,
-              fontSize: 20,
+              fontSize: _flumeaResponsiveValue(context, 20),
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -533,7 +527,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.symmetric(vertical: 22),
               child: Text(
                 'لا توجد مهام لهذا اليوم',
-                style: TextStyle(color: grayText, fontSize: 13),
+                style: TextStyle(color: grayText, fontSize: _flumeaResponsiveValue(context, 13)),
               ),
             )
           else
@@ -572,7 +566,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   '$_completedTasks من ${_tasks.length} مكتملة',
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 11,
+                    fontSize: _flumeaResponsiveValue(context, 11),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -604,7 +598,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: EdgeInsets.all(10),
                 child: Text(
                   'لا توجد عادات',
-                  style: TextStyle(color: grayText, fontSize: 11),
+                  style: TextStyle(color: grayText, fontSize: _flumeaResponsiveValue(context, 11)),
                 ),
               )
             else
@@ -686,8 +680,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                   if (mounted) await _loadHomeData();
                 },
-                icon: const Icon(Icons.add, size: 19),
-                label: const Text('تسجيل وجبة'),
+                icon: Icon(Icons.add, size: _flumeaResponsiveValue(context, 19)),
+                label: Text('تسجيل وجبة'),
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
                   backgroundColor:
@@ -714,9 +708,9 @@ class _HomeScreenState extends State<HomeScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              habitsCard(),
-              const SizedBox(height: 14),
               foodCard(),
+              const SizedBox(height: 14),
+              habitsCard(),
             ],
           );
         }
@@ -748,10 +742,10 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.auto_awesome_rounded, color: green),
+            child: Icon(Icons.auto_awesome_rounded, color: green),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -759,7 +753,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   'اقتراح ذكي ✨',
                   style: TextStyle(
                     color: darkBlue,
-                    fontSize: 14,
+                    fontSize: _flumeaResponsiveValue(context, 14),
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -769,7 +763,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     color: grayText,
-                    fontSize: 10,
+                    fontSize: _flumeaResponsiveValue(context, 10),
                     height: 1.4,
                   ),
                 ),
@@ -809,22 +803,22 @@ class _ProgressStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: iconColor, size: 28),
+        Icon(icon, color: iconColor, size: _flumeaResponsiveValue(context, 28)),
         const SizedBox(height: 7),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
-            fontSize: 20,
+            fontSize: _flumeaResponsiveValue(context, 20),
             fontWeight: FontWeight.w800,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             color: Color(0xFFB7C3D1),
-            fontSize: 10,
+            fontSize: _flumeaResponsiveValue(context, 10),
           ),
         ),
       ],
@@ -886,18 +880,18 @@ class _DailyProgressRing extends StatelessWidget {
             children: [
               Text(
                 '$percent%',
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 23,
+                  fontSize: _flumeaResponsiveValue(context, 23),
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 1),
-              const Text(
+              Text(
                 'اليوم',
                 style: TextStyle(
                   color: Color(0xFF42C4DD),
-                  fontSize: 11,
+                  fontSize: _flumeaResponsiveValue(context, 11),
                 ),
               ),
             ],
@@ -946,14 +940,14 @@ class _CardTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 25, color: Theme.of(context).colorScheme.onSurface),
+        Icon(icon, size: _flumeaResponsiveValue(context, 25), color: Theme.of(context).colorScheme.onSurface),
         const SizedBox(width: 7),
         Expanded(
           child: Text(
             title,
             textAlign: TextAlign.right,
             style: TextStyle(
-              fontSize: 19,
+              fontSize: _flumeaResponsiveValue(context, 19),
               fontWeight: FontWeight.w800,
               color: Theme.of(context).colorScheme.onSurface,
             ),
@@ -1017,7 +1011,7 @@ class _HomeTask extends StatelessWidget {
                       category,
                       style: TextStyle(
                         color: categoryColor,
-                        fontSize: 10,
+                        fontSize: _flumeaResponsiveValue(context, 10),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -1029,7 +1023,7 @@ class _HomeTask extends StatelessWidget {
                       textAlign: TextAlign.right,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: _flumeaResponsiveValue(context, 14),
                         fontWeight: FontWeight.w700,
                         color: Theme.of(context).colorScheme.onSurface,
                         decoration: completed
@@ -1049,7 +1043,7 @@ class _HomeTask extends StatelessWidget {
               color: completed
                   ? HomeScreen.green
                   : Theme.of(context).colorScheme.outlineVariant,
-              size: 25,
+              size: _flumeaResponsiveValue(context, 25),
             ),
             const SizedBox(width: 10),
             SizedBox(
@@ -1058,7 +1052,7 @@ class _HomeTask extends StatelessWidget {
                 time,
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: _flumeaResponsiveValue(context, 11),
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -1113,14 +1107,14 @@ class _SmallCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 21, color: Theme.of(context).colorScheme.onSurface),
+              Icon(icon, size: _flumeaResponsiveValue(context, 21), color: Theme.of(context).colorScheme.onSurface),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   title,
                   textAlign: TextAlign.right,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: _flumeaResponsiveValue(context, 16),
                     fontWeight: FontWeight.w800,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
@@ -1158,14 +1152,14 @@ class _HomeHabit extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 12),
         child: Row(
           children: [
-            Text(icon, style: const TextStyle(fontSize: 18)),
+            Text(icon, style: TextStyle(fontSize: _flumeaResponsiveValue(context, 18))),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 title,
                 textAlign: TextAlign.right,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: _flumeaResponsiveValue(context, 12),
                   fontWeight: FontWeight.w600,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
@@ -1175,7 +1169,7 @@ class _HomeHabit extends StatelessWidget {
               completed
                   ? Icons.check_circle_rounded
                   : Icons.radio_button_unchecked_rounded,
-              size: 23,
+              size: _flumeaResponsiveValue(context, 23),
               color: completed
                   ? HomeScreen.green
                   : Theme.of(context).colorScheme.outlineVariant,
@@ -1232,7 +1226,7 @@ class _CaloriesRing extends StatelessWidget {
                 value,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 20,
+                  fontSize: _flumeaResponsiveValue(context, 20),
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -1241,7 +1235,7 @@ class _CaloriesRing extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: 9,
+                  fontSize: _flumeaResponsiveValue(context, 9),
                   height: 1.25,
                 ),
               ),
@@ -1270,7 +1264,7 @@ class _MealLine extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 7),
       child: Row(
         children: [
-          Text(icon, style: const TextStyle(fontSize: 15)),
+          Text(icon, style: TextStyle(fontSize: _flumeaResponsiveValue(context, 15))),
           const SizedBox(width: 5),
           Expanded(
             child: Column(
@@ -1280,7 +1274,7 @@ class _MealLine extends StatelessWidget {
                   name,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 10,
+                    fontSize: _flumeaResponsiveValue(context, 10),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -1288,7 +1282,7 @@ class _MealLine extends StatelessWidget {
                   calories,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 8,
+                    fontSize: _flumeaResponsiveValue(context, 8),
                   ),
                 ),
               ],
