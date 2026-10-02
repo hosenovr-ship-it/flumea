@@ -310,8 +310,8 @@ class _HomeScreenState extends State<HomeScreen> {
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(
               textScaler: TextScaler.linear(
-                (MediaQuery.sizeOf(context).width / 480.0)
-                    .clamp(0.84, 1.0)
+                (MediaQuery.sizeOf(context).width / 600.0)
+                    .clamp(0.76, 1.0)
                     .toDouble(),
               ),
             ),
@@ -763,24 +763,25 @@ class _ProgressStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 600;
     return Column(
       children: [
-        Icon(icon, color: iconColor, size: 28),
-        const SizedBox(height: 7),
+        Icon(icon, color: iconColor, size: compact ? 22 : 28),
+        SizedBox(height: compact ? 5 : 7),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
-            fontSize: 20,
+            fontSize: compact ? 16 : 20,
             fontWeight: FontWeight.w800,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           label,
-          style: const TextStyle(
-            color: Color(0xFFB7C3D1),
-            fontSize: 10,
+          style: TextStyle(
+            color: const Color(0xFFB7C3D1),
+            fontSize: compact ? 8 : 10,
           ),
         ),
       ],
@@ -904,16 +905,17 @@ class _CardTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 600;
     return Row(
       children: [
-        Icon(icon, size: 25, color: Theme.of(context).colorScheme.onSurface),
-        const SizedBox(width: 7),
+        Icon(icon, size: compact ? 21 : 25, color: Theme.of(context).colorScheme.onSurface),
+        SizedBox(width: compact ? 5 : 7),
         Expanded(
           child: Text(
             title,
             textAlign: TextAlign.right,
             style: TextStyle(
-              fontSize: 19,
+              fontSize: compact ? 16 : 19,
               fontWeight: FontWeight.w800,
               color: Theme.of(context).colorScheme.onSurface,
             ),
@@ -944,30 +946,31 @@ class _HomeTask extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categoryColor = _categoryColor(category);
+    final compact = MediaQuery.sizeOf(context).width < 600;
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        constraints: const BoxConstraints(minHeight: 51),
+        constraints: BoxConstraints(minHeight: compact ? 44 : 51),
         child: Row(
           children: [
             Container(
-              width: 8,
-              height: 8,
+              width: compact ? 6 : 8,
+              height: compact ? 6 : 8,
               decoration: BoxDecoration(
                 color: dotColor,
                 shape: BoxShape.circle,
               ),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: compact ? 6 : 10),
             Expanded(
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 5,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: compact ? 8 : 12,
+                      vertical: compact ? 4 : 5,
                     ),
                     decoration: BoxDecoration(
                       color: categoryColor.withValues(alpha: 0.12),
@@ -977,19 +980,19 @@ class _HomeTask extends StatelessWidget {
                       category,
                       style: TextStyle(
                         color: categoryColor,
-                        fontSize: 10,
+                        fontSize: compact ? 8 : 10,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: compact ? 6 : 10),
                   Expanded(
                     child: Text(
                       title,
                       textAlign: TextAlign.right,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: compact ? 12 : 14,
                         fontWeight: FontWeight.w700,
                         color: Theme.of(context).colorScheme.onSurface,
                         decoration: completed
@@ -1001,7 +1004,7 @@ class _HomeTask extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: compact ? 6 : 10),
             Icon(
               completed
                   ? Icons.check_box_rounded
@@ -1009,16 +1012,16 @@ class _HomeTask extends StatelessWidget {
               color: completed
                   ? HomeScreen.green
                   : Theme.of(context).colorScheme.outlineVariant,
-              size: 25,
+              size: compact ? 20 : 25,
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: compact ? 6 : 10),
             SizedBox(
-              width: 56,
+              width: compact ? 44 : 56,
               child: Text(
                 time,
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: compact ? 9 : 11,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -1056,8 +1059,11 @@ class _SmallCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 600;
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 13, 12, 12),
+      padding: EdgeInsets.fromLTRB(
+        compact ? 9 : 12, compact ? 10 : 13, compact ? 9 : 12, compact ? 9 : 12,
+      ),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
@@ -1073,14 +1079,14 @@ class _SmallCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 21, color: Theme.of(context).colorScheme.onSurface),
-              const SizedBox(width: 6),
+              Icon(icon, size: compact ? 18 : 21, color: Theme.of(context).colorScheme.onSurface),
+              SizedBox(width: compact ? 4 : 6),
               Expanded(
                 child: Text(
                   title,
                   textAlign: TextAlign.right,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: compact ? 14 : 16,
                     fontWeight: FontWeight.w800,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
@@ -1088,7 +1094,7 @@ class _SmallCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: compact ? 10 : 14),
           child,
         ],
       ),
@@ -1111,21 +1117,22 @@ class _HomeHabit extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 600;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 12),
+        padding: EdgeInsets.only(bottom: compact ? 8 : 12),
         child: Row(
           children: [
-            Text(icon, style: const TextStyle(fontSize: 18)),
-            const SizedBox(width: 8),
+            Text(icon, style: TextStyle(fontSize: compact ? 14 : 18)),
+            SizedBox(width: compact ? 5 : 8),
             Expanded(
               child: Text(
                 title,
                 textAlign: TextAlign.right,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: compact ? 10 : 12,
                   fontWeight: FontWeight.w600,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
@@ -1135,7 +1142,7 @@ class _HomeHabit extends StatelessWidget {
               completed
                   ? Icons.check_circle_rounded
                   : Icons.radio_button_unchecked_rounded,
-              size: 23,
+              size: compact ? 19 : 23,
               color: completed
                   ? HomeScreen.green
                   : Theme.of(context).colorScheme.outlineVariant,
