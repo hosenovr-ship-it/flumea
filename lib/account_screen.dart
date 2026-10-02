@@ -11,6 +11,11 @@ import 'services/flumea_notification_service.dart';
 import 'privacy_screen.dart';
 import 'login_screen.dart';
 
+double _flumeaResponsiveScale(double width) {
+  if (width >= 430) return 1.0;
+  return (width / 430.0).clamp(0.84, 1.0).toDouble();
+}
+
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
 
@@ -934,8 +939,18 @@ class _AccountScreenState extends State<AccountScreen> {
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final scale = _flumeaResponsiveScale(constraints.maxWidth);
+
+              return Transform.scale(
+                scale: scale,
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  width: constraints.maxWidth / scale,
+                  height: constraints.maxHeight / scale,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -1262,6 +1277,10 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
               ],
             ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
         bottomNavigationBar: FlumeaBottomNavigation(
