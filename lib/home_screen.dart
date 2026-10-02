@@ -317,10 +317,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.fromLTRB(18, 14, 18, 105),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 760),
-                        child: Column(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _buildHeader(),
@@ -332,9 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _buildHabitsAndFood(),
                         const SizedBox(height: 16),
                         _buildSmartAssistant(),
-                          ],
-                        ),
-                      ),
+                      ],
                     ),
                   ),
                 ),
@@ -578,7 +573,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHabitsAndFood() {
     final habitsToShow = List<Map<String, dynamic>>.from(_habits);
-    final isCompact = MediaQuery.sizeOf(context).width < 600;
 
     Widget habitsCard() {
       return _SmallCard(
@@ -598,6 +592,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ...habitsToShow.map((habit) {
                 final id = habit['id']?.toString();
                 final completed = id != null && _habitCompleted[id] == true;
+
                 return _HomeHabit(
                   icon: '✓',
                   title: habit['name']?.toString() ?? '',
@@ -621,6 +616,8 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Expanded(
                   child: _CaloriesRing(
+                    // الدائرة تعرض السعرات المحددة فقط من إجمالي
+                    // السعرات المضافة لليوم. لا يوجد هدف ثابت مثل 2200.
                     progress: _foodTotalCalories == 0
                         ? 0.0
                         : (_foodSelectedCalories / _foodTotalCalories)
@@ -637,9 +634,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     textDirection: TextDirection.rtl,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      _MealLine(name: 'الفطور', calories: '${_mealCalories['الفطور'] ?? 0} سعرة', icon: '☀️'),
-                      _MealLine(name: 'الغداء', calories: '${_mealCalories['الغداء'] ?? 0} سعرة', icon: '☀️'),
-                      _MealLine(name: 'العشاء', calories: '${_mealCalories['العشاء'] ?? 0} سعرة', icon: '🌙'),
+                      _MealLine(
+                        name: 'الفطور',
+                        calories: '${_mealCalories['الفطور'] ?? 0} سعرة',
+                        icon: '☀️',
+                      ),
+                      _MealLine(
+                        name: 'الغداء',
+                        calories: '${_mealCalories['الغداء'] ?? 0} سعرة',
+                        icon: '☀️',
+                      ),
+                      _MealLine(
+                        name: 'العشاء',
+                        calories: '${_mealCalories['العشاء'] ?? 0} سعرة',
+                        icon: '🌙',
+                      ),
                     ],
                   ),
                 ),
@@ -662,8 +671,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 label: const Text('تسجيل وجبة'),
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
-                  backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                  foregroundColor: Theme.of(context).colorScheme.secondary,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.secondaryContainer,
+                  foregroundColor:
+                      Theme.of(context).colorScheme.secondary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -676,24 +687,30 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    if (isCompact) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          habitsCard(),
-          const SizedBox(height: 14),
-          foodCard(),
-        ],
-      );
-    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 600;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: habitsCard()),
-        const SizedBox(width: 14),
-        Expanded(child: foodCard()),
-      ],
+        if (isCompact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              habitsCard(),
+              const SizedBox(height: 14),
+              foodCard(),
+            ],
+          );
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: habitsCard()),
+            const SizedBox(width: 14),
+            Expanded(child: foodCard()),
+          ],
+        );
+      },
     );
   }
   Widget _buildSmartAssistant() {
