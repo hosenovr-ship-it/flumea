@@ -11,14 +11,6 @@ import 'services/flumea_notification_service.dart';
 import 'privacy_screen.dart';
 import 'login_screen.dart';
 
-double _flumeaResponsiveScale(double width) {
-  if (width >= 430) return 1.0;
-  return (width / 430.0).clamp(0.84, 1.0).toDouble();
-}
-
-double _flumeaResponsiveValue(BuildContext context, double value) {
-  return value * _flumeaResponsiveScale(MediaQuery.sizeOf(context).width);
-}
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -148,10 +140,10 @@ class _AccountScreenState extends State<AccountScreen> {
                   ),
                 ),
                 const SizedBox(height: 18),
-                Text(
+                const Text(
                   'اختيار صورة الحساب',
                   style: TextStyle(
-                    fontSize: _flumeaResponsiveValue(context, 20),
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: navy,
                   ),
@@ -162,7 +154,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     backgroundColor: lightBlue,
                     child: Icon(Icons.photo_library, color: blue),
                   ),
-                  title: Text('اختيار من المعرض'),
+                  title: const Text('اختيار من المعرض'),
                   onTap: () => Navigator.pop(context, ImageSource.gallery),
                 ),
                 ListTile(
@@ -170,7 +162,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     backgroundColor: lightBlue,
                     child: Icon(Icons.camera_alt, color: navy),
                   ),
-                  title: Text('التقاط صورة بالكاميرا'),
+                  title: const Text('التقاط صورة بالكاميرا'),
                   onTap: () => Navigator.pop(context, ImageSource.camera),
                 ),
               ],
@@ -381,10 +373,10 @@ class _AccountScreenState extends State<AccountScreen> {
                         color: blue.withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.notifications_none_rounded,
                         color: blue,
-                        size: _flumeaResponsiveValue(context, 25),
+                        size: 25,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -394,7 +386,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         textAlign: TextAlign.right,
                         style: TextStyle(
                           color: primary,
-                          fontSize: _flumeaResponsiveValue(context, 21),
+                          fontSize: 21,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -488,10 +480,10 @@ class _AccountScreenState extends State<AccountScreen> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: Text(
+                        child: const Text(
                           'إغلاق',
                           style: TextStyle(
-                            fontSize: _flumeaResponsiveValue(context, 15),
+                            fontSize: 15,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -560,7 +552,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   child: Icon(
                     icon,
                     color: color,
-                    size: _flumeaResponsiveValue(context, 23),
+                    size: 23,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -578,7 +570,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: primary,
-                            fontSize: _flumeaResponsiveValue(context, 15),
+                            fontSize: 15,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -593,7 +585,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: secondary,
-                            fontSize: _flumeaResponsiveValue(context, 12.5),
+                            fontSize: 12.5,
                             height: 1.35,
                           ),
                         ),
@@ -665,7 +657,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       color: accent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Icon(icon, color: accent, size: _flumeaResponsiveValue(context, 27)),
+                    child: Icon(icon, color: accent, size: 27),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -677,7 +669,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             color: primary,
-                            fontSize: _flumeaResponsiveValue(context, 20),
+                            fontSize: 20,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -687,7 +679,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             color: secondary,
-                            fontSize: _flumeaResponsiveValue(context, 12.5),
+                            fontSize: 12.5,
                           ),
                         ),
                       ],
@@ -747,10 +739,10 @@ class _AccountScreenState extends State<AccountScreen> {
                             : lightBlue,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.palette_outlined,
                         color: blue,
-                        size: _flumeaResponsiveValue(context, 27),
+                        size: 27,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -763,7 +755,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             textAlign: TextAlign.right,
                             style: TextStyle(
                               color: primary,
-                              fontSize: _flumeaResponsiveValue(context, 22),
+                              fontSize: 22,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -772,7 +764,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             textAlign: TextAlign.right,
                             style: TextStyle(
                               color: secondary,
-                              fontSize: _flumeaResponsiveValue(context, 12.5),
+                              fontSize: 12.5,
                             ),
                           ),
                         ],
@@ -836,10 +828,10 @@ class _AccountScreenState extends State<AccountScreen> {
                     color: const Color(0xFFFFE7E7),
                     borderRadius: BorderRadius.circular(21),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.logout_rounded,
                     color: Color(0xFFD93B3B),
-                    size: _flumeaResponsiveValue(context, 32),
+                    size: 32,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -848,7 +840,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: primary,
-                    fontSize: _flumeaResponsiveValue(context, 23),
+                    fontSize: 23,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -859,7 +851,7 @@ class _AccountScreenState extends State<AccountScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: secondary,
-                fontSize: _flumeaResponsiveValue(context, 14.5),
+                fontSize: 14.5,
                 height: 1.6,
               ),
             ),
@@ -882,7 +874,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: Text(
+                      child: const Text(
                         'البقاء',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
@@ -900,7 +892,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: Text(
+                      child: const Text(
                         'تسجيل الخروج',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
@@ -938,348 +930,293 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final width = MediaQuery.sizeOf(context).width;
+    final textScale = (width / 430.0).clamp(0.84, 1.0).toDouble();
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(
-                  height: 74,
-                  child: Row(
-                    textDirection: TextDirection.ltr,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'FLUMEA',
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          fontSize: _flumeaResponsiveValue(context, 20),
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 4.0,
-                          color: isDark ? Colors.white : navy,,
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            SizedBox(
-                              width: double.infinity,
-                              child: Text(
-                                'الحساب',
-                                textAlign: TextAlign.right,
-                                style: TextStyle(
-                                  fontSize: _flumeaResponsiveValue(context, 30),
-                                  height: 1.05,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark
-                                      ? const Color(0xFFF2F6FA)
-                                      : navy,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            SizedBox(
-                              width: double.infinity,
-                              child: Text(
-                                'إدارة حسابك وتخصيص تجربتك',
-                                textAlign: TextAlign.right,
-                                style: TextStyle(
-                                  fontSize: _flumeaResponsiveValue(context, 16),
-                                  color: isDark
-                                      ? const Color(0xFFB8C2CC)
-                                      : const Color(0xFF7B8798),
-                                ),
-                              ),
-                            ),
-                          ],
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: TextScaler.linear(textScale),
+            ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: 74,
+                    child: Row(
+                      textDirection: TextDirection.ltr,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'FLUMEA',
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 4.0,
+                            color: isDark ? Colors.white : navy,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                // بطاقة الملف الشخصي
-                Container(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-                  constraints: const BoxConstraints(minHeight: 174),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    gradient: LinearGradient(
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
-                      colors: isDark
-                          ? const [
-                              Color(0xFF17212B),
-                              Color(0xFF1B2733),
-                            ]
-                          : const [
-                              Color(0xFFF2FBFA),
-                              Color(0xFFF8FBFF),
-                            ],
-                    ),
-                    border: Border.all(
-                      color: Color(0xFFE4EBF2),
-                    ),
-                  ),
-                  child: Row(
-                    textDirection: TextDirection.ltr,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: _pickAvatar,
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            Container(
-                              width: 92,
-                              height: 92,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color(0xFFE3F5F1),
-                              ),
-                              clipBehavior: Clip.antiAlias,
-                              child: _avatarUrl != null && _avatarUrl!.isNotEmpty
-                                  ? Image.network(
-                                      _avatarUrl!,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) => Icon(
-                                        Icons.person,
-                                        size: _flumeaResponsiveValue(context, 58),
-                                        color: navy,
-                                      ),
-                                    )
-                                  : Icon(
-                                      Icons.person,
-                                      size: _flumeaResponsiveValue(context, 58),
-                                      color: navy,
-                                    ),
-                            ),
-                            Positioned(
-                              bottom: -2,
-                              left: -4,
-                              child: Container(
-                                width: 34,
-                                height: 34,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: navy,
-                                ),
-                                child: _uploadingAvatar
-                                    ? const Padding(
-                                        padding: EdgeInsets.all(8),
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                            Colors.white,
-                                          ),
-                                        ),
-                                      )
-                                    : Icon(
-                                        Icons.camera_alt,
-                                        size: _flumeaResponsiveValue(context, 18),
-                                        color: Colors.white,
-                                      ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 18),
-                      Expanded(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            SizedBox(
-                              width: double.infinity,
-                              child: Text(
-                                _loading ? '...' : _fullName,
-                                textAlign: TextAlign.right,
-                                style: TextStyle(
-                                  fontSize: _flumeaResponsiveValue(context, 25),
-                                  height: 1.15,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : navy,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 7),
-                            const SizedBox(
-                              width: double.infinity,
-                              child: Text(
-                                '✨  نسخة أفضل من نفسي كل يوم',
-                                textAlign: TextAlign.right,
-                                style: TextStyle(
-                                  fontSize: _flumeaResponsiveValue(context, 14),
-                                  color: Color(0xFF718096),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: OutlinedButton.icon(
-                                onPressed: _editProfile,
-                                icon: Icon(
-                                  Icons.edit,
-                                  size: _flumeaResponsiveValue(context, 19),
-                                  color: blue,
-                                ),
-                                label: Text(
-                                  'تعديل الملف الشخصي',
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                width: double.infinity,
+                                child: Text(
+                                  'الحساب',
                                   textAlign: TextAlign.right,
                                   style: TextStyle(
-                                    color: blue,
+                                    fontSize: 30,
+                                    height: 1.05,
                                     fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  side: const BorderSide(
-                                    color: Color(0xFFE4EBF2),
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 15,
-                                    vertical: 10,
+                                    color: isDark
+                                        ? const Color(0xFFF2F6FA)
+                                        : navy,
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 5),
+                              SizedBox(
+                                width: double.infinity,
+                                child: Text(
+                                  'إدارة حسابك وتخصيص تجربتك',
+                                  textAlign: TextAlign.right,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: isDark
+                                        ? const Color(0xFFB8C2CC)
+                                        : const Color(0xFF7B8798),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-
-                const SizedBox(height: 22),
-
-                _sectionCard(
-                  title: 'الإعدادات',
-                  icon: Icons.settings,
-                  children: [
-                    ValueListenableBuilder<ThemeMode>(
-                      valueListenable: FlumeaThemeController.mode,
-                      builder: (context, mode, _) {
-                        return _settingRow(
+                  const SizedBox(height: 10),
+                  // بطاقة الملف الشخصي
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                    constraints: const BoxConstraints(minHeight: 174),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      gradient: LinearGradient(
+                        begin: Alignment.topRight,
+                        end: Alignment.bottomLeft,
+                        colors: isDark
+                            ? const [Color(0xFF17212B), Color(0xFF1B2733)]
+                            : const [Color(0xFFF2FBFA), Color(0xFFF8FBFF)],
+                      ),
+                      border: Border.all(color: const Color(0xFFE4EBF2)),
+                    ),
+                    child: Row(
+                      textDirection: TextDirection.ltr,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: _pickAvatar,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                width: 92,
+                                height: 92,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Color(0xFFE3F5F1),
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: _avatarUrl != null && _avatarUrl!.isNotEmpty
+                                    ? Image.network(
+                                        _avatarUrl!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) =>
+                                            const Icon(Icons.person, size: 58, color: navy),
+                                      )
+                                    : const Icon(Icons.person, size: 58, color: navy),
+                              ),
+                              Positioned(
+                                bottom: -2,
+                                left: -4,
+                                child: Container(
+                                  width: 34,
+                                  height: 34,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: navy,
+                                  ),
+                                  child: _uploadingAvatar
+                                      ? const Padding(
+                                          padding: EdgeInsets.all(8),
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          ),
+                                        )
+                                      : const Icon(Icons.camera_alt, size: 18, color: Colors.white),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 18),
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                width: double.infinity,
+                                child: Text(
+                                  _loading ? '...' : _fullName,
+                                  textAlign: TextAlign.right,
+                                  style: TextStyle(
+                                    fontSize: 25,
+                                    height: 1.15,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : navy,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 7),
+                              const SizedBox(
+                                width: double.infinity,
+                                child: Text(
+                                  '✨  نسخة أفضل من نفسي كل يوم',
+                                  textAlign: TextAlign.right,
+                                  style: TextStyle(fontSize: 14, color: Color(0xFF718096)),
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: OutlinedButton.icon(
+                                  onPressed: _editProfile,
+                                  icon: const Icon(Icons.edit, size: 19, color: blue),
+                                  label: const Text(
+                                    'تعديل الملف الشخصي',
+                                    textAlign: TextAlign.right,
+                                    style: TextStyle(color: blue, fontWeight: FontWeight.bold),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    side: const BorderSide(color: Color(0xFFE4EBF2)),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  _sectionCard(
+                    title: 'الإعدادات',
+                    icon: Icons.settings,
+                    children: [
+                      ValueListenableBuilder<ThemeMode>(
+                        valueListenable: FlumeaThemeController.mode,
+                        builder: (context, mode, _) => _settingRow(
                           icon: Icons.dark_mode,
                           title: 'المظهر',
                           subtitle: mode == ThemeMode.dark ? 'داكن' : 'فاتح',
                           color: blue,
                           onTap: _showAppearance,
-                        );
-                      },
-                    ),
-                    _settingRow(
-                      icon: Icons.notifications_none_rounded,
-                      title: 'الإشعارات',
-                      subtitle: 'تنبيهات المهام والعادات',
-                      color: blue,
-                      onTap: _showNotifications,
-                    ),
-                    _settingRow(
-                      icon: Icons.lock,
-                      title: 'الخصوصية',
-                      subtitle: 'إدارة بياناتك',
-                      color: navy,
-                      last: true,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const PrivacyScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 20),
-
-                _sectionCard(
-                  title: 'الدعم والمساعدة',
-                  icon: Icons.help_outline,
-                  children: [
-                    _settingRow(
-                      icon: Icons.headset_mic,
-                      title: 'مركز المساعدة',
-                      subtitle: 'الأسئلة الشائعة',
-                      color: blue,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const FlumeaHelpCenterScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    _settingRow(
-                      icon: Icons.mail_outline,
-                      title: 'تواصل معنا',
-                      subtitle: 'نحن هنا لمساعدتك',
-                      color: navy,
-                      last: true,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const FlumeaContactScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 20),
-
-                Container(
-                  height: 58,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFE7E7),
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(
-                      color: const Color(0xFFFFD2D2),
-                    ),
+                        ),
+                      ),
+                      _settingRow(
+                        icon: Icons.notifications_none_rounded,
+                        title: 'الإشعارات',
+                        subtitle: 'تنبيهات المهام والعادات',
+                        color: blue,
+                        onTap: _showNotifications,
+                      ),
+                      _settingRow(
+                        icon: Icons.lock,
+                        title: 'الخصوصية',
+                        subtitle: 'إدارة بياناتك',
+                        color: navy,
+                        last: true,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const PrivacyScreen()),
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                  child: TextButton.icon(
-                    onPressed: _signOut,
-                    icon: Icon(
-                      Icons.logout,
-                      color: Color(0xFFD93B3B),
+                  const SizedBox(height: 20),
+                  _sectionCard(
+                    title: 'الدعم والمساعدة',
+                    icon: Icons.help_outline,
+                    children: [
+                      _settingRow(
+                        icon: Icons.headset_mic,
+                        title: 'مركز المساعدة',
+                        subtitle: 'الأسئلة الشائعة',
+                        color: blue,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const FlumeaHelpCenterScreen()),
+                          );
+                        },
+                      ),
+                      _settingRow(
+                        icon: Icons.mail_outline,
+                        title: 'تواصل معنا',
+                        subtitle: 'نحن هنا لمساعدتك',
+                        color: navy,
+                        last: true,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const FlumeaContactScreen()),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    height: 58,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFE7E7),
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(color: const Color(0xFFFFD2D2)),
                     ),
-                    label: Text(
-                      'تسجيل الخروج',
-                      style: TextStyle(
-                        color: Color(0xFFD93B3B),
-                        fontSize: _flumeaResponsiveValue(context, 17),
-                        fontWeight: FontWeight.bold,
+                    child: TextButton.icon(
+                      onPressed: _signOut,
+                      icon: const Icon(Icons.logout, color: Color(0xFFD93B3B)),
+                      label: const Text(
+                        'تسجيل الخروج',
+                        style: TextStyle(
+                          color: Color(0xFFD93B3B),
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-                  ),
-                ),
-              );
-            },
           ),
         ),
-        bottomNavigationBar: FlumeaBottomNavigation(
-          selectedIndex: 3,
-        ),
+        bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 3),
       ),
     );
   }
@@ -1307,7 +1244,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 Icon(
                   icon,
                   color: navy,
-                  size: _flumeaResponsiveValue(context, 28),
+                  size: 28,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -1315,7 +1252,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     title,
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      fontSize: _flumeaResponsiveValue(context, 22),
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
@@ -1377,14 +1314,14 @@ class _AccountScreenState extends State<AccountScreen> {
                     child: Icon(
                       icon,
                       color: color,
-                      size: _flumeaResponsiveValue(context, 27),
+                      size: 27,
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Icon(
+                  const Icon(
                     Icons.chevron_left,
                     color: Color(0xFF718096),
-                    size: _flumeaResponsiveValue(context, 27),
+                    size: 27,
                   ),
                   const Spacer(),
                   Expanded(
@@ -1398,7 +1335,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             title,
                             textAlign: TextAlign.right,
                             style: TextStyle(
-                              fontSize: _flumeaResponsiveValue(context, 17),
+                              fontSize: 17,
                               fontWeight: FontWeight.bold,
                               color: primary,
                             ),
@@ -1411,7 +1348,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             subtitle,
                             textAlign: TextAlign.right,
                             style: TextStyle(
-                              fontSize: _flumeaResponsiveValue(context, 13),
+                              fontSize: 13,
                               color: secondary,
                             ),
                           ),
@@ -1421,10 +1358,10 @@ class _AccountScreenState extends State<AccountScreen> {
                   ),
                 ]
               : [
-                  Icon(
+                  const Icon(
                     Icons.chevron_left,
                     color: Color(0xFF718096),
-                    size: _flumeaResponsiveValue(context, 27),
+                    size: 27,
                   ),
                   const Spacer(),
                   Expanded(
@@ -1438,7 +1375,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             title,
                             textAlign: TextAlign.right,
                             style: TextStyle(
-                              fontSize: _flumeaResponsiveValue(context, 17),
+                              fontSize: 17,
                               fontWeight: FontWeight.bold,
                               color: primary,
                             ),
@@ -1451,7 +1388,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             subtitle,
                             textAlign: TextAlign.right,
                             style: TextStyle(
-                              fontSize: _flumeaResponsiveValue(context, 13),
+                              fontSize: 13,
                               color: secondary,
                             ),
                           ),
@@ -1470,7 +1407,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     child: Icon(
                       icon,
                       color: color,
-                      size: _flumeaResponsiveValue(context, 27),
+                      size: 27,
                     ),
                   ),
                 ],
@@ -1553,7 +1490,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                     'تغيير صورة الحساب',
                     style: TextStyle(
                       color: primary,
-                      fontSize: _flumeaResponsiveValue(context, 20),
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1566,7 +1503,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                       backgroundColor: Color(0xFFEAF3FF),
                       child: Icon(Icons.photo_library_rounded, color: blue),
                     ),
-                    title: Text('اختيار من المعرض'),
+                    title: const Text('اختيار من المعرض'),
                     onTap: () =>
                         Navigator.pop(sheetContext, ImageSource.gallery),
                   ),
@@ -1578,7 +1515,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                       backgroundColor: Color(0xFFEAF3FF),
                       child: Icon(Icons.camera_alt_rounded, color: navy),
                     ),
-                    title: Text('التقاط صورة بالكاميرا'),
+                    title: const Text('التقاط صورة بالكاميرا'),
                     onTap: () =>
                         Navigator.pop(sheetContext, ImageSource.camera),
                   ),
@@ -1744,7 +1681,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
               ),
               child: IconButton(
                 onPressed: () => Navigator.of(context).pop(),
-                icon: Icon(Icons.arrow_forward_rounded),
+                icon: const Icon(Icons.arrow_forward_rounded),
                 color: primary,
                 tooltip: 'رجوع',
               ),
@@ -1754,7 +1691,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
             'تعديل الملف الشخصي',
             style: TextStyle(
               color: primary,
-              fontSize: _flumeaResponsiveValue(context, 20),
+              fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -1813,13 +1750,13 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                                     fit: BoxFit.cover,
                                     errorBuilder: (context, error, stackTrace) => Icon(
                                       Icons.person_rounded,
-                                      size: _flumeaResponsiveValue(context, 68),
+                                      size: 68,
                                       color: isDark ? Colors.white70 : navy,
                                     ),
                                   )
                                 : Icon(
                                     Icons.person_rounded,
-                                    size: _flumeaResponsiveValue(context, 68),
+                                    size: 68,
                                     color: isDark ? Colors.white70 : navy,
                                   ),
                           ),
@@ -1844,10 +1781,10 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                                         ),
                                       ),
                                     )
-                                  : Icon(
+                                  : const Icon(
                                       Icons.camera_alt_rounded,
                                       color: Colors.white,
-                                      size: _flumeaResponsiveValue(context, 21),
+                                      size: 21,
                                     ),
                             ),
                           ),
@@ -1860,7 +1797,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: primary,
-                        fontSize: _flumeaResponsiveValue(context, 19),
+                        fontSize: 19,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1868,7 +1805,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                     Text(
                       'اضغط على الصورة لتغييرها',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: secondary, fontSize: _flumeaResponsiveValue(context, 13.5)),
+                      style: TextStyle(color: secondary, fontSize: 13.5),
                     ),
                   ],
                 ),
@@ -1890,7 +1827,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         color: primary,
-                        fontSize: _flumeaResponsiveValue(context, 20),
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1903,7 +1840,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                       decoration: InputDecoration(
                         labelText: 'الاسم',
                         hintText: 'اكتب اسمك',
-                        prefixIcon: Icon(
+                        prefixIcon: const Icon(
                           Icons.person_outline_rounded,
                           color: blue,
                         ),
@@ -1943,11 +1880,11 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                                 AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : Icon(Icons.check_rounded),
+                      : const Icon(Icons.check_rounded),
                   label: Text(
                     _saving ? 'جارٍ الحفظ...' : 'حفظ التغييرات',
-                    style: TextStyle(
-                      fontSize: _flumeaResponsiveValue(context, 16),
+                    style: const TextStyle(
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1999,7 +1936,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                     Text(
                       'FLUMEA',
                       style: TextStyle(
-                        fontSize: _flumeaResponsiveValue(context, 17),
+                        fontSize: 17,
                         fontWeight: FontWeight.bold,
                         color: primary,
                       ),
@@ -2021,7 +1958,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                       ),
                       child: IconButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: Icon(Icons.arrow_forward_rounded),
+                        icon: const Icon(Icons.arrow_forward_rounded),
                         color: primary,
                         tooltip: 'رجوع',
                       ),
@@ -2044,7 +1981,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: primary,
-                                fontSize: _flumeaResponsiveValue(context, 30),
+                                fontSize: 30,
                                 height: 1.05,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -2058,7 +1995,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: secondary,
-                                fontSize: _flumeaResponsiveValue(context, 15),
+                                fontSize: 15,
                               ),
                             ),
                           ),
@@ -2073,10 +2010,10 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                         color: const Color(0xFFEAF3FF),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.headset_mic_rounded,
                         color: blue,
-                        size: _flumeaResponsiveValue(context, 35),
+                        size: 35,
                       ),
                     ),
                   ],
@@ -2170,14 +2107,14 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
               color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(15),
             ),
-            child: Icon(icon, color: color, size: _flumeaResponsiveValue(context, 25)),
+            child: Icon(icon, color: color, size: 25),
           ),
           title: Text(
             question,
             textAlign: TextAlign.right,
             style: TextStyle(
               color: primary,
-              fontSize: _flumeaResponsiveValue(context, 16),
+              fontSize: 16,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -2189,7 +2126,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   color: secondary,
-                  fontSize: _flumeaResponsiveValue(context, 14),
+                  fontSize: 14,
                   height: 1.6,
                 ),
               ),
@@ -2288,7 +2225,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                         child: Icon(
                           icon,
                           color: const Color(0xFF55D6B2),
-                          size: _flumeaResponsiveValue(context, 22),
+                          size: 22,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -2296,9 +2233,9 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                         child: Text(
                           message,
                           textAlign: TextAlign.right,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
-                            fontSize: _flumeaResponsiveValue(context, 14.5),
+                            fontSize: 14.5,
                             fontWeight: FontWeight.w600,
                             height: 1.35,
                           ),
@@ -2348,7 +2285,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                     Text(
                       'FLUMEA',
                       style: TextStyle(
-                        fontSize: _flumeaResponsiveValue(context, 17),
+                        fontSize: 17,
                         fontWeight: FontWeight.bold,
                         color: primary,
                       ),
@@ -2370,7 +2307,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                       ),
                       child: IconButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: Icon(Icons.arrow_forward_rounded),
+                        icon: const Icon(Icons.arrow_forward_rounded),
                         color: primary,
                         tooltip: 'رجوع',
                       ),
@@ -2393,7 +2330,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: primary,
-                                fontSize: _flumeaResponsiveValue(context, 30),
+                                fontSize: 30,
                                 height: 1.05,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -2407,7 +2344,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: secondary,
-                                fontSize: _flumeaResponsiveValue(context, 15),
+                                fontSize: 15,
                               ),
                             ),
                           ),
@@ -2422,10 +2359,10 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                         color: const Color(0xFFEAF3FF),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.mail_outline_rounded,
                         color: blue,
-                        size: _flumeaResponsiveValue(context, 35),
+                        size: 35,
                       ),
                     ),
                   ],
@@ -2446,7 +2383,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                         textAlign: TextAlign.right,
                         style: TextStyle(
                           color: primary,
-                          fontSize: _flumeaResponsiveValue(context, 21),
+                          fontSize: 21,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -2498,11 +2435,11 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                         height: 54,
                         child: FilledButton.icon(
                           onPressed: _sendMessage,
-                          icon: Icon(Icons.send_rounded),
-                          label: Text(
+                          icon: const Icon(Icons.send_rounded),
+                          label: const Text(
                             'إرسال الرسالة',
                             style: TextStyle(
-                              fontSize: _flumeaResponsiveValue(context, 16),
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -2534,10 +2471,10 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.support_agent_rounded,
                         color: Color(0xFF20B995),
-                        size: _flumeaResponsiveValue(context, 32),
+                        size: 32,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -2546,7 +2483,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             color: primary,
-                            fontSize: _flumeaResponsiveValue(context, 13.5),
+                            fontSize: 13.5,
                             height: 1.5,
                           ),
                         ),
