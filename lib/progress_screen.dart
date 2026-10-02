@@ -773,8 +773,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(
               textScaler: TextScaler.linear(
-                (MediaQuery.sizeOf(context).width / 480.0)
-                    .clamp(0.84, 1.0)
+                (MediaQuery.sizeOf(context).width / 600.0)
+                    .clamp(0.76, 1.0)
                     .toDouble(),
               ),
             ),
@@ -827,7 +827,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cloud_off_rounded, color: _primaryText, size: 45),
+            Icon(Icons.cloud_off_rounded, color: _primaryText, size: MediaQuery.sizeOf(context).width < 600 ? 34 : 45),
             const SizedBox(height: 12),
             Text(
               _error!,
@@ -855,13 +855,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Icon(Icons.bar_chart_rounded, color: _primaryText, size: 30),
+                  Icon(Icons.bar_chart_rounded, color: _primaryText, size: MediaQuery.sizeOf(context).width < 600 ? 24 : 30),
                   const SizedBox(width: 8),
                   Text(
                     'التقدم',
                     style: TextStyle(
                       color: _primaryText,
-                      fontSize: 30,
+                      fontSize: MediaQuery.sizeOf(context).width < 600 ? 24 : 30,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -1034,14 +1034,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.bar_chart_rounded, color: _primaryText, size: 25),
+              Icon(Icons.bar_chart_rounded, color: _primaryText, size: MediaQuery.sizeOf(context).width < 600 ? 20 : 25),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   'معدل إكمال العادات',
                   style: TextStyle(
                     color: _primaryText,
-                    fontSize: 21,
+                    fontSize: MediaQuery.sizeOf(context).width < 600 ? 17 : 21,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
