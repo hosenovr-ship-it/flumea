@@ -10,6 +10,10 @@ double _flumeaResponsiveScale(double width) {
   return (width / 430.0).clamp(0.84, 1.0).toDouble();
 }
 
+double _flumeaResponsiveValue(BuildContext context, double value) {
+  return value * _flumeaResponsiveScale(MediaQuery.sizeOf(context).width);
+}
+
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
 
@@ -777,15 +781,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final scale = _flumeaResponsiveScale(constraints.maxWidth);
-
-              return Transform.scale(
-                scale: scale,
-                alignment: Alignment.topCenter,
-                child: SizedBox(
-                  width: constraints.maxWidth / scale,
-                  height: constraints.maxHeight / scale,
-                  child: RefreshIndicator(
+              return RefreshIndicator(
                     onRefresh: _loadProgress,
                     child: SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
@@ -835,9 +831,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                         );
                                       },
                                     ),
-                                  ],
-                                ),
-                    ),
+                                  ],,
                   ),
                 ),
               );
@@ -856,12 +850,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cloud_off_rounded, color: _primaryText, size: 45),
+            Icon(Icons.cloud_off_rounded, color: _primaryText, size: _flumeaResponsiveValue(context, 45)),
             const SizedBox(height: 12),
             Text(
               _error!,
               textAlign: TextAlign.center,
-              style: TextStyle(color: _primaryText, fontSize: 15),
+              style: TextStyle(color: _primaryText, fontSize: _flumeaResponsiveValue(context, 15)),
             ),
             const SizedBox(height: 14),
             ElevatedButton(
@@ -884,13 +878,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Icon(Icons.bar_chart_rounded, color: _primaryText, size: 30),
+                  Icon(Icons.bar_chart_rounded, color: _primaryText, size: _flumeaResponsiveValue(context, 30)),
                   const SizedBox(width: 8),
                   Text(
                     'التقدم',
                     style: TextStyle(
                       color: _primaryText,
-                      fontSize: 30,
+                      fontSize: _flumeaResponsiveValue(context, 30),
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -901,7 +895,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               'FLUMEA',
               style: TextStyle(
                 color: _primaryText,
-                fontSize: 20,
+                fontSize: _flumeaResponsiveValue(context, 20),
                 fontWeight: FontWeight.w800,
                 letterSpacing: 4,
               ),
@@ -913,7 +907,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           alignment: Alignment.centerRight,
           child: Text(
             'رحلتك نحو نسخة أفضل من نفسك',
-            style: TextStyle(color: _secondaryText, fontSize: 16),
+            style: TextStyle(color: _secondaryText, fontSize: _flumeaResponsiveValue(context, 16)),
           ),
         ),
       ],
@@ -952,7 +946,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   titles[index],
                   style: TextStyle(
                     color: _selectedPeriod == index ? blue : _primaryText,
-                    fontSize: 15,
+                    fontSize: _flumeaResponsiveValue(context, 15),
                     fontWeight: _selectedPeriod == index
                         ? FontWeight.w800
                         : FontWeight.w600,
@@ -1019,13 +1013,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: iconColor, size: 38),
+          Icon(icon, color: iconColor, size: _flumeaResponsiveValue(context, 38)),
           const SizedBox(height: 8),
           Text(
             value,
             style: TextStyle(
               color: _primaryText,
-              fontSize: 27,
+              fontSize: _flumeaResponsiveValue(context, 27),
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -1035,7 +1029,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: iconColor == blue ? blue : _primaryText,
-              fontSize: 14,
+              fontSize: _flumeaResponsiveValue(context, 14),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -1061,14 +1055,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.bar_chart_rounded, color: _primaryText, size: 25),
+              Icon(Icons.bar_chart_rounded, color: _primaryText, size: _flumeaResponsiveValue(context, 25)),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   'معدل إكمال العادات',
                   style: TextStyle(
                     color: _primaryText,
-                    fontSize: 21,
+                    fontSize: _flumeaResponsiveValue(context, 21),
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -1085,13 +1079,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       _formatPercent(_data.dailyRate),
                       style: TextStyle(
                         color: _primaryText,
-                        fontSize: 19,
+                        fontSize: _flumeaResponsiveValue(context, 19),
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                     Text(
                       'معدل اليوم',
-                      style: TextStyle(color: _primaryText, fontSize: 12),
+                      style: TextStyle(color: _primaryText, fontSize: _flumeaResponsiveValue(context, 12)),
                     ),
                   ],
                 ),
@@ -1102,7 +1096,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           Text(
             '${_periodLabel(_selectedPeriod)} · ${_todayArabicDate()}',
             textAlign: TextAlign.right,
-            style: TextStyle(color: _secondaryText, fontSize: 13),
+            style: TextStyle(color: _secondaryText, fontSize: _flumeaResponsiveValue(context, 13)),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -1111,7 +1105,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 ? Center(
                     child: Text(
                       'أضف عاداتك لتظهر بيانات التقدم هنا',
-                      style: TextStyle(color: _secondaryText, fontSize: 13),
+                      style: TextStyle(color: _secondaryText, fontSize: _flumeaResponsiveValue(context, 13)),
                     ),
                   )
                 : Row(
@@ -1131,7 +1125,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                 _formatPercent(value),
                                 style: TextStyle(
                                   color: barColor,
-                                  fontSize: 15,
+                                  fontSize: _flumeaResponsiveValue(context, 15),
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
@@ -1178,7 +1172,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                 ),
                                 child: Text(
                                   habitEmoji,
-                                  style: const TextStyle(fontSize: 21),
+                                  style: TextStyle(fontSize: _flumeaResponsiveValue(context, 21)),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -1190,7 +1184,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: _secondaryText,
-                                  fontSize: 11,
+                                  fontSize: _flumeaResponsiveValue(context, 11),
                                 ),
                               ),
                             ],
@@ -1365,7 +1359,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   'معدل إكمال المهمة',
                   style: TextStyle(
                     color: _primaryText,
-                    fontSize: 18,
+                    fontSize: _flumeaResponsiveValue(context, 18),
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -1376,7 +1370,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           const SizedBox(height: 4),
           Text(
             '$completed من $total ${total == 1 ? 'مهمة' : 'مهام'} مكتملة في ${_periodLabel(_selectedPeriod)}',
-            style: TextStyle(color: _secondaryText, fontSize: 12),
+            style: TextStyle(color: _secondaryText, fontSize: _flumeaResponsiveValue(context, 12)),
           ),
           const SizedBox(height: 16),
           Expanded(
@@ -1404,13 +1398,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
                             _formatPercent(rate),
                             style: TextStyle(
                               color: _primaryText,
-                              fontSize: 25,
+                              fontSize: _flumeaResponsiveValue(context, 25),
                               fontWeight: FontWeight.w800,
                             ),
                           ),
                           Text(
                             'معدل الإكمال',
-                            style: TextStyle(color: _secondaryText, fontSize: 12),
+                            style: TextStyle(color: _secondaryText, fontSize: _flumeaResponsiveValue(context, 12)),
                           ),
                         ],
                       ),
@@ -1456,7 +1450,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   'تحسنك عبر الوقت',
                   style: TextStyle(
                     color: _primaryText,
-                    fontSize: 18,
+                    fontSize: _flumeaResponsiveValue(context, 18),
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -1614,8 +1608,8 @@ class _Legend extends StatelessWidget {
               textAlign: TextAlign.right,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 13,
+              style: TextStyle(
+                fontSize: _flumeaResponsiveValue(context, 13),
                 color: Color(0xFF102A4C),
                 fontWeight: FontWeight.w600,
               ),
@@ -1625,7 +1619,7 @@ class _Legend extends StatelessWidget {
           Text(
             value,
             style: TextStyle(
-               fontSize: 12,
+               fontSize: _flumeaResponsiveValue(context, 12),
                color: Theme.of(context).brightness == Brightness.dark
                    ? const Color(0xFF9AA7B8)
                    : const Color(0xFF7B8798),
@@ -1709,7 +1703,7 @@ class _LineChartPainter extends CustomPainter {
 
     final labelStyle = TextStyle(
       color: isDark ? const Color(0xFF9AA7B8) : const Color(0xFF7B8798),
-      fontSize: 10,
+      fontSize: _flumeaResponsiveValue(context, 10),
     );
     final textPainter = TextPainter(textDirection: TextDirection.rtl);
     final safeLabels = labels.isEmpty ? <String>[] : labels;
