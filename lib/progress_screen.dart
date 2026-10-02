@@ -796,9 +796,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
                             LayoutBuilder(
                               builder: (context, constraints) {
                                 final isCompact = constraints.maxWidth < 600;
+
                                 if (isCompact) {
                                   return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
                                     children: [
                                       _timeCard(),
                                       const SizedBox(height: 14),
@@ -806,8 +808,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                     ],
                                   );
                                 }
+
                                 return Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
                                   children: [
                                     Expanded(child: _timeCard()),
                                     const SizedBox(width: 12),
