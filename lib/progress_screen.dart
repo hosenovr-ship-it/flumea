@@ -5,6 +5,11 @@ import 'bottom_navigation.dart';
 import 'services/flumea_notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+double _flumeaResponsiveScale(double width) {
+  if (width >= 430) return 1.0;
+  return (width / 430.0).clamp(0.84, 1.0).toDouble();
+}
+
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
 
@@ -770,59 +775,73 @@ class _ProgressScreenState extends State<ProgressScreen> {
       child: Scaffold(
         backgroundColor: _pageBackground,
         body: SafeArea(
-          child: RefreshIndicator(
-            onRefresh: _loadProgress,
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
-              child: _loading
-                  ? const SizedBox(
-                      height: 650,
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                  : _error != null
-                      ? _errorView()
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _header(),
-                            const SizedBox(height: 18),
-                            _periodSelector(),
-                            const SizedBox(height: 18),
-                            _statsRow(),
-                            const SizedBox(height: 16),
-                            _habitChart(),
-                            const SizedBox(height: 14),
-                            LayoutBuilder(
-                              builder: (context, constraints) {
-                                final isCompact = constraints.maxWidth < 600;
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final scale = _flumeaResponsiveScale(constraints.maxWidth);
 
-                                if (isCompact) {
-                                  return Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      _timeCard(),
-                                      const SizedBox(height: 14),
-                                      _improvementCard(),
-                                    ],
-                                  );
-                                }
-
-                                return Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+              return Transform.scale(
+                scale: scale,
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  width: constraints.maxWidth / scale,
+                  height: constraints.maxHeight / scale,
+                  child: RefreshIndicator(
+                    onRefresh: _loadProgress,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                      child: _loading
+                          ? const SizedBox(
+                              height: 650,
+                              child: Center(child: CircularProgressIndicator()),
+                            )
+                          : _error != null
+                              ? _errorView()
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
-                                    Expanded(child: _timeCard()),
-                                    const SizedBox(width: 12),
-                                    Expanded(child: _improvementCard()),
+                                    _header(),
+                                    const SizedBox(height: 18),
+                                    _periodSelector(),
+                                    const SizedBox(height: 18),
+                                    _statsRow(),
+                                    const SizedBox(height: 16),
+                                    _habitChart(),
+                                    const SizedBox(height: 14),
+                                    LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        final isCompact = constraints.maxWidth < 600;
+
+                                        if (isCompact) {
+                                          return Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: [
+                                              _timeCard(),
+                                              const SizedBox(height: 14),
+                                              _improvementCard(),
+                                            ],
+                                          );
+                                        }
+
+                                        return Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(child: _timeCard()),
+                                            const SizedBox(width: 12),
+                                            Expanded(child: _improvementCard()),
+                                          ],
+                                        );
+                                      },
+                                    ),
                                   ],
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-            ),
+                                ),
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
         bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 2),
