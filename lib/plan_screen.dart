@@ -8,14 +8,6 @@ import 'services/task_service.dart';
 import 'services/habit_service.dart';
 import 'services/flumea_notification_service.dart';
 
-double _flumeaResponsiveScale(double width) {
-  if (width >= 430) return 1.0;
-  return (width / 430.0).clamp(0.84, 1.0).toDouble();
-}
-
-double _flumeaResponsiveValue(BuildContext context, double value) {
-  return value * _flumeaResponsiveScale(MediaQuery.sizeOf(context).width);
-}
 
 class PlanScreen extends StatefulWidget {
   const PlanScreen({super.key});
@@ -693,73 +685,42 @@ class _PlanScreenState extends State<PlanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final textScale = (width / 430.0).clamp(0.84, 1.0).toDouble();
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: background,
         body: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(
-                      18,
-                      12,
-                      18,
-                      110,
-                    ),
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.stretch,
-                      children: [
-                        _buildHeader(),
-                        SizedBox(height: 14),
-                        _buildTodayButton(),
-                        SizedBox(height: 14),
-                        _buildDays(),
-                        SizedBox(height: 14),
-                        _buildSummary(),
-                        SizedBox(height: 14),
-                        _buildTasks(),
-                        SizedBox(height: 14),
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            final isCompact = constraints.maxWidth < 600;
-
-                            if (isCompact) {
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  _buildDailyHabits(),
-                                  SizedBox(height: 14),
-                                  _buildWeeklyGoals(),
-                                ],
-                              );
-                            }
-
-                            return Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: _buildWeeklyGoals(),
-                                ),
-                                SizedBox(width: 12),
-                                Expanded(
-                                  child: _buildDailyHabits(),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ],,
-                ),
-              );
-            },
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: TextScaler.linear(textScale),
+            ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(18, 12, 18, 110),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHeader(),
+                  const SizedBox(height: 14),
+                  _buildTodayButton(),
+                  const SizedBox(height: 14),
+                  _buildDays(),
+                  const SizedBox(height: 14),
+                  _buildSummary(),
+                  const SizedBox(height: 14),
+                  _buildTasks(),
+                  const SizedBox(height: 14),
+                  _buildDailyHabits(),
+                  const SizedBox(height: 14),
+                  _buildWeeklyGoals(),
+                ],
+              ),
+            ),
           ),
         ),
-        bottomNavigationBar:
-            const FlumeaBottomNavigation(
-          selectedIndex: 1,
-        ),
+        bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 1),
       ),
     );
   }
@@ -783,7 +744,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   'الخطة',
                   textAlign: TextAlign.right,
                   style: TextStyle(
-                    fontSize: _flumeaResponsiveValue(context, 30),
+                    fontSize: 30,
                     fontWeight: FontWeight.w800,
                     color: navy,
                   ),
@@ -792,7 +753,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 Icon(
                   Icons.calendar_month_outlined,
                   color: navy,
-                  size: _flumeaResponsiveValue(context, 30),
+                  size: 30,
                 ),
               ],
             ),
@@ -801,7 +762,7 @@ class _PlanScreenState extends State<PlanScreen> {
               'نظم يومك وحقق أهدافك',
               textAlign: TextAlign.right,
               style: TextStyle(
-                fontSize: _flumeaResponsiveValue(context, 16),
+                fontSize: 16,
                 color: _subtle,
               ),
             ),
@@ -814,7 +775,7 @@ class _PlanScreenState extends State<PlanScreen> {
             'FLUMEA',
             style: TextStyle(
               color: navy,
-              fontSize: _flumeaResponsiveValue(context, 20),
+              fontSize: 20,
               fontWeight: FontWeight.w800,
               letterSpacing: 4,
             ),
@@ -858,7 +819,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   'اليوم',
                   style: TextStyle(
                     color: navy,
-                    fontSize: _flumeaResponsiveValue(context, 16),
+                    fontSize: 16,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -866,7 +827,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 Icon(
                   Icons.calendar_month_outlined,
                   color: navy,
-                  size: _flumeaResponsiveValue(context, 22),
+                  size: 22,
                 ),
               ],
             ),
@@ -956,7 +917,7 @@ class _PlanScreenState extends State<PlanScreen> {
             textAlign:
                 TextAlign.center,
             style: TextStyle(
-              fontSize: _flumeaResponsiveValue(context, 10),
+              fontSize: 10,
               fontWeight:
                   FontWeight.w700,
               color: selected
@@ -968,7 +929,7 @@ class _PlanScreenState extends State<PlanScreen> {
           Text(
             number,
             style: TextStyle(
-              fontSize: _flumeaResponsiveValue(context, 18),
+              fontSize: 18,
               fontWeight:
                   FontWeight.w800,
               color: selected
@@ -1020,7 +981,7 @@ class _PlanScreenState extends State<PlanScreen> {
                         Text(
                           'خطة اليوم',
                           style: TextStyle(
-                            fontSize: _flumeaResponsiveValue(context, 21),
+                            fontSize: 21,
                             fontWeight:
                                 FontWeight.w800,
                             color: navy,
@@ -1032,7 +993,7 @@ class _PlanScreenState extends State<PlanScreen> {
                         Text(
                           '☀️',
                           style: TextStyle(
-                            fontSize: _flumeaResponsiveValue(context, 22),
+                            fontSize: 22,
                           ),
                         ),
                       ],
@@ -1045,7 +1006,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       textAlign:
                           TextAlign.right,
                       style: TextStyle(
-                        fontSize: _flumeaResponsiveValue(context, 13),
+                        fontSize: 13,
                         color:
                             Color(0xFF7B8798),
                       ),
@@ -1121,7 +1082,7 @@ class _PlanScreenState extends State<PlanScreen> {
           child: Icon(
             icon,
             color: color,
-            size: _flumeaResponsiveValue(context, 23),
+            size: 23,
           ),
         ),
 
@@ -1132,7 +1093,7 @@ class _PlanScreenState extends State<PlanScreen> {
         Text(
           number,
           style: TextStyle(
-            fontSize: _flumeaResponsiveValue(context, 19),
+            fontSize: 19,
             fontWeight:
                 FontWeight.w800,
             color: navy,
@@ -1144,7 +1105,7 @@ class _PlanScreenState extends State<PlanScreen> {
           textAlign:
               TextAlign.center,
           style: TextStyle(
-            fontSize: _flumeaResponsiveValue(context, 10),
+            fontSize: 10,
             color: _subtle,
           ),
         ),
@@ -1197,7 +1158,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 '$completed/${tasks.length}',
                 style:
                     TextStyle(
-                  fontSize: _flumeaResponsiveValue(context, 15),
+                  fontSize: 15,
                   fontWeight:
                       FontWeight.w800,
                   color: navy,
@@ -1206,7 +1167,7 @@ class _PlanScreenState extends State<PlanScreen> {
               Text(
                 'مكتملة',
                 style: TextStyle(
-                  fontSize: _flumeaResponsiveValue(context, 9),
+                  fontSize: 9,
                   color:
                       Color(0xFF66758A),
                 ),
@@ -1247,7 +1208,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   child: Text(
                     'مهام اليوم',
                     style: TextStyle(
-                      fontSize: _flumeaResponsiveValue(context, 20),
+                      fontSize: 20,
                       fontWeight:
                           FontWeight.w800,
                       color: navy,
@@ -1257,7 +1218,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 Icon(
                   Icons.format_list_bulleted,
                   color: navy,
-                  size: _flumeaResponsiveValue(context, 27),
+                  size: 27,
                 ),
               ],
             ),
@@ -1283,7 +1244,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: _subtle,
-                  fontSize: _flumeaResponsiveValue(context, 14),
+                  fontSize: 14,
                 ),
               ),
             )
@@ -1322,7 +1283,7 @@ class _PlanScreenState extends State<PlanScreen> {
                           ? Icons.hourglass_top
                           : Icons.add,
                       color: blue,
-                      size: _flumeaResponsiveValue(context, 24),
+                      size: 24,
                     ),
                     SizedBox(width: 5),
                     Text(
@@ -1331,7 +1292,7 @@ class _PlanScreenState extends State<PlanScreen> {
                           : 'إضافة مهمة جديدة',
                       style: TextStyle(
                         color: blue,
-                        fontSize: _flumeaResponsiveValue(context, 16),
+                        fontSize: 16,
                         fontWeight:
                             FontWeight.w800,
                       ),
@@ -1433,7 +1394,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       Icons.check,
                       color:
                           Colors.white,
-                      size: _flumeaResponsiveValue(context, 20),
+                      size: 20,
                     )
                   : null,
             ),
@@ -1466,7 +1427,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               TextOverflow.ellipsis,
                           style:
                               TextStyle(
-                            fontSize: _flumeaResponsiveValue(context, 16),
+                            fontSize: 16,
                             fontWeight:
                                 FontWeight.w800,
                             color: completed
@@ -1516,7 +1477,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               style:
                                   TextStyle(
                                 color: color,
-                                fontSize: _flumeaResponsiveValue(context, 11),
+                                fontSize: 11,
                                 fontWeight:
                                     FontWeight
                                         .w800,
@@ -1529,7 +1490,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               emoji,
                               style:
                                   TextStyle(
-                                fontSize: _flumeaResponsiveValue(context, 13),
+                                fontSize: 13,
                               ),
                             ),
                           ],
@@ -1551,7 +1512,7 @@ class _PlanScreenState extends State<PlanScreen> {
                         TextOverflow.ellipsis,
                     style:
                         TextStyle(
-                      fontSize: _flumeaResponsiveValue(context, 12),
+                      fontSize: 12,
                       color:
                           Color(0xFF7B8798),
                     ),
@@ -1573,7 +1534,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   TextAlign.left,
               style:
                   TextStyle(
-                fontSize: _flumeaResponsiveValue(context, 13),
+                fontSize: 13,
                 color:
                     Color(0xFF52647A),
                 fontWeight:
@@ -1609,7 +1570,7 @@ class _PlanScreenState extends State<PlanScreen> {
         Icons.more_vert,
         color:
             Color(0xFF6E7A88),
-        size: _flumeaResponsiveValue(context, 22),
+        size: 22,
       ),
       onSelected:
           (value) {
@@ -1635,7 +1596,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   style:
                       TextStyle(
                     color: navy,
-                    fontSize: _flumeaResponsiveValue(context, 14),
+                    fontSize: 14,
                     fontWeight:
                         FontWeight.w700,
                   ),
@@ -1655,7 +1616,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       TextStyle(
                     color:
                         Color(0xFFD64545),
-                    fontSize: _flumeaResponsiveValue(context, 14),
+                    fontSize: 14,
                     fontWeight:
                         FontWeight.w700,
                   ),
@@ -1757,7 +1718,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                         textAlign: TextAlign.right,
                                         style: TextStyle(
                                           color: navy,
-                                          fontSize: _flumeaResponsiveValue(context, 25),
+                                          fontSize: 25,
                                           fontWeight: FontWeight.w800,
                                           height: 1.2,
                                         ),
@@ -1768,7 +1729,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                         textAlign: TextAlign.right,
                                         style: TextStyle(
                                           color: _subtle,
-                                          fontSize: _flumeaResponsiveValue(context, 14),
+                                          fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                           height: 1.35,
                                         ),
@@ -1801,7 +1762,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                     Icon(
                                       Icons.assignment_outlined,
                                       color: blue,
-                                      size: _flumeaResponsiveValue(context, 58),
+                                      size: 58,
                                     ),
                                     Positioned(
                                       right: 10,
@@ -1816,7 +1777,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                         child: Icon(
                                           Icons.add,
                                           color: Colors.white,
-                                          size: _flumeaResponsiveValue(context, 23),
+                                          size: 23,
                                         ),
                                       ),
                                     ),
@@ -1933,7 +1894,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                               'اختر التصنيف',
                                               style: TextStyle(
                                                 color: navy,
-                                                fontSize: _flumeaResponsiveValue(context, 20),
+                                                fontSize: 20,
                                                 fontWeight: FontWeight.w800,
                                               ),
                                             ),
@@ -2032,7 +1993,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                     'إلغاء',
                                     style: TextStyle(
                                       color: navy,
-                                      fontSize: _flumeaResponsiveValue(context, 16),
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w800,
                                     ),
                                   ),
@@ -2176,12 +2137,12 @@ class _PlanScreenState extends State<PlanScreen> {
                                         },
                                   icon: Icon(
                                     Icons.add,
-                                    size: _flumeaResponsiveValue(context, 23),
+                                    size: 23,
                                   ),
                                   label: Text(
                                     'إضافة المهمة',
                                     style: TextStyle(
-                                      fontSize: _flumeaResponsiveValue(context, 16),
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w800,
                                     ),
                                   ),
@@ -2239,7 +2200,7 @@ class _PlanScreenState extends State<PlanScreen> {
         textAlign: TextAlign.right,
         style: TextStyle(
           color: navy,
-          fontSize: _flumeaResponsiveValue(context, 16),
+          fontSize: 16,
           fontWeight: FontWeight.w700,
         ),
         decoration: InputDecoration(
@@ -2247,12 +2208,12 @@ class _PlanScreenState extends State<PlanScreen> {
           hintText: hint.isEmpty ? null : hint,
           hintStyle: TextStyle(
             color: Color(0xFF8B98A8),
-            fontSize: _flumeaResponsiveValue(context, 14),
+            fontSize: 14,
           ),
           labelText: label,
           labelStyle: TextStyle(
             color: navy,
-            fontSize: _flumeaResponsiveValue(context, 15),
+            fontSize: 15,
             fontWeight: FontWeight.w700,
           ),
           floatingLabelBehavior: FloatingLabelBehavior.auto,
@@ -2277,7 +2238,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 child: Icon(
                   icon,
                   color: iconColor,
-                  size: _flumeaResponsiveValue(context, 22),
+                  size: 22,
                 ),
               ),
             ),
@@ -2287,7 +2248,7 @@ class _PlanScreenState extends State<PlanScreen> {
               : Icon(
                   suffixIcon,
                   color: navy,
-                  size: _flumeaResponsiveValue(context, 25),
+                  size: 25,
                 ),
         ),
       ),
@@ -2321,7 +2282,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   color: navy,
-                  fontSize: _flumeaResponsiveValue(context, 17),
+                  fontSize: 17,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -2329,7 +2290,7 @@ class _PlanScreenState extends State<PlanScreen> {
               Icon(
                 Icons.flag_outlined,
                 color: navy,
-                size: _flumeaResponsiveValue(context, 21),
+                size: 21,
               ),
             ],
           ),
@@ -2340,7 +2301,7 @@ class _PlanScreenState extends State<PlanScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: _subtle,
-                fontSize: _flumeaResponsiveValue(context, 13),
+                fontSize: 13,
               ),
             ),
           ] else ...[
@@ -2364,12 +2325,12 @@ class _PlanScreenState extends State<PlanScreen> {
               _weeklyGoals.length >= 3
                   ? Icons.block_outlined
                   : Icons.add,
-              size: _flumeaResponsiveValue(context, 20),
+              size: 20,
             ),
             label: Text(
               _weeklyGoals.length >= 3 ? 'الحد الأقصى 3 أهداف' : 'إضافة هدف',
-              style: TextStyle(
-                fontSize: _flumeaResponsiveValue(context, 14),
+              style: const TextStyle(
+                fontSize: 14,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -2420,7 +2381,7 @@ class _PlanScreenState extends State<PlanScreen> {
             child: Icon(
               completed ? Icons.check : Icons.flag_outlined,
               color: completed ? cyan : blue,
-              size: _flumeaResponsiveValue(context, 20),
+              size: 20,
             ),
           ),
           const SizedBox(width: 12),
@@ -2432,7 +2393,7 @@ class _PlanScreenState extends State<PlanScreen> {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: navy,
-                fontSize: _flumeaResponsiveValue(context, 14),
+                fontSize: 14,
                 fontWeight: FontWeight.w700,
                 decoration: completed ? TextDecoration.lineThrough : null,
               ),
@@ -2445,7 +2406,7 @@ class _PlanScreenState extends State<PlanScreen> {
             icon: Icon(
               Icons.more_vert_rounded,
               color: const Color(0xFF7B8798),
-              size: _flumeaResponsiveValue(context, 21),
+              size: 21,
             ),
             onSelected: (value) async {
               if (value == 'reset') {
@@ -2520,10 +2481,10 @@ class _PlanScreenState extends State<PlanScreen> {
                 ),
               ),
               child: completed
-                  ? Icon(
+                  ? const Icon(
                       Icons.check,
                       color: Colors.white,
-                      size: _flumeaResponsiveValue(context, 16),
+                      size: 16,
                     )
                   : null,
             ),
@@ -2656,8 +2617,8 @@ class _PlanScreenState extends State<PlanScreen> {
                   if (!dialogContext.mounted) return;
                   Navigator.pop(dialogContext);
                 },
-                icon: Icon(Icons.add),
-                label: Text('إضافة'),
+                icon: const Icon(Icons.add),
+                label: const Text('إضافة'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: blue,
                   foregroundColor: Colors.white,
@@ -2697,7 +2658,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 'عادات اليوم',
                 style: TextStyle(
                   color: navy,
-                  fontSize: _flumeaResponsiveValue(context, 17),
+                  fontSize: 17,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -2705,7 +2666,7 @@ class _PlanScreenState extends State<PlanScreen> {
               Icon(
                 Icons.repeat,
                 color: navy,
-                size: _flumeaResponsiveValue(context, 21),
+                size: 21,
               ),
             ],
           ),
@@ -2718,7 +2679,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Color(0xFF7B8798),
-                  fontSize: _flumeaResponsiveValue(context, 13),
+                  fontSize: 13,
                 ),
               ),
             )
@@ -2745,12 +2706,12 @@ class _PlanScreenState extends State<PlanScreen> {
             onPressed: _isSavingHabit ? null : _showAddHabitDialog,
             icon: Icon(
               _isSavingHabit ? Icons.hourglass_top : Icons.add,
-              size: _flumeaResponsiveValue(context, 20),
+              size: 20,
             ),
             label: Text(
               _isSavingHabit ? 'جاري الحفظ...' : 'إضافة عادة',
               style: TextStyle(
-                fontSize: _flumeaResponsiveValue(context, 14),
+                fontSize: 14,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -2829,7 +2790,7 @@ class _PlanScreenState extends State<PlanScreen> {
             child: Icon(
               completed ? Icons.check : icon,
               color: completed ? cyan : blue,
-              size: _flumeaResponsiveValue(context, 20),
+              size: 20,
             ),
           ),
           SizedBox(width: 12),
@@ -2839,7 +2800,7 @@ class _PlanScreenState extends State<PlanScreen> {
               textAlign: TextAlign.right,
               style: TextStyle(
                 color: navy,
-                fontSize: _flumeaResponsiveValue(context, 14),
+                fontSize: 14,
                 fontWeight: FontWeight.w700,
                 decoration: completed
                     ? TextDecoration.lineThrough
@@ -2855,7 +2816,7 @@ class _PlanScreenState extends State<PlanScreen> {
             icon: Icon(
               Icons.more_vert_rounded,
               color: Color(0xFF7B8798),
-              size: _flumeaResponsiveValue(context, 21),
+              size: 21,
             ),
             onSelected: (value) async {
               if (value == 'reset') {
@@ -2915,7 +2876,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   ? Icon(
                       Icons.check,
                       color: Colors.white,
-                      size: _flumeaResponsiveValue(context, 16),
+                      size: 16,
                     )
                   : null,
             ),
@@ -2953,7 +2914,7 @@ class _PlanScreenState extends State<PlanScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: navy,
-                fontSize: _flumeaResponsiveValue(context, 23),
+                fontSize: 23,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -2987,7 +2948,7 @@ class _PlanScreenState extends State<PlanScreen> {
                         'إلغاء',
                         style: TextStyle(
                           color: navy,
-                          fontSize: _flumeaResponsiveValue(context, 16),
+                          fontSize: 16,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -3110,7 +3071,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       child: Text(
                         'إضافة',
                         style: TextStyle(
-                          fontSize: _flumeaResponsiveValue(context, 16),
+                          fontSize: 16,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
