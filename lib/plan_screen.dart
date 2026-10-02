@@ -8,7 +8,6 @@ import 'services/task_service.dart';
 import 'services/habit_service.dart';
 import 'services/flumea_notification_service.dart';
 
-
 class PlanScreen extends StatefulWidget {
   const PlanScreen({super.key});
 
@@ -685,9 +684,6 @@ class _PlanScreenState extends State<PlanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final textScale = (width / 430.0).clamp(0.84, 1.0).toDouble();
-
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -695,32 +691,55 @@ class _PlanScreenState extends State<PlanScreen> {
         body: SafeArea(
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(textScale),
+              textScaler: TextScaler.linear(
+                (MediaQuery.sizeOf(context).width / 430.0)
+                    .clamp(0.84, 1.0)
+                    .toDouble(),
+              ),
             ),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(18, 12, 18, 110),
+              padding: EdgeInsets.fromLTRB(
+                18,
+                12,
+                18,
+                110,
+              ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment:
+                    CrossAxisAlignment.stretch,
                 children: [
                   _buildHeader(),
-                  const SizedBox(height: 14),
+                  SizedBox(height: 14),
                   _buildTodayButton(),
-                  const SizedBox(height: 14),
+                  SizedBox(height: 14),
                   _buildDays(),
-                  const SizedBox(height: 14),
+                  SizedBox(height: 14),
                   _buildSummary(),
-                  const SizedBox(height: 14),
+                  SizedBox(height: 14),
                   _buildTasks(),
-                  const SizedBox(height: 14),
-                  _buildDailyHabits(),
-                  const SizedBox(height: 14),
-                  _buildWeeklyGoals(),
+                  SizedBox(height: 14),
+                  Row(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _buildWeeklyGoals(),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: _buildDailyHabits(),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
           ),
         ),
-        bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 1),
+        bottomNavigationBar:
+            const FlumeaBottomNavigation(
+          selectedIndex: 1,
+        ),
       ),
     );
   }
