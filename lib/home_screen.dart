@@ -4,7 +4,6 @@ import 'bottom_navigation.dart';
 import 'food_tracking_screen.dart';
 import 'services/flumea_notification_service.dart';
 
-
 class HomeScreen extends StatefulWidget {
   static const darkBlue = Color(0xFF102A4C);
   static const blue = Color(0xFF2870B5);
@@ -303,9 +302,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final textScale = (width / 430.0).clamp(0.84, 1.0).toDouble();
-
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -313,7 +309,11 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SafeArea(
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(textScale),
+              textScaler: TextScaler.linear(
+                (MediaQuery.sizeOf(context).width / 430.0)
+                    .clamp(0.84, 1.0)
+                    .toDouble(),
+              ),
             ),
             child: _loading
                 ? const Center(
@@ -583,145 +583,111 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHabitsAndFood() {
     final habitsToShow = List<Map<String, dynamic>>.from(_habits);
 
-    Widget habitsCard() {
-      return _SmallCard(
-        title: 'عاداتك',
-        icon: Icons.history_rounded,
-        child: Column(
-          children: [
-            if (habitsToShow.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(10),
-                child: Text(
-                  'لا توجد عادات',
-                  style: TextStyle(color: grayText, fontSize: 11),
-                ),
-              )
-            else
-              ...habitsToShow.map((habit) {
-                final id = habit['id']?.toString();
-                final completed = id != null && _habitCompleted[id] == true;
-
-                return _HomeHabit(
-                  icon: '✓',
-                  title: habit['name']?.toString() ?? '',
-                  completed: completed,
-                  onTap: () => _toggleHabit(habit),
-                );
-              }),
-          ],
-        ),
-      );
-    }
-
-    Widget foodCard() {
-      return _SmallCard(
-        title: 'طعامك اليوم 🍴',
-        icon: Icons.restaurant_menu_rounded,
-        child: Column(
-          children: [
-            Row(
-              textDirection: TextDirection.ltr,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: _SmallCard(
+            title: 'عاداتك',
+            icon: Icons.history_rounded,
+            child: Column(
               children: [
-                Expanded(
-                  child: _CaloriesRing(
-                    // الدائرة تعرض السعرات المحددة فقط من إجمالي
-                    // السعرات المضافة لليوم. لا يوجد هدف ثابت مثل 2200.
-                    progress: _foodTotalCalories == 0
-                        ? 0.0
-                        : (_foodSelectedCalories / _foodTotalCalories)
-                            .clamp(0.0, 1.0)
-                            .toDouble(),
-                    value: _formatCalories(_foodSelectedCalories),
-                    subtitle:
-                        'من ${_formatCalories(_foodTotalCalories)}\nسعرة حرارية',
-                  ),
+                if (habitsToShow.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Text(
+                      'لا توجد عادات',
+                      style: TextStyle(color: grayText, fontSize: 11),
+                    ),
+                  )
+                else
+                  ...habitsToShow.map((habit) {
+                    final id = habit['id']?.toString();
+                    final completed = id != null && _habitCompleted[id] == true;
+
+                    return _HomeHabit(
+                      icon: '✓',
+                      title: habit['name']?.toString() ?? '',
+                      completed: completed,
+                      onTap: () => _toggleHabit(habit),
+                    );
+                  }),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: _SmallCard(
+            title: 'طعامك اليوم 🍴',
+            icon: Icons.restaurant_menu_rounded,
+            child: Column(
+              children: [
+                Row(
+                  textDirection: TextDirection.ltr,
+                  children: [
+                    Expanded(
+                      child: _CaloriesRing(
+                        // الدائرة تعرض السعرات المحددة فقط من إجمالي
+                        // السعرات المضافة لليوم. لا يوجد هدف ثابت مثل 2200.
+                        progress: _foodTotalCalories == 0
+                            ? 0.0
+                            : (_foodSelectedCalories / _foodTotalCalories)
+                                .clamp(0.0, 1.0)
+                                .toDouble(),
+                        value: _formatCalories(_foodSelectedCalories),
+                        subtitle:
+                            'من ${_formatCalories(_foodTotalCalories)}\nسعرة حرارية',
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Column(
+                        textDirection: TextDirection.rtl,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          _MealLine(name: 'الفطور', calories: '${_mealCalories['الفطور'] ?? 0} سعرة', icon: '☀️'),
+                          _MealLine(name: 'الغداء', calories: '${_mealCalories['الغداء'] ?? 0} سعرة', icon: '☀️'),
+                          _MealLine(name: 'العشاء', calories: '${_mealCalories['العشاء'] ?? 0} سعرة', icon: '🌙'),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Column(
-                    textDirection: TextDirection.rtl,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      _MealLine(
-                        name: 'الفطور',
-                        calories: '${_mealCalories['الفطور'] ?? 0} سعرة',
-                        icon: '☀️',
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FoodTrackingScreen(),
+                        ),
+                      );
+                      if (mounted) await _loadHomeData();
+                    },
+                    icon: const Icon(Icons.add, size: 19),
+                    label: const Text('تسجيل وجبة'),
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                      foregroundColor: Theme.of(context).colorScheme.secondary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                      _MealLine(
-                        name: 'الغداء',
-                        calories: '${_mealCalories['الغداء'] ?? 0} سعرة',
-                        icon: '☀️',
-                      ),
-                      _MealLine(
-                        name: 'العشاء',
-                        calories: '${_mealCalories['العشاء'] ?? 0} سعرة',
-                        icon: '🌙',
-                      ),
-                    ],
+                      padding: const EdgeInsets.symmetric(vertical: 11),
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const FoodTrackingScreen(),
-                    ),
-                  );
-                  if (mounted) await _loadHomeData();
-                },
-                icon: const Icon(Icons.add, size: 19),
-                label: const Text('تسجيل وجبة'),
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor:
-                      Theme.of(context).colorScheme.secondaryContainer,
-                  foregroundColor:
-                      Theme.of(context).colorScheme.secondary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 11),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
-      );
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isCompact = constraints.maxWidth < 600;
-
-        if (isCompact) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              habitsCard(),
-              const SizedBox(height: 14),
-              foodCard(),
-            ],
-          );
-        }
-
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: habitsCard()),
-            const SizedBox(width: 14),
-            Expanded(child: foodCard()),
-          ],
-        );
-      },
+      ],
     );
   }
+
   Widget _buildSmartAssistant() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 17),
