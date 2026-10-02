@@ -692,7 +692,7 @@ class _PlanScreenState extends State<PlanScreen> {
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(
               textScaler: TextScaler.linear(
-                (MediaQuery.sizeOf(context).width / 430.0)
+                (MediaQuery.sizeOf(context).width / 480.0)
                     .clamp(0.84, 1.0)
                     .toDouble(),
               ),
@@ -1135,20 +1135,21 @@ class _PlanScreenState extends State<PlanScreen> {
   Widget _progressCircle({
     required int completed,
   }) {
+    final compact = MediaQuery.sizeOf(context).width < 600;
     final progress = tasks.isEmpty
         ? 0.0
         : completed / tasks.length;
 
     return SizedBox(
-      width: 70,
-      height: 70,
+      width: compact ? 62 : 70,
+      height: compact ? 62 : 70,
       child: Stack(
         alignment:
             Alignment.center,
         children: [
           SizedBox(
-            width: 65,
-            height: 65,
+            width: compact ? 58 : 65,
+            height: compact ? 58 : 65,
             child:
                 CircularProgressIndicator(
               value:
@@ -1156,7 +1157,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 0.0,
                 1.0,
               ),
-              strokeWidth: 7,
+              strokeWidth: compact ? 6 : 7,
               backgroundColor:
                   const Color(
                 0xFFDDE4ED,
@@ -1177,7 +1178,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 '$completed/${tasks.length}',
                 style:
                     TextStyle(
-                  fontSize: 15,
+                  fontSize: compact ? 13 : 15,
                   fontWeight:
                       FontWeight.w800,
                   color: navy,
@@ -1186,7 +1187,7 @@ class _PlanScreenState extends State<PlanScreen> {
               Text(
                 'مكتملة',
                 style: TextStyle(
-                  fontSize: 9,
+                  fontSize: compact ? 8 : 9,
                   color:
                       Color(0xFF66758A),
                 ),
