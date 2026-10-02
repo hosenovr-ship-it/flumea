@@ -793,13 +793,28 @@ class _ProgressScreenState extends State<ProgressScreen> {
                             const SizedBox(height: 16),
                             _habitChart(),
                             const SizedBox(height: 14),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(child: _timeCard()),
-                                const SizedBox(width: 12),
-                                Expanded(child: _improvementCard()),
-                              ],
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                final isCompact = constraints.maxWidth < 600;
+                                if (isCompact) {
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      _timeCard(),
+                                      const SizedBox(height: 14),
+                                      _improvementCard(),
+                                    ],
+                                  );
+                                }
+                                return Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(child: _timeCard()),
+                                    const SizedBox(width: 12),
+                                    Expanded(child: _improvementCard()),
+                                  ],
+                                );
+                              },
                             ),
                           ],
                         ),
