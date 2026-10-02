@@ -2285,6 +2285,8 @@ class _PlanScreenState extends State<PlanScreen> {
   // ============================================================
 
   Widget _buildWeeklyGoals() {
+    final compact = MediaQuery.sizeOf(context).width < 600;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -2503,7 +2505,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 ),
               ),
               child: completed
-                  ? const Icon(
+                  ? Icon(
                       Icons.check,
                       color: Colors.white,
                       size: compact ? 13 : 16,
