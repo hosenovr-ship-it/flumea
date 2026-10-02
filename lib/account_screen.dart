@@ -937,7 +937,7 @@ class _AccountScreenState extends State<AccountScreen> {
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(
               textScaler: TextScaler.linear(
-                (MediaQuery.sizeOf(context).width / 430.0)
+                (MediaQuery.sizeOf(context).width / 480.0)
                     .clamp(0.84, 1.0)
                     .toDouble(),
               ),
