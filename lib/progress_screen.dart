@@ -773,7 +773,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(
               textScaler: TextScaler.linear(
-                (MediaQuery.sizeOf(context).width / 430.0)
+                (MediaQuery.sizeOf(context).width / 480.0)
                     .clamp(0.84, 1.0)
                     .toDouble(),
               ),
@@ -980,8 +980,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
     required Color background,
     required Color iconColor,
   }) {
+    final compact = MediaQuery.sizeOf(context).width < 600;
     return Container(
-      height: 145,
+      height: compact ? 124 : 145,
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(20),
@@ -990,13 +991,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: iconColor, size: 38),
-          const SizedBox(height: 8),
+          Icon(icon, color: iconColor, size: compact ? 32 : 38),
+          const SizedBox(height: 6),
           Text(
             value,
             style: TextStyle(
               color: _primaryText,
-              fontSize: 27,
+              fontSize: compact ? 23 : 27,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -1006,7 +1007,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: iconColor == blue ? blue : _primaryText,
-              fontSize: 14,
+              fontSize: compact ? 12 : 14,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -1016,6 +1017,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _habitChart() {
+    final compact = MediaQuery.sizeOf(context).width < 600;
     final values = _data.chartValues;
     final names = _data.chartNames;
     final count = values.length;
@@ -1077,7 +1079,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           ),
           const SizedBox(height: 16),
           SizedBox(
-            height: 265,
+            height: compact ? 235 : 265,
             child: count == 0
                 ? Center(
                     child: Text(
@@ -1311,6 +1313,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _timeCard() {
+    final compact = MediaQuery.sizeOf(context).width < 600;
     final summary = _data.timeSummary;
     final total = summary.totalTasks;
     final completed = summary.completedTasks;
@@ -1319,7 +1322,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final rate = total == 0 ? 0.0 : (completed / total).clamp(0.0, 1.0).toDouble();
 
     return Container(
-      height: 310,
+      height: compact ? 270 : 310,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: _cardBackground,
@@ -1354,16 +1357,16 @@ class _ProgressScreenState extends State<ProgressScreen> {
             child: Row(
               children: [
                 SizedBox(
-                  width: 145,
+                  width: compact ? 120 : 145,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       SizedBox(
-                        width: 125,
-                        height: 125,
+                        width: compact ? 105 : 125,
+                        height: compact ? 105 : 125,
                         child: CircularProgressIndicator(
                           value: rate,
-                          strokeWidth: 18,
+                          strokeWidth: compact ? 15 : 18,
                           backgroundColor: _circleTrack,
                           valueColor: const AlwaysStoppedAnimation<Color>(blue),
                         ),
@@ -1375,7 +1378,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                             _formatPercent(rate),
                             style: TextStyle(
                               color: _primaryText,
-                              fontSize: 25,
+                              fontSize: compact ? 22 : 25,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -1409,8 +1412,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _improvementCard() {
+    final compact = MediaQuery.sizeOf(context).width < 600;
     return Container(
-      height: 310,
+      height: compact ? 270 : 310,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: _cardBackground,
