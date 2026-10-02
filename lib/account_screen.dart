@@ -650,13 +650,13 @@ class _AccountScreenState extends State<AccountScreen> {
                 textDirection: TextDirection.rtl,
                 children: [
                   Container(
-                    width: 50,
-                    height: 50,
+                    width: MediaQuery.sizeOf(context).width < 600 ? 42 : 50,
+                    height: MediaQuery.sizeOf(context).width < 600 ? 42 : 50,
                     decoration: BoxDecoration(
                       color: accent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Icon(icon, color: accent, size: 27),
+                    child: Icon(icon, color: accent, size: MediaQuery.sizeOf(context).width < 600 ? 22 : 27),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -937,8 +937,8 @@ class _AccountScreenState extends State<AccountScreen> {
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(
               textScaler: TextScaler.linear(
-                (MediaQuery.sizeOf(context).width / 480.0)
-                    .clamp(0.84, 1.0)
+                (MediaQuery.sizeOf(context).width / 600.0)
+                    .clamp(0.76, 1.0)
                     .toDouble(),
               ),
             ),
@@ -1364,8 +1364,8 @@ class _AccountScreenState extends State<AccountScreen> {
           children: iconOnLeft
               ? [
                   Container(
-                    width: 52,
-                    height: 52,
+                    width: MediaQuery.sizeOf(context).width < 600 ? 44 : 52,
+                    height: MediaQuery.sizeOf(context).width < 600 ? 44 : 52,
                     decoration: BoxDecoration(
                       color: iconBackground,
                       borderRadius: BorderRadius.circular(17),
@@ -2160,8 +2160,8 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
           tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           childrenPadding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
           leading: Container(
-            width: 48,
-            height: 48,
+            width: MediaQuery.sizeOf(context).width < 600 ? 40 : 48,
+            height: MediaQuery.sizeOf(context).width < 600 ? 40 : 48,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(15),
