@@ -8,6 +8,11 @@ import 'services/task_service.dart';
 import 'services/habit_service.dart';
 import 'services/flumea_notification_service.dart';
 
+double _flumeaResponsiveScale(double width) {
+  if (width >= 430) return 1.0;
+  return (width / 430.0).clamp(0.84, 1.0).toDouble();
+}
+
 class PlanScreen extends StatefulWidget {
   const PlanScreen({super.key});
 
@@ -689,58 +694,72 @@ class _PlanScreenState extends State<PlanScreen> {
       child: Scaffold(
         backgroundColor: background,
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-              18,
-              12,
-              18,
-              110,
-            ),
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.stretch,
-              children: [
-                _buildHeader(),
-                SizedBox(height: 14),
-                _buildTodayButton(),
-                SizedBox(height: 14),
-                _buildDays(),
-                SizedBox(height: 14),
-                _buildSummary(),
-                SizedBox(height: 14),
-                _buildTasks(),
-                SizedBox(height: 14),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isCompact = constraints.maxWidth < 600;
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final scale = _flumeaResponsiveScale(constraints.maxWidth);
 
-                    if (isCompact) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildDailyHabits(),
-                          SizedBox(height: 14),
-                          _buildWeeklyGoals(),
-                        ],
-                      );
-                    }
-
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              return Transform.scale(
+                scale: scale,
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  width: constraints.maxWidth / scale,
+                  height: constraints.maxHeight / scale,
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(
+                      18,
+                      12,
+                      18,
+                      110,
+                    ),
+                    child: Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.stretch,
                       children: [
-                        Expanded(
-                          child: _buildWeeklyGoals(),
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: _buildDailyHabits(),
+                        _buildHeader(),
+                        SizedBox(height: 14),
+                        _buildTodayButton(),
+                        SizedBox(height: 14),
+                        _buildDays(),
+                        SizedBox(height: 14),
+                        _buildSummary(),
+                        SizedBox(height: 14),
+                        _buildTasks(),
+                        SizedBox(height: 14),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isCompact = constraints.maxWidth < 600;
+
+                            if (isCompact) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _buildDailyHabits(),
+                                  SizedBox(height: 14),
+                                  _buildWeeklyGoals(),
+                                ],
+                              );
+                            }
+
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: _buildWeeklyGoals(),
+                                ),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: _buildDailyHabits(),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ],
-                    );
-                  },
+                    ),
+                  ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
         bottomNavigationBar:
