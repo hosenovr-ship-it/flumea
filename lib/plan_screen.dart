@@ -696,7 +696,10 @@ class _PlanScreenState extends State<PlanScreen> {
               18,
               110,
             ),
-            child: Column(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 900),
+                child: Column(
               crossAxisAlignment:
                   CrossAxisAlignment.stretch,
               children: [
@@ -710,20 +713,33 @@ class _PlanScreenState extends State<PlanScreen> {
                 SizedBox(height: 14),
                 _buildTasks(),
                 SizedBox(height: 14),
-                Row(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: _buildWeeklyGoals(),
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: _buildDailyHabits(),
-                    ),
-                  ],
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isCompact = constraints.maxWidth < 600;
+                    if (isCompact) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildDailyHabits(),
+                          const SizedBox(height: 14),
+                          _buildWeeklyGoals(),
+                        ],
+                      );
+                    }
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: _buildWeeklyGoals()),
+                        const SizedBox(width: 12),
+                        Expanded(child: _buildDailyHabits()),
+                      ],
+                    );
+                  },
                 ),
               ],
+            ),
+          ),
+        ),
             ),
           ),
         ),
