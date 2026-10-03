@@ -2518,7 +2518,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 ),
               ),
               child: completed
-                  ? const Icon(
+                  ? Icon(
                       Icons.check,
                       color: Colors.white,
                       size: MediaQuery.sizeOf(context).width < 600 ? 16 * 0.90 : 16,
