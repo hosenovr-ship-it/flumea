@@ -372,7 +372,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         color: blue.withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.notifications_none_rounded,
                         color: blue,
                         size: MediaQuery.sizeOf(context).width < 600 ? 25 * 0.90 : 25,
@@ -738,7 +738,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             : lightBlue,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.palette_outlined,
                         color: blue,
                         size: MediaQuery.sizeOf(context).width < 600 ? 27 * 0.90 : 27,
@@ -827,7 +827,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     color: const Color(0xFFFFE7E7),
                     borderRadius: BorderRadius.circular(21),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.logout_rounded,
                     color: Color(0xFFD93B3B),
                     size: MediaQuery.sizeOf(context).width < 600 ? 32 * 0.90 : 32,
@@ -1050,13 +1050,13 @@ class _AccountScreenState extends State<AccountScreen> {
                                   ? Image.network(
                                       _avatarUrl!,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) => const Icon(
+                                      errorBuilder: (context, error, stackTrace) => Icon(
                                         Icons.person,
                                         size: MediaQuery.sizeOf(context).width < 600 ? 58 * 0.90 : 58,
                                         color: navy,
                                       ),
                                     )
-                                  : const Icon(
+                                  : Icon(
                                       Icons.person,
                                       size: MediaQuery.sizeOf(context).width < 600 ? 58 * 0.90 : 58,
                                       color: navy,
@@ -1083,7 +1083,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                           ),
                                         ),
                                       )
-                                    : const Icon(
+                                    : Icon(
                                         Icons.camera_alt,
                                         size: MediaQuery.sizeOf(context).width < 600 ? 18 * 0.90 : 18,
                                         color: Colors.white,
@@ -1129,7 +1129,7 @@ class _AccountScreenState extends State<AccountScreen> {
                               alignment: Alignment.centerRight,
                               child: OutlinedButton.icon(
                                 onPressed: _editProfile,
-                                icon: const Icon(
+                                icon: Icon(
                                   Icons.edit,
                                   size: MediaQuery.sizeOf(context).width < 600 ? 19 * 0.90 : 19,
                                   color: blue,
@@ -1379,7 +1379,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  const Icon(
+                  Icon(
                     Icons.chevron_left,
                     color: Color(0xFF718096),
                     size: MediaQuery.sizeOf(context).width < 600 ? 27 * 0.90 : 27,
@@ -1419,7 +1419,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   ),
                 ]
               : [
-                  const Icon(
+                  Icon(
                     Icons.chevron_left,
                     color: Color(0xFF718096),
                     size: MediaQuery.sizeOf(context).width < 600 ? 27 * 0.90 : 27,
@@ -1842,7 +1842,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                                         ),
                                       ),
                                     )
-                                  : const Icon(
+                                  : Icon(
                                       Icons.camera_alt_rounded,
                                       color: Colors.white,
                                       size: MediaQuery.sizeOf(context).width < 600 ? 21 * 0.90 : 21,
@@ -2071,7 +2071,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                         color: const Color(0xFFEAF3FF),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.headset_mic_rounded,
                         color: blue,
                         size: MediaQuery.sizeOf(context).width < 600 ? 35 * 0.90 : 35,
@@ -2420,7 +2420,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                         color: const Color(0xFFEAF3FF),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.mail_outline_rounded,
                         color: blue,
                         size: MediaQuery.sizeOf(context).width < 600 ? 35 * 0.90 : 35,
@@ -2532,7 +2532,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.support_agent_rounded,
                         color: Color(0xFF20B995),
                         size: MediaQuery.sizeOf(context).width < 600 ? 32 * 0.90 : 32,
