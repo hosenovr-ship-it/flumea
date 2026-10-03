@@ -781,7 +781,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   'الخطة',
                   textAlign: TextAlign.right,
                   style: TextStyle(
-                    fontSize: 30,
+                    fontSize: 27,
                     fontWeight: FontWeight.w800,
                     color: navy,
                   ),
@@ -799,7 +799,7 @@ class _PlanScreenState extends State<PlanScreen> {
               'نظم يومك وحقق أهدافك',
               textAlign: TextAlign.right,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 14.4,
                 color: _subtle,
               ),
             ),
@@ -812,7 +812,7 @@ class _PlanScreenState extends State<PlanScreen> {
             'FLUMEA',
             style: TextStyle(
               color: navy,
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.w800,
               letterSpacing: 4,
             ),
@@ -856,7 +856,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   'اليوم',
                   style: TextStyle(
                     color: navy,
-                    fontSize: 16,
+                    fontSize: 14.4,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -954,7 +954,7 @@ class _PlanScreenState extends State<PlanScreen> {
             textAlign:
                 TextAlign.center,
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 9,
               fontWeight:
                   FontWeight.w700,
               color: selected
@@ -966,7 +966,7 @@ class _PlanScreenState extends State<PlanScreen> {
           Text(
             number,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16.2,
               fontWeight:
                   FontWeight.w800,
               color: selected
@@ -1018,7 +1018,7 @@ class _PlanScreenState extends State<PlanScreen> {
                         Text(
                           'خطة اليوم',
                           style: TextStyle(
-                            fontSize: 21,
+                            fontSize: 18.9,
                             fontWeight:
                                 FontWeight.w800,
                             color: navy,
@@ -1030,7 +1030,7 @@ class _PlanScreenState extends State<PlanScreen> {
                         Text(
                           '☀️',
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 19.8,
                           ),
                         ),
                       ],
@@ -1043,7 +1043,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       textAlign:
                           TextAlign.right,
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 11.7,
                         color:
                             Color(0xFF7B8798),
                       ),
@@ -1130,7 +1130,7 @@ class _PlanScreenState extends State<PlanScreen> {
         Text(
           number,
           style: TextStyle(
-            fontSize: 19,
+            fontSize: 17.1,
             fontWeight:
                 FontWeight.w800,
             color: navy,
@@ -1142,7 +1142,7 @@ class _PlanScreenState extends State<PlanScreen> {
           textAlign:
               TextAlign.center,
           style: TextStyle(
-            fontSize: 10,
+            fontSize: 9,
             color: _subtle,
           ),
         ),
@@ -1195,7 +1195,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 '$completed/${tasks.length}',
                 style:
                     TextStyle(
-                  fontSize: 15,
+                  fontSize: 13.5,
                   fontWeight:
                       FontWeight.w800,
                   color: navy,
@@ -1204,7 +1204,7 @@ class _PlanScreenState extends State<PlanScreen> {
               Text(
                 'مكتملة',
                 style: TextStyle(
-                  fontSize: 9,
+                  fontSize: 8.1,
                   color:
                       Color(0xFF66758A),
                 ),
@@ -1245,7 +1245,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   child: Text(
                     'مهام اليوم',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight:
                           FontWeight.w800,
                       color: navy,
@@ -1281,7 +1281,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: _subtle,
-                  fontSize: 14,
+                  fontSize: 12.6,
                 ),
               ),
             )
@@ -1329,7 +1329,7 @@ class _PlanScreenState extends State<PlanScreen> {
                           : 'إضافة مهمة جديدة',
                       style: TextStyle(
                         color: blue,
-                        fontSize: 16,
+                        fontSize: 14.4,
                         fontWeight:
                             FontWeight.w800,
                       ),
@@ -1464,7 +1464,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               TextOverflow.ellipsis,
                           style:
                               TextStyle(
-                            fontSize: 16,
+                            fontSize: 14.4,
                             fontWeight:
                                 FontWeight.w800,
                             color: completed
@@ -1514,7 +1514,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               style:
                                   TextStyle(
                                 color: color,
-                                fontSize: 11,
+                                fontSize: 9.9,
                                 fontWeight:
                                     FontWeight
                                         .w800,
@@ -1527,7 +1527,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               emoji,
                               style:
                                   TextStyle(
-                                fontSize: 13,
+                                fontSize: 11.7,
                               ),
                             ),
                           ],
@@ -1549,7 +1549,7 @@ class _PlanScreenState extends State<PlanScreen> {
                         TextOverflow.ellipsis,
                     style:
                         TextStyle(
-                      fontSize: 12,
+                      fontSize: 10.8,
                       color:
                           Color(0xFF7B8798),
                     ),
@@ -1571,7 +1571,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   TextAlign.left,
               style:
                   TextStyle(
-                fontSize: 13,
+                fontSize: 11.7,
                 color:
                     Color(0xFF52647A),
                 fontWeight:
@@ -1633,7 +1633,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   style:
                       TextStyle(
                     color: navy,
-                    fontSize: 14,
+                    fontSize: 12.6,
                     fontWeight:
                         FontWeight.w700,
                   ),
@@ -1653,7 +1653,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       TextStyle(
                     color:
                         Color(0xFFD64545),
-                    fontSize: 14,
+                    fontSize: 12.6,
                     fontWeight:
                         FontWeight.w700,
                   ),
@@ -1755,7 +1755,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                         textAlign: TextAlign.right,
                                         style: TextStyle(
                                           color: navy,
-                                          fontSize: 25,
+                                          fontSize: 22.5,
                                           fontWeight: FontWeight.w800,
                                           height: 1.2,
                                         ),
@@ -1766,7 +1766,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                         textAlign: TextAlign.right,
                                         style: TextStyle(
                                           color: _subtle,
-                                          fontSize: 14,
+                                          fontSize: 12.6,
                                           fontWeight: FontWeight.w500,
                                           height: 1.35,
                                         ),
@@ -1931,7 +1931,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                               'اختر التصنيف',
                                               style: TextStyle(
                                                 color: navy,
-                                                fontSize: 20,
+                                                fontSize: 18,
                                                 fontWeight: FontWeight.w800,
                                               ),
                                             ),
@@ -2030,7 +2030,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                     'إلغاء',
                                     style: TextStyle(
                                       color: navy,
-                                      fontSize: 16,
+                                      fontSize: 14.4,
                                       fontWeight: FontWeight.w800,
                                     ),
                                   ),
@@ -2179,7 +2179,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                   label: Text(
                                     'إضافة المهمة',
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 14.4,
                                       fontWeight: FontWeight.w800,
                                     ),
                                   ),
@@ -2237,7 +2237,7 @@ class _PlanScreenState extends State<PlanScreen> {
         textAlign: TextAlign.right,
         style: TextStyle(
           color: navy,
-          fontSize: 16,
+          fontSize: 14.4,
           fontWeight: FontWeight.w700,
         ),
         decoration: InputDecoration(
@@ -2245,12 +2245,12 @@ class _PlanScreenState extends State<PlanScreen> {
           hintText: hint.isEmpty ? null : hint,
           hintStyle: TextStyle(
             color: Color(0xFF8B98A8),
-            fontSize: 14,
+            fontSize: 12.6,
           ),
           labelText: label,
           labelStyle: TextStyle(
             color: navy,
-            fontSize: 15,
+            fontSize: 13.5,
             fontWeight: FontWeight.w700,
           ),
           floatingLabelBehavior: FloatingLabelBehavior.auto,
@@ -2319,7 +2319,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   color: navy,
-                  fontSize: 17,
+                  fontSize: 15.3,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -2338,7 +2338,7 @@ class _PlanScreenState extends State<PlanScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: _subtle,
-                fontSize: 13,
+                fontSize: 11.7,
               ),
             ),
           ] else ...[
@@ -2367,7 +2367,7 @@ class _PlanScreenState extends State<PlanScreen> {
             label: Text(
               _weeklyGoals.length >= 3 ? 'الحد الأقصى 3 أهداف' : 'إضافة هدف',
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 12.6,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -2430,7 +2430,7 @@ class _PlanScreenState extends State<PlanScreen> {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: navy,
-                fontSize: 14,
+                fontSize: 12.6,
                 fontWeight: FontWeight.w700,
                 decoration: completed ? TextDecoration.lineThrough : null,
               ),
@@ -2695,7 +2695,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 'عادات اليوم',
                 style: TextStyle(
                   color: navy,
-                  fontSize: 17,
+                  fontSize: 15.3,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -2716,7 +2716,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Color(0xFF7B8798),
-                  fontSize: 13,
+                  fontSize: 11.7,
                 ),
               ),
             )
@@ -2748,7 +2748,7 @@ class _PlanScreenState extends State<PlanScreen> {
             label: Text(
               _isSavingHabit ? 'جاري الحفظ...' : 'إضافة عادة',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 12.6,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -2837,7 +2837,7 @@ class _PlanScreenState extends State<PlanScreen> {
               textAlign: TextAlign.right,
               style: TextStyle(
                 color: navy,
-                fontSize: 14,
+                fontSize: 12.6,
                 fontWeight: FontWeight.w700,
                 decoration: completed
                     ? TextDecoration.lineThrough
@@ -2951,7 +2951,7 @@ class _PlanScreenState extends State<PlanScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: navy,
-                fontSize: 23,
+                fontSize: 20.7,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -2985,7 +2985,7 @@ class _PlanScreenState extends State<PlanScreen> {
                         'إلغاء',
                         style: TextStyle(
                           color: navy,
-                          fontSize: 16,
+                          fontSize: 14.4,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -3108,7 +3108,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       child: Text(
                         'إضافة',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 14.4,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
