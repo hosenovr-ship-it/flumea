@@ -951,7 +951,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: 3.5,
+                          letterSpacing: 3.2,
                           color: isDark ? Colors.white : navy,
                         ),
                       ),
@@ -966,8 +966,8 @@ class _AccountScreenState extends State<AccountScreen> {
                                 'الحساب',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 26,
-                                  height: 1.05,
+                                  fontSize: 25,
+                                  height: 1.08,
                                   fontWeight: FontWeight.bold,
                                   color: isDark
                                       ? const Color(0xFFF2F6FA)
@@ -982,7 +982,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 'إدارة حسابك وتخصيص تجربتك',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 13,
+                                  fontSize: 13.5,
                                   color: isDark
                                       ? const Color(0xFFB8C2CC)
                                       : const Color(0xFF7B8798),
