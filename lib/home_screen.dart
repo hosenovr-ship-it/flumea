@@ -404,7 +404,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? NetworkImage(avatarUrl)
                   : null,
               child: avatarUrl == null || avatarUrl.isEmpty
-                  ? const Icon(
+                  ? Icon(
                       Icons.person_rounded,
                       color: darkBlue,
                       size: MediaQuery.sizeOf(context).width < 600 ? 28 * 0.90 : 28,
