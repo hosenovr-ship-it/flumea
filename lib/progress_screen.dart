@@ -819,7 +819,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
             ),
           ),
         ),
-          ),
         bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 2),
       ),
     );
