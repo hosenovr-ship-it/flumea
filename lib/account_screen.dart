@@ -935,7 +935,7 @@ class _AccountScreenState extends State<AccountScreen> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: Transform.scale(
-            scale: MediaQuery.sizeOf(context).width < 600 ? 0.94 : 1.0,
+            scale: MediaQuery.sizeOf(context).width < 600 ? 0.88 : 1.0,
             alignment: Alignment.topCenter,
             child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
