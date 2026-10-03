@@ -769,9 +769,15 @@ class _ProgressScreenState extends State<ProgressScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: _pageBackground,
-        body: SafeArea(
+        body: MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(
+              MediaQuery.sizeOf(context).width < 600 ? 0.90 : 1.0,
+            ),
+          ),
+          child: SafeArea(
           child: Transform.scale(
-            scale: MediaQuery.sizeOf(context).width < 600 ? 0.88 : 1.0,
+            scale: MediaQuery.sizeOf(context).width < 600 ? 0.94 : 1.0,
             alignment: Alignment.topCenter,
             child: RefreshIndicator(
             onRefresh: _loadProgress,
@@ -828,6 +834,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             ),
           ),
             ),
+        ),
         ),
         bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 2),
       ),
