@@ -740,7 +740,6 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
         ),
-          ),
         bottomNavigationBar:
             const FlumeaBottomNavigation(
           selectedIndex: 1,
