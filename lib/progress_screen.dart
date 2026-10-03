@@ -770,7 +770,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
       child: Scaffold(
         backgroundColor: _pageBackground,
         body: SafeArea(
-          child: RefreshIndicator(
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: TextScaler.linear(
+                MediaQuery.sizeOf(context).width < 600 ? 0.88 : 1.0,
+              ),
+            ),
+            child: RefreshIndicator(
             onRefresh: _loadProgress,
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -793,19 +799,27 @@ class _ProgressScreenState extends State<ProgressScreen> {
                             const SizedBox(height: 16),
                             _habitChart(),
                             const SizedBox(height: 14),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(child: _timeCard()),
-                                const SizedBox(width: 12),
-                                Expanded(child: _improvementCard()),
-                              ],
-                            ),
+                            // الهاتف: معدل إكمال المهمة ثم تحسنك عبر الوقت.
+                            // الآيباد يبقى على التخطيط الجانبي الحالي.
+                            if (MediaQuery.sizeOf(context).width < 600) ...[
+                              _timeCard(),
+                              const SizedBox(height: 14),
+                              _improvementCard(),
+                            ] else
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(child: _timeCard()),
+                                  const SizedBox(width: 12),
+                                  Expanded(child: _improvementCard()),
+                                ],
+                              ),
                           ],
                         ),
             ),
           ),
         ),
+          ),
         bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 2),
       ),
     );
@@ -837,57 +851,45 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _header() {
-    return Row(
-      textDirection: TextDirection.ltr,
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 5),
-          child: Text(
-            'FLUMEA',
-            textAlign: TextAlign.left,
-            style: TextStyle(
-              color: _primaryText,
-              fontSize: 17,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 3.2,
-            ),
-          ),
-        ),
-        const Spacer(),
-        Expanded(
-          flex: 3,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Row(
-                textDirection: TextDirection.rtl,
-                mainAxisAlignment: MainAxisAlignment.end,
+        Row(
+          children: [
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
+                  Icon(Icons.bar_chart_rounded, color: _primaryText, size: 30),
+                  const SizedBox(width: 8),
                   Text(
                     'التقدم',
-                    textAlign: TextAlign.right,
                     style: TextStyle(
                       color: _primaryText,
-                      fontSize: 25,
+                      fontSize: 30,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  const SizedBox(width: 7),
-                  Icon(
-                    Icons.bar_chart_rounded,
-                    color: _primaryText,
-                    size: 25,
-                  ),
                 ],
               ),
-              const SizedBox(height: 3),
-              Text(
-                'رحلتك نحو نسخة أفضل من نفسك',
-                textAlign: TextAlign.right,
-                style: TextStyle(color: _secondaryText, fontSize: 13.5),
+            ),
+            Text(
+              'FLUMEA',
+              style: TextStyle(
+                color: _primaryText,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 4,
               ),
-            ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Text(
+            'رحلتك نحو نسخة أفضل من نفسك',
+            style: TextStyle(color: _secondaryText, fontSize: 16),
           ),
         ),
       ],
