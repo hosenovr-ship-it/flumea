@@ -692,32 +692,37 @@ class _PlanScreenState extends State<PlanScreen> {
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(
               textScaler: TextScaler.linear(
-                (MediaQuery.sizeOf(context).width / 600.0)
-                    .clamp(0.76, 1.0)
-                    .toDouble(),
+                MediaQuery.sizeOf(context).width < 600 ? 0.88 : 1.0,
               ),
             ),
             child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(
-                18,
-                12,
-                18,
-                110,
-              ),
-              child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.stretch,
-                children: [
-                  _buildHeader(),
-                  SizedBox(height: 14),
-                  _buildTodayButton(),
-                  SizedBox(height: 14),
-                  _buildDays(),
-                  SizedBox(height: 14),
-                  _buildSummary(),
-                  SizedBox(height: 14),
-                  _buildTasks(),
-                  SizedBox(height: 14),
+            padding: EdgeInsets.fromLTRB(
+              18,
+              12,
+              18,
+              110,
+            ),
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.stretch,
+              children: [
+                _buildHeader(),
+                SizedBox(height: 14),
+                _buildTodayButton(),
+                SizedBox(height: 14),
+                _buildDays(),
+                SizedBox(height: 14),
+                _buildSummary(),
+                SizedBox(height: 14),
+                _buildTasks(),
+                SizedBox(height: 14),
+                // الهاتف: مهام اليوم ثم عادات اليوم ثم أهداف الأسبوع.
+                // الآيباد يحتفظ بالتخطيط الجانبي الحالي.
+                if (MediaQuery.sizeOf(context).width < 600) ...[
+                  _buildDailyHabits(),
+                  SizedBox(height: 12),
+                  _buildWeeklyGoals(),
+                ] else
                   Row(
                     crossAxisAlignment:
                         CrossAxisAlignment.start,
@@ -731,11 +736,11 @@ class _PlanScreenState extends State<PlanScreen> {
                       ),
                     ],
                   ),
-                ],
-              ),
+              ],
             ),
           ),
         ),
+          ),
         bottomNavigationBar:
             const FlumeaBottomNavigation(
           selectedIndex: 1,
@@ -750,59 +755,54 @@ class _PlanScreenState extends State<PlanScreen> {
 
   Widget _buildHeader() {
     return Row(
-      textDirection: TextDirection.ltr,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 5),
-          child: Text(
-            'FLUMEA',
-            textAlign: TextAlign.left,
-            style: TextStyle(
-              color: navy,
-              fontSize: 17,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 3.2,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  'الخطة',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w800,
+                    color: navy,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.calendar_month_outlined,
+                  color: navy,
+                  size: 30,
+                ),
+              ],
             ),
-          ),
+            const SizedBox(height: 4),
+            Text(
+              'نظم يومك وحقق أهدافك',
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: 16,
+                color: _subtle,
+              ),
+            ),
+          ],
         ),
         const Spacer(),
-        Expanded(
-          flex: 3,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Row(
-                textDirection: TextDirection.rtl,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    'الخطة',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.w800,
-                      color: navy,
-                    ),
-                  ),
-                  const SizedBox(width: 7),
-                  Icon(
-                    Icons.calendar_month_outlined,
-                    color: navy,
-                    size: 25,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 3),
-              Text(
-                'نظم يومك وحقق أهدافك',
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontSize: 13.5,
-                  color: _subtle,
-                ),
-              ),
-            ],
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            'FLUMEA',
+            style: TextStyle(
+              color: navy,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 4,
+            ),
           ),
         ),
       ],
@@ -1140,21 +1140,20 @@ class _PlanScreenState extends State<PlanScreen> {
   Widget _progressCircle({
     required int completed,
   }) {
-    final compact = MediaQuery.sizeOf(context).width < 600;
     final progress = tasks.isEmpty
         ? 0.0
         : completed / tasks.length;
 
     return SizedBox(
-      width: compact ? 62 : 70,
-      height: compact ? 62 : 70,
+      width: 70,
+      height: 70,
       child: Stack(
         alignment:
             Alignment.center,
         children: [
           SizedBox(
-            width: compact ? 58 : 65,
-            height: compact ? 58 : 65,
+            width: 65,
+            height: 65,
             child:
                 CircularProgressIndicator(
               value:
@@ -1162,7 +1161,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 0.0,
                 1.0,
               ),
-              strokeWidth: compact ? 6 : 7,
+              strokeWidth: 7,
               backgroundColor:
                   const Color(
                 0xFFDDE4ED,
@@ -1183,7 +1182,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 '$completed/${tasks.length}',
                 style:
                     TextStyle(
-                  fontSize: compact ? 13 : 15,
+                  fontSize: 15,
                   fontWeight:
                       FontWeight.w800,
                   color: navy,
@@ -1192,7 +1191,7 @@ class _PlanScreenState extends State<PlanScreen> {
               Text(
                 'مكتملة',
                 style: TextStyle(
-                  fontSize: compact ? 8 : 9,
+                  fontSize: 9,
                   color:
                       Color(0xFF66758A),
                 ),
@@ -1340,7 +1339,6 @@ class _PlanScreenState extends State<PlanScreen> {
     Map<String, dynamic> task,
     int index,
   ) {
-    final compact = MediaQuery.sizeOf(context).width < 600;
     final bool completed =
         _safeBool(
       task['completed'],
@@ -1384,8 +1382,8 @@ class _PlanScreenState extends State<PlanScreen> {
     return Container(
       padding:
           EdgeInsets.symmetric(
-        horizontal: compact ? 9 : 16,
-        vertical: compact ? 9 : 14,
+        horizontal: 16,
+        vertical: 14,
       ),
       decoration: const BoxDecoration(),
       child: Row(
@@ -1395,8 +1393,8 @@ class _PlanScreenState extends State<PlanScreen> {
               _toggleTask(index);
             },
             child: Container(
-              width: compact ? 22 : 28,
-              height: compact ? 22 : 28,
+              width: 28,
+              height: 28,
               decoration:
                   BoxDecoration(
                 color: completed
@@ -1420,14 +1418,14 @@ class _PlanScreenState extends State<PlanScreen> {
                       Icons.check,
                       color:
                           Colors.white,
-                      size: compact ? 15 : 20,
+                      size: 20,
                     )
                   : null,
             ),
           ),
 
           SizedBox(
-            width: compact ? 7 : 12,
+            width: 12,
           ),
 
           Expanded(
@@ -1453,7 +1451,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               TextOverflow.ellipsis,
                           style:
                               TextStyle(
-                            fontSize: compact ? 12 : 16,
+                            fontSize: 16,
                             fontWeight:
                                 FontWeight.w800,
                             color: completed
@@ -1472,15 +1470,15 @@ class _PlanScreenState extends State<PlanScreen> {
                       ),
 
                       SizedBox(
-                        width: compact ? 5 : 8,
+                        width: 8,
                       ),
 
                       Container(
                         padding:
                             EdgeInsets
                                 .symmetric(
-                          horizontal: compact ? 7 : 10,
-                          vertical: compact ? 4 : 6,
+                          horizontal: 10,
+                          vertical: 6,
                         ),
                         decoration:
                             BoxDecoration(
@@ -1503,7 +1501,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               style:
                                   TextStyle(
                                 color: color,
-                                fontSize: compact ? 8 : 11,
+                                fontSize: 11,
                                 fontWeight:
                                     FontWeight
                                         .w800,
@@ -1516,7 +1514,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               emoji,
                               style:
                                   TextStyle(
-                                fontSize: compact ? 10 : 13,
+                                fontSize: 13,
                               ),
                             ),
                           ],
@@ -1538,7 +1536,7 @@ class _PlanScreenState extends State<PlanScreen> {
                         TextOverflow.ellipsis,
                     style:
                         TextStyle(
-                      fontSize: compact ? 10 : 12,
+                      fontSize: 12,
                       color:
                           Color(0xFF7B8798),
                     ),
@@ -1553,14 +1551,14 @@ class _PlanScreenState extends State<PlanScreen> {
           ),
 
           SizedBox(
-            width: compact ? 42 : 58,
+            width: 58,
             child: Text(
               time,
               textAlign:
                   TextAlign.left,
               style:
                   TextStyle(
-                fontSize: compact ? 10 : 13,
+                fontSize: 13,
                 color:
                     Color(0xFF52647A),
                 fontWeight:
@@ -2290,7 +2288,6 @@ class _PlanScreenState extends State<PlanScreen> {
   // ============================================================
 
   Widget _buildWeeklyGoals() {
-    final compact = MediaQuery.sizeOf(context).width < 600;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -2309,7 +2306,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   color: navy,
-                  fontSize: compact ? 14 : 17,
+                  fontSize: 17,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -2343,7 +2340,7 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             ),
           ],
-          SizedBox(height: compact ? 10 : 14),
+          const SizedBox(height: 14),
           OutlinedButton.icon(
             onPressed: _weeklyGoals.length >= 3
                 ? null
@@ -2377,7 +2374,6 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   Widget _goalRow(int index, Map<String, dynamic> goal) {
-    final compact = MediaQuery.sizeOf(context).width < 600;
     final title = _safeString(goal['title'], fallback: 'هدف أسبوعي');
     final current = (goal['current'] as int?) ?? 0;
     const total = 1;
@@ -2398,8 +2394,8 @@ class _PlanScreenState extends State<PlanScreen> {
       child: Row(
         children: [
           Container(
-            width: compact ? 30 : 38,
-            height: compact ? 30 : 38,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
               color: completed
                   ? cyan.withValues(alpha: 0.12)
@@ -2421,20 +2417,20 @@ class _PlanScreenState extends State<PlanScreen> {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: navy,
-                fontSize: compact ? 11 : 14,
+                fontSize: 14,
                 fontWeight: FontWeight.w700,
                 decoration: completed ? TextDecoration.lineThrough : null,
               ),
             ),
           ),
-          SizedBox(width: compact ? 2 : 4),
+          const SizedBox(width: 4),
           PopupMenuButton<String>(
             tooltip: 'خيارات الهدف',
             padding: EdgeInsets.zero,
             icon: Icon(
               Icons.more_vert_rounded,
               color: const Color(0xFF7B8798),
-              size: compact ? 17 : 21,
+              size: 21,
             ),
             onSelected: (value) async {
               if (value == 'reset') {
@@ -2498,8 +2494,8 @@ class _PlanScreenState extends State<PlanScreen> {
               await _saveWeeklyGoals();
             },
             child: Container(
-              width: compact ? 19 : 23,
-              height: compact ? 19 : 23,
+              width: 23,
+              height: 23,
               decoration: BoxDecoration(
                 color: completed ? cyan : Colors.white,
                 borderRadius: BorderRadius.circular(7),
@@ -2509,10 +2505,10 @@ class _PlanScreenState extends State<PlanScreen> {
                 ),
               ),
               child: completed
-                  ? Icon(
+                  ? const Icon(
                       Icons.check,
                       color: Colors.white,
-                      size: compact ? 13 : 16,
+                      size: 16,
                     )
                   : null,
             ),
@@ -2667,9 +2663,8 @@ class _PlanScreenState extends State<PlanScreen> {
   // ============================================================
 
   Widget _buildDailyHabits() {
-    final compact = MediaQuery.sizeOf(context).width < 600;
     return Container(
-      padding: EdgeInsets.all(compact ? 10 : 16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: _surface,
         borderRadius: BorderRadius.circular(22),
@@ -2691,18 +2686,18 @@ class _PlanScreenState extends State<PlanScreen> {
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              SizedBox(width: compact ? 5 : 7),
+              SizedBox(width: 7),
               Icon(
                 Icons.repeat,
                 color: navy,
-                size: compact ? 17 : 21,
+                size: 21,
               ),
             ],
           ),
-          SizedBox(height: compact ? 10 : 16),
+          SizedBox(height: 16),
           if (habits.isEmpty)
             Padding(
-              padding: EdgeInsets.symmetric(vertical: compact ? 8 : 12),
+              padding: EdgeInsets.symmetric(vertical: 12),
               child: Text(
                 'لا توجد عادات بعد',
                 textAlign: TextAlign.center,
@@ -2735,12 +2730,12 @@ class _PlanScreenState extends State<PlanScreen> {
             onPressed: _isSavingHabit ? null : _showAddHabitDialog,
             icon: Icon(
               _isSavingHabit ? Icons.hourglass_top : Icons.add,
-              size: compact ? 16 : 20,
+              size: 20,
             ),
             label: Text(
               _isSavingHabit ? 'جاري الحفظ...' : 'إضافة عادة',
               style: TextStyle(
-                fontSize: compact ? 11 : 14,
+                fontSize: 14,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -2789,11 +2784,10 @@ class _PlanScreenState extends State<PlanScreen> {
     required bool completed,
     required String id,
   }) {
-    final compact = MediaQuery.sizeOf(context).width < 600;
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: compact ? 8 : 13,
-        vertical: compact ? 8 : 12,
+        horizontal: 13,
+        vertical: 12,
       ),
       decoration: BoxDecoration(
         color: completed
@@ -2820,10 +2814,10 @@ class _PlanScreenState extends State<PlanScreen> {
             child: Icon(
               completed ? Icons.check : icon,
               color: completed ? cyan : blue,
-              size: compact ? 16 : 20,
+              size: 20,
             ),
           ),
-          SizedBox(width: compact ? 7 : 12),
+          SizedBox(width: 12),
           Expanded(
             child: Text(
               title,
@@ -2886,7 +2880,7 @@ class _PlanScreenState extends State<PlanScreen> {
               ),
             ],
           ),
-          SizedBox(width: compact ? 2 : 4),
+          SizedBox(width: 4),
           GestureDetector(
             onTap: () => _toggleHabit(id, completed),
             child: Container(
