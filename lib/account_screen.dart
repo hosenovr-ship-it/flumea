@@ -650,13 +650,13 @@ class _AccountScreenState extends State<AccountScreen> {
                 textDirection: TextDirection.rtl,
                 children: [
                   Container(
-                    width: MediaQuery.sizeOf(context).width < 600 ? 42 : 50,
-                    height: MediaQuery.sizeOf(context).width < 600 ? 42 : 50,
+                    width: 50,
+                    height: 50,
                     decoration: BoxDecoration(
                       color: accent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Icon(icon, color: accent, size: MediaQuery.sizeOf(context).width < 600 ? 22 : 27),
+                    child: Icon(icon, color: accent, size: 27),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -934,17 +934,9 @@ class _AccountScreenState extends State<AccountScreen> {
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
-          child: MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(
-                (MediaQuery.sizeOf(context).width / 600.0)
-                    .clamp(0.76, 1.0)
-                    .toDouble(),
-              ),
-            ),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
-              child: Column(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SizedBox(
@@ -957,9 +949,9 @@ class _AccountScreenState extends State<AccountScreen> {
                         'FLUMEA',
                         textAlign: TextAlign.left,
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 17,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: 4.0,
+                          letterSpacing: 3.5,
                           color: isDark ? Colors.white : navy,
                         ),
                       ),
@@ -974,7 +966,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 'الحساب',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 30,
+                                  fontSize: 26,
                                   height: 1.05,
                                   fontWeight: FontWeight.bold,
                                   color: isDark
@@ -990,7 +982,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 'إدارة حسابك وتخصيص تجربتك',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 13,
                                   color: isDark
                                       ? const Color(0xFFB8C2CC)
                                       : const Color(0xFF7B8798),
@@ -1270,7 +1262,6 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
               ],
             ),
-            ),
           ),
         ),
         bottomNavigationBar: FlumeaBottomNavigation(
@@ -1364,8 +1355,8 @@ class _AccountScreenState extends State<AccountScreen> {
           children: iconOnLeft
               ? [
                   Container(
-                    width: MediaQuery.sizeOf(context).width < 600 ? 44 : 52,
-                    height: MediaQuery.sizeOf(context).width < 600 ? 44 : 52,
+                    width: 52,
+                    height: 52,
                     decoration: BoxDecoration(
                       color: iconBackground,
                       borderRadius: BorderRadius.circular(17),
@@ -2160,8 +2151,8 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
           tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           childrenPadding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
           leading: Container(
-            width: MediaQuery.sizeOf(context).width < 600 ? 40 : 48,
-            height: MediaQuery.sizeOf(context).width < 600 ? 40 : 48,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(15),
