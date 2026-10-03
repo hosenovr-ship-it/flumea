@@ -934,7 +934,13 @@ class _AccountScreenState extends State<AccountScreen> {
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
-          child: SingleChildScrollView(
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: TextScaler.linear(
+                MediaQuery.sizeOf(context).width < 600 ? 0.88 : 1.0,
+              ),
+            ),
+            child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -949,9 +955,9 @@ class _AccountScreenState extends State<AccountScreen> {
                         'FLUMEA',
                         textAlign: TextAlign.left,
                         style: TextStyle(
-                          fontSize: 17,
+                          fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: 3.2,
+                          letterSpacing: 4.0,
                           color: isDark ? Colors.white : navy,
                         ),
                       ),
@@ -966,8 +972,8 @@ class _AccountScreenState extends State<AccountScreen> {
                                 'الحساب',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 25,
-                                  height: 1.08,
+                                  fontSize: 30,
+                                  height: 1.05,
                                   fontWeight: FontWeight.bold,
                                   color: isDark
                                       ? const Color(0xFFF2F6FA)
@@ -982,7 +988,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 'إدارة حسابك وتخصيص تجربتك',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 13.5,
+                                  fontSize: 16,
                                   color: isDark
                                       ? const Color(0xFFB8C2CC)
                                       : const Color(0xFF7B8798),
@@ -1264,6 +1270,7 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
         ),
+          ),
         bottomNavigationBar: FlumeaBottomNavigation(
           selectedIndex: 3,
         ),
