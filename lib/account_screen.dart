@@ -929,16 +929,14 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final compact = MediaQuery.sizeOf(context).width < 600;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
-          child: MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(compact ? 0.88 : 1.0),
-            ),
+          child: Transform.scale(
+            scale: MediaQuery.sizeOf(context).width < 600 ? 0.94 : 1.0,
+            alignment: Alignment.topCenter,
             child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
             child: Column(
@@ -1267,8 +1265,8 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
               ],
             ),
-            ),
           ),
+            ),
         ),
         bottomNavigationBar: FlumeaBottomNavigation(
           selectedIndex: 3,
