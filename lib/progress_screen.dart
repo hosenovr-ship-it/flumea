@@ -837,45 +837,57 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _header() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Row(
+      textDirection: TextDirection.ltr,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+        Padding(
+          padding: const EdgeInsets.only(top: 5),
+          child: Text(
+            'FLUMEA',
+            textAlign: TextAlign.left,
+            style: TextStyle(
+              color: _primaryText,
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 3.2,
+            ),
+          ),
+        ),
+        const Spacer(),
+        Expanded(
+          flex: 3,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Row(
+                textDirection: TextDirection.rtl,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Icon(Icons.bar_chart_rounded, color: _primaryText, size: 24),
-                  const SizedBox(width: 8),
                   Text(
                     'التقدم',
+                    textAlign: TextAlign.right,
                     style: TextStyle(
                       color: _primaryText,
-                      fontSize: 26,
+                      fontSize: 25,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
+                  const SizedBox(width: 7),
+                  Icon(
+                    Icons.bar_chart_rounded,
+                    color: _primaryText,
+                    size: 25,
+                  ),
                 ],
               ),
-            ),
-            Text(
-              'FLUMEA',
-              style: TextStyle(
-                color: _primaryText,
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 3.5,
+              const SizedBox(height: 3),
+              Text(
+                'رحلتك نحو نسخة أفضل من نفسك',
+                textAlign: TextAlign.right,
+                style: TextStyle(color: _secondaryText, fontSize: 13.5),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Text(
-            'رحلتك نحو نسخة أفضل من نفسك',
-            style: TextStyle(color: _secondaryText, fontSize: 13),
+            ],
           ),
         ),
       ],
