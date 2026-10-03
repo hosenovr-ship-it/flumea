@@ -940,10 +940,16 @@ class _AccountScreenState extends State<AccountScreen> {
               textScaler: TextScaler.linear(compact ? 0.88 : 1.0),
             ),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: 74,
+                  child: Row(
+                    textDirection: TextDirection.ltr,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
                         'FLUMEA',
                         textAlign: TextAlign.left,
@@ -1260,7 +1266,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   ),
                 ),
               ],
-              ),
+            ),
             ),
           ),
         ),
