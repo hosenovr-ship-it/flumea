@@ -690,7 +690,7 @@ class _PlanScreenState extends State<PlanScreen> {
         backgroundColor: background,
         body: SafeArea(
           child: Transform.scale(
-            scale: MediaQuery.sizeOf(context).width < 600 ? 0.94 : 1.0,
+            scale: MediaQuery.sizeOf(context).width < 600 ? 0.88 : 1.0,
             alignment: Alignment.topCenter,
             child: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(
