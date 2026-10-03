@@ -684,6 +684,7 @@ class _PlanScreenState extends State<PlanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 600;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -691,57 +692,42 @@ class _PlanScreenState extends State<PlanScreen> {
         body: SafeArea(
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(
-                MediaQuery.sizeOf(context).width < 600 ? 0.88 : 1.0,
-              ),
+              textScaler: TextScaler.linear(compact ? 0.88 : 1.0),
             ),
             child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-              18,
-              12,
-              18,
-              110,
-            ),
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.stretch,
-              children: [
-                _buildHeader(),
-                SizedBox(height: 14),
-                _buildTodayButton(),
-                SizedBox(height: 14),
-                _buildDays(),
-                SizedBox(height: 14),
-                _buildSummary(),
-                SizedBox(height: 14),
-                _buildTasks(),
-                SizedBox(height: 14),
-                // الهاتف: مهام اليوم ثم عادات اليوم ثم أهداف الأسبوع.
-                // الآيباد يحتفظ بالتخطيط الجانبي الحالي.
-                if (MediaQuery.sizeOf(context).width < 600) ...[
-                  _buildDailyHabits(),
-                  SizedBox(height: 12),
-                  _buildWeeklyGoals(),
-                ] else
-                  Row(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: _buildWeeklyGoals(),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: _buildDailyHabits(),
-                      ),
-                    ],
-                  ),
-              ],
+              padding: EdgeInsets.fromLTRB(18, 12, 18, 110),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHeader(),
+                  SizedBox(height: 14),
+                  _buildTodayButton(),
+                  SizedBox(height: 14),
+                  _buildDays(),
+                  SizedBox(height: 14),
+                  _buildSummary(),
+                  SizedBox(height: 14),
+                  _buildTasks(),
+                  SizedBox(height: 14),
+                  if (compact) ...[
+                    _buildDailyHabits(),
+                    SizedBox(height: 12),
+                    _buildWeeklyGoals(),
+                  ] else
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: _buildWeeklyGoals()),
+                        SizedBox(width: 12),
+                        Expanded(child: _buildDailyHabits()),
+                      ],
+                    ),
+                ],
+              ),
             ),
           ),
         ),
-        bottomNavigationBar:
-            const FlumeaBottomNavigation(
+        bottomNavigationBar: const FlumeaBottomNavigation(
           selectedIndex: 1,
         ),
       ),
