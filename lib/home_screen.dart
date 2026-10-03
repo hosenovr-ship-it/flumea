@@ -306,9 +306,15 @@ class _HomeScreenState extends State<HomeScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: SafeArea(
+        body: MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(
+              MediaQuery.sizeOf(context).width < 600 ? 0.90 : 1.0,
+            ),
+          ),
+          child: SafeArea(
           child: Transform.scale(
-            scale: MediaQuery.sizeOf(context).width < 600 ? 0.88 : 1.0,
+            scale: MediaQuery.sizeOf(context).width < 600 ? 0.94 : 1.0,
             alignment: Alignment.topCenter,
             child: _loading
               ? const Center(
@@ -337,6 +343,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
             ),
+        ),
         ),
         bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 0),
       ),
@@ -400,7 +407,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? const Icon(
                       Icons.person_rounded,
                       color: darkBlue,
-                      size: 28,
+                      size: MediaQuery.sizeOf(context).width < 600 ? 28 * 0.90 : 28,
                     )
                   : null,
             ),
@@ -931,7 +938,7 @@ class _CardTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 25, color: Theme.of(context).colorScheme.onSurface),
+        Icon(icon, size: MediaQuery.sizeOf(context).width < 600 ? 25 * 0.90 : 25, color: Theme.of(context).colorScheme.onSurface),
         const SizedBox(width: 7),
         Expanded(
           child: Text(
@@ -1034,7 +1041,7 @@ class _HomeTask extends StatelessWidget {
               color: completed
                   ? HomeScreen.green
                   : Theme.of(context).colorScheme.outlineVariant,
-              size: 25,
+              size: MediaQuery.sizeOf(context).width < 600 ? 25 * 0.90 : 25,
             ),
             const SizedBox(width: 10),
             SizedBox(
@@ -1098,7 +1105,7 @@ class _SmallCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 21, color: Theme.of(context).colorScheme.onSurface),
+              Icon(icon, size: MediaQuery.sizeOf(context).width < 600 ? 21 * 0.90 : 21, color: Theme.of(context).colorScheme.onSurface),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -1160,7 +1167,7 @@ class _HomeHabit extends StatelessWidget {
               completed
                   ? Icons.check_circle_rounded
                   : Icons.radio_button_unchecked_rounded,
-              size: 23,
+              size: MediaQuery.sizeOf(context).width < 600 ? 23 * 0.90 : 23,
               color: completed
                   ? HomeScreen.green
                   : Theme.of(context).colorScheme.outlineVariant,
