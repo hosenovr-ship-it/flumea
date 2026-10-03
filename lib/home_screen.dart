@@ -302,6 +302,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 600;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -309,39 +310,35 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SafeArea(
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(
-                MediaQuery.sizeOf(context).width < 600 ? 0.88 : 1.0,
-              ),
+              textScaler: TextScaler.linear(compact ? 0.88 : 1.0),
             ),
             child: _loading
                 ? const Center(
                     child: CircularProgressIndicator(color: teal),
                   )
                 : RefreshIndicator(
-                  onRefresh: _loadHomeData,
-                  color: teal,
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(18, 14, 18, 105),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildHeader(),
-                        const SizedBox(height: 24),
-                        _buildDailyProgress(),
-                        const SizedBox(height: 20),
-                        _buildTodayPlan(),
-                        const SizedBox(height: 16),
-                        _buildHabitsAndFood(),
-                        const SizedBox(height: 16),
-                        _buildSmartAssistant(),
-                      ],
+                    onRefresh: _loadHomeData,
+                    color: teal,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(18, 14, 18, 105),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildHeader(),
+                          const SizedBox(height: 24),
+                          _buildDailyProgress(),
+                          const SizedBox(height: 20),
+                          _buildTodayPlan(),
+                          const SizedBox(height: 16),
+                          _buildHabitsAndFood(),
+                          const SizedBox(height: 16),
+                          _buildSmartAssistant(),
+                        ],
+                      ),
                     ),
                   ),
-                  ),
-                ),
-              ),
-            ),
+          ),
         ),
         bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 0),
       ),
@@ -600,7 +597,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ...habitsToShow.map((habit) {
               final id = habit['id']?.toString();
               final completed = id != null && _habitCompleted[id] == true;
-
               return _HomeHabit(
                 icon: '✓',
                 title: habit['name']?.toString() ?? '',
@@ -689,10 +685,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    // الهاتف: كل قسم بعرض كامل، والآيباد: البطاقتان جنبًا إلى جنب.
-    final compact = MediaQuery.sizeOf(context).width < 600;
-
-    if (compact) {
+    if (MediaQuery.sizeOf(context).width < 600) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
