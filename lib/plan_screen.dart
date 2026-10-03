@@ -688,9 +688,15 @@ class _PlanScreenState extends State<PlanScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: background,
-        body: SafeArea(
+        body: MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(
+              MediaQuery.sizeOf(context).width < 600 ? 0.90 : 1.0,
+            ),
+          ),
+          child: SafeArea(
           child: Transform.scale(
-            scale: MediaQuery.sizeOf(context).width < 600 ? 0.88 : 1.0,
+            scale: MediaQuery.sizeOf(context).width < 600 ? 0.94 : 1.0,
             alignment: Alignment.topCenter,
             child: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(
@@ -747,6 +753,7 @@ class _PlanScreenState extends State<PlanScreen> {
           ),
             ),
         ),
+        ),
         bottomNavigationBar:
             const FlumeaBottomNavigation(
           selectedIndex: 1,
@@ -783,7 +790,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 Icon(
                   Icons.calendar_month_outlined,
                   color: navy,
-                  size: 30,
+                  size: MediaQuery.sizeOf(context).width < 600 ? 30 * 0.90 : 30,
                 ),
               ],
             ),
@@ -857,7 +864,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 Icon(
                   Icons.calendar_month_outlined,
                   color: navy,
-                  size: 22,
+                  size: MediaQuery.sizeOf(context).width < 600 ? 22 * 0.90 : 22,
                 ),
               ],
             ),
@@ -1112,7 +1119,7 @@ class _PlanScreenState extends State<PlanScreen> {
           child: Icon(
             icon,
             color: color,
-            size: 23,
+            size: MediaQuery.sizeOf(context).width < 600 ? 23 * 0.90 : 23,
           ),
         ),
 
@@ -1248,7 +1255,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 Icon(
                   Icons.format_list_bulleted,
                   color: navy,
-                  size: 27,
+                  size: MediaQuery.sizeOf(context).width < 600 ? 27 * 0.90 : 27,
                 ),
               ],
             ),
@@ -1313,7 +1320,7 @@ class _PlanScreenState extends State<PlanScreen> {
                           ? Icons.hourglass_top
                           : Icons.add,
                       color: blue,
-                      size: 24,
+                      size: MediaQuery.sizeOf(context).width < 600 ? 24 * 0.90 : 24,
                     ),
                     SizedBox(width: 5),
                     Text(
@@ -1424,7 +1431,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       Icons.check,
                       color:
                           Colors.white,
-                      size: 20,
+                      size: MediaQuery.sizeOf(context).width < 600 ? 20 * 0.90 : 20,
                     )
                   : null,
             ),
@@ -1600,7 +1607,7 @@ class _PlanScreenState extends State<PlanScreen> {
         Icons.more_vert,
         color:
             Color(0xFF6E7A88),
-        size: 22,
+        size: MediaQuery.sizeOf(context).width < 600 ? 22 * 0.90 : 22,
       ),
       onSelected:
           (value) {
@@ -1792,7 +1799,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                     Icon(
                                       Icons.assignment_outlined,
                                       color: blue,
-                                      size: 58,
+                                      size: MediaQuery.sizeOf(context).width < 600 ? 58 * 0.90 : 58,
                                     ),
                                     Positioned(
                                       right: 10,
@@ -1807,7 +1814,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                         child: Icon(
                                           Icons.add,
                                           color: Colors.white,
-                                          size: 23,
+                                          size: MediaQuery.sizeOf(context).width < 600 ? 23 * 0.90 : 23,
                                         ),
                                       ),
                                     ),
@@ -2167,7 +2174,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                         },
                                   icon: Icon(
                                     Icons.add,
-                                    size: 23,
+                                    size: MediaQuery.sizeOf(context).width < 600 ? 23 * 0.90 : 23,
                                   ),
                                   label: Text(
                                     'إضافة المهمة',
@@ -2268,7 +2275,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 child: Icon(
                   icon,
                   color: iconColor,
-                  size: 22,
+                  size: MediaQuery.sizeOf(context).width < 600 ? 22 * 0.90 : 22,
                 ),
               ),
             ),
@@ -2278,7 +2285,7 @@ class _PlanScreenState extends State<PlanScreen> {
               : Icon(
                   suffixIcon,
                   color: navy,
-                  size: 25,
+                  size: MediaQuery.sizeOf(context).width < 600 ? 25 * 0.90 : 25,
                 ),
         ),
       ),
@@ -2320,7 +2327,7 @@ class _PlanScreenState extends State<PlanScreen> {
               Icon(
                 Icons.flag_outlined,
                 color: navy,
-                size: 21,
+                size: MediaQuery.sizeOf(context).width < 600 ? 21 * 0.90 : 21,
               ),
             ],
           ),
@@ -2355,7 +2362,7 @@ class _PlanScreenState extends State<PlanScreen> {
               _weeklyGoals.length >= 3
                   ? Icons.block_outlined
                   : Icons.add,
-              size: 20,
+              size: MediaQuery.sizeOf(context).width < 600 ? 20 * 0.90 : 20,
             ),
             label: Text(
               _weeklyGoals.length >= 3 ? 'الحد الأقصى 3 أهداف' : 'إضافة هدف',
@@ -2411,7 +2418,7 @@ class _PlanScreenState extends State<PlanScreen> {
             child: Icon(
               completed ? Icons.check : Icons.flag_outlined,
               color: completed ? cyan : blue,
-              size: 20,
+              size: MediaQuery.sizeOf(context).width < 600 ? 20 * 0.90 : 20,
             ),
           ),
           const SizedBox(width: 12),
@@ -2436,7 +2443,7 @@ class _PlanScreenState extends State<PlanScreen> {
             icon: Icon(
               Icons.more_vert_rounded,
               color: const Color(0xFF7B8798),
-              size: 21,
+              size: MediaQuery.sizeOf(context).width < 600 ? 21 * 0.90 : 21,
             ),
             onSelected: (value) async {
               if (value == 'reset') {
@@ -2514,7 +2521,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   ? const Icon(
                       Icons.check,
                       color: Colors.white,
-                      size: 16,
+                      size: MediaQuery.sizeOf(context).width < 600 ? 16 * 0.90 : 16,
                     )
                   : null,
             ),
@@ -2696,7 +2703,7 @@ class _PlanScreenState extends State<PlanScreen> {
               Icon(
                 Icons.repeat,
                 color: navy,
-                size: 21,
+                size: MediaQuery.sizeOf(context).width < 600 ? 21 * 0.90 : 21,
               ),
             ],
           ),
@@ -2736,7 +2743,7 @@ class _PlanScreenState extends State<PlanScreen> {
             onPressed: _isSavingHabit ? null : _showAddHabitDialog,
             icon: Icon(
               _isSavingHabit ? Icons.hourglass_top : Icons.add,
-              size: 20,
+              size: MediaQuery.sizeOf(context).width < 600 ? 20 * 0.90 : 20,
             ),
             label: Text(
               _isSavingHabit ? 'جاري الحفظ...' : 'إضافة عادة',
@@ -2820,7 +2827,7 @@ class _PlanScreenState extends State<PlanScreen> {
             child: Icon(
               completed ? Icons.check : icon,
               color: completed ? cyan : blue,
-              size: 20,
+              size: MediaQuery.sizeOf(context).width < 600 ? 20 * 0.90 : 20,
             ),
           ),
           SizedBox(width: 12),
@@ -2846,7 +2853,7 @@ class _PlanScreenState extends State<PlanScreen> {
             icon: Icon(
               Icons.more_vert_rounded,
               color: Color(0xFF7B8798),
-              size: 21,
+              size: MediaQuery.sizeOf(context).width < 600 ? 21 * 0.90 : 21,
             ),
             onSelected: (value) async {
               if (value == 'reset') {
@@ -2906,7 +2913,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   ? Icon(
                       Icons.check,
                       color: Colors.white,
-                      size: 16,
+                      size: MediaQuery.sizeOf(context).width < 600 ? 16 * 0.90 : 16,
                     )
                   : null,
             ),
