@@ -302,43 +302,41 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final compact = MediaQuery.sizeOf(context).width < 600;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
-          child: MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(compact ? 0.88 : 1.0),
-            ),
+          child: Transform.scale(
+            scale: MediaQuery.sizeOf(context).width < 600 ? 0.94 : 1.0,
+            alignment: Alignment.topCenter,
             child: _loading
-                ? const Center(
-                    child: CircularProgressIndicator(color: teal),
-                  )
-                : RefreshIndicator(
-                    onRefresh: _loadHomeData,
-                    color: teal,
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(18, 14, 18, 105),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildHeader(),
-                          const SizedBox(height: 24),
-                          _buildDailyProgress(),
-                          const SizedBox(height: 20),
-                          _buildTodayPlan(),
-                          const SizedBox(height: 16),
-                          _buildHabitsAndFood(),
-                          const SizedBox(height: 16),
-                          _buildSmartAssistant(),
-                        ],
-                      ),
+              ? const Center(
+                  child: CircularProgressIndicator(color: teal),
+                )
+              : RefreshIndicator(
+                  onRefresh: _loadHomeData,
+                  color: teal,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(18, 14, 18, 105),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildHeader(),
+                        const SizedBox(height: 24),
+                        _buildDailyProgress(),
+                        const SizedBox(height: 20),
+                        _buildTodayPlan(),
+                        const SizedBox(height: 16),
+                        _buildHabitsAndFood(),
+                        const SizedBox(height: 16),
+                        _buildSmartAssistant(),
+                      ],
                     ),
                   ),
-          ),
+                ),
+            ),
         ),
         bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 0),
       ),
@@ -580,132 +578,145 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHabitsAndFood() {
     final habitsToShow = List<Map<String, dynamic>>.from(_habits);
 
-    final habitsCard = _SmallCard(
-      title: 'عاداتك',
-      icon: Icons.history_rounded,
-      child: Column(
-        children: [
-          if (habitsToShow.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(10),
-              child: Text(
-                'لا توجد عادات',
-                style: TextStyle(color: grayText, fontSize: 11),
-              ),
-            )
-          else
-            ...habitsToShow.map((habit) {
-              final id = habit['id']?.toString();
-              final completed = id != null && _habitCompleted[id] == true;
-              return _HomeHabit(
-                icon: '✓',
-                title: habit['name']?.toString() ?? '',
-                completed: completed,
-                onTap: () => _toggleHabit(habit),
-              );
-            }),
-        ],
-      ),
-    );
+    Widget habitsCard() {
+      return _SmallCard(
+        title: 'عاداتك',
+        icon: Icons.history_rounded,
+        child: Column(
+          children: [
+            if (habitsToShow.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(10),
+                child: Text(
+                  'لا توجد عادات',
+                  style: TextStyle(color: grayText, fontSize: 11),
+                ),
+              )
+            else
+              ...habitsToShow.map((habit) {
+                final id = habit['id']?.toString();
+                final completed = id != null && _habitCompleted[id] == true;
 
-    final foodCard = _SmallCard(
-      title: 'طعامك اليوم 🍴',
-      icon: Icons.restaurant_menu_rounded,
-      child: Column(
-        children: [
-          Row(
-            textDirection: TextDirection.ltr,
-            children: [
-              Expanded(
-                child: _CaloriesRing(
-                  progress: _foodTotalCalories == 0
-                      ? 0.0
-                      : (_foodSelectedCalories / _foodTotalCalories)
-                          .clamp(0.0, 1.0)
-                          .toDouble(),
-                  value: _formatCalories(_foodSelectedCalories),
-                  subtitle:
-                      'من ${_formatCalories(_foodTotalCalories)}\nسعرة حرارية',
-                ),
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Column(
-                  textDirection: TextDirection.rtl,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    _MealLine(
-                      name: 'الفطور',
-                      calories: '${_mealCalories['الفطور'] ?? 0} سعرة',
-                      icon: '☀️',
-                    ),
-                    _MealLine(
-                      name: 'الغداء',
-                      calories: '${_mealCalories['الغداء'] ?? 0} سعرة',
-                      icon: '☀️',
-                    ),
-                    _MealLine(
-                      name: 'العشاء',
-                      calories: '${_mealCalories['العشاء'] ?? 0} سعرة',
-                      icon: '🌙',
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const FoodTrackingScreen(),
-                  ),
+                return _HomeHabit(
+                  icon: '✓',
+                  title: habit['name']?.toString() ?? '',
+                  completed: completed,
+                  onTap: () => _toggleHabit(habit),
                 );
-                if (mounted) await _loadHomeData();
-              },
-              icon: const Icon(Icons.add, size: 19),
-              label: const Text('تسجيل وجبة'),
-              style: ElevatedButton.styleFrom(
-                elevation: 0,
-                backgroundColor:
-                    Theme.of(context).colorScheme.secondaryContainer,
-                foregroundColor: Theme.of(context).colorScheme.secondary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 11),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (MediaQuery.sizeOf(context).width < 600) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          habitsCard,
-          const SizedBox(height: 12),
-          foodCard,
-        ],
+              }),
+          ],
+        ),
       );
     }
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: habitsCard),
-        const SizedBox(width: 14),
-        Expanded(child: foodCard),
-      ],
+    Widget foodCard() {
+      return _SmallCard(
+        title: 'طعامك اليوم 🍴',
+        icon: Icons.restaurant_menu_rounded,
+        child: Column(
+          children: [
+            Row(
+              textDirection: TextDirection.ltr,
+              children: [
+                Expanded(
+                  child: _CaloriesRing(
+                    // الدائرة تعرض السعرات المحددة فقط من إجمالي
+                    // السعرات المضافة لليوم. لا يوجد هدف ثابت مثل 2200.
+                    progress: _foodTotalCalories == 0
+                        ? 0.0
+                        : (_foodSelectedCalories / _foodTotalCalories)
+                            .clamp(0.0, 1.0)
+                            .toDouble(),
+                    value: _formatCalories(_foodSelectedCalories),
+                    subtitle:
+                        'من ${_formatCalories(_foodTotalCalories)}\nسعرة حرارية',
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Column(
+                    textDirection: TextDirection.rtl,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _MealLine(
+                        name: 'الفطور',
+                        calories: '${_mealCalories['الفطور'] ?? 0} سعرة',
+                        icon: '☀️',
+                      ),
+                      _MealLine(
+                        name: 'الغداء',
+                        calories: '${_mealCalories['الغداء'] ?? 0} سعرة',
+                        icon: '☀️',
+                      ),
+                      _MealLine(
+                        name: 'العشاء',
+                        calories: '${_mealCalories['العشاء'] ?? 0} سعرة',
+                        icon: '🌙',
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const FoodTrackingScreen(),
+                    ),
+                  );
+                  if (mounted) await _loadHomeData();
+                },
+                icon: const Icon(Icons.add, size: 19),
+                label: const Text('تسجيل وجبة'),
+                style: ElevatedButton.styleFrom(
+                  elevation: 0,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.secondaryContainer,
+                  foregroundColor:
+                      Theme.of(context).colorScheme.secondary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 600;
+
+        if (isCompact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              habitsCard(),
+              const SizedBox(height: 14),
+              foodCard(),
+            ],
+          );
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: habitsCard()),
+            const SizedBox(width: 14),
+            Expanded(child: foodCard()),
+          ],
+        );
+      },
     );
   }
-
   Widget _buildSmartAssistant() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 17),
