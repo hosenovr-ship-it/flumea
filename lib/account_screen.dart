@@ -944,7 +944,6 @@ class _AccountScreenState extends State<AccountScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                children: [
                       Text(
                         'FLUMEA',
                         textAlign: TextAlign.left,
