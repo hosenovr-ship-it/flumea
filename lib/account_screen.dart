@@ -142,7 +142,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 const Text(
                   'اختيار صورة الحساب',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: navy,
                   ),
@@ -385,7 +385,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         textAlign: TextAlign.right,
                         style: TextStyle(
                           color: primary,
-                          fontSize: 21,
+                          fontSize: 18.9,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -482,7 +482,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         child: const Text(
                           'إغلاق',
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: 13.5,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -569,7 +569,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: primary,
-                            fontSize: 15,
+                            fontSize: 13.5,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -584,7 +584,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: secondary,
-                            fontSize: 12.5,
+                            fontSize: 11.2,
                             height: 1.35,
                           ),
                         ),
@@ -656,7 +656,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       color: accent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Icon(icon, color: accent, size: 27),
+                    child: Icon(icon, color: accent, size: 24.3),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -668,7 +668,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             color: primary,
-                            fontSize: 20,
+                            fontSize: 18,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -678,7 +678,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             color: secondary,
-                            fontSize: 12.5,
+                            fontSize: 11.2,
                           ),
                         ),
                       ],
@@ -754,7 +754,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             textAlign: TextAlign.right,
                             style: TextStyle(
                               color: primary,
-                              fontSize: 22,
+                              fontSize: 19.8,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -763,7 +763,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             textAlign: TextAlign.right,
                             style: TextStyle(
                               color: secondary,
-                              fontSize: 12.5,
+                              fontSize: 11.2,
                             ),
                           ),
                         ],
@@ -839,7 +839,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: primary,
-                    fontSize: 23,
+                    fontSize: 20.7,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -850,7 +850,7 @@ class _AccountScreenState extends State<AccountScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: secondary,
-                fontSize: 14.5,
+                fontSize: 13.1,
                 height: 1.6,
               ),
             ),
@@ -958,7 +958,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         'FLUMEA',
                         textAlign: TextAlign.left,
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 4.0,
                           color: isDark ? Colors.white : navy,
@@ -975,7 +975,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 'الحساب',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 30,
+                                  fontSize: 27,
                                   height: 1.05,
                                   fontWeight: FontWeight.bold,
                                   color: isDark
@@ -991,7 +991,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 'إدارة حسابك وتخصيص تجربتك',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 14.4,
                                   color: isDark
                                       ? const Color(0xFFB8C2CC)
                                       : const Color(0xFF7B8798),
@@ -1105,7 +1105,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 _loading ? '...' : _fullName,
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 25,
+                                  fontSize: 22.5,
                                   height: 1.15,
                                   fontWeight: FontWeight.bold,
                                   color: isDark ? Colors.white : navy,
@@ -1119,7 +1119,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 '✨  نسخة أفضل من نفسي كل يوم',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 12.6,
                                   color: Color(0xFF718096),
                                 ),
                               ),
@@ -1263,7 +1263,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       'تسجيل الخروج',
                       style: TextStyle(
                         color: Color(0xFFD93B3B),
-                        fontSize: 17,
+                        fontSize: 15.3,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1313,7 +1313,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     title,
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 19.8,
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
@@ -1396,7 +1396,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             title,
                             textAlign: TextAlign.right,
                             style: TextStyle(
-                              fontSize: 17,
+                              fontSize: 15.3,
                               fontWeight: FontWeight.bold,
                               color: primary,
                             ),
@@ -1409,7 +1409,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             subtitle,
                             textAlign: TextAlign.right,
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: 11.7,
                               color: secondary,
                             ),
                           ),
@@ -1436,7 +1436,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             title,
                             textAlign: TextAlign.right,
                             style: TextStyle(
-                              fontSize: 17,
+                              fontSize: 15.3,
                               fontWeight: FontWeight.bold,
                               color: primary,
                             ),
@@ -1449,7 +1449,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             subtitle,
                             textAlign: TextAlign.right,
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: 11.7,
                               color: secondary,
                             ),
                           ),
@@ -1551,7 +1551,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                     'تغيير صورة الحساب',
                     style: TextStyle(
                       color: primary,
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1752,7 +1752,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
             'تعديل الملف الشخصي',
             style: TextStyle(
               color: primary,
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -1858,7 +1858,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: primary,
-                        fontSize: 19,
+                        fontSize: 17.1,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1866,7 +1866,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                     Text(
                       'اضغط على الصورة لتغييرها',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: secondary, fontSize: 13.5),
+                      style: TextStyle(color: secondary, fontSize: 12.2),
                     ),
                   ],
                 ),
@@ -1888,7 +1888,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         color: primary,
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1945,7 +1945,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                   label: Text(
                     _saving ? 'جارٍ الحفظ...' : 'حفظ التغييرات',
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 14.4,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1997,7 +1997,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                     Text(
                       'FLUMEA',
                       style: TextStyle(
-                        fontSize: 17,
+                        fontSize: 15.3,
                         fontWeight: FontWeight.bold,
                         color: primary,
                       ),
@@ -2042,7 +2042,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: primary,
-                                fontSize: 30,
+                                fontSize: 27,
                                 height: 1.05,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -2056,7 +2056,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: secondary,
-                                fontSize: 15,
+                                fontSize: 13.5,
                               ),
                             ),
                           ),
@@ -2168,14 +2168,14 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
               color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(15),
             ),
-            child: Icon(icon, color: color, size: 25),
+            child: Icon(icon, color: color, size: 22.5),
           ),
           title: Text(
             question,
             textAlign: TextAlign.right,
             style: TextStyle(
               color: primary,
-              fontSize: 16,
+              fontSize: 14.4,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -2187,7 +2187,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   color: secondary,
-                  fontSize: 14,
+                  fontSize: 12.6,
                   height: 1.6,
                 ),
               ),
@@ -2296,7 +2296,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                           textAlign: TextAlign.right,
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 14.5,
+                            fontSize: 13.1,
                             fontWeight: FontWeight.w600,
                             height: 1.35,
                           ),
@@ -2346,7 +2346,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                     Text(
                       'FLUMEA',
                       style: TextStyle(
-                        fontSize: 17,
+                        fontSize: 15.3,
                         fontWeight: FontWeight.bold,
                         color: primary,
                       ),
@@ -2391,7 +2391,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: primary,
-                                fontSize: 30,
+                                fontSize: 27,
                                 height: 1.05,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -2405,7 +2405,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: secondary,
-                                fontSize: 15,
+                                fontSize: 13.5,
                               ),
                             ),
                           ),
@@ -2444,7 +2444,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                         textAlign: TextAlign.right,
                         style: TextStyle(
                           color: primary,
-                          fontSize: 21,
+                          fontSize: 18.9,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -2500,7 +2500,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                           label: const Text(
                             'إرسال الرسالة',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 14.4,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -2544,7 +2544,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             color: primary,
-                            fontSize: 13.5,
+                            fontSize: 12.2,
                             height: 1.5,
                           ),
                         ),
