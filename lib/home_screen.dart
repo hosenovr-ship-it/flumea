@@ -308,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: Transform.scale(
-            scale: MediaQuery.sizeOf(context).width < 600 ? 0.94 : 1.0,
+            scale: MediaQuery.sizeOf(context).width < 600 ? 0.88 : 1.0,
             alignment: Alignment.topCenter,
             child: _loading
               ? const Center(
