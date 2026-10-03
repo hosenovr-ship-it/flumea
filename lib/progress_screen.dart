@@ -848,12 +848,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cloud_off_rounded, color: _primaryText, size: 45),
+            Icon(Icons.cloud_off_rounded, color: _primaryText, size: 40.5),
             const SizedBox(height: 12),
             Text(
               _error!,
               textAlign: TextAlign.center,
-              style: TextStyle(color: _primaryText, fontSize: 15),
+              style: TextStyle(color: _primaryText, fontSize: 13.5),
             ),
             const SizedBox(height: 14),
             ElevatedButton(
@@ -876,13 +876,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Icon(Icons.bar_chart_rounded, color: _primaryText, size: 30),
+                  Icon(Icons.bar_chart_rounded, color: _primaryText, size: 27),
                   const SizedBox(width: 8),
                   Text(
                     'التقدم',
                     style: TextStyle(
                       color: _primaryText,
-                      fontSize: 30,
+                      fontSize: 27,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -893,7 +893,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               'FLUMEA',
               style: TextStyle(
                 color: _primaryText,
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 4,
               ),
@@ -905,7 +905,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           alignment: Alignment.centerRight,
           child: Text(
             'رحلتك نحو نسخة أفضل من نفسك',
-            style: TextStyle(color: _secondaryText, fontSize: 16),
+            style: TextStyle(color: _secondaryText, fontSize: 14.4),
           ),
         ),
       ],
@@ -944,7 +944,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   titles[index],
                   style: TextStyle(
                     color: _selectedPeriod == index ? blue : _primaryText,
-                    fontSize: 15,
+                    fontSize: 13.5,
                     fontWeight: _selectedPeriod == index
                         ? FontWeight.w800
                         : FontWeight.w600,
@@ -1011,13 +1011,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: iconColor, size: 38),
+          Icon(icon, color: iconColor, size: 34.2),
           const SizedBox(height: 8),
           Text(
             value,
             style: TextStyle(
               color: _primaryText,
-              fontSize: 27,
+              fontSize: 24.3,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -1027,7 +1027,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: iconColor == blue ? blue : _primaryText,
-              fontSize: 14,
+              fontSize: 12.6,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -1053,14 +1053,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.bar_chart_rounded, color: _primaryText, size: 25),
+              Icon(Icons.bar_chart_rounded, color: _primaryText, size: 22.5),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   'معدل إكمال العادات',
                   style: TextStyle(
                     color: _primaryText,
-                    fontSize: 21,
+                    fontSize: 18.9,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -1077,13 +1077,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       _formatPercent(_data.dailyRate),
                       style: TextStyle(
                         color: _primaryText,
-                        fontSize: 19,
+                        fontSize: 17.1,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                     Text(
                       'معدل اليوم',
-                      style: TextStyle(color: _primaryText, fontSize: 12),
+                      style: TextStyle(color: _primaryText, fontSize: 10.8),
                     ),
                   ],
                 ),
@@ -1094,7 +1094,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           Text(
             '${_periodLabel(_selectedPeriod)} · ${_todayArabicDate()}',
             textAlign: TextAlign.right,
-            style: TextStyle(color: _secondaryText, fontSize: 13),
+            style: TextStyle(color: _secondaryText, fontSize: 11.7),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -1103,7 +1103,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 ? Center(
                     child: Text(
                       'أضف عاداتك لتظهر بيانات التقدم هنا',
-                      style: TextStyle(color: _secondaryText, fontSize: 13),
+                      style: TextStyle(color: _secondaryText, fontSize: 11.7),
                     ),
                   )
                 : Row(
@@ -1123,7 +1123,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                 _formatPercent(value),
                                 style: TextStyle(
                                   color: barColor,
-                                  fontSize: 15,
+                                  fontSize: 13.5,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
@@ -1170,7 +1170,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                 ),
                                 child: Text(
                                   habitEmoji,
-                                  style: const TextStyle(fontSize: 21),
+                                  style: const TextStyle(fontSize: 18.9),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -1182,7 +1182,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: _secondaryText,
-                                  fontSize: 11,
+                                  fontSize: 9.9,
                                 ),
                               ),
                             ],
@@ -1357,7 +1357,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   'معدل إكمال المهمة',
                   style: TextStyle(
                     color: _primaryText,
-                    fontSize: 18,
+                    fontSize: 16.2,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -1368,7 +1368,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           const SizedBox(height: 4),
           Text(
             '$completed من $total ${total == 1 ? 'مهمة' : 'مهام'} مكتملة في ${_periodLabel(_selectedPeriod)}',
-            style: TextStyle(color: _secondaryText, fontSize: 12),
+            style: TextStyle(color: _secondaryText, fontSize: 10.8),
           ),
           const SizedBox(height: 16),
           Expanded(
@@ -1396,13 +1396,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
                             _formatPercent(rate),
                             style: TextStyle(
                               color: _primaryText,
-                              fontSize: 25,
+                              fontSize: 22.5,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
                           Text(
                             'معدل الإكمال',
-                            style: TextStyle(color: _secondaryText, fontSize: 12),
+                            style: TextStyle(color: _secondaryText, fontSize: 10.8),
                           ),
                         ],
                       ),
@@ -1448,7 +1448,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   'تحسنك عبر الوقت',
                   style: TextStyle(
                     color: _primaryText,
-                    fontSize: 18,
+                    fontSize: 16.2,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -1607,7 +1607,7 @@ class _Legend extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 13,
+                fontSize: 11.7,
                 color: Color(0xFF102A4C),
                 fontWeight: FontWeight.w600,
               ),
@@ -1617,7 +1617,7 @@ class _Legend extends StatelessWidget {
           Text(
             value,
             style: TextStyle(
-               fontSize: 12,
+               fontSize: 10.8,
                color: Theme.of(context).brightness == Brightness.dark
                    ? const Color(0xFF9AA7B8)
                    : const Color(0xFF7B8798),
@@ -1701,7 +1701,7 @@ class _LineChartPainter extends CustomPainter {
 
     final labelStyle = TextStyle(
       color: isDark ? const Color(0xFF9AA7B8) : const Color(0xFF7B8798),
-      fontSize: 10,
+      fontSize: 9,
     );
     final textPainter = TextPainter(textDirection: TextDirection.rtl);
     final safeLabels = labels.isEmpty ? <String>[] : labels;
