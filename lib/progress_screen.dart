@@ -765,6 +765,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 600;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -772,50 +773,48 @@ class _ProgressScreenState extends State<ProgressScreen> {
         body: SafeArea(
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(
-                MediaQuery.sizeOf(context).width < 600 ? 0.88 : 1.0,
-              ),
+              textScaler: TextScaler.linear(compact ? 0.88 : 1.0),
             ),
             child: RefreshIndicator(
-            onRefresh: _loadProgress,
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
-              child: _loading
-                  ? const SizedBox(
-                      height: 650,
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                  : _error != null
-                      ? _errorView()
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _header(),
-                            const SizedBox(height: 18),
-                            _periodSelector(),
-                            const SizedBox(height: 18),
-                            _statsRow(),
-                            const SizedBox(height: 16),
-                            _habitChart(),
-                            const SizedBox(height: 14),
-                            // الهاتف: معدل إكمال المهمة ثم تحسنك عبر الوقت.
-                            // الآيباد يبقى على التخطيط الجانبي الحالي.
-                            if (MediaQuery.sizeOf(context).width < 600) ...[
-                              _timeCard(),
+              onRefresh: _loadProgress,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                child: _loading
+                    ? const SizedBox(
+                        height: 650,
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    : _error != null
+                        ? _errorView()
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _header(),
+                              const SizedBox(height: 18),
+                              _periodSelector(),
+                              const SizedBox(height: 18),
+                              _statsRow(),
+                              const SizedBox(height: 16),
+                              _habitChart(),
                               const SizedBox(height: 14),
-                              _improvementCard(),
-                            ] else
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(child: _timeCard()),
-                                  const SizedBox(width: 12),
-                                  Expanded(child: _improvementCard()),
-                                ],
-                              ),
-                          ],
-                        ),
+                              if (compact) ...[
+                                _timeCard(),
+                                const SizedBox(height: 14),
+                                _improvementCard(),
+                              ] else
+                                Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(child: _timeCard()),
+                                    const SizedBox(width: 12),
+                                    Expanded(child: _improvementCard()),
+                                  ],
+                                ),
+                            ],
+                          ),
+              ),
             ),
           ),
         ),
