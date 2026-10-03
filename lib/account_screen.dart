@@ -375,7 +375,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       child: const Icon(
                         Icons.notifications_none_rounded,
                         color: blue,
-                        size: 25,
+                        size: MediaQuery.sizeOf(context).width < 600 ? 25 * 0.90 : 25,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -551,7 +551,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   child: Icon(
                     icon,
                     color: color,
-                    size: 23,
+                    size: MediaQuery.sizeOf(context).width < 600 ? 23 * 0.90 : 23,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -741,7 +741,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       child: const Icon(
                         Icons.palette_outlined,
                         color: blue,
-                        size: 27,
+                        size: MediaQuery.sizeOf(context).width < 600 ? 27 * 0.90 : 27,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -830,7 +830,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   child: const Icon(
                     Icons.logout_rounded,
                     color: Color(0xFFD93B3B),
-                    size: 32,
+                    size: MediaQuery.sizeOf(context).width < 600 ? 32 * 0.90 : 32,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -933,9 +933,15 @@ class _AccountScreenState extends State<AccountScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: SafeArea(
+        body: MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(
+              MediaQuery.sizeOf(context).width < 600 ? 0.90 : 1.0,
+            ),
+          ),
+          child: SafeArea(
           child: Transform.scale(
-            scale: MediaQuery.sizeOf(context).width < 600 ? 0.88 : 1.0,
+            scale: MediaQuery.sizeOf(context).width < 600 ? 0.94 : 1.0,
             alignment: Alignment.topCenter,
             child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
@@ -1046,13 +1052,13 @@ class _AccountScreenState extends State<AccountScreen> {
                                       fit: BoxFit.cover,
                                       errorBuilder: (context, error, stackTrace) => const Icon(
                                         Icons.person,
-                                        size: 58,
+                                        size: MediaQuery.sizeOf(context).width < 600 ? 58 * 0.90 : 58,
                                         color: navy,
                                       ),
                                     )
                                   : const Icon(
                                       Icons.person,
-                                      size: 58,
+                                      size: MediaQuery.sizeOf(context).width < 600 ? 58 * 0.90 : 58,
                                       color: navy,
                                     ),
                             ),
@@ -1079,7 +1085,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                       )
                                     : const Icon(
                                         Icons.camera_alt,
-                                        size: 18,
+                                        size: MediaQuery.sizeOf(context).width < 600 ? 18 * 0.90 : 18,
                                         color: Colors.white,
                                       ),
                               ),
@@ -1125,7 +1131,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 onPressed: _editProfile,
                                 icon: const Icon(
                                   Icons.edit,
-                                  size: 19,
+                                  size: MediaQuery.sizeOf(context).width < 600 ? 19 * 0.90 : 19,
                                   color: blue,
                                 ),
                                 label: const Text(
@@ -1268,6 +1274,7 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
             ),
         ),
+        ),
         bottomNavigationBar: FlumeaBottomNavigation(
           selectedIndex: 3,
         ),
@@ -1298,7 +1305,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 Icon(
                   icon,
                   color: navy,
-                  size: 28,
+                  size: MediaQuery.sizeOf(context).width < 600 ? 28 * 0.90 : 28,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -1368,14 +1375,14 @@ class _AccountScreenState extends State<AccountScreen> {
                     child: Icon(
                       icon,
                       color: color,
-                      size: 27,
+                      size: MediaQuery.sizeOf(context).width < 600 ? 27 * 0.90 : 27,
                     ),
                   ),
                   const SizedBox(width: 10),
                   const Icon(
                     Icons.chevron_left,
                     color: Color(0xFF718096),
-                    size: 27,
+                    size: MediaQuery.sizeOf(context).width < 600 ? 27 * 0.90 : 27,
                   ),
                   const Spacer(),
                   Expanded(
@@ -1415,7 +1422,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   const Icon(
                     Icons.chevron_left,
                     color: Color(0xFF718096),
-                    size: 27,
+                    size: MediaQuery.sizeOf(context).width < 600 ? 27 * 0.90 : 27,
                   ),
                   const Spacer(),
                   Expanded(
@@ -1461,7 +1468,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     child: Icon(
                       icon,
                       color: color,
-                      size: 27,
+                      size: MediaQuery.sizeOf(context).width < 600 ? 27 * 0.90 : 27,
                     ),
                   ),
                 ],
@@ -1804,13 +1811,13 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                                     fit: BoxFit.cover,
                                     errorBuilder: (context, error, stackTrace) => Icon(
                                       Icons.person_rounded,
-                                      size: 68,
+                                      size: MediaQuery.sizeOf(context).width < 600 ? 68 * 0.90 : 68,
                                       color: isDark ? Colors.white70 : navy,
                                     ),
                                   )
                                 : Icon(
                                     Icons.person_rounded,
-                                    size: 68,
+                                    size: MediaQuery.sizeOf(context).width < 600 ? 68 * 0.90 : 68,
                                     color: isDark ? Colors.white70 : navy,
                                   ),
                           ),
@@ -1838,7 +1845,7 @@ class _FlumeaEditProfileScreenState extends State<FlumeaEditProfileScreen> {
                                   : const Icon(
                                       Icons.camera_alt_rounded,
                                       color: Colors.white,
-                                      size: 21,
+                                      size: MediaQuery.sizeOf(context).width < 600 ? 21 * 0.90 : 21,
                                     ),
                             ),
                           ),
@@ -2067,7 +2074,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                       child: const Icon(
                         Icons.headset_mic_rounded,
                         color: blue,
-                        size: 35,
+                        size: MediaQuery.sizeOf(context).width < 600 ? 35 * 0.90 : 35,
                       ),
                     ),
                   ],
@@ -2279,7 +2286,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                         child: Icon(
                           icon,
                           color: const Color(0xFF55D6B2),
-                          size: 22,
+                          size: MediaQuery.sizeOf(context).width < 600 ? 22 * 0.90 : 22,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -2416,7 +2423,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                       child: const Icon(
                         Icons.mail_outline_rounded,
                         color: blue,
-                        size: 35,
+                        size: MediaQuery.sizeOf(context).width < 600 ? 35 * 0.90 : 35,
                       ),
                     ),
                   ],
@@ -2528,7 +2535,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                       const Icon(
                         Icons.support_agent_rounded,
                         color: Color(0xFF20B995),
-                        size: 32,
+                        size: MediaQuery.sizeOf(context).width < 600 ? 32 * 0.90 : 32,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
