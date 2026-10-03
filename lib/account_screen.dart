@@ -1270,7 +1270,6 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
         ),
-          ),
         bottomNavigationBar: FlumeaBottomNavigation(
           selectedIndex: 3,
         ),
