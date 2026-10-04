@@ -58,30 +58,17 @@ class PrivacyScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 22),
-                Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 58,
-                        height: 58,
-                        decoration: BoxDecoration(
-                          color: iconBlue,
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Icon(
-                          Icons.lock_rounded,
-                          color: blue,
-                          size: 31,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
+                Row(
+                  textDirection: TextDirection.ltr,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
                               'الخصوصية',
                               textAlign: TextAlign.right,
                               maxLines: 1,
@@ -93,8 +80,11 @@ class PrivacyScreen extends StatelessWidget {
                                 height: 1.15,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
+                          ),
+                          const SizedBox(height: 4),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
                               'تحكم في بياناتك وأمان حسابك وخصوصيتك',
                               textAlign: TextAlign.right,
                               maxLines: 2,
@@ -105,11 +95,25 @@ class PrivacyScreen extends StatelessWidget {
                                 height: 1.4,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 14),
+                    Container(
+                      width: 58,
+                      height: 58,
+                      decoration: BoxDecoration(
+                        color: iconBlue,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Icon(
+                        Icons.lock_rounded,
+                        color: blue,
+                        size: 31,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 30),
                 _PrivacyOption(
@@ -200,8 +204,42 @@ class PrivacyScreen extends StatelessWidget {
                     ),
                   ),
                   child: Row(
+                    textDirection: TextDirection.ltr,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                'بياناتك آمنة معنا',
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  color: primary,
+                                  fontSize: 19,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                'نحرص على حماية بياناتك الشخصية وفق أعلى معايير الأمان والخصوصية.',
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  color: secondary,
+                                  fontSize: 14,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
                       Container(
                         width: 58,
                         height: 58,
@@ -215,33 +253,6 @@ class PrivacyScreen extends StatelessWidget {
                           Icons.verified_user_outlined,
                           color: mint,
                           size: 31,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'بياناتك آمنة معنا',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                color: primary,
-                                fontSize: 19,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'نحرص على حماية بياناتك الشخصية وفق أعلى معايير الأمان والخصوصية.',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                color: secondary,
-                                fontSize: 14,
-                                height: 1.5,
-                              ),
-                            ),
-                          ],
                         ),
                       ),
                     ],
@@ -1464,31 +1475,24 @@ class _PrivacyOption extends StatelessWidget {
             borderRadius: BorderRadius.circular(28),
             border: Border.all(color: borderColor),
           ),
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: isSmallPhone ? 52 : 58,
-                  height: isSmallPhone ? 52 : 58,
-                  decoration: BoxDecoration(
-                    color: iconBackground,
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: iconColor,
-                    size: isSmallPhone ? 27 : 30,
-                  ),
-                ),
-                SizedBox(width: isSmallPhone ? 11 : 14),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
+          child: Row(
+            textDirection: TextDirection.ltr,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.chevron_left_rounded,
+                color: secondary,
+                size: isSmallPhone ? 26 : 30,
+              ),
+              SizedBox(width: isSmallPhone ? 9 : 14),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
                         title,
                         textAlign: TextAlign.right,
                         maxLines: 2,
@@ -1500,8 +1504,11 @@ class _PrivacyOption extends StatelessWidget {
                           height: 1.25,
                         ),
                       ),
-                      const SizedBox(height: 5),
-                      Text(
+                    ),
+                    const SizedBox(height: 5),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
                         subtitle,
                         textAlign: TextAlign.right,
                         maxLines: 2,
@@ -1512,17 +1519,25 @@ class _PrivacyOption extends StatelessWidget {
                           height: 1.4,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                SizedBox(width: isSmallPhone ? 9 : 14),
-                Icon(
-                  Icons.chevron_left_rounded,
-                  color: secondary,
-                  size: isSmallPhone ? 26 : 30,
+              ),
+              SizedBox(width: isSmallPhone ? 9 : 14),
+              Container(
+                width: isSmallPhone ? 52 : 58,
+                height: isSmallPhone ? 52 : 58,
+                decoration: BoxDecoration(
+                  color: iconBackground,
+                  borderRadius: BorderRadius.circular(18),
                 ),
-              ],
-            ),
+                child: Icon(
+                  icon,
+                  color: iconColor,
+                  size: isSmallPhone ? 27 : 30,
+                ),
+              ),
+            ],
           ),
         ),
       ),
