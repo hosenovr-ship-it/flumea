@@ -306,14 +306,25 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Future<void> _loadNotificationPreferences() async {
     final prefs = await SharedPreferences.getInstance();
+
+    // سياسة الإشعارات الجديدة: نُبقي فقط التنبيهات المهمة افتراضيًا.
+    // المهام والإنجازات مهمة، بينما العادات وشرب الماء اختياريان.
+    if (prefs.getInt('flumea_notification_policy_version') != 2) {
+      await prefs.setBool('flumea_notify_habits', false);
+      await prefs.setBool('flumea_notify_tasks', true);
+      await prefs.setBool('flumea_notify_achievements', true);
+      await prefs.setBool('flumea_notify_water', false);
+      await prefs.setInt('flumea_notification_policy_version', 2);
+    }
+
     if (!mounted) return;
 
     setState(() {
-      _habitNotifications = prefs.getBool('flumea_notify_habits') ?? true;
+      _habitNotifications = prefs.getBool('flumea_notify_habits') ?? false;
       _taskNotifications = prefs.getBool('flumea_notify_tasks') ?? true;
       _achievementNotifications =
           prefs.getBool('flumea_notify_achievements') ?? true;
-      _waterNotifications = prefs.getBool('flumea_notify_water') ?? true;
+      _waterNotifications = prefs.getBool('flumea_notify_water') ?? false;
     });
   }
 
@@ -328,11 +339,13 @@ class _AccountScreenState extends State<AccountScreen> {
     required IconData icon,
     required Color accent,
   }) async {
-    await FlumeaNotificationService.instance.show(
-      title: title,
-      body: message,
-      type: FlumeaNotificationType.general,
-      payload: 'icon=${icon.codePoint};accent=${accent.toARGB32()}',
+    // هذه رسائل داخل التطبيق وليست إشعارات خارجية.
+    // نعرضها داخل FLUMEA حتى لا يتحول كل خطأ بسيط إلى إشعار مزعج للمستخدم.
+    if (!mounted) return;
+    FlumeaNotificationService.showTopMessage(
+      context,
+      message,
+      success: false,
     );
   }
 
