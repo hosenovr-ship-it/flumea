@@ -58,50 +58,58 @@ class PrivacyScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 22),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 58,
-                      height: 58,
-                      decoration: BoxDecoration(
-                        color: iconBlue,
-                        borderRadius: BorderRadius.circular(18),
+                Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 58,
+                        height: 58,
+                        decoration: BoxDecoration(
+                          color: iconBlue,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Icon(
+                          Icons.lock_rounded,
+                          color: blue,
+                          size: 31,
+                        ),
                       ),
-                      child: Icon(
-                        Icons.lock_rounded,
-                        color: blue,
-                        size: 31,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'الخصوصية',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                              color: primary,
-                              fontSize: 31,
-                              fontWeight: FontWeight.w800,
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'الخصوصية',
+                              textAlign: TextAlign.right,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: primary,
+                                fontSize: 31,
+                                fontWeight: FontWeight.w800,
+                                height: 1.15,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'تحكم في بياناتك وأمان حسابك وخصوصيتك',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                              color: secondary,
-                              fontSize: 15,
-                              height: 1.4,
+                            const SizedBox(height: 4),
+                            Text(
+                              'تحكم في بياناتك وأمان حسابك وخصوصيتك',
+                              textAlign: TextAlign.right,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: secondary,
+                                fontSize: 15,
+                                height: 1.4,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 30),
                 _PrivacyOption(
@@ -1433,10 +1441,13 @@ class _PrivacyOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.onSurface;
-    final secondary = Theme.of(context).brightness == Brightness.dark
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primary = theme.colorScheme.onSurface;
+    final secondary = isDark
         ? const Color(0xFFB8C2CC)
         : const Color(0xFF8290A2);
+    final isSmallPhone = MediaQuery.sizeOf(context).width <= 430;
 
     return Material(
       color: Colors.transparent,
@@ -1444,69 +1455,80 @@ class _PrivacyOption extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(28),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+          padding: EdgeInsets.symmetric(
+            horizontal: isSmallPhone ? 14 : 18,
+            vertical: isSmallPhone ? 15 : 18,
+          ),
           decoration: BoxDecoration(
             color: cardColor,
             borderRadius: BorderRadius.circular(28),
             border: Border.all(color: borderColor),
           ),
-          child: Row(
-            textDirection: TextDirection.ltr,
-            children: [
-              Icon(
-                Icons.chevron_left_rounded,
-                color: secondary,
-                size: 30,
-              ),
-              const Spacer(),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        color: primary,
-                        fontSize: 19,
-                        fontWeight: FontWeight.w800,
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: isSmallPhone ? 52 : 58,
+                  height: isSmallPhone ? 52 : 58,
+                  decoration: BoxDecoration(
+                    color: iconBackground,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: iconColor,
+                    size: isSmallPhone ? 27 : 30,
+                  ),
+                ),
+                SizedBox(width: isSmallPhone ? 11 : 14),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        title,
+                        textAlign: TextAlign.right,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: primary,
+                          fontSize: isSmallPhone ? 17 : 19,
+                          fontWeight: FontWeight.w800,
+                          height: 1.25,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      subtitle,
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        color: secondary,
-                        fontSize: 14,
-                        height: 1.4,
+                      const SizedBox(height: 5),
+                      Text(
+                        subtitle,
+                        textAlign: TextAlign.right,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: secondary,
+                          fontSize: isSmallPhone ? 12.5 : 14,
+                          height: 1.4,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 14),
-              Container(
-                width: 58,
-                height: 58,
-                decoration: BoxDecoration(
-                  color: iconBackground,
-                  borderRadius: BorderRadius.circular(18),
+                SizedBox(width: isSmallPhone ? 9 : 14),
+                Icon(
+                  Icons.chevron_left_rounded,
+                  color: secondary,
+                  size: isSmallPhone ? 26 : 30,
                 ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: 30,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
-
 
 class AccountDataScreen extends StatefulWidget {
   const AccountDataScreen({super.key});
