@@ -29,7 +29,7 @@ class FlumeaNotificationService {
     'flumea_notifications',
     'إشعارات FLUMEA',
     description: 'تنبيهات المهام والعادات والإنجازات في FLUMEA.',
-    importance: Importance.max,
+    importance: Importance.high,
     playSound: true,
     enableVibration: true,
     showBadge: true,
@@ -71,7 +71,21 @@ class FlumeaNotificationService {
     bool requestPermission = true,
     String? payload,
   }) async {
+    // لا نرسل إشعارات عامة من نوع general؛ الإشعار الخارجي يجب أن يكون
+    // مرتبطًا بنوع واضح ومفيد للمستخدم.
+    if (type == FlumeaNotificationType.general) return false;
+
     if (!await _isEnabled(type)) return false;
+
+    // منع تكرار نفس الإشعار خلال فترة قصيرة حتى لا يتحول التنبيه إلى إزعاج.
+    final prefs = await SharedPreferences.getInstance();
+    final dedupeKey = _dedupeKey(title, body, type);
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final lastShown = prefs.getInt(dedupeKey);
+    if (lastShown != null &&
+        now - lastShown < const Duration(minutes: 10).inMilliseconds) {
+      return false;
+    }
 
     await initialize();
     if (!_initialized) return false;
@@ -79,8 +93,21 @@ class FlumeaNotificationService {
     if (Platform.isAndroid && requestPermission) {
       final android = _plugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
-      final granted = await android?.requestNotificationsPermission();
-      if (granted == false) return false;
+
+      final alreadyAsked =
+          prefs.getBool('flumea_notifications_permission_requested') ?? false;
+
+      if (!alreadyAsked) {
+        final granted = await android?.requestNotificationsPermission();
+        await prefs.setBool(
+          'flumea_notifications_permission_requested',
+          true,
+        );
+        if (granted == false) return false;
+      } else {
+        final enabled = await android?.areNotificationsEnabled();
+        if (enabled == false) return false;
+      }
     }
 
     final details = AndroidNotificationDetails(
@@ -88,7 +115,7 @@ class FlumeaNotificationService {
       _channel.name,
       channelDescription: _channel.description,
       icon: '@mipmap/ic_launcher',
-      importance: Importance.max,
+      importance: Importance.high,
       priority: Priority.high,
       playSound: true,
       enableVibration: true,
@@ -113,6 +140,7 @@ class FlumeaNotificationService {
       payload: payload,
     );
 
+    await prefs.setInt(dedupeKey, now);
     return true;
   }
 
@@ -152,6 +180,19 @@ class FlumeaNotificationService {
     });
   }
 
+  String _dedupeKey(
+    String title,
+    String body,
+    FlumeaNotificationType type,
+  ) {
+    final raw = '${type.name}|$title|$body';
+    final hash = raw.codeUnits.fold<int>(
+      17,
+      (value, code) => (value * 31 + code) & 0x7fffffff,
+    );
+    return 'flumea_notification_last_$hash';
+  }
+
   Future<bool> _isEnabled(FlumeaNotificationType type) async {
     if (type == FlumeaNotificationType.general) return true;
 
@@ -159,13 +200,13 @@ class FlumeaNotificationService {
 
     switch (type) {
       case FlumeaNotificationType.habit:
-        return prefs.getBool('flumea_notify_habits') ?? true;
+        return prefs.getBool('flumea_notify_habits') ?? false;
       case FlumeaNotificationType.task:
         return prefs.getBool('flumea_notify_tasks') ?? true;
       case FlumeaNotificationType.achievement:
         return prefs.getBool('flumea_notify_achievements') ?? true;
       case FlumeaNotificationType.water:
-        return prefs.getBool('flumea_notify_water') ?? true;
+        return prefs.getBool('flumea_notify_water') ?? false;
       case FlumeaNotificationType.general:
         return true;
     }
