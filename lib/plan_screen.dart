@@ -2065,7 +2065,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                 const Duration(milliseconds: 120),
                               );
 
-                              if (!mounted) return;
+                              if (!dialogContext.mounted) return;
 
                               final picked = await _showFlumeaTimePicker(
                                 dialogContext,
