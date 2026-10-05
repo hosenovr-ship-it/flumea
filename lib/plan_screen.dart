@@ -1412,7 +1412,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   BoxDecoration(
                 color: completed
                     ? blue
-                    : Colors.white,
+                    : _softButton,
                 borderRadius:
                     BorderRadius.circular(
                   6,
@@ -1420,9 +1420,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 border: Border.all(
                   color: completed
                       ? blue
-                      : const Color(
-                          0xFFB8C2CE,
-                        ),
+                      : _unselectedControlBorder,
                   width: 2,
                 ),
               ),
@@ -1450,7 +1448,9 @@ class _PlanScreenState extends State<PlanScreen> {
                 crossAxisAlignment:
                     CrossAxisAlignment.end,
                 children: [
-                  Row(
+                  Transform.translate(
+                    offset: const Offset(0, 6),
+                    child: Row(
                     mainAxisAlignment:
                         MainAxisAlignment.end,
                     children: [
@@ -1464,7 +1464,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               TextOverflow.ellipsis,
                           style:
                               TextStyle(
-                            fontSize: 14.4,
+                            fontSize: 13.2,
                             fontWeight:
                                 FontWeight.w800,
                             color: completed
@@ -1490,8 +1490,8 @@ class _PlanScreenState extends State<PlanScreen> {
                         padding:
                             EdgeInsets
                                 .symmetric(
-                          horizontal: 10,
-                          vertical: 6,
+                          horizontal: 9,
+                          vertical: 5,
                         ),
                         decoration:
                             BoxDecoration(
@@ -1514,26 +1514,27 @@ class _PlanScreenState extends State<PlanScreen> {
                               style:
                                   TextStyle(
                                 color: color,
-                                fontSize: 9.9,
+                                fontSize: 9.2,
                                 fontWeight:
                                     FontWeight
                                         .w800,
                               ),
                             ),
                             SizedBox(
-                              width: 3,
+                              width: 7,
                             ),
                             Text(
                               emoji,
                               style:
                                   TextStyle(
-                                fontSize: 11.7,
+                                fontSize: 9.8,
                               ),
                             ),
                           ],
                         ),
                       ),
                     ],
+                  ),
                   ),
 
                   SizedBox(
@@ -2510,7 +2511,7 @@ class _PlanScreenState extends State<PlanScreen> {
               width: 23,
               height: 23,
               decoration: BoxDecoration(
-                color: completed ? cyan : Colors.white,
+                color: completed ? cyan : _softButton,
                 borderRadius: BorderRadius.circular(7),
                 border: Border.all(
                   color: completed ? cyan : _unselectedControlBorder,
@@ -2900,7 +2901,7 @@ class _PlanScreenState extends State<PlanScreen> {
               width: 23,
               height: 23,
               decoration: BoxDecoration(
-                color: completed ? cyan : Colors.white,
+                color: completed ? cyan : _softButton,
                 borderRadius: BorderRadius.circular(7),
                 border: Border.all(
                   color: completed
