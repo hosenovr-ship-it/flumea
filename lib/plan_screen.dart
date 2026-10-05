@@ -1792,6 +1792,7 @@ class _PlanScreenState extends State<PlanScreen> {
     return showTimePicker(
       context: pickerContext,
       initialTime: initialTime,
+      useRootNavigator: true,
       builder: (context, child) {
         final scheme = ColorScheme.fromSeed(
           seedColor: blue,
@@ -2058,6 +2059,14 @@ class _PlanScreenState extends State<PlanScreen> {
 
                           GestureDetector(
                             onTap: () async {
+                              // إخفاء لوحة المفاتيح أولاً حتى يظهر منتقي الوقت فوق نافذة المهمة بشكل صحيح.
+                              FocusScope.of(dialogContext).unfocus();
+                              await Future<void>.delayed(
+                                const Duration(milliseconds: 120),
+                              );
+
+                              if (!mounted) return;
+
                               final picked = await _showFlumeaTimePicker(
                                 dialogContext,
                                 initialTime: TimeOfDay.now(),
