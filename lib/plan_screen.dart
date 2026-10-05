@@ -1599,74 +1599,286 @@ class _PlanScreenState extends State<PlanScreen> {
     int index,
   ) {
     return PopupMenuButton<String>(
-      tooltip:
-          'خيارات المهمة',
-      padding:
-          EdgeInsets.zero,
-      icon:
-          Icon(
+      tooltip: 'خيارات المهمة',
+      padding: EdgeInsets.zero,
+      color: _surface,
+      elevation: 10,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: _border),
+      ),
+      icon: Icon(
         Icons.more_vert,
-        color:
-            Color(0xFF6E7A88),
+        color: _subtle,
         size: MediaQuery.sizeOf(context).width < 600 ? 22 * 0.90 : 22,
       ),
-      onSelected:
-          (value) {
-        if (value == 'reset') {
+      onSelected: (value) {
+        if (value == 'view') {
+          _showTaskDetails(index);
+        } else if (value == 'reset') {
           _showResetTaskDialog(index);
-        }
-
-        if (value == 'delete') {
+        } else if (value == 'delete') {
           _deleteTask(index);
         }
       },
-      itemBuilder:
-          (context) {
+      itemBuilder: (context) {
         return [
-          PopupMenuItem<String>(
-            value: 'reset',
-            child: Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.end,
-              children: [
-                Text(
-                  'إعادة المهمة 🔄',
-                  style:
-                      TextStyle(
-                    color: navy,
-                    fontSize: 12.6,
-                    fontWeight:
-                        FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
+          _menuItem(
+            value: 'view',
+            icon: Icons.visibility_outlined,
+            iconColor: blue,
+            label: 'عرض المهمة',
           ),
-          PopupMenuItem<String>(
+          _menuItem(
+            value: 'reset',
+            icon: Icons.refresh_rounded,
+            iconColor: cyan,
+            label: 'إعادة المهمة',
+          ),
+          _menuItem(
             value: 'delete',
-            child: Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.end,
-              children: [
-                Text(
-                  'حذف المهمة 🗑️',
-                  style:
-                      TextStyle(
-                    color:
-                        Color(0xFFD64545),
-                    fontSize: 12.6,
-                    fontWeight:
-                        FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
+            icon: Icons.delete_outline_rounded,
+            iconColor: const Color(0xFFD64545),
+            label: 'حذف المهمة',
+            destructive: true,
           ),
         ];
       },
     );
   }
-    // ============================================================
+
+  PopupMenuItem<String> _menuItem({
+    required String value,
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    bool destructive = false,
+  }) {
+    return PopupMenuItem<String>(
+      value: value,
+      height: 48,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: destructive ? const Color(0xFFD64545) : navy,
+              fontSize: 13.2,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(width: 11),
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: _isDark ? 0.16 : 0.10),
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: Icon(icon, color: iconColor, size: 19),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showTaskDetails(int index) {
+    if (index < 0 || index >= tasks.length) return;
+    final task = tasks[index];
+    final title = _safeString(task['title'], fallback: 'مهمة جديدة');
+    final description = _safeString(task['description'], fallback: 'لا يوجد وصف للمهمة.');
+    final time = _safeString(task['time'], fallback: 'بدون وقت');
+    final tag = _safeString(task['tag'], fallback: 'عام');
+    final emoji = _safeString(task['emoji'], fallback: '📝');
+
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (dialogContext) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          backgroundColor: _surface,
+          elevation: 12,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(26),
+            side: BorderSide(color: _border),
+          ),
+          title: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: _taskAdd,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                alignment: Alignment.center,
+                child: Text(emoji, style: const TextStyle(fontSize: 23)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'تفاصيل المهمة',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(color: navy, fontSize: 20, fontWeight: FontWeight.w800),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(title, textAlign: TextAlign.right, style: TextStyle(color: navy, fontSize: 18, fontWeight: FontWeight.w800, height: 1.4)),
+              const SizedBox(height: 10),
+              Text(description, textAlign: TextAlign.right, style: TextStyle(color: _subtle, fontSize: 14, height: 1.5)),
+              const SizedBox(height: 16),
+              Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _detailChip(Icons.access_time_rounded, time, blue),
+                  _detailChip(Icons.local_offer_outlined, tag, cyan),
+                ],
+              ),
+            ],
+          ),
+          actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
+          actions: [
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                style: TextButton.styleFrom(
+                  backgroundColor: _softButton,
+                  foregroundColor: navy,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                ),
+                child: Text('إغلاق', style: TextStyle(color: navy, fontWeight: FontWeight.w800)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _detailChip(IconData icon, String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: _isDark ? 0.14 : 0.08),
+        borderRadius: BorderRadius.circular(13),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 17, color: color),
+          const SizedBox(width: 6),
+          Text(text, style: TextStyle(color: color, fontSize: 12.2, fontWeight: FontWeight.w800)),
+        ],
+      ),
+    );
+  }
+
+  Future<TimeOfDay?> _showFlumeaTimePicker(
+    BuildContext pickerContext, {
+    required TimeOfDay initialTime,
+  }) {
+    final baseTheme = Theme.of(pickerContext);
+    return showTimePicker(
+      context: pickerContext,
+      initialTime: initialTime,
+      builder: (context, child) {
+        final scheme = ColorScheme.fromSeed(
+          seedColor: blue,
+          brightness: baseTheme.brightness,
+        );
+        return Localizations.override(
+          context: context,
+          locale: const Locale('ar', 'IQ'),
+          child: Theme(
+            data: baseTheme.copyWith(
+              colorScheme: scheme.copyWith(
+                primary: blue,
+                secondary: cyan,
+                surface: _surface,
+                onSurface: navy,
+              ),
+              timePickerTheme: TimePickerThemeData(
+                backgroundColor: _surface,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                hourMinuteColor: _taskAdd,
+                hourMinuteTextColor: navy,
+                dayPeriodColor: cyan.withValues(alpha: _isDark ? 0.18 : 0.12),
+                dayPeriodTextColor: navy,
+                dialBackgroundColor: _soft,
+                dialHandColor: blue,
+                dialTextColor: navy,
+                entryModeIconColor: blue,
+                helpTextStyle: TextStyle(color: _subtle, fontWeight: FontWeight.w700),
+                dayPeriodBorderSide: BorderSide(color: _border),
+                hourMinuteShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+            ),
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: child!,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _arabicContextMenuBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    final items = editableTextState.contextMenuButtonItems.map((item) {
+      String label;
+      switch (item.type) {
+        case ContextMenuButtonType.cut:
+          label = 'قص';
+          break;
+        case ContextMenuButtonType.copy:
+          label = 'نسخ';
+          break;
+        case ContextMenuButtonType.paste:
+          label = 'لصق';
+          break;
+        case ContextMenuButtonType.selectAll:
+          label = 'تحديد الكل';
+          break;
+        case ContextMenuButtonType.share:
+          label = 'مشاركة';
+          break;
+        case ContextMenuButtonType.lookUp:
+          label = 'بحث';
+          break;
+        case ContextMenuButtonType.searchWeb:
+          label = 'البحث على الويب';
+          break;
+        default:
+          label = item.label;
+      }
+      return ContextMenuButtonItem(
+        onPressed: item.onPressed,
+        type: item.type,
+        label: label,
+      );
+    }).toList();
+
+    return AdaptiveTextSelectionToolbar.buttonItems(
+      anchors: editableTextState.contextMenuAnchors,
+      buttonItems: items,
+    );
+  }
+
+  // ============================================================
   // معلومات المهمة عند إعادة المهمة
   // ============================================================
 
@@ -1840,15 +2052,9 @@ class _PlanScreenState extends State<PlanScreen> {
 
                           GestureDetector(
                             onTap: () async {
-                              final picked = await showTimePicker(
-                                context: dialogContext,
+                              final picked = await _showFlumeaTimePicker(
+                                dialogContext,
                                 initialTime: TimeOfDay.now(),
-                                builder: (context, child) {
-                                  return Directionality(
-                                    textDirection: TextDirection.rtl,
-                                    child: child!,
-                                  );
-                                },
                               );
 
                               if (picked == null) {
@@ -2236,6 +2442,7 @@ class _PlanScreenState extends State<PlanScreen> {
       child: TextField(
         controller: controller,
         textAlign: TextAlign.right,
+        contextMenuBuilder: _arabicContextMenuBuilder,
         style: TextStyle(
           color: navy,
           fontSize: 14.4,
@@ -2443,11 +2650,19 @@ class _PlanScreenState extends State<PlanScreen> {
             padding: EdgeInsets.zero,
             icon: Icon(
               Icons.more_vert_rounded,
-              color: const Color(0xFF7B8798),
+              color: _subtle,
               size: MediaQuery.sizeOf(context).width < 600 ? 21 * 0.90 : 21,
             ),
+            color: _surface,
+            elevation: 10,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: BorderSide(color: _border),
+            ),
             onSelected: (value) async {
-              if (value == 'reset') {
+              if (value == 'view') {
+                _showGoalDetails(title, completed);
+              } else if (value == 'reset') {
                 _showResetGoalDialog(index);
               } else if (value == 'delete') {
                 setState(() {
@@ -2463,40 +2678,9 @@ class _PlanScreenState extends State<PlanScreen> {
               }
             },
             itemBuilder: (context) => [
-              PopupMenuItem<String>(
-                value: 'reset',
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Icon(Icons.refresh_rounded, color: blue),
-                    const SizedBox(width: 10),
-                    Text(
-                      'إعادة الهدف',
-                      style: TextStyle(
-                        color: navy,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuItem<String>(
-                value: 'delete',
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: const [
-                    Icon(Icons.delete_outline_rounded, color: Colors.red),
-                    SizedBox(width: 10),
-                    Text(
-                      'حذف الهدف',
-                      style: TextStyle(
-                        color: Color(0xFFD64545),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _menuItem(value: 'view', icon: Icons.visibility_outlined, iconColor: blue, label: 'عرض الهدف'),
+              _menuItem(value: 'reset', icon: Icons.refresh_rounded, iconColor: cyan, label: 'إعادة الهدف'),
+              _menuItem(value: 'delete', icon: Icons.delete_outline_rounded, iconColor: const Color(0xFFD64545), label: 'حذف الهدف', destructive: true),
             ],
           ),
           const SizedBox(width: 4),
@@ -2571,6 +2755,7 @@ class _PlanScreenState extends State<PlanScreen> {
             content: TextField(
               controller: titleController,
               textAlign: TextAlign.right,
+              contextMenuBuilder: _arabicContextMenuBuilder,
               style: TextStyle(color: navy),
               decoration: InputDecoration(
                 labelText: 'اسم الهدف',
@@ -2788,6 +2973,28 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
 
+  void _showHabitDetails(String title, bool completed, IconData icon) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          backgroundColor: _surface,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26), side: BorderSide(color: _border)),
+          title: Text('تفاصيل العادة', textAlign: TextAlign.right, style: TextStyle(color: navy, fontWeight: FontWeight.w800)),
+          content: Row(
+            children: [
+              Container(width: 48, height: 48, decoration: BoxDecoration(color: blue.withValues(alpha: _isDark ? .16 : .08), shape: BoxShape.circle), child: Icon(icon, color: blue)),
+              const SizedBox(width: 12),
+              Expanded(child: Text(title, textAlign: TextAlign.right, style: TextStyle(color: navy, fontSize: 17, fontWeight: FontWeight.w800, height: 1.4))),
+            ],
+          ),
+          actions: [TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: Text('إغلاق', style: TextStyle(color: blue, fontWeight: FontWeight.w800)))],
+        ),
+      ),
+    );
+  }
+
   // ============================================================
   // بطاقة العادة
   // ============================================================
@@ -2853,45 +3060,28 @@ class _PlanScreenState extends State<PlanScreen> {
             padding: EdgeInsets.zero,
             icon: Icon(
               Icons.more_vert_rounded,
-              color: Color(0xFF7B8798),
+              color: _subtle,
               size: MediaQuery.sizeOf(context).width < 600 ? 21 * 0.90 : 21,
             ),
+            color: _surface,
+            elevation: 10,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: BorderSide(color: _border),
+            ),
             onSelected: (value) async {
-              if (value == 'reset') {
+              if (value == 'view') {
+                _showHabitDetails(title, completed, icon);
+              } else if (value == 'reset') {
                 _showResetHabitDialog(id);
               } else if (value == 'delete') {
                 await _deleteHabit(id);
               }
             },
             itemBuilder: (context) => [
-              PopupMenuItem<String>(
-                value: 'reset',
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Icon(
-                      Icons.refresh_rounded,
-                      color: blue,
-                    ),
-                    SizedBox(width: 10),
-                    Text('إعادة العادة'),
-                  ],
-                ),
-              ),
-              PopupMenuItem<String>(
-                value: 'delete',
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Icon(
-                      Icons.delete_outline_rounded,
-                      color: Colors.red,
-                    ),
-                    SizedBox(width: 10),
-                    Text('حذف العادة'),
-                  ],
-                ),
-              ),
+              _menuItem(value: 'view', icon: Icons.visibility_outlined, iconColor: blue, label: 'عرض العادة'),
+              _menuItem(value: 'reset', icon: Icons.refresh_rounded, iconColor: cyan, label: 'إعادة العادة'),
+              _menuItem(value: 'delete', icon: Icons.delete_outline_rounded, iconColor: const Color(0xFFD64545), label: 'حذف العادة', destructive: true),
             ],
           ),
           SizedBox(width: 4),
@@ -3139,6 +3329,8 @@ class _PlanScreenState extends State<PlanScreen> {
           controller,
       textAlign:
           TextAlign.right,
+      contextMenuBuilder:
+          _arabicContextMenuBuilder,
       decoration:
           InputDecoration(
         labelText:
