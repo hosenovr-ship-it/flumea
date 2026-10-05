@@ -1808,6 +1808,12 @@ class _PlanScreenState extends State<PlanScreen> {
                 surface: _surface,
                 onSurface: navy,
               ),
+              dialogTheme: DialogThemeData(
+                backgroundColor: _surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28),
+                ),
+              ),
               timePickerTheme: TimePickerThemeData(
                 backgroundColor: _surface,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
@@ -1863,7 +1869,7 @@ class _PlanScreenState extends State<PlanScreen> {
           label = 'البحث على الويب';
           break;
         default:
-          label = item.label;
+          label = item.label ?? '';
       }
       return ContextMenuButtonItem(
         onPressed: item.onPressed,
@@ -2712,6 +2718,107 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showGoalDetails(String title, bool completed) {
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (dialogContext) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          backgroundColor: _surface,
+          elevation: 12,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(26),
+            side: BorderSide(color: _border),
+          ),
+          title: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: blue.withValues(alpha: _isDark ? 0.16 : 0.08),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Icon(Icons.flag_outlined, color: blue, size: 25),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'تفاصيل الهدف',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    color: navy,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                title,
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  color: navy,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                decoration: BoxDecoration(
+                  color: completed
+                      ? cyan.withValues(alpha: _isDark ? 0.14 : 0.08)
+                      : blue.withValues(alpha: _isDark ? 0.14 : 0.06),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: completed ? cyan.withValues(alpha: 0.35) : _border,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Icon(
+                      completed ? Icons.check_circle_outline : Icons.flag_outlined,
+                      color: completed ? cyan : blue,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      completed ? 'تم إنجاز الهدف' : 'الهدف غير مكتمل',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        color: navy,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(
+                'إغلاق',
+                style: TextStyle(color: blue, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
