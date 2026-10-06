@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'login_screen.dart';
+import 'home_screen.dart';
 import 'theme_controller.dart';
 import 'services/flumea_notification_service.dart';
 
@@ -16,6 +17,33 @@ Future<void> main() async {
   await FlumeaThemeController.load();
 
   runApp(const FlumeaApp());
+}
+
+
+class _AuthGate extends StatelessWidget {
+  const _AuthGate();
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = Supabase.instance.client.auth;
+
+    return StreamBuilder<AuthState>(
+      stream: auth.onAuthStateChange,
+      initialData: AuthState(
+        AuthChangeEvent.initialSession,
+        auth.currentSession,
+      ),
+      builder: (context, snapshot) {
+        final session = snapshot.data?.session;
+
+        if (session != null) {
+          return const HomeScreen();
+        }
+
+        return const LoginScreen();
+      },
+    );
+  }
 }
 
 class FlumeaApp extends StatelessWidget {
@@ -48,7 +76,7 @@ class FlumeaApp extends StatelessWidget {
             scaffoldBackgroundColor: const Color(0xFF0F1720),
             useMaterial3: true,
           ),
-          home: const LoginScreen(),
+          home: const _AuthGate(),
         );
       },
     );
