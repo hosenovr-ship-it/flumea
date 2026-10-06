@@ -287,6 +287,25 @@ class _PlanScreenState extends State<PlanScreen> {
     return '${date.year}-$month-$day';
   }
 
+  String _habitDailyKey(String habitId, DateTime date) {
+    final userId = _supabase.auth.currentUser?.id ?? 'local';
+    return 'flumea_habit_done_${userId}_${habitId}_${_dateKey(date)}';
+  }
+
+  Future<bool> _getHabitDailyState(String habitId, DateTime date) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_habitDailyKey(habitId, date)) ?? false;
+  }
+
+  Future<void> _setHabitDailyState(
+    String habitId,
+    DateTime date,
+    bool completed,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_habitDailyKey(habitId, date), completed);
+  }
+
   Future<void> _saveTaskDate(
     String id,
     DateTime date,
@@ -411,9 +430,6 @@ class _PlanScreenState extends State<PlanScreen> {
         return;
       }
 
-      // لا ننشئ عادات افتراضية للمستخدم الجديد.
-      // وإذا كانت النسخ القديمة قد أنشأت العادات الافتراضية فقط، نحذفها
-      // حتى تبدأ صفحة الخطة فارغة.
       const defaultHabitNames = {
         'شرب الماء',
         'الرياضة',
@@ -442,32 +458,40 @@ class _PlanScreenState extends State<PlanScreen> {
         return;
       }
 
+      // العادات تتكرر يومياً، لذلك حالة الإنجاز لا تُقرأ من
+      // عمود completed الدائم في habits، بل من سجل محلي خاص بكل يوم.
+      final selectedDate = _selectedDate;
+      final dailyHabits = <Map<String, dynamic>>[];
+
+      for (final habit in loadedHabits) {
+        final mapped = _habitMap(habit);
+        final id = _safeString(mapped['id']);
+        final doneToday = id.isNotEmpty
+            ? await _getHabitDailyState(id, selectedDate)
+            : false;
+        mapped['completed'] = doneToday;
+        dailyHabits.add(mapped);
+      }
+
+      if (!mounted) return;
+
       setState(() {
-        habits.clear();
-        for (final habit in loadedHabits) {
-          habits.add(_habitMap(habit));
-        }
+        habits
+          ..clear()
+          ..addAll(dailyHabits);
       });
+
       await _loadActiveDays();
     } catch (error) {
       if (!mounted) {
         return;
       }
 
-      FlumeaNotificationService.showTopMessage(context, 'تعذر تحميل العادات: $error');
+      FlumeaNotificationService.showTopMessage(
+        context,
+        'تعذر تحميل العادات: $error',
+      );
     }
-  }
-
-  Map<String, dynamic> _habitMap(Map<String, dynamic> habit) {
-    final name = _safeString(habit['name']);
-
-    return {
-      'id': habit['id'],
-      'title': name,
-      'description': _safeString(habit['description']),
-      'completed': _safeBool(habit['completed']),
-      'icon': _habitIconForName(name),
-    };
   }
 
   IconData _habitIconForName(String name) {
@@ -506,16 +530,27 @@ class _PlanScreenState extends State<PlanScreen> {
     }
 
     final newValue = !completed;
+    final date = _selectedDate;
 
     setState(() {
       habits[index]['completed'] = newValue;
     });
 
     try {
-      await _habitService.updateHabit(
-        id: id,
-        completed: newValue,
-      );
+      // كل يوم له حالة مستقلة؛ إكمال العادة اليوم لا يجعلها
+      // مكتملة تلقائياً في اليوم التالي.
+      await _setHabitDailyState(id, date, newValue);
+
+      // نبقي حالة habits متوافقة مع البيانات القديمة، لكن واجهة
+      // الخطة تعتمد على السجل اليومي أعلاه.
+      try {
+        await _habitService.updateHabit(
+          id: id,
+          completed: newValue,
+        );
+      } catch (_) {
+        // فشل تحديث القيمة العامة لا يمنع حفظ إنجاز اليوم.
+      }
 
       await _loadActiveDays();
 
@@ -535,7 +570,10 @@ class _PlanScreenState extends State<PlanScreen> {
         habits[index]['completed'] = completed;
       });
 
-      FlumeaNotificationService.showTopMessage(context, 'تعذر تحديث العادة: $error');
+      FlumeaNotificationService.showTopMessage(
+        context,
+        'تعذر تحديث العادة: $error',
+      );
     }
   }
 
@@ -837,6 +875,7 @@ class _PlanScreenState extends State<PlanScreen> {
               selectedDay = DateTime.now().weekday % 7;
             });
             _loadTasks();
+            _loadHabits();
           },
           child: Container(
             padding:
@@ -909,6 +948,7 @@ class _PlanScreenState extends State<PlanScreen> {
                     selectedDay = index;
                   });
                   _loadTasks();
+                  _loadHabits();
                 },
                 child: _dayBox(
                   days[index][0],
@@ -1785,59 +1825,61 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   Future<TimeOfDay?> _showFlumeaTimePicker({
+    required BuildContext pickerContext,
     required TimeOfDay initialTime,
   }) {
-    // نافذة إضافة المهمة موجودة على الـ root Navigator نفسه.
-    // نستخدمه صراحةً حتى يظهر منتقي الوقت فوق النافذة الحالية
-    // بدل أن يختفي خلف طبقة الـ Dialog.
-    final pickerContext = context;
-    final baseTheme = Theme.of(pickerContext);
+    // نستخدم منتقي Flutter الأصلي مباشرةً داخل نفس الـ Navigator
+    // الخاص بنافذة إضافة المهمة. هذا يمنع ظهور طبقة التعتيم وحدها.
+    final baseTheme = Theme.of(context);
+
     return showTimePicker(
       context: pickerContext,
       initialTime: initialTime,
-      useRootNavigator: true,
+      useRootNavigator: false,
       builder: (context, child) {
+        if (child == null) return const SizedBox.shrink();
+
         final scheme = ColorScheme.fromSeed(
           seedColor: blue,
           brightness: baseTheme.brightness,
         );
-        return Localizations.override(
-          context: context,
-          locale: const Locale('ar', 'IQ'),
-          child: Theme(
-            data: baseTheme.copyWith(
-              colorScheme: scheme.copyWith(
-                primary: blue,
-                secondary: cyan,
-                surface: _surface,
-                onSurface: navy,
+
+        return Theme(
+          data: baseTheme.copyWith(
+            colorScheme: scheme.copyWith(
+              primary: blue,
+              secondary: cyan,
+              surface: _surface,
+              onSurface: navy,
+            ),
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: _surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
               ),
-              dialogTheme: DialogThemeData(
-                backgroundColor: _surface,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28),
-                ),
+              hourMinuteColor: _taskAdd,
+              hourMinuteTextColor: navy,
+              dayPeriodColor: cyan.withValues(
+                alpha: _isDark ? 0.18 : 0.12,
               ),
-              timePickerTheme: TimePickerThemeData(
-                backgroundColor: _surface,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-                hourMinuteColor: _taskAdd,
-                hourMinuteTextColor: navy,
-                dayPeriodColor: cyan.withValues(alpha: _isDark ? 0.18 : 0.12),
-                dayPeriodTextColor: navy,
-                dialBackgroundColor: _soft,
-                dialHandColor: blue,
-                dialTextColor: navy,
-                entryModeIconColor: blue,
-                helpTextStyle: TextStyle(color: _subtle, fontWeight: FontWeight.w700),
-                dayPeriodBorderSide: BorderSide(color: _border),
-                hourMinuteShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              dayPeriodTextColor: navy,
+              dialBackgroundColor: _soft,
+              dialHandColor: blue,
+              dialTextColor: navy,
+              entryModeIconColor: blue,
+              helpTextStyle: TextStyle(
+                color: _subtle,
+                fontWeight: FontWeight.w700,
+              ),
+              dayPeriodBorderSide: BorderSide(color: _border),
+              hourMinuteShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: child!,
-            ),
+          ),
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: child,
           ),
         );
       },
@@ -2071,6 +2113,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               if (!dialogContext.mounted) return;
 
                               final picked = await _showFlumeaTimePicker(
+                                pickerContext: dialogContext,
                                 initialTime: TimeOfDay.now(),
                               );
 
