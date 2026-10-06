@@ -953,11 +953,8 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
           child: SafeArea(
-          child: Transform.scale(
-            scale: MediaQuery.sizeOf(context).width < 600 ? 0.94 : 1.0,
-            alignment: Alignment.topCenter,
-            child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(18, 16, 18, 110),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -1286,7 +1283,6 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
             ),
-        ),
         ),
         bottomNavigationBar: FlumeaBottomNavigation(
           selectedIndex: 3,
