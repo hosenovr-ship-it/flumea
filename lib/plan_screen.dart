@@ -494,6 +494,20 @@ class _PlanScreenState extends State<PlanScreen> {
     }
   }
 
+  Map<String, dynamic> _habitMap(Map<String, dynamic> habit) {
+    final name = _safeString(habit['name']).trim();
+    return {
+      ...habit,
+      'id': _safeString(habit['id']),
+      'title': name,
+      'name': name,
+      'icon': _safeIcon(habit['icon']) == Icons.check_circle_outline
+          ? _habitIconForName(name)
+          : _safeIcon(habit['icon']),
+      'completed': _safeBool(habit['completed']),
+    };
+  }
+
   IconData _habitIconForName(String name) {
     switch (name.trim()) {
       case 'شرب الماء':
@@ -1825,7 +1839,6 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   Future<TimeOfDay?> _showFlumeaTimePicker({
-    required BuildContext pickerContext,
     required TimeOfDay initialTime,
   }) {
     // نستخدم منتقي Flutter الأصلي مباشرةً داخل نفس الـ Navigator
@@ -1833,9 +1846,9 @@ class _PlanScreenState extends State<PlanScreen> {
     final baseTheme = Theme.of(context);
 
     return showTimePicker(
-      context: pickerContext,
+      context: context,
       initialTime: initialTime,
-      useRootNavigator: false,
+      useRootNavigator: true,
       builder: (context, child) {
         if (child == null) return const SizedBox.shrink();
 
