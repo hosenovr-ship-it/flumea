@@ -35,6 +35,56 @@ class _GoogleAuth {
   }
 }
 
+
+SnackBar _flumeaSnackBar({
+  required String message,
+  required bool success,
+}) {
+  return SnackBar(
+    behavior: SnackBarBehavior.floating,
+    margin: const EdgeInsets.fromLTRB(16, 0, 16, 18),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+    elevation: 8,
+    duration: const Duration(seconds: 3),
+    backgroundColor: success
+        ? const Color(0xFF168A62)
+        : const Color(0xFF263246),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+    ),
+    content: Row(
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.16),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            success ? Icons.check_rounded : Icons.error_outline_rounded,
+            color: Colors.white,
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            message,
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              height: 1.35,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
@@ -99,12 +149,9 @@ class LoginScreen extends StatelessWidget {
                       if (!context.mounted) return;
 
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'تم تسجيل الدخول باستخدام Google بنجاح ✅',
-                            textAlign: TextAlign.right,
-                          ),
-                          behavior: SnackBarBehavior.floating,
+                        _flumeaSnackBar(
+                          message: 'تم تسجيل الدخول بنجاح',
+                          success: true,
                         ),
                       );
 
@@ -117,45 +164,28 @@ class LoginScreen extends StatelessWidget {
                     } on GoogleSignInException catch (error) {
                       if (!context.mounted) return;
 
-                      final String description =
-                          error.description?.trim().isNotEmpty == true
-                              ? error.description!.trim()
-                              : 'لا توجد تفاصيل إضافية من Google.';
-
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          duration: const Duration(seconds: 8),
-                          content: Text(
-                            'تعذر تسجيل الدخول باستخدام Google\n'
-                            'رمز الخطأ: ${error.code}\n'
-                            'التفاصيل: $description',
-                            textAlign: TextAlign.right,
-                          ),
-                          behavior: SnackBarBehavior.floating,
+                        _flumeaSnackBar(
+                          message: 'تعذر تسجيل الدخول باستخدام Google',
+                          success: false,
                         ),
                       );
                     } on AuthException catch (error) {
                       if (!context.mounted) return;
 
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            error.message,
-                            textAlign: TextAlign.right,
-                          ),
-                          behavior: SnackBarBehavior.floating,
+                        _flumeaSnackBar(
+                          message: 'تعذر تسجيل الدخول',
+                          success: false,
                         ),
                       );
                     } catch (error) {
                       if (!context.mounted) return;
 
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'حدث خطأ أثناء تسجيل الدخول باستخدام Google. حاول مرة أخرى.',
-                            textAlign: TextAlign.right,
-                          ),
-                          behavior: SnackBarBehavior.floating,
+                        _flumeaSnackBar(
+                          message: 'تعذر تسجيل الدخول باستخدام Google',
+                          success: false,
                         ),
                       );
                     }
@@ -331,7 +361,7 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
 
         if (!mounted) return;
 
-        _showMessage('تم تسجيل الدخول بنجاح ✅');
+        _showMessage('تم تسجيل الدخول بنجاح', success: true);
 
         Navigator.pushReplacement(
           context,
@@ -350,10 +380,11 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
 
         if (response.session == null) {
           _showMessage(
-            'تم إنشاء الحساب ✅\nتحقق من بريدك الإلكتروني لتأكيد الحساب.',
+            'تم إنشاء الحساب. تحقق من بريدك الإلكتروني لتأكيد الحساب.',
+            success: true,
           );
         } else {
-          _showMessage('تم إنشاء الحساب بنجاح ✅');
+          _showMessage('تم إنشاء الحساب بنجاح', success: true);
 
           if (!mounted) return;
 
@@ -368,11 +399,11 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
     } on AuthException catch (error) {
       if (!mounted) return;
 
-      _showMessage(error.message);
+      _showMessage('تعذر تسجيل الدخول', success: false);
     } catch (error) {
       if (!mounted) return;
 
-      _showMessage('حدث خطأ غير متوقع، حاول مرة أخرى.');
+      _showMessage('تعذر تسجيل الدخول، حاول مرة أخرى', success: false);
     } finally {
       if (mounted) {
         setState(() {
@@ -382,14 +413,14 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
     }
   }
 
-  void _showMessage(String message) {
+  void _showMessage(
+    String message, {
+    bool success = false,
+  }) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          textAlign: TextAlign.right,
-        ),
-        behavior: SnackBarBehavior.floating,
+      _flumeaSnackBar(
+        message: message,
+        success: success,
       ),
     );
   }
