@@ -313,10 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           child: SafeArea(
-          child: Transform.scale(
-            scale: MediaQuery.sizeOf(context).width < 600 ? 0.94 : 1.0,
-            alignment: Alignment.topCenter,
-            child: _loading
+          child: _loading
               ? const Center(
                   child: CircularProgressIndicator(color: teal),
                 )
@@ -325,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: teal,
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(18, 14, 18, 105),
+                    padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -343,7 +340,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
             ),
-        ),
         ),
         bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 0),
       ),
@@ -733,22 +729,13 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Row(
         children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(Icons.auto_awesome_rounded, color: green),
-          ),
-          const SizedBox(width: 12),
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   'اقتراح ذكي ✨',
+                  textAlign: TextAlign.right,
                   style: TextStyle(
                     color: darkBlue,
                     fontSize: 12.6,
@@ -768,36 +755,20 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
+          const SizedBox(width: 12),
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(Icons.auto_awesome_rounded, color: green),
+          ),
         ],
       ),
     );
   }
-
-  static Color? _parseColor(String? value) {
-    if (value == null || value.isEmpty) return null;
-
-    final hex = value.replaceAll('#', '');
-    if (hex.length != 6 && hex.length != 8) return null;
-
-    final normalized = hex.length == 6 ? 'FF$hex' : hex;
-    return Color(int.tryParse(normalized, radix: 16) ?? 0xFF2870B5);
-  }
-}
-
-class _ProgressStat extends StatelessWidget {
-  final IconData icon;
-  final String value;
-  final String label;
-  final Color iconColor;
-
-  const _ProgressStat({
-    required this.icon,
-    required this.value,
-    required this.label,
-    required this.iconColor,
-  });
-
-  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
@@ -1262,14 +1233,13 @@ class _MealLine extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 7),
       child: Row(
         children: [
-          Text(icon, style: const TextStyle(fontSize: 13.5)),
-          const SizedBox(width: 5),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   name,
+                  textAlign: TextAlign.right,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 9,
@@ -1278,6 +1248,7 @@ class _MealLine extends StatelessWidget {
                 ),
                 Text(
                   calories,
+                  textAlign: TextAlign.right,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 7.2,
@@ -1286,6 +1257,8 @@ class _MealLine extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(width: 5),
+          Text(icon, style: const TextStyle(fontSize: 13.5)),
         ],
       ),
     );
