@@ -507,6 +507,22 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Color? _parseColor(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    final text = value.trim().replaceFirst('#', '');
+    try {
+      if (text.length == 6) {
+        return Color(int.parse('FF$text', radix: 16));
+      }
+      if (text.length == 8) {
+        return Color(int.parse(text, radix: 16));
+      }
+    } catch (_) {
+      return null;
+    }
+    return null;
+  }
+
   Widget _buildTodayPlan() {
     return _LargeCard(
       child: Column(
@@ -769,6 +785,19 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+class _ProgressStat extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+  final Color iconColor;
+
+  const _ProgressStat({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.iconColor,
+  });
+
   Widget build(BuildContext context) {
     return Column(
       children: [
