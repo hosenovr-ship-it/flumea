@@ -1784,17 +1784,18 @@ class _PlanScreenState extends State<PlanScreen> {
     );
   }
 
-  Future<TimeOfDay?> _showFlumeaTimePicker(
-    BuildContext pickerContext, {
+  Future<TimeOfDay?> _showFlumeaTimePicker({
     required TimeOfDay initialTime,
   }) {
+    // نافذة إضافة المهمة موجودة على الـ root Navigator نفسه.
+    // نستخدمه صراحةً حتى يظهر منتقي الوقت فوق النافذة الحالية
+    // بدل أن يختفي خلف طبقة الـ Dialog.
+    final pickerContext = context;
     final baseTheme = Theme.of(pickerContext);
     return showTimePicker(
       context: pickerContext,
       initialTime: initialTime,
-      // مهم: نافذة إضافة المهمة نفسها تستخدم Navigator الداخلي،
-      // لذلك يجب أن يظهر منتقي الوقت فوقها على نفس الـ Navigator.
-      useRootNavigator: false,
+      useRootNavigator: true,
       builder: (context, child) {
         final scheme = ColorScheme.fromSeed(
           seedColor: blue,
@@ -2070,7 +2071,6 @@ class _PlanScreenState extends State<PlanScreen> {
                               if (!dialogContext.mounted) return;
 
                               final picked = await _showFlumeaTimePicker(
-                                dialogContext,
                                 initialTime: TimeOfDay.now(),
                               );
 
