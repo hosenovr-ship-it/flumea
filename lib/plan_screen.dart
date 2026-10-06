@@ -747,15 +747,12 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
           child: SafeArea(
-          child: Transform.scale(
-            scale: MediaQuery.sizeOf(context).width < 600 ? 0.94 : 1.0,
-            alignment: Alignment.topCenter,
-            child: SingleChildScrollView(
+          child: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(
               18,
               12,
               18,
-              110,
+              24,
             ),
             child: Column(
               crossAxisAlignment:
@@ -804,7 +801,6 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
             ),
-        ),
         ),
         bottomNavigationBar:
             const FlumeaBottomNavigation(
