@@ -1792,7 +1792,9 @@ class _PlanScreenState extends State<PlanScreen> {
     return showTimePicker(
       context: pickerContext,
       initialTime: initialTime,
-      useRootNavigator: true,
+      // مهم: نافذة إضافة المهمة نفسها تستخدم Navigator الداخلي،
+      // لذلك يجب أن يظهر منتقي الوقت فوقها على نفس الـ Navigator.
+      useRootNavigator: false,
       builder: (context, child) {
         final scheme = ColorScheme.fromSeed(
           seedColor: blue,
