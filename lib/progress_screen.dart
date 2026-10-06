@@ -773,14 +773,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
             ),
           ),
           child: SafeArea(
-          child: Transform.scale(
-            scale: MediaQuery.sizeOf(context).width < 600 ? 0.94 : 1.0,
-            alignment: Alignment.topCenter,
-            child: RefreshIndicator(
+          child: RefreshIndicator(
             onRefresh: _loadProgress,
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               child: _loading
                   ? const SizedBox(
                       height: 650,
@@ -831,7 +828,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
             ),
           ),
             ),
-        ),
         ),
         bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 2),
       ),
