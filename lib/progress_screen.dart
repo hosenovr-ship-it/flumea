@@ -399,17 +399,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
     final totalDays = _daysBetween(range.start, range.end);
 
-    // في الشهر/الفترات الطويلة نعرض 7 نقاط فقط موزعة على كامل الفترة،
-    // حتى لا تتداخل تواريخ الأيام فوق بعضها.
-    final pointCount = totalDays <= 7 ? totalDays : 7;
+    // نستخدم يومًا حقيقيًا لكل نقطة حتى يكون الرسم مطابقًا للفترة:
+    // الأسبوع = 7 أيام، والشهر = جميع الأيام المنقضية من الشهر.
+    final pointCount = totalDays;
     final values = <double>[];
     final labels = <String>[];
 
     for (int i = 0; i < pointCount; i++) {
-      final offset = pointCount == 1
-          ? 0
-          : ((totalDays - 1) * i / (pointCount - 1)).round();
-      final date = range.start.add(Duration(days: offset));
+      final date = range.start.add(Duration(days: i));
       final value = _dailyCompletionRate(
         date: date,
         habits: habits,
@@ -1092,7 +1089,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            '${_periodLabel(_selectedPeriod)} · ${_todayArabicDate()}',
+            _progressPeriodDateLabel(),
             textAlign: TextAlign.right,
             style: TextStyle(color: _secondaryText, fontSize: 11.7),
           ),
@@ -1302,6 +1299,35 @@ class _ProgressScreenState extends State<ProgressScreen> {
     Color(0xFF8E5CF6),
     Color(0xFF18B77A),
   ];
+
+  String _progressPeriodDateLabel() {
+    final today = _dateOnly(DateTime.now());
+    final range = _periodRange(_selectedPeriod);
+
+    if (_selectedPeriod == 0) {
+      return 'اليوم · ${_todayArabicDate()}';
+    }
+
+    if (_selectedPeriod == 1) {
+      return 'آخر 7 أيام · ${_shortArabicDate(range.start)} - ${_shortArabicDate(range.end)}';
+    }
+
+    const months = [
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر',
+    ];
+    return 'هذا الشهر · ${months[today.month - 1]} ${today.year}';
+  }
 
   String _todayArabicDate() {
     final now = DateTime.now();
@@ -1705,7 +1731,19 @@ class _LineChartPainter extends CustomPainter {
     );
     final textPainter = TextPainter(textDirection: TextDirection.rtl);
     final safeLabels = labels.isEmpty ? <String>[] : labels;
+
+    // عند الشهر قد توجد 28-31 نقطة؛ نُبقي جميع النقاط في الرسم،
+    // لكن نعرض تسميات متباعدة حتى لا تتداخل مع بعضها.
+    int labelStep = 1;
+    if (safeLabels.length > 10) {
+      labelStep = (safeLabels.length / 6).ceil();
+    }
+
     for (int i = 0; i < safeLabels.length; i++) {
+      final isFirst = i == 0;
+      final isLast = i == safeLabels.length - 1;
+      if (!isFirst && !isLast && i % labelStep != 0) continue;
+
       final x = safeLabels.length == 1
           ? size.width / 2
           : size.width * (safeLabels.length - 1 - i) / (safeLabels.length - 1);
