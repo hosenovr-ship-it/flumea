@@ -2126,7 +2126,6 @@ class _PlanScreenState extends State<PlanScreen> {
                               if (!dialogContext.mounted) return;
 
                               final picked = await _showFlumeaTimePicker(
-                                pickerContext: dialogContext,
                                 initialTime: TimeOfDay.now(),
                               );
 
