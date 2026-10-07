@@ -718,14 +718,25 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(22),
       ),
       child: Row(
-        textDirection: TextDirection.rtl,
+        textDirection: TextDirection.ltr,
         children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(Icons.auto_awesome_rounded, color: green),
+          ),
+          const SizedBox(width: 12),
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   'اقتراح ذكي ✨',
+                  textAlign: TextAlign.right,
                   style: TextStyle(
                     color: darkBlue,
                     fontSize: 14,
@@ -744,16 +755,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 12),
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(Icons.auto_awesome_rounded, color: green),
           ),
         ],
       ),
@@ -1248,14 +1249,17 @@ class _MealLine extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 7),
       child: Row(
-        textDirection: TextDirection.rtl,
+        textDirection: TextDirection.ltr,
         children: [
+          Text(icon, style: const TextStyle(fontSize: 15)),
+          const SizedBox(width: 5),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   name,
+                  textAlign: TextAlign.right,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 10,
@@ -1264,6 +1268,7 @@ class _MealLine extends StatelessWidget {
                 ),
                 Text(
                   calories,
+                  textAlign: TextAlign.right,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 8,
@@ -1272,8 +1277,6 @@ class _MealLine extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 5),
-          Text(icon, style: const TextStyle(fontSize: 15)),
         ],
       ),
     );
