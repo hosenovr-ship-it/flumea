@@ -717,46 +717,52 @@ class _HomeScreenState extends State<HomeScreen> {
         color: Theme.of(context).colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(22),
       ),
-      child: Row(
-        textDirection: TextDirection.ltr,
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(Icons.auto_awesome_rounded, color: green),
-          ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'اقتراح ذكي ✨',
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color: darkBlue,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                  ),
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Row(
+          children: [
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'اقتراح ذكي ✨',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        color: darkBlue,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'أكمل مهامك المتبقية لتحافظ على تقدمك اليوم.',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        color: grayText,
+                        fontSize: 10,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 4),
-                Text(
-                  'أكمل مهامك المتبقية لتحافظ على تقدمك اليوم.',
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color: grayText,
-                    fontSize: 10,
-                    height: 1.4,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(Icons.auto_awesome_rounded, color: green),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1248,36 +1254,42 @@ class _MealLine extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 7),
-      child: Row(
-        textDirection: TextDirection.ltr,
-        children: [
-          Text(icon, style: const TextStyle(fontSize: 15)),
-          const SizedBox(width: 5),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  name,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                  ),
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Row(
+          children: [
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      name,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      calories,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 8,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  calories,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 8,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 5),
+            Text(icon, style: const TextStyle(fontSize: 15)),
+          ],
+        ),
       ),
     );
   }
