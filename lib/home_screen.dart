@@ -124,26 +124,8 @@ class _HomeScreenState extends State<HomeScreen> {
       debugPrint('FLUMEA habits load error: $e');
     }
 
-    // Today's habit logs are optional. If this query fails,
-    // tasks and habits must still remain visible.
-    try {
-      final today = _today();
-
-      final response = await _supabase
-          .from('habit_logs')
-          .select('habit_id,completed,completed_date')
-          .eq('user_id', user.id)
-          .eq('completed_date', today);
-
-      for (final row in response) {
-        final habitId = row['habit_id']?.toString();
-        if (habitId != null) {
-          completedMap[habitId] = row['completed'] == true;
-        }
-      }
-    } catch (e) {
-      debugPrint('FLUMEA habit logs load error: $e');
-    }
+    // The Plan screen uses habits.completed as the single source of truth.
+    // Do not override it with habit_logs, because Plan updates habits.completed directly.
 
     int foodTotalCalories = 0;
     int foodSelectedCalories = 0;
@@ -718,9 +700,19 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(22),
       ),
       child: Directionality(
-        textDirection: TextDirection.rtl,
+        textDirection: TextDirection.ltr,
         child: Row(
           children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(Icons.auto_awesome_rounded, color: green),
+            ),
+            const SizedBox(width: 12),
             Expanded(
               child: Align(
                 alignment: Alignment.centerRight,
@@ -750,16 +742,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Icon(Icons.auto_awesome_rounded, color: green),
             ),
           ],
         ),
