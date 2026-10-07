@@ -306,13 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaler: TextScaler.linear(
-              MediaQuery.sizeOf(context).width < 600 ? 0.90 : 1.0,
-            ),
-          ),
-          child: SafeArea(
+        body: SafeArea(
           child: _loading
               ? const Center(
                   child: CircularProgressIndicator(color: teal),
@@ -339,7 +333,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-            ),
         ),
         bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 0),
       ),
@@ -386,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 'FLUMEA',
                 style: TextStyle(
                   color: flumeaColor,
-                  fontSize: 18,
+                  fontSize: 20,
                   letterSpacing: 4.0,
                   fontWeight: FontWeight.w700,
                 ),
@@ -400,10 +393,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? NetworkImage(avatarUrl)
                   : null,
               child: avatarUrl == null || avatarUrl.isEmpty
-                  ? Icon(
+                  ? const Icon(
                       Icons.person_rounded,
                       color: darkBlue,
-                      size: MediaQuery.sizeOf(context).width < 600 ? 28 * 0.90 : 28,
+                      size: 28,
                     )
                   : null,
             ),
@@ -414,7 +407,7 @@ class _HomeScreenState extends State<HomeScreen> {
           '$greeting، $userName 👋',
           textAlign: TextAlign.right,
           style: TextStyle(
-            fontSize: 22.5,
+            fontSize: 25,
             height: 1.15,
             fontWeight: FontWeight.w800,
             color: Theme.of(context).colorScheme.onSurface,
@@ -425,7 +418,7 @@ class _HomeScreenState extends State<HomeScreen> {
           'يوم جديد، فرصة جديدة لتصبح أفضل نسخة منك.',
           textAlign: TextAlign.right,
           style: TextStyle(
-            fontSize: 12.6,
+            fontSize: 14,
             height: 1.3,
             color: grayText,
             fontWeight: FontWeight.w500,
@@ -463,7 +456,7 @@ class _HomeScreenState extends State<HomeScreen> {
             textAlign: TextAlign.right,
             style: TextStyle(
               color: Colors.white,
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -507,22 +500,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Color? _parseColor(String? value) {
-    if (value == null || value.trim().isEmpty) return null;
-    final text = value.trim().replaceFirst('#', '');
-    try {
-      if (text.length == 6) {
-        return Color(int.parse('FF$text', radix: 16));
-      }
-      if (text.length == 8) {
-        return Color(int.parse(text, radix: 16));
-      }
-    } catch (_) {
-      return null;
-    }
-    return null;
-  }
-
   Widget _buildTodayPlan() {
     return _LargeCard(
       child: Column(
@@ -537,7 +514,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.symmetric(vertical: 22),
               child: Text(
                 'لا توجد مهام لهذا اليوم',
-                style: TextStyle(color: grayText, fontSize: 11.7),
+                style: TextStyle(color: grayText, fontSize: 13),
               ),
             )
           else
@@ -576,7 +553,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   '$_completedTasks من ${_tasks.length} مكتملة',
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 9.9,
+                    fontSize: 11,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -608,7 +585,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: EdgeInsets.all(10),
                 child: Text(
                   'لا توجد عادات',
-                  style: TextStyle(color: grayText, fontSize: 9.9),
+                  style: TextStyle(color: grayText, fontSize: 11),
                 ),
               )
             else
@@ -639,8 +616,6 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Expanded(
                   child: _CaloriesRing(
-                    // الدائرة تعرض السعرات المحددة فقط من إجمالي
-                    // السعرات المضافة لليوم. لا يوجد هدف ثابت مثل 2200.
                     progress: _foodTotalCalories == 0
                         ? 0.0
                         : (_foodSelectedCalories / _foodTotalCalories)
@@ -690,14 +665,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                   if (mounted) await _loadHomeData();
                 },
-                icon: const Icon(Icons.add, size: 17.1),
+                icon: const Icon(Icons.add, size: 19),
                 label: const Text('تسجيل وجبة'),
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
-                  backgroundColor:
-                      Theme.of(context).colorScheme.secondaryContainer,
-                  foregroundColor:
-                      Theme.of(context).colorScheme.secondary,
+                  backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                  foregroundColor: Theme.of(context).colorScheme.secondary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -736,6 +709,7 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
+
   Widget _buildSmartAssistant() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 17),
@@ -752,10 +726,9 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   'اقتراح ذكي ✨',
-                  textAlign: TextAlign.right,
                   style: TextStyle(
                     color: darkBlue,
-                    fontSize: 12.6,
+                    fontSize: 14,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -765,7 +738,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     color: grayText,
-                    fontSize: 9,
+                    fontSize: 10,
                     height: 1.4,
                   ),
                 ),
@@ -786,6 +759,18 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  static Color? _parseColor(String? value) {
+    if (value == null || value.isEmpty) return null;
+
+    final hex = value.replaceAll('#', '');
+    if (hex.length != 6 && hex.length != 8) return null;
+
+    final normalized = hex.length == 6 ? 'FF$hex' : hex;
+    return Color(int.tryParse(normalized, radix: 16) ?? 0xFF2870B5);
+  }
+}
+
 class _ProgressStat extends StatelessWidget {
   final IconData icon;
   final String value;
@@ -799,16 +784,17 @@ class _ProgressStat extends StatelessWidget {
     required this.iconColor,
   });
 
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: iconColor, size: 25.2),
+        Icon(icon, color: iconColor, size: 28),
         const SizedBox(height: 7),
         Text(
           value,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 18,
+            fontSize: 20,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -817,7 +803,7 @@ class _ProgressStat extends StatelessWidget {
           label,
           style: const TextStyle(
             color: Color(0xFFB7C3D1),
-            fontSize: 9,
+            fontSize: 10,
           ),
         ),
       ],
@@ -881,7 +867,7 @@ class _DailyProgressRing extends StatelessWidget {
                 '$percent%',
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 20.7,
+                  fontSize: 23,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -890,7 +876,7 @@ class _DailyProgressRing extends StatelessWidget {
                 'اليوم',
                 style: TextStyle(
                   color: Color(0xFF42C4DD),
-                  fontSize: 9.9,
+                  fontSize: 11,
                 ),
               ),
             ],
@@ -939,14 +925,14 @@ class _CardTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: MediaQuery.sizeOf(context).width < 600 ? 25 * 0.90 : 25, color: Theme.of(context).colorScheme.onSurface),
+        Icon(icon, size: 25, color: Theme.of(context).colorScheme.onSurface),
         const SizedBox(width: 7),
         Expanded(
           child: Text(
             title,
             textAlign: TextAlign.right,
             style: TextStyle(
-              fontSize: 17.1,
+              fontSize: 19,
               fontWeight: FontWeight.w800,
               color: Theme.of(context).colorScheme.onSurface,
             ),
@@ -1010,7 +996,7 @@ class _HomeTask extends StatelessWidget {
                       category,
                       style: TextStyle(
                         color: categoryColor,
-                        fontSize: 9,
+                        fontSize: 10,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -1022,7 +1008,7 @@ class _HomeTask extends StatelessWidget {
                       textAlign: TextAlign.right,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 12.6,
+                        fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: Theme.of(context).colorScheme.onSurface,
                         decoration: completed
@@ -1042,7 +1028,7 @@ class _HomeTask extends StatelessWidget {
               color: completed
                   ? HomeScreen.green
                   : Theme.of(context).colorScheme.outlineVariant,
-              size: MediaQuery.sizeOf(context).width < 600 ? 25 * 0.90 : 25,
+              size: 25,
             ),
             const SizedBox(width: 10),
             SizedBox(
@@ -1051,7 +1037,7 @@ class _HomeTask extends StatelessWidget {
                 time,
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  fontSize: 9.9,
+                  fontSize: 11,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -1106,14 +1092,14 @@ class _SmallCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: MediaQuery.sizeOf(context).width < 600 ? 21 * 0.90 : 21, color: Theme.of(context).colorScheme.onSurface),
+              Icon(icon, size: 21, color: Theme.of(context).colorScheme.onSurface),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   title,
                   textAlign: TextAlign.right,
                   style: TextStyle(
-                    fontSize: 14.4,
+                    fontSize: 16,
                     fontWeight: FontWeight.w800,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
@@ -1151,14 +1137,14 @@ class _HomeHabit extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 12),
         child: Row(
           children: [
-            Text(icon, style: const TextStyle(fontSize: 16.2)),
+            Text(icon, style: const TextStyle(fontSize: 18)),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 title,
                 textAlign: TextAlign.right,
                 style: TextStyle(
-                  fontSize: 10.8,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
@@ -1168,7 +1154,7 @@ class _HomeHabit extends StatelessWidget {
               completed
                   ? Icons.check_circle_rounded
                   : Icons.radio_button_unchecked_rounded,
-              size: MediaQuery.sizeOf(context).width < 600 ? 23 * 0.90 : 23,
+              size: 23,
               color: completed
                   ? HomeScreen.green
                   : Theme.of(context).colorScheme.outlineVariant,
@@ -1225,7 +1211,7 @@ class _CaloriesRing extends StatelessWidget {
                 value,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 18,
+                  fontSize: 20,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -1234,7 +1220,7 @@ class _CaloriesRing extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: 8.1,
+                  fontSize: 9,
                   height: 1.25,
                 ),
               ),
@@ -1270,26 +1256,24 @@ class _MealLine extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  textAlign: TextAlign.right,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 9,
+                    fontSize: 10,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 Text(
                   calories,
-                  textAlign: TextAlign.right,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 7.2,
+                    fontSize: 8,
                   ),
                 ),
               ],
             ),
           ),
           const SizedBox(width: 5),
-          Text(icon, style: const TextStyle(fontSize: 13.5)),
+          Text(icon, style: const TextStyle(fontSize: 15)),
         ],
       ),
     );
