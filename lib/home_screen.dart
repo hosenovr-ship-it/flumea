@@ -56,21 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return '${now.year}-$month-$day';
   }
 
-  String _habitDailyKey(String habitId) {
-    final userId = _supabase.auth.currentUser?.id ?? 'local';
-    return 'flumea_habit_done_${userId}_${habitId}_${_today()}';
-  }
-
-  Future<bool> _getHabitDailyState(String habitId, bool fallback) async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_habitDailyKey(habitId)) ?? fallback;
-  }
-
-  Future<void> _setHabitDailyState(String habitId, bool completed) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_habitDailyKey(habitId), completed);
-  }
-
   Future<void> _loadHomeData() async {
     final user = _supabase.auth.currentUser;
 
@@ -129,21 +114,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
       habits = List<Map<String, dynamic>>.from(response);
 
-      // Use the same per-day SharedPreferences state used by PlanScreen.
-      // This keeps the Home and Plan habit checkmarks synchronized while
-      // still allowing habits to reset for a new day.
+      // Match PlanScreen's per-day habit state exactly.
+      // Key format mirrors PlanScreen._habitDailyKey.
+      final prefs = await SharedPreferences.getInstance();
+      final today = DateTime.now();
+      final dateKey =
+          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
       for (final habit in habits) {
         final id = habit['id']?.toString();
         if (id != null && id.isNotEmpty) {
-          completedMap[id] = await _getHabitDailyState(
-            id,
-            habit['completed'] == true,
-          );
+          final key = 'flumea_habit_done_${user.id}_${id}_$dateKey';
+          completedMap[id] = prefs.getBool(key) ?? false;
         }
       }
     } catch (e) {
       debugPrint('FLUMEA habits load error: $e');
     }
+
+    // The Plan screen uses habits.completed as the single source of truth.
+    // Do not override it with habit_logs, because Plan updates habits.completed directly.
 
     int foodTotalCalories = 0;
     int foodSelectedCalories = 0;
@@ -230,29 +219,36 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final oldValue = _habitCompleted[habitId] == true;
     final newValue = !oldValue;
-    final today = _today();
+    final now = DateTime.now();
+    final dateKey =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final dailyKey = 'flumea_habit_done_${user.id}_${habitId}_$dateKey';
 
     setState(() => _habitCompleted[habitId] = newValue);
 
     try {
-      // استخدم نفس المفتاح اليومي الذي تستخدمه صفحة الخطة.
-      await _setHabitDailyState(habitId, newValue);
+      // This is the same per-day key used by PlanScreen.
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(dailyKey, newValue);
 
-      // احفظ الحالة الأساسية في جدول habits أولاً.
-      await _supabase
-          .from('habits')
-          .update({'completed': newValue})
-          .eq('id', habitId)
-          .eq('user_id', user.id);
+      // Keep the Supabase status and daily log in sync when available.
+      try {
+        await _supabase
+            .from('habits')
+            .update({'completed': newValue})
+            .eq('id', habitId)
+            .eq('user_id', user.id);
+      } catch (e) {
+        debugPrint('FLUMEA habit status sync error: $e');
+      }
 
-      // سجل اليوم اختياري؛ إذا كانت سياسات RLS تمنعه فلا نُفشل حفظ العادة.
       try {
         final existing = await _supabase
             .from('habit_logs')
             .select('id')
             .eq('habit_id', habitId)
             .eq('user_id', user.id)
-            .eq('completed_date', today)
+            .eq('completed_date', dateKey)
             .maybeSingle();
 
         if (existing != null) {
@@ -264,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
           await _supabase.from('habit_logs').insert({
             'habit_id': habitId,
             'user_id': user.id,
-            'completed_date': today,
+            'completed_date': dateKey,
             'completed': newValue,
           });
         }
@@ -723,7 +719,6 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
               width: 42,
@@ -857,7 +852,7 @@ class _DailyProgressRing extends StatelessWidget {
             height: 102,
             child: CircularProgressIndicator(
               value: 1,
-              strokeWidth: 8,
+              strokeWidth: 9,
               color: Color(0xFF244B70),
             ),
           ),
@@ -866,7 +861,7 @@ class _DailyProgressRing extends StatelessWidget {
             height: 102,
             child: CircularProgressIndicator(
               value: progress,
-              strokeWidth: 8,
+              strokeWidth: 9,
               strokeCap: StrokeCap.round,
               color: Color(0xFF18C5DE),
             ),
@@ -1087,7 +1082,7 @@ class _SmallCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(11, 11, 11, 10),
+      padding: const EdgeInsets.fromLTRB(12, 13, 12, 12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
@@ -1145,7 +1140,7 @@ class _HomeHabit extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 9),
+        padding: const EdgeInsets.only(bottom: 12),
         child: Row(
           children: [
             Text(icon, style: const TextStyle(fontSize: 18)),
@@ -1291,7 +1286,7 @@ class _MealLine extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 5),
-            Text(icon, style: const TextStyle(fontSize: 14)),
+            Text(icon, style: const TextStyle(fontSize: 15)),
           ],
         ),
       ),
