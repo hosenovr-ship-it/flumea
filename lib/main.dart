@@ -29,20 +29,18 @@ class _AuthGate extends StatelessWidget {
 
     return StreamBuilder<AuthState>(
       stream: auth.onAuthStateChange,
+      initialData: AuthState(
+        AuthChangeEvent.initialSession,
+        auth.currentSession,
+      ),
       builder: (context, snapshot) {
-        // Wait for Supabase's first auth event before choosing a screen.
-        // This prevents a restored session from briefly opening Home and
-        // then jumping back to Login when INITIAL_SESSION arrives.
-        if (!snapshot.hasData) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
+        final session = snapshot.data?.session ?? auth.currentSession;
+
+        if (session != null) {
+          return const HomeScreen();
         }
 
-        final session = snapshot.data!.session;
-        return session != null ? const HomeScreen() : const LoginScreen();
+        return const LoginScreen();
       },
     );
   }
