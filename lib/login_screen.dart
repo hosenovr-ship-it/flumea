@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'home_screen.dart';
 const String _googleWebClientId =
     '106036859936-2seqm33h1h9um8pl5dusdatjuc4lhljt.apps.googleusercontent.com';
 
@@ -154,14 +153,7 @@ class LoginScreen extends StatelessWidget {
                           success: true,
                         ),
                       );
-
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HomeScreen(),
-                        ),
-                      );
-                    } on GoogleSignInException catch (_) {
+                    } on GoogleSignInException catch (error) {
                       if (!context.mounted) return;
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -170,7 +162,7 @@ class LoginScreen extends StatelessWidget {
                           success: false,
                         ),
                       );
-                    } on AuthException catch (_) {
+                    } on AuthException catch (error) {
                       if (!context.mounted) return;
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -179,7 +171,7 @@ class LoginScreen extends StatelessWidget {
                           success: false,
                         ),
                       );
-                    } catch (_) {
+                    } catch (error) {
                       if (!context.mounted) return;
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -362,13 +354,6 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
         if (!mounted) return;
 
         _showMessage('تم تسجيل الدخول بنجاح', success: true);
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HomeScreen(),
-          ),
-        );
       } else {
         final response =
             await Supabase.instance.client.auth.signUp(
@@ -387,20 +372,13 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
           _showMessage('تم إنشاء الحساب بنجاح', success: true);
 
           if (!mounted) return;
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const HomeScreen(),
-            ),
-          );
         }
       }
-    } on AuthException catch (_) {
+    } on AuthException catch (error) {
       if (!mounted) return;
 
       _showMessage('تعذر تسجيل الدخول', success: false);
-    } catch (_) {
+    } catch (error) {
       if (!mounted) return;
 
       _showMessage('تعذر تسجيل الدخول، حاول مرة أخرى', success: false);
