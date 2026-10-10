@@ -60,8 +60,10 @@ class FlumeaBottomNavigation extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Container(
-        height: 70,
-          decoration: BoxDecoration(
+        // Increase the navigation bar's height so its top edge and
+        // the four navigation items sit higher on the screen.
+        height: 84,
+        decoration: BoxDecoration(
             color: navigationBackground,
             border: Border(
               top: BorderSide(
