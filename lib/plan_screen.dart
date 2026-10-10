@@ -747,7 +747,8 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
           child: SafeArea(
-          child: SingleChildScrollView(
+            bottom: false,
+            child: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(
               18,
               12,
