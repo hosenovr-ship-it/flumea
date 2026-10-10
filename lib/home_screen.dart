@@ -301,9 +301,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+    // Reduce Home text slightly on narrow phone layouts so it matches the other tabs.
+    // Wider tablet layouts keep their existing typography.
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final homeTextScale = screenWidth < 600 ? 0.90 : 1.0;
+
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: TextScaler.linear(homeTextScale),
+      ),
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: _loading
@@ -333,7 +342,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
         ),
-        bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 0),
+          bottomNavigationBar: const FlumeaBottomNavigation(selectedIndex: 0),
+        ),
       ),
     );
   }
