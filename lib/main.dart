@@ -34,6 +34,8 @@ class _AuthGate extends StatelessWidget {
         auth.currentSession,
       ),
       builder: (context, snapshot) {
+        // Supabase may briefly emit an auth event without a session payload
+        // while restoring a persisted session. Prefer the live client session.
         final session = snapshot.data?.session ?? auth.currentSession;
 
         if (session != null) {
