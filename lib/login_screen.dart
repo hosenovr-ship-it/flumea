@@ -153,7 +153,7 @@ class LoginScreen extends StatelessWidget {
                           success: true,
                         ),
                       );
-                    } on GoogleSignInException catch (error) {
+                    } on GoogleSignInException {
                       if (!context.mounted) return;
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -162,7 +162,7 @@ class LoginScreen extends StatelessWidget {
                           success: false,
                         ),
                       );
-                    } on AuthException catch (error) {
+                    } on AuthException {
                       if (!context.mounted) return;
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -171,7 +171,7 @@ class LoginScreen extends StatelessWidget {
                           success: false,
                         ),
                       );
-                    } catch (error) {
+                    } catch (_) {
                       if (!context.mounted) return;
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -374,11 +374,11 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
           if (!mounted) return;
         }
       }
-    } on AuthException catch (error) {
+    } on AuthException {
       if (!mounted) return;
 
       _showMessage('تعذر تسجيل الدخول', success: false);
-    } catch (error) {
+    } catch (_) {
       if (!mounted) return;
 
       _showMessage('تعذر تسجيل الدخول، حاول مرة أخرى', success: false);
