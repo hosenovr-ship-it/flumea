@@ -59,11 +59,11 @@ class FlumeaBottomNavigation extends StatelessWidget {
 
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: Container(
-        // Increase the navigation bar's height so its top edge and
-        // the four navigation items sit higher on the screen.
-        height: 84,
-        decoration: BoxDecoration(
+      child: SafeArea(
+        top: false,
+        child: Container(
+          height: 78,
+          decoration: BoxDecoration(
             color: navigationBackground,
             border: Border(
               top: BorderSide(
@@ -72,8 +72,8 @@ class FlumeaBottomNavigation extends StatelessWidget {
               ),
             ),
           ),
-        child: Row(
-          children: [
+          child: Row(
+            children: [
               // 1 — الرئيسية
               Expanded(
                 child: _NavItem(
@@ -121,7 +121,8 @@ class FlumeaBottomNavigation extends StatelessWidget {
                   onTap: () => _navigate(context, 3),
                 ),
               ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -155,7 +156,7 @@ class _NavItem extends StatelessWidget {
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(
             horizontal: 18,
-            vertical: 5,
+            vertical: 7,
           ),
           decoration: BoxDecoration(
             color: selected
