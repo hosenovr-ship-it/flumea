@@ -388,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 'FLUMEA',
                 style: TextStyle(
                   color: flumeaColor,
-                  fontSize: 20,
+                  fontSize: 18,
                   letterSpacing: 4.0,
                   fontWeight: FontWeight.w700,
                 ),
