@@ -64,6 +64,55 @@ class _ProgressScreenState extends State<ProgressScreen> {
         userId: user.id,
       );
 
+      // The Plan/Home screens also persist daily habit state locally. Merge
+      // those daily records into the progress history so the chart and counts
+      // reflect completed habits even when a habit_logs write was unavailable.
+      final prefs = await SharedPreferences.getInstance();
+      final localPrefix = 'flumea_habit_done_${user.id}_';
+      final todayKey = _dateKey(_dateOnly(DateTime.now()));
+      for (final key in prefs.getKeys()) {
+        if (!key.startsWith(localPrefix)) continue;
+        final localValue = prefs.getBool(key);
+        if (localValue == null) continue;
+        final suffix = key.substring(localPrefix.length);
+        final match = RegExp(r'^(.+)_([0-9]{4}-[0-9]{2}-[0-9]{2})$')
+            .firstMatch(suffix);
+        if (match == null) continue;
+        final habitId = match.group(1)!;
+        final dateKey = match.group(2)!;
+
+        // Today's local checkbox state is the most recent state shown in Home/Plan.
+        if (dateKey == todayKey) {
+          for (final habit in habits) {
+            if (habit['id']?.toString() == habitId) {
+              habit['completed'] = localValue;
+            }
+          }
+        }
+        if (!localValue) continue;
+
+        final localIdentity = '${habitId}_$dateKey';
+        final alreadyPresent = habitLogs.any((log) {
+          final logHabitId = log['habit_id']?.toString();
+          final logDate = _readDate(log['completed_date']) ??
+              _readDate(log['created_at']);
+          return logHabitId == habitId &&
+              logDate != null &&
+              _dateKey(logDate) == dateKey &&
+              _asBool(log['completed']);
+        });
+        if (!alreadyPresent) {
+          habitLogs.add({
+            'id': 'local_$localIdentity',
+            'habit_id': habitId,
+            'completed_date': dateKey,
+            'completed': true,
+            'created_at': dateKey,
+            'user_id': user.id,
+          });
+        }
+      }
+
       final tasks = await _safeSelect(
         table: 'tasks',
         columns: 'id, title, completed, due_date, created_at, user_id, tag',
@@ -773,7 +822,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
             ),
           ),
           child: SafeArea(
-          child: RefreshIndicator(
+            bottom: false,
+            child: RefreshIndicator(
             onRefresh: _loadProgress,
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
