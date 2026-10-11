@@ -40,7 +40,7 @@ class PrivacyScreen extends StatelessWidget {
                       'FLUMEA',
                       style: TextStyle(
                         color: isDark ? const Color(0xFF6EA7E6) : navy,
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 4,
                       ),
@@ -59,47 +59,8 @@ class PrivacyScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 22),
                 Row(
-                  textDirection: TextDirection.ltr,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              'الخصوصية',
-                              textAlign: TextAlign.right,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: primary,
-                                fontSize: 31,
-                                fontWeight: FontWeight.w800,
-                                height: 1.15,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              'تحكم في بياناتك وأمان حسابك وخصوصيتك',
-                              textAlign: TextAlign.right,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: secondary,
-                                fontSize: 15,
-                                height: 1.4,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 14),
                     Container(
                       width: 58,
                       height: 58,
@@ -111,6 +72,33 @@ class PrivacyScreen extends StatelessWidget {
                         Icons.lock_rounded,
                         color: blue,
                         size: 31,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'الخصوصية',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              color: primary,
+                              fontSize: 25,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'تحكم في بياناتك وأمان حسابك وخصوصيتك',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              color: secondary,
+                              fontSize: 13,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -204,42 +192,8 @@ class PrivacyScreen extends StatelessWidget {
                     ),
                   ),
                   child: Row(
-                    textDirection: TextDirection.ltr,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                'بياناتك آمنة معنا',
-                                textAlign: TextAlign.right,
-                                style: TextStyle(
-                                  color: primary,
-                                  fontSize: 19,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                'نحرص على حماية بياناتك الشخصية وفق أعلى معايير الأمان والخصوصية.',
-                                textAlign: TextAlign.right,
-                                style: TextStyle(
-                                  color: secondary,
-                                  fontSize: 14,
-                                  height: 1.5,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
                       Container(
                         width: 58,
                         height: 58,
@@ -253,6 +207,33 @@ class PrivacyScreen extends StatelessWidget {
                           Icons.verified_user_outlined,
                           color: mint,
                           size: 31,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'بياناتك آمنة معنا',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                color: primary,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'نحرص على حماية بياناتك الشخصية وفق أعلى معايير الأمان والخصوصية.',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                color: secondary,
+                                fontSize: 12.5,
+                                height: 1.5,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -452,7 +433,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                       'FLUMEA',
                       style: TextStyle(
                         color: isDark ? const Color(0xFF6EA7E6) : PrivacyScreen.navy,
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 4,
                       ),
@@ -502,7 +483,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               color: primary,
-                              fontSize: 31,
+                              fontSize: 25,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -512,7 +493,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               color: secondary,
-                              fontSize: 15,
+                              fontSize: 13,
                               height: 1.4,
                             ),
                           ),
@@ -561,7 +542,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                                 color: isDark
                                     ? const Color(0xFFFF8D8D)
                                     : const Color(0xFFAA2D2D),
-                                fontSize: 21,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -571,7 +552,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                               textAlign: TextAlign.left,
                               style: TextStyle(
                                 color: primary,
-                                fontSize: 15,
+                                fontSize: 13,
                                 height: 1.6,
                               ),
                             ),
@@ -599,7 +580,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                         textAlign: TextAlign.right,
                         style: TextStyle(
                           color: primary,
-                          fontSize: 22,
+                          fontSize: 17,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -609,7 +590,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                         textAlign: TextAlign.right,
                         style: TextStyle(
                           color: secondary,
-                          fontSize: 15,
+                          fontSize: 13,
                           height: 1.5,
                         ),
                       ),
@@ -720,7 +701,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                                   textAlign: TextAlign.left,
                                   style: TextStyle(
                                     color: primary,
-                                    fontSize: 19,
+                                    fontSize: 17,
                                     fontWeight: FontWeight.w800,
                                   ),
                                 ),
@@ -730,7 +711,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                                   textAlign: TextAlign.left,
                                   style: TextStyle(
                                     color: secondary,
-                                    fontSize: 14,
+                                    fontSize: 12.5,
                                     height: 1.4,
                                   ),
                                 ),
@@ -1074,7 +1055,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                         color: isDark
                             ? const Color(0xFF6EA7E6)
                             : PrivacyScreen.navy,
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 4,
                       ),
@@ -1120,7 +1101,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               color: primary,
-                              fontSize: 31,
+                              fontSize: 25,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -1130,7 +1111,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               color: secondary,
-                              fontSize: 15,
+                              fontSize: 13,
                               height: 1.4,
                             ),
                           ),
@@ -1189,7 +1170,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: secondary,
-                                fontSize: 14,
+                                fontSize: 12.5,
                               ),
                             ),
                           ],
@@ -1214,7 +1195,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                         textAlign: TextAlign.left,
                         style: TextStyle(
                           color: primary,
-                          fontSize: 20,
+                          fontSize: 18,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -1224,7 +1205,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                         textAlign: TextAlign.left,
                         style: TextStyle(
                           color: secondary,
-                          fontSize: 14,
+                          fontSize: 12.5,
                           height: 1.4,
                         ),
                       ),
@@ -1336,7 +1317,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                           textAlign: TextAlign.left,
                           style: TextStyle(
                             color: primary,
-                            fontSize: 14,
+                            fontSize: 12.5,
                             height: 1.5,
                             fontWeight: FontWeight.w600,
                           ),
@@ -1452,13 +1433,10 @@ class _PrivacyOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final primary = theme.colorScheme.onSurface;
-    final secondary = isDark
+    final primary = Theme.of(context).colorScheme.onSurface;
+    final secondary = Theme.of(context).brightness == Brightness.dark
         ? const Color(0xFFB8C2CC)
         : const Color(0xFF8290A2);
-    final isSmallPhone = MediaQuery.sizeOf(context).width <= 430;
 
     return Material(
       color: Colors.transparent,
@@ -1466,10 +1444,7 @@ class _PrivacyOption extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(28),
         child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: isSmallPhone ? 14 : 18,
-            vertical: isSmallPhone ? 15 : 18,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
           decoration: BoxDecoration(
             color: cardColor,
             borderRadius: BorderRadius.circular(28),
@@ -1477,56 +1452,43 @@ class _PrivacyOption extends StatelessWidget {
           ),
           child: Row(
             textDirection: TextDirection.ltr,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(
                 Icons.chevron_left_rounded,
                 color: secondary,
-                size: isSmallPhone ? 26 : 30,
+                size: 30,
               ),
-              SizedBox(width: isSmallPhone ? 9 : 14),
+              const Spacer(),
               Expanded(
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        title,
-                        textAlign: TextAlign.right,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: primary,
-                          fontSize: isSmallPhone ? 17 : 19,
-                          fontWeight: FontWeight.w800,
-                          height: 1.25,
-                        ),
+                    Text(
+                      title,
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        color: primary,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 5),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        subtitle,
-                        textAlign: TextAlign.right,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: secondary,
-                          fontSize: isSmallPhone ? 12.5 : 14,
-                          height: 1.4,
-                        ),
+                    Text(
+                      subtitle,
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        color: secondary,
+                        fontSize: 12.5,
+                        height: 1.4,
                       ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(width: isSmallPhone ? 9 : 14),
+              const SizedBox(width: 14),
               Container(
-                width: isSmallPhone ? 52 : 58,
-                height: isSmallPhone ? 52 : 58,
+                width: 58,
+                height: 58,
                 decoration: BoxDecoration(
                   color: iconBackground,
                   borderRadius: BorderRadius.circular(18),
@@ -1534,7 +1496,7 @@ class _PrivacyOption extends StatelessWidget {
                 child: Icon(
                   icon,
                   color: iconColor,
-                  size: isSmallPhone ? 27 : 30,
+                  size: 30,
                 ),
               ),
             ],
@@ -1544,6 +1506,7 @@ class _PrivacyOption extends StatelessWidget {
     );
   }
 }
+
 
 class AccountDataScreen extends StatefulWidget {
   const AccountDataScreen({super.key});
@@ -1650,7 +1613,7 @@ class _AccountDataScreenState extends State<AccountDataScreen> {
                               color: isDark
                                   ? const Color(0xFF6EA7E6)
                                   : PrivacyScreen.navy,
-                              fontSize: 22,
+                              fontSize: 20,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 4,
                             ),
@@ -1698,7 +1661,7 @@ class _AccountDataScreenState extends State<AccountDataScreen> {
                                   textAlign: TextAlign.left,
                                   style: TextStyle(
                                     color: primary,
-                                    fontSize: 31,
+                                    fontSize: 25,
                                     fontWeight: FontWeight.w800,
                                   ),
                                 ),
@@ -1708,7 +1671,7 @@ class _AccountDataScreenState extends State<AccountDataScreen> {
                                   textAlign: TextAlign.left,
                                   style: TextStyle(
                                     color: secondary,
-                                    fontSize: 15,
+                                    fontSize: 13,
                                     height: 1.4,
                                   ),
                                 ),
@@ -1754,7 +1717,7 @@ class _AccountDataScreenState extends State<AccountDataScreen> {
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: primary,
-                                fontSize: 22,
+                                fontSize: 17,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -1764,7 +1727,7 @@ class _AccountDataScreenState extends State<AccountDataScreen> {
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: secondary,
-                                fontSize: 14,
+                                fontSize: 12.5,
                               ),
                             ),
                           ],
@@ -1846,7 +1809,7 @@ class _AccountDataScreenState extends State<AccountDataScreen> {
                                 textAlign: TextAlign.left,
                                 style: TextStyle(
                                   color: primary,
-                                  fontSize: 14,
+                                  fontSize: 12.5,
                                   height: 1.5,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -1944,7 +1907,7 @@ class _AccountDataItem extends StatelessWidget {
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     color: secondary,
-                    fontSize: 14,
+                    fontSize: 12.5,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -2053,7 +2016,7 @@ class PrivacyPolicyDetailsScreen extends StatelessWidget {
                         color: isDark
                             ? const Color(0xFF6EA7E6)
                             : PrivacyScreen.navy,
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 4,
                       ),
@@ -2086,7 +2049,7 @@ class PrivacyPolicyDetailsScreen extends StatelessWidget {
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: primary,
-                                fontSize: 31,
+                                fontSize: 25,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -2099,7 +2062,7 @@ class PrivacyPolicyDetailsScreen extends StatelessWidget {
                               textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: secondary,
-                                fontSize: 15,
+                                fontSize: 13,
                                 height: 1.4,
                               ),
                             ),
@@ -2248,7 +2211,7 @@ class PrivacyPolicyDetailsScreen extends StatelessWidget {
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             color: primary,
-                            fontSize: 15,
+                            fontSize: 13,
                             height: 1.5,
                             fontWeight: FontWeight.w600,
                           ),
@@ -2325,7 +2288,7 @@ class _PolicyCard extends StatelessWidget {
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     color: primary,
-                    fontSize: 19,
+                    fontSize: 17,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
