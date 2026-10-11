@@ -747,8 +747,7 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
           child: SafeArea(
-            bottom: false,
-            child: SingleChildScrollView(
+          child: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(
               18,
               12,
@@ -1738,7 +1737,7 @@ class _PlanScreenState extends State<PlanScreen> {
     if (index < 0 || index >= tasks.length) return;
     final task = tasks[index];
     final title = _safeString(task['title'], fallback: 'مهمة جديدة');
-    final description = _safeString(task['description'], fallback: 'لا يوجد وصف للمهمة.');
+    final description = _safeString(task['description']).trim();
     final time = _safeString(task['time'], fallback: 'بدون وقت');
     final tag = _safeString(task['tag'], fallback: 'عام');
     final emoji = _safeString(task['emoji'], fallback: '📝');
@@ -1782,8 +1781,10 @@ class _PlanScreenState extends State<PlanScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(title, textAlign: TextAlign.right, style: TextStyle(color: navy, fontSize: 18, fontWeight: FontWeight.w800, height: 1.4)),
-              const SizedBox(height: 10),
-              Text(description, textAlign: TextAlign.right, style: TextStyle(color: _subtle, fontSize: 14, height: 1.5)),
+              if (description.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Text(description, textAlign: TextAlign.right, style: TextStyle(color: _subtle, fontSize: 14, height: 1.5)),
+              ],
               const SizedBox(height: 16),
               Wrap(
                 alignment: WrapAlignment.end,
@@ -2164,6 +2165,7 @@ class _PlanScreenState extends State<PlanScreen> {
                               final categories = [
                                 'دراسة',
                                 'صحة',
+                                'رياضة',
                                 'إنتاجية',
                                 'تطوير الذات',
                                 'شخصي',
