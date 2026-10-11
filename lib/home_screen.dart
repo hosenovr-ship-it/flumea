@@ -388,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 'FLUMEA',
                 style: TextStyle(
                   color: flumeaColor,
-                  fontSize: 18,
+                  fontSize: 20,
                   letterSpacing: 4.0,
                   fontWeight: FontWeight.w700,
                 ),
@@ -743,7 +743,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: Align(
                 alignment: Alignment.centerRight,
-                child: const Column(
+                child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -751,18 +751,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       'اقتراح ذكي ✨',
                       textAlign: TextAlign.right,
                       style: TextStyle(
-                        color: darkBlue,
+                        color: Theme.of(context).colorScheme.onSecondaryContainer,
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       'أكمل مهامك المتبقية لتحافظ على تقدمك اليوم.',
                       textAlign: TextAlign.right,
                       style: TextStyle(
-                        color: grayText,
-                        fontSize: 10,
+                        color: Theme.of(context).colorScheme.onSecondaryContainer.withValues(alpha: 0.78),
+                        fontSize: 10.5,
                         height: 1.4,
                       ),
                     ),
