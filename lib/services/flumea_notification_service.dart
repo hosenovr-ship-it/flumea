@@ -162,11 +162,11 @@ class FlumeaNotificationService {
       ),
     );
     await _plugin.zonedSchedule(
-      _waterReminderId,
-      'حان وقت شرب الماء 💧',
-      'خذ لحظة واشرب بعض الماء لتحافظ على ترطيبك.',
-      scheduled,
-      details,
+      id: _waterReminderId,
+      title: 'حان وقت شرب الماء 💧',
+      body: 'خذ لحظة واشرب بعض الماء لتحافظ على ترطيبك.',
+      scheduledDate: scheduled,
+      notificationDetails: details,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
     );
