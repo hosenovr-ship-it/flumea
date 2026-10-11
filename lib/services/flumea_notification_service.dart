@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest.dart' as tzdata;
+import 'package:timezone/timezone.dart' as tz;
 
 enum FlumeaNotificationType {
   general,
@@ -29,7 +31,7 @@ class FlumeaNotificationService {
     'flumea_notifications',
     'إشعارات FLUMEA',
     description: 'تنبيهات المهام والعادات والإنجازات في FLUMEA.',
-    importance: Importance.high,
+    importance: Importance.max,
     playSound: true,
     enableVibration: true,
     showBadge: true,
@@ -42,6 +44,9 @@ class FlumeaNotificationService {
 
   Future<void> _initialize() async {
     try {
+      tzdata.initializeTimeZones();
+      tz.setLocalLocation(tz.getLocation('Asia/Baghdad'));
+
       const settings = InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       );
@@ -56,6 +61,14 @@ class FlumeaNotificationService {
 
       await android?.createNotificationChannel(_channel);
       _initialized = true;
+
+      final prefs = await SharedPreferences.getInstance();
+      if ((prefs.getBool('flumea_notifications_master_enabled') ?? true) &&
+          (prefs.getBool('flumea_notify_water') ?? false)) {
+        final hour = prefs.getInt('flumea_water_hour') ?? 9;
+        final minute = prefs.getInt('flumea_water_minute') ?? 0;
+        await scheduleWaterReminder(TimeOfDay(hour: hour, minute: minute));
+      }
     } catch (_) {
       // لا نوقف التطبيق إذا تعذر تشغيل الإشعارات.
     }
@@ -71,21 +84,7 @@ class FlumeaNotificationService {
     bool requestPermission = true,
     String? payload,
   }) async {
-    // لا نرسل إشعارات عامة من نوع general؛ الإشعار الخارجي يجب أن يكون
-    // مرتبطًا بنوع واضح ومفيد للمستخدم.
-    if (type == FlumeaNotificationType.general) return false;
-
     if (!await _isEnabled(type)) return false;
-
-    // منع تكرار نفس الإشعار خلال فترة قصيرة حتى لا يتحول التنبيه إلى إزعاج.
-    final prefs = await SharedPreferences.getInstance();
-    final dedupeKey = _dedupeKey(title, body, type);
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final lastShown = prefs.getInt(dedupeKey);
-    if (lastShown != null &&
-        now - lastShown < const Duration(minutes: 10).inMilliseconds) {
-      return false;
-    }
 
     await initialize();
     if (!_initialized) return false;
@@ -93,21 +92,8 @@ class FlumeaNotificationService {
     if (Platform.isAndroid && requestPermission) {
       final android = _plugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
-
-      final alreadyAsked =
-          prefs.getBool('flumea_notifications_permission_requested') ?? false;
-
-      if (!alreadyAsked) {
-        final granted = await android?.requestNotificationsPermission();
-        await prefs.setBool(
-          'flumea_notifications_permission_requested',
-          true,
-        );
-        if (granted == false) return false;
-      } else {
-        final enabled = await android?.areNotificationsEnabled();
-        if (enabled == false) return false;
-      }
+      final granted = await android?.requestNotificationsPermission();
+      if (granted == false) return false;
     }
 
     final details = AndroidNotificationDetails(
@@ -115,7 +101,7 @@ class FlumeaNotificationService {
       _channel.name,
       channelDescription: _channel.description,
       icon: '@mipmap/ic_launcher',
-      importance: Importance.high,
+      importance: Importance.max,
       priority: Priority.high,
       playSound: true,
       enableVibration: true,
@@ -140,11 +126,61 @@ class FlumeaNotificationService {
       payload: payload,
     );
 
-    await prefs.setInt(dedupeKey, now);
     return true;
   }
 
 
+
+  static const int _waterReminderId = 730041;
+
+  Future<void> scheduleWaterReminder(TimeOfDay time) async {
+    await initialize();
+    if (!_initialized) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('flumea_water_hour', time.hour);
+    await prefs.setInt('flumea_water_minute', time.minute);
+    if (Platform.isAndroid) {
+      final android = _plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+      final granted = await android?.requestNotificationsPermission();
+      if (granted == false) return;
+    }
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduled = tz.TZDateTime(
+      tz.local, now.year, now.month, now.day, time.hour, time.minute,
+    );
+    if (!scheduled.isAfter(now)) scheduled = scheduled.add(const Duration(days: 1));
+    const details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'flumea_water_reminder',
+        'تذكير شرب الماء',
+        channelDescription: 'تذكير يومي بموعد شرب الماء الذي يحدده المستخدم.',
+        importance: Importance.high,
+        priority: Priority.high,
+        playSound: true,
+        enableVibration: true,
+      ),
+    );
+    await _plugin.zonedSchedule(
+      _waterReminderId,
+      'حان وقت شرب الماء 💧',
+      'خذ لحظة واشرب بعض الماء لتحافظ على ترطيبك.',
+      scheduled,
+      details,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+  }
+
+  Future<void> cancelWaterReminder() async {
+    await initialize();
+    await _plugin.cancel(id: _waterReminderId);
+  }
+
+  Future<void> cancelAllNotifications() async {
+    await initialize();
+    await _plugin.cancelAll();
+  }
 
   /// يعرض رسالة أنيقة من أعلى الصفحة داخل التطبيق بدل SnackBar السفلي.
   static void showTopMessage(
@@ -180,33 +216,22 @@ class FlumeaNotificationService {
     });
   }
 
-  String _dedupeKey(
-    String title,
-    String body,
-    FlumeaNotificationType type,
-  ) {
-    final raw = '${type.name}|$title|$body';
-    final hash = raw.codeUnits.fold<int>(
-      17,
-      (value, code) => (value * 31 + code) & 0x7fffffff,
-    );
-    return 'flumea_notification_last_$hash';
-  }
-
   Future<bool> _isEnabled(FlumeaNotificationType type) async {
-    if (type == FlumeaNotificationType.general) return true;
-
     final prefs = await SharedPreferences.getInstance();
+    if (!(prefs.getBool('flumea_notifications_master_enabled') ?? true)) {
+      return false;
+    }
+    if (type == FlumeaNotificationType.general) return true;
 
     switch (type) {
       case FlumeaNotificationType.habit:
-        return prefs.getBool('flumea_notify_habits') ?? false;
+        return prefs.getBool('flumea_notify_habits') ?? true;
       case FlumeaNotificationType.task:
         return prefs.getBool('flumea_notify_tasks') ?? true;
       case FlumeaNotificationType.achievement:
         return prefs.getBool('flumea_notify_achievements') ?? true;
       case FlumeaNotificationType.water:
-        return prefs.getBool('flumea_notify_water') ?? false;
+        return prefs.getBool('flumea_notify_water') ?? true;
       case FlumeaNotificationType.general:
         return true;
     }
