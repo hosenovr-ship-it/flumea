@@ -351,164 +351,12 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Future<void> _showNotifications() async {
     if (!mounted) return;
-
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surface = Theme.of(context).colorScheme.surface;
-    final primary = Theme.of(context).colorScheme.onSurface;
-    final secondary =
-        isDark ? const Color(0xFFB8C2CC) : const Color(0xFF8290A2);
-    final border =
-        isDark ? const Color(0xFF2A3540) : const Color(0xFFE4EBF2);
-
-    await showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (dialogContext, setDialogState) {
-            return Directionality(
-              textDirection: TextDirection.rtl,
-              child: AlertDialog(
-                backgroundColor: surface,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  side: BorderSide(color: border),
-                ),
-                titlePadding: const EdgeInsets.fromLTRB(24, 22, 24, 8),
-                contentPadding: const EdgeInsets.fromLTRB(18, 8, 18, 20),
-                title: Row(
-                  textDirection: TextDirection.rtl,
-                  children: [
-                    Container(
-                      width: 46,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        color: blue.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Icon(
-                        Icons.notifications_none_rounded,
-                        color: blue,
-                        size: MediaQuery.sizeOf(context).width < 600 ? 25 * 0.90 : 25,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'الإشعارات',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          color: primary,
-                          fontSize: 18.9,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _notificationItem(
-                      icon: Icons.check_circle_outline_rounded,
-                      color: const Color(0xFF20C997),
-                      title: 'العادات',
-                      message: 'تابع عاداتك اليومية وحافظ على تقدمك.',
-                      enabled: _habitNotifications,
-                      primary: primary,
-                      secondary: secondary,
-                      onChanged: (value) {
-                        setDialogState(() => _habitNotifications = value);
-                        _setNotificationPreference(
-                          'flumea_notify_habits',
-                          value,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    _notificationItem(
-                      icon: Icons.flag_outlined,
-                      color: const Color(0xFF1976D2),
-                      title: 'المهام',
-                      message: 'راجع مهامك القادمة وأكمل ما عليك.',
-                      enabled: _taskNotifications,
-                      primary: primary,
-                      secondary: secondary,
-                      onChanged: (value) {
-                        setDialogState(() => _taskNotifications = value);
-                        _setNotificationPreference(
-                          'flumea_notify_tasks',
-                          value,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    _notificationItem(
-                      icon: Icons.emoji_events_outlined,
-                      color: const Color(0xFFFFA726),
-                      title: 'إنجاز جديد',
-                      message: 'استمر في التقدم نحو أهدافك.',
-                      enabled: _achievementNotifications,
-                      primary: primary,
-                      secondary: secondary,
-                      onChanged: (value) {
-                        setDialogState(
-                          () => _achievementNotifications = value,
-                        );
-                        _setNotificationPreference(
-                          'flumea_notify_achievements',
-                          value,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    _notificationItem(
-                      icon: Icons.water_drop_outlined,
-                      color: const Color(0xFF42A5F5),
-                      title: 'حان وقت شرب الماء',
-                      message: 'خذ لحظة واشرب بعض الماء لتحافظ على ترطيبك. 💧',
-                      enabled: _waterNotifications,
-                      primary: primary,
-                      secondary: secondary,
-                      onChanged: (value) {
-                        setDialogState(() => _waterNotifications = value);
-                        _setNotificationPreference(
-                          'flumea_notify_water',
-                          value,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: TextButton(
-                        onPressed: () => Navigator.of(dialogContext).pop(),
-                        style: TextButton.styleFrom(
-                          backgroundColor: isDark
-                              ? const Color(0xFF223247)
-                              : const Color(0xFFEAF3FF),
-                          foregroundColor: blue,
-                          padding: const EdgeInsets.symmetric(vertical: 13),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: const Text(
-                          'إغلاق',
-                          style: TextStyle(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const NotificationsScreen(),
+      ),
     );
+    await _loadNotificationPreferences();
   }
 
   Widget _notificationItem({
@@ -953,9 +801,8 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
           child: SafeArea(
-            bottom: false,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -969,7 +816,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         'FLUMEA',
                         textAlign: TextAlign.left,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 20,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 4.0,
                           color: isDark ? Colors.white : navy,
@@ -1274,7 +1121,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       'تسجيل الخروج',
                       style: TextStyle(
                         color: Color(0xFFD93B3B),
-                        fontSize: 15.3,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -2007,7 +1854,7 @@ class FlumeaHelpCenterScreen extends StatelessWidget {
                     Text(
                       'FLUMEA',
                       style: TextStyle(
-                        fontSize: 15.3,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: primary,
                       ),
@@ -2356,7 +2203,7 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
                     Text(
                       'FLUMEA',
                       style: TextStyle(
-                        fontSize: 15.3,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: primary,
                       ),
@@ -2566,6 +2413,290 @@ class _FlumeaContactScreenState extends State<FlumeaContactScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+
+class NotificationsScreen extends StatefulWidget {
+  const NotificationsScreen({super.key});
+
+  @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  static const Color _blue = Color(0xFF1976D2);
+  static const Color _mint = Color(0xFF20C997);
+
+  bool _habits = false;
+  bool _tasks = true;
+  bool _achievements = true;
+  bool _water = false;
+  bool _loading = true;
+  TimeOfDay _waterTime = const TimeOfDay(hour: 9, minute: 0);
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _habits = prefs.getBool('flumea_notify_habits') ?? false;
+      _tasks = prefs.getBool('flumea_notify_tasks') ?? true;
+      _achievements = prefs.getBool('flumea_notify_achievements') ?? true;
+      _water = prefs.getBool('flumea_notify_water') ?? false;
+      _waterTime = TimeOfDay(
+        hour: prefs.getInt('flumea_water_hour') ?? 9,
+        minute: prefs.getInt('flumea_water_minute') ?? 0,
+      );
+      _loading = false;
+    });
+  }
+
+  Future<void> _setOption(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('flumea_notifications_master_enabled', true);
+    await prefs.setBool(key, value);
+    if (key == 'flumea_notify_water') {
+      if (value) {
+        await FlumeaNotificationService.instance.scheduleWaterReminder(_waterTime);
+      } else {
+        await FlumeaNotificationService.instance.cancelWaterReminder();
+      }
+    }
+  }
+
+  Future<void> _cancelAll() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('flumea_notifications_master_enabled', false);
+    await prefs.setBool('flumea_notify_habits', false);
+    await prefs.setBool('flumea_notify_tasks', false);
+    await prefs.setBool('flumea_notify_achievements', false);
+    await prefs.setBool('flumea_notify_water', false);
+    await FlumeaNotificationService.instance.cancelAllNotifications();
+    if (!mounted) return;
+    setState(() {
+      _habits = false;
+      _tasks = false;
+      _achievements = false;
+      _water = false;
+    });
+    FlumeaNotificationService.showTopMessage(
+      context,
+      'تم إيقاف جميع الإشعارات',
+      success: true,
+    );
+  }
+
+  Future<void> _chooseWaterTime() async {
+    final selected = await showTimePicker(
+      context: context,
+      initialTime: _waterTime,
+      helpText: 'حدد وقت تذكير شرب الماء',
+      cancelText: 'إلغاء',
+      confirmText: 'حفظ الوقت',
+    );
+    if (selected == null || !mounted) return;
+    setState(() => _waterTime = selected);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('flumea_water_hour', selected.hour);
+    await prefs.setInt('flumea_water_minute', selected.minute);
+    if (_water) {
+      await FlumeaNotificationService.instance.scheduleWaterReminder(selected);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final scheme = Theme.of(context).colorScheme;
+    final primary = scheme.onSurface;
+    final secondary = isDark ? const Color(0xFFB8C2CC) : const Color(0xFF8290A2);
+    final card = scheme.surface;
+    final border = isDark ? const Color(0xFF2A3540) : const Color(0xFFE4EBF2);
+
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: SafeArea(
+          child: _loading
+              ? const Center(child: CircularProgressIndicator())
+              : CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate([
+                          Row(
+                            textDirection: TextDirection.ltr,
+                            children: [
+                              Text(
+                                'FLUMEA',
+                                style: TextStyle(
+                                  color: isDark ? const Color(0xFF8AB4F8) : const Color(0xFF102A4C),
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 4,
+                                ),
+                              ),
+                              const Spacer(),
+                              IconButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                tooltip: 'رجوع',
+                                icon: Icon(Icons.arrow_forward_rounded, color: primary),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Container(
+                                width: 52,
+                                height: 52,
+                                decoration: BoxDecoration(
+                                  color: _blue.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(17),
+                                ),
+                                child: const Icon(Icons.notifications_active_outlined, color: _blue, size: 27),
+                              ),
+                              const SizedBox(width: 13),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('الإشعارات', style: TextStyle(color: primary, fontSize: 25, fontWeight: FontWeight.w800)),
+                                    const SizedBox(height: 4),
+                                    Text('اختر التنبيهات التي تساعدك دون إزعاج.', style: TextStyle(color: secondary, fontSize: 13, height: 1.4)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          _notificationCard(
+                            icon: Icons.check_circle_outline_rounded,
+                            color: _mint,
+                            title: 'العادات',
+                            subtitle: 'تابع عاداتك اليومية وحافظ على تقدمك.',
+                            value: _habits,
+                            onChanged: (v) async { setState(() => _habits = v); await _setOption('flumea_notify_habits', v); },
+                            card: card, border: border, primary: primary, secondary: secondary,
+                          ),
+                          const SizedBox(height: 12),
+                          _notificationCard(
+                            icon: Icons.flag_outlined,
+                            color: _blue,
+                            title: 'المهام',
+                            subtitle: 'تذكيرات تساعدك على إكمال خطتك.',
+                            value: _tasks,
+                            onChanged: (v) async { setState(() => _tasks = v); await _setOption('flumea_notify_tasks', v); },
+                            card: card, border: border, primary: primary, secondary: secondary,
+                          ),
+                          const SizedBox(height: 12),
+                          _notificationCard(
+                            icon: Icons.emoji_events_outlined,
+                            color: const Color(0xFFFFA726),
+                            title: 'إنجاز جديد',
+                            subtitle: 'احتفل بتقدمك عندما تحقق إنجازًا.',
+                            value: _achievements,
+                            onChanged: (v) async { setState(() => _achievements = v); await _setOption('flumea_notify_achievements', v); },
+                            card: card, border: border, primary: primary, secondary: secondary,
+                          ),
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(color: card, borderRadius: BorderRadius.circular(20), border: Border.all(color: border)),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(width: 42, height: 42, decoration: BoxDecoration(color: const Color(0xFF42A5F5).withValues(alpha: 0.13), shape: BoxShape.circle), child: const Icon(Icons.water_drop_outlined, color: Color(0xFF42A5F5))),
+                                    const SizedBox(width: 10),
+                                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('حان وقت شرب الماء', style: TextStyle(color: primary, fontSize: 14, fontWeight: FontWeight.w800)), const SizedBox(height: 3), Text('تذكير يومي في الوقت الذي تختاره.', style: TextStyle(color: secondary, fontSize: 11.5))])),
+                                    Switch.adaptive(value: _water, activeTrackColor: _mint, onChanged: (v) async { setState(() => _water = v); await _setOption('flumea_notify_water', v); }),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                InkWell(
+                                  onTap: _chooseWaterTime,
+                                  borderRadius: BorderRadius.circular(15),
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                    decoration: BoxDecoration(color: isDark ? const Color(0xFF202A35) : const Color(0xFFEAF3FF), borderRadius: BorderRadius.circular(15)),
+                                    child: Row(children: [const Icon(Icons.schedule_rounded, color: _blue), const SizedBox(width: 9), Expanded(child: Text('وقت التذكير', style: TextStyle(color: primary, fontSize: 13, fontWeight: FontWeight.w700))), Text(_waterTime.format(context), style: const TextStyle(color: _blue, fontSize: 14, fontWeight: FontWeight.w800)), const SizedBox(width: 5), const Icon(Icons.edit_outlined, size: 17, color: _blue)]),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: _cancelAll,
+                              icon: const Icon(Icons.notifications_off_outlined),
+                              label: const Text('إلغاء الكل'),
+                              style: OutlinedButton.styleFrom(foregroundColor: const Color(0xFFE45B5B), side: const BorderSide(color: Color(0xFFE8B9B9)), padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: double.infinity,
+                            child: FilledButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: FilledButton.styleFrom(backgroundColor: isDark ? const Color(0xFF223247) : const Color(0xFFEAF3FF), foregroundColor: _blue, elevation: 0, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                              child: const Text('تم', style: TextStyle(fontWeight: FontWeight.w800)),
+                            ),
+                          ),
+                        ]),
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
+
+  Widget _notificationCard({
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+    required Color card,
+    required Color border,
+    required Color primary,
+    required Color secondary,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+      decoration: BoxDecoration(color: card, borderRadius: BorderRadius.circular(19), border: Border.all(color: border)),
+      child: Row(
+        textDirection: TextDirection.ltr,
+        children: [
+          Switch.adaptive(value: value, onChanged: onChanged, activeTrackColor: _mint),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Row(
+              textDirection: TextDirection.rtl,
+              children: [
+                Container(width: 40, height: 40, decoration: BoxDecoration(color: color.withValues(alpha: 0.13), shape: BoxShape.circle), child: Icon(icon, color: color, size: 21)),
+                const SizedBox(width: 10),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [Text(title, textAlign: TextAlign.right, style: TextStyle(color: primary, fontSize: 13.5, fontWeight: FontWeight.w800)), const SizedBox(height: 3), Text(subtitle, textAlign: TextAlign.right, style: TextStyle(color: secondary, fontSize: 11.5, height: 1.35))])),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
