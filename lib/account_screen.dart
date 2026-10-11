@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field, unused_element
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
