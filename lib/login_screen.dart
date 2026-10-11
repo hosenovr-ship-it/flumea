@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'home_screen.dart';
 const String _googleWebClientId =
     '106036859936-2seqm33h1h9um8pl5dusdatjuc4lhljt.apps.googleusercontent.com';
 
@@ -96,35 +97,35 @@ class LoginScreen extends StatelessWidget {
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
-              horizontal: 24,
-              vertical: 35,
+              horizontal: 20,
+              vertical: 16,
             ),
             child: Column(
               children: [
-                const SizedBox(height: 55),
+                const SizedBox(height: 24),
 
                 const Text(
                   'مرحباً بك في FLUMEA',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 32,
+                    fontSize: 26,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF102A4C),
                   ),
                 ),
 
-                const SizedBox(height: 18),
+                const SizedBox(height: 10),
 
                 const Text(
                   'اختر طريقة التسجيل أو تسجيل الدخول',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
                     color: Color(0xFF8A97AD),
                   ),
                 ),
 
-                const SizedBox(height: 55),
+                const SizedBox(height: 26),
 
                 // Google
                 _loginButton(
@@ -153,7 +154,14 @@ class LoginScreen extends StatelessWidget {
                           success: true,
                         ),
                       );
-                    } on GoogleSignInException {
+
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomeScreen(),
+                        ),
+                      );
+                    } on GoogleSignInException catch (error) {
                       if (!context.mounted) return;
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -162,7 +170,7 @@ class LoginScreen extends StatelessWidget {
                           success: false,
                         ),
                       );
-                    } on AuthException {
+                    } on AuthException catch (error) {
                       if (!context.mounted) return;
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -171,7 +179,7 @@ class LoginScreen extends StatelessWidget {
                           success: false,
                         ),
                       );
-                    } catch (_) {
+                    } catch (error) {
                       if (!context.mounted) return;
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -184,7 +192,7 @@ class LoginScreen extends StatelessWidget {
                   },
                 ),
 
-                const SizedBox(height: 28),
+                const SizedBox(height: 18),
 
                 Row(
                   children: [
@@ -214,7 +222,7 @@ class LoginScreen extends StatelessWidget {
                   ],
                 ),
 
-                const SizedBox(height: 28),
+                const SizedBox(height: 18),
 
                 // Email
                 _loginButton(
@@ -234,7 +242,7 @@ class LoginScreen extends StatelessWidget {
                   },
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 22),
 
                 const Text(
                   'بالتسجيل، أنت توافق على الشروط والأحكام و سياسة الخصوصية',
@@ -262,7 +270,7 @@ class LoginScreen extends StatelessWidget {
   }) {
     return SizedBox(
       width: double.infinity,
-      height: 62,
+      height: 54,
       child: OutlinedButton(
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
@@ -286,7 +294,7 @@ class LoginScreen extends StatelessWidget {
                 text,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 17,
+                  fontSize: 14.5,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF102A4C),
                 ),
@@ -354,6 +362,13 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
         if (!mounted) return;
 
         _showMessage('تم تسجيل الدخول بنجاح', success: true);
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomeScreen(),
+          ),
+        );
       } else {
         final response =
             await Supabase.instance.client.auth.signUp(
@@ -372,13 +387,20 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
           _showMessage('تم إنشاء الحساب بنجاح', success: true);
 
           if (!mounted) return;
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HomeScreen(),
+            ),
+          );
         }
       }
-    } on AuthException {
+    } on AuthException catch (error) {
       if (!mounted) return;
 
       _showMessage('تعذر تسجيل الدخول', success: false);
-    } catch (_) {
+    } catch (error) {
       if (!mounted) return;
 
       _showMessage('تعذر تسجيل الدخول، حاول مرة أخرى', success: false);
@@ -427,7 +449,7 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 35),
+                const SizedBox(height: 20),
 
                 const Icon(
                   Icons.lock_outline,
@@ -435,7 +457,7 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
                   color: Color(0xFF102A4C),
                 ),
 
-                const SizedBox(height: 25),
+                const SizedBox(height: 16),
 
                 Text(
                   isLogin
@@ -443,7 +465,7 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
                       : 'أنشئ حسابك في FLUMEA',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 27,
+                    fontSize: 23,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF102A4C),
                   ),
@@ -462,7 +484,7 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 24),
 
                 TextField(
                   controller: emailController,
