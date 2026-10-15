@@ -2438,6 +2438,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   bool _water = false;
   bool _loading = true;
   TimeOfDay _waterTime = const TimeOfDay(hour: 9, minute: 0);
+  List<TimeOfDay> _waterTimes = <TimeOfDay>[const TimeOfDay(hour: 9, minute: 0)];
 
   @override
   void initState() {
@@ -2457,6 +2458,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         hour: prefs.getInt('flumea_water_hour') ?? 9,
         minute: prefs.getInt('flumea_water_minute') ?? 0,
       );
+      final savedTimes = prefs.getStringList('flumea_water_times') ?? <String>[];
+      _waterTimes = savedTimes.map((value) {
+        final parts = value.split(':');
+        if (parts.length != 2) return _waterTime;
+        return TimeOfDay(
+          hour: int.tryParse(parts[0]) ?? _waterTime.hour,
+          minute: int.tryParse(parts[1]) ?? _waterTime.minute,
+        );
+      }).toList();
+      if (_waterTimes.isEmpty) _waterTimes = <TimeOfDay>[_waterTime];
       _loading = false;
     });
   }
@@ -2467,7 +2478,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     await prefs.setBool(key, value);
     if (key == 'flumea_notify_water') {
       if (value) {
-        await FlumeaNotificationService.instance.scheduleWaterReminder(_waterTime);
+        for (var i = 0; i < _waterTimes.length && i < 20; i++) {
+          await FlumeaNotificationService.instance.scheduleWaterReminder(_waterTimes[i], reminderIndex: i);
+        }
       } else {
         await FlumeaNotificationService.instance.cancelWaterReminder();
       }
@@ -2496,21 +2509,67 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
-  Future<void> _chooseWaterTime() async {
+  Future<void> _chooseWaterTime({int? index}) async {
+    final initial = index != null && index < _waterTimes.length
+        ? _waterTimes[index]
+        : _waterTime;
     final selected = await showTimePicker(
       context: context,
-      initialTime: _waterTime,
-      helpText: 'حدد وقت تذكير شرب الماء',
+      initialTime: initial,
+      helpText: index == null ? 'أضف وقت تذكير شرب الماء' : 'عدّل وقت التذكير',
       cancelText: 'إلغاء',
       confirmText: 'حفظ الوقت',
     );
     if (selected == null || !mounted) return;
-    setState(() => _waterTime = selected);
+
+    final updated = List<TimeOfDay>.from(_waterTimes);
+    if (index == null) {
+      if (updated.any((t) => t.hour == selected.hour && t.minute == selected.minute)) {
+        FlumeaNotificationService.showTopMessage(context, 'هذا الوقت مضاف بالفعل');
+        return;
+      }
+      if (updated.length >= 20) {
+        FlumeaNotificationService.showTopMessage(context, 'يمكنك إضافة 20 وقت تذكير كحد أقصى');
+        return;
+      }
+      updated.add(selected);
+    } else {
+      updated[index] = selected;
+    }
+    updated.sort((a, b) => (a.hour * 60 + a.minute).compareTo(b.hour * 60 + b.minute));
+    setState(() {
+      _waterTimes = updated;
+      _waterTime = updated.first;
+    });
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('flumea_water_hour', selected.hour);
-    await prefs.setInt('flumea_water_minute', selected.minute);
+    await prefs.setStringList('flumea_water_times', updated.map((t) => '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}').toList());
+    await prefs.setInt('flumea_water_hour', _waterTime.hour);
+    await prefs.setInt('flumea_water_minute', _waterTime.minute);
     if (_water) {
-      await FlumeaNotificationService.instance.scheduleWaterReminder(selected);
+      await FlumeaNotificationService.instance.cancelWaterReminder();
+      for (var i = 0; i < _waterTimes.length && i < 20; i++) {
+        await FlumeaNotificationService.instance.scheduleWaterReminder(_waterTimes[i], reminderIndex: i);
+      }
+    }
+  }
+
+  Future<void> _removeWaterTime(int index) async {
+    if (_waterTimes.length <= 1) {
+      FlumeaNotificationService.showTopMessage(context, 'احتفظ بوقت واحد على الأقل للتذكير');
+      return;
+    }
+    final updated = List<TimeOfDay>.from(_waterTimes)..removeAt(index);
+    setState(() {
+      _waterTimes = updated;
+      _waterTime = updated.first;
+    });
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('flumea_water_times', updated.map((t) => '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}').toList());
+    if (_water) {
+      await FlumeaNotificationService.instance.cancelWaterReminder();
+      for (var i = 0; i < _waterTimes.length && i < 20; i++) {
+        await FlumeaNotificationService.instance.scheduleWaterReminder(_waterTimes[i], reminderIndex: i);
+      }
     }
   }
 
@@ -2571,11 +2630,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               const SizedBox(width: 13),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text('الإشعارات', style: TextStyle(color: primary, fontSize: 25, fontWeight: FontWeight.w800)),
+                                    Text('الإشعارات', textAlign: TextAlign.right, style: TextStyle(color: primary, fontSize: 25, fontWeight: FontWeight.w800)),
                                     const SizedBox(height: 4),
-                                    Text('اختر التنبيهات التي تساعدك دون إزعاج.', style: TextStyle(color: secondary, fontSize: 13, height: 1.4)),
+                                    Text('اختر التنبيهات التي تساعدك دون إزعاج.', textAlign: TextAlign.right, style: TextStyle(color: secondary, fontSize: 13, height: 1.4)),
                                   ],
                                 ),
                               ),
@@ -2621,19 +2680,40 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                   children: [
                                     Container(width: 42, height: 42, decoration: BoxDecoration(color: const Color(0xFF42A5F5).withValues(alpha: 0.13), shape: BoxShape.circle), child: const Icon(Icons.water_drop_outlined, color: Color(0xFF42A5F5))),
                                     const SizedBox(width: 10),
-                                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('حان وقت شرب الماء', style: TextStyle(color: primary, fontSize: 14, fontWeight: FontWeight.w800)), const SizedBox(height: 3), Text('تذكير يومي في الوقت الذي تختاره.', style: TextStyle(color: secondary, fontSize: 11.5))])),
+                                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [Text('حان وقت شرب الماء', textAlign: TextAlign.right, style: TextStyle(color: primary, fontSize: 14, fontWeight: FontWeight.w800)), const SizedBox(height: 3), Text('أضف أوقاتاً متعددة للتذكير يومياً.', textAlign: TextAlign.right, style: TextStyle(color: secondary, fontSize: 11.5))])),
                                     Switch.adaptive(value: _water, activeTrackColor: _mint, onChanged: (v) async { setState(() => _water = v); await _setOption('flumea_notify_water', v); }),
                                   ],
                                 ),
                                 const SizedBox(height: 10),
-                                InkWell(
-                                  onTap: _chooseWaterTime,
-                                  borderRadius: BorderRadius.circular(15),
-                                  child: Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                                    decoration: BoxDecoration(color: isDark ? const Color(0xFF202A35) : const Color(0xFFEAF3FF), borderRadius: BorderRadius.circular(15)),
-                                    child: Row(children: [const Icon(Icons.schedule_rounded, color: _blue), const SizedBox(width: 9), Expanded(child: Text('وقت التذكير', style: TextStyle(color: primary, fontSize: 13, fontWeight: FontWeight.w700))), Text(_waterTime.format(context), style: const TextStyle(color: _blue, fontSize: 14, fontWeight: FontWeight.w800)), const SizedBox(width: 5), const Icon(Icons.edit_outlined, size: 17, color: _blue)]),
+                                ..._waterTimes.asMap().entries.map((entry) {
+                                  final index = entry.key;
+                                  final time = entry.value;
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      decoration: BoxDecoration(color: isDark ? const Color(0xFF202A35) : const Color(0xFFEAF3FF), borderRadius: BorderRadius.circular(14)),
+                                      child: Row(children: [
+                                        IconButton(tooltip: 'حذف الوقت', onPressed: () => _removeWaterTime(index), icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFE45B5B), size: 20)),
+                                        IconButton(tooltip: 'تعديل الوقت', onPressed: () => _chooseWaterTime(index: index), icon: const Icon(Icons.edit_outlined, color: _blue, size: 19)),
+                                        const Spacer(),
+                                        Text('وقت التذكير ${index + 1}', style: TextStyle(color: primary, fontSize: 12, fontWeight: FontWeight.w700)),
+                                        const SizedBox(width: 10),
+                                        Text(time.format(context), style: const TextStyle(color: _blue, fontSize: 14, fontWeight: FontWeight.w800)),
+                                        const SizedBox(width: 4),
+                                        const Icon(Icons.schedule_rounded, color: _blue, size: 20),
+                                      ]),
+                                    ),
+                                  );
+                                }),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: OutlinedButton.icon(
+                                    onPressed: () => _chooseWaterTime(),
+                                    icon: const Icon(Icons.add_rounded),
+                                    label: const Text('إضافة وقت تذكير'),
+                                    style: OutlinedButton.styleFrom(foregroundColor: _blue, side: BorderSide(color: _blue.withValues(alpha: 0.35)), padding: const EdgeInsets.symmetric(vertical: 11), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                                   ),
                                 ),
                               ],
