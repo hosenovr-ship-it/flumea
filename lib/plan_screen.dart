@@ -2331,6 +2331,13 @@ class _PlanScreenState extends State<PlanScreen> {
 
                                           final time =
                                               timeController.text.trim();
+                                          if (time.isEmpty || time == 'بدون وقت') {
+                                            FlumeaNotificationService.showTopMessage(
+                                              context,
+                                              'يرجى تحديد وقت للمهمة',
+                                            );
+                                            return;
+                                          }
                                           final category =
                                               selectedCategory.isEmpty
                                                   ? categoryController.text.trim()
@@ -2353,9 +2360,7 @@ class _PlanScreenState extends State<PlanScreen> {
                                               'description': _safeString(
                                                 initialTask?['description'],
                                               ),
-                                              'time': time.isEmpty
-                                                  ? 'بدون وقت'
-                                                  : time,
+                                              'time': time,
                                               'tag': category.isEmpty
                                                   ? 'عام'
                                                   : category,
@@ -2447,7 +2452,11 @@ class _PlanScreenState extends State<PlanScreen> {
                                               _isSavingTask = false;
                                             });
 
-                                            FlumeaNotificationService.showTopMessage(context, 'تعذر حفظ المهمة: $error');
+                                            final errorText = error.toString().toLowerCase();
+                                            final message = errorText.contains('connection reset') || errorText.contains('socketexception') || errorText.contains('failed host lookup')
+                                                ? 'تعذر الاتصال بالخادم. تحقق من الإنترنت ثم حاول مجدداً.'
+                                                : 'تعذر حفظ المهمة. تحقق من بيانات المهمة وحاول مرة أخرى.';
+                                            FlumeaNotificationService.showTopMessage(context, message);
                                           }
                                         },
                                   icon: Icon(
