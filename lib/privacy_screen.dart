@@ -77,7 +77,7 @@ class PrivacyScreen extends StatelessWidget {
                     const SizedBox(width: 14),
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
                             'الخصوصية',
@@ -216,7 +216,7 @@ class PrivacyScreen extends StatelessWidget {
                           children: [
                             Text(
                               'بياناتك آمنة معنا',
-                              textAlign: TextAlign.right,
+                              textAlign: TextAlign.left,
                               style: TextStyle(
                                 color: primary,
                                 fontSize: 17,
@@ -226,7 +226,7 @@ class PrivacyScreen extends StatelessWidget {
                             const SizedBox(height: 6),
                             Text(
                               'نحرص على حماية بياناتك الشخصية وفق أعلى معايير الأمان والخصوصية.',
-                              textAlign: TextAlign.right,
+                              textAlign: TextAlign.left,
                               style: TextStyle(
                                 color: secondary,
                                 fontSize: 12.5,
@@ -480,7 +480,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                         children: [
                           Text(
                             'حذف الحساب',
-                            textAlign: TextAlign.right,
+                            textAlign: TextAlign.left,
                             style: TextStyle(
                               color: primary,
                               fontSize: 25,
@@ -490,7 +490,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                           const SizedBox(height: 4),
                           Text(
                             'حذف حسابك وجميع بياناتك نهائيًا.',
-                            textAlign: TextAlign.right,
+                            textAlign: TextAlign.left,
                             style: TextStyle(
                               color: secondary,
                               fontSize: 13,
@@ -537,7 +537,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                           children: [
                             Text(
                               'تنبيه مهم',
-                              textAlign: TextAlign.right,
+                              textAlign: TextAlign.left,
                               style: TextStyle(
                                 color: isDark
                                     ? const Color(0xFFFF8D8D)
@@ -549,7 +549,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                             const SizedBox(height: 8),
                             Text(
                               'سيتم حذف حسابك وبياناتك المرتبطة به نهائيًا، ولا يمكن التراجع عن هذا الإجراء.',
-                              textAlign: TextAlign.right,
+                              textAlign: TextAlign.left,
                               style: TextStyle(
                                 color: primary,
                                 fontSize: 13,
@@ -698,7 +698,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                               children: [
                                 Text(
                                   'تأكيد كلمة المرور',
-                                  textAlign: TextAlign.right,
+                                  textAlign: TextAlign.left,
                                   style: TextStyle(
                                     color: primary,
                                     fontSize: 17,
@@ -708,7 +708,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                                 const SizedBox(height: 4),
                                 Text(
                                   'أدخل كلمة مرور حسابك لتأكيد الحذف.',
-                                  textAlign: TextAlign.right,
+                                  textAlign: TextAlign.left,
                                   style: TextStyle(
                                     color: secondary,
                                     fontSize: 12.5,
@@ -908,7 +908,7 @@ class _DeleteDataRow extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.left,
                   style: TextStyle(
                     color: primary,
                     fontSize: 17,
@@ -918,7 +918,7 @@ class _DeleteDataRow extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.left,
                   style: TextStyle(
                     color: secondary,
                     fontSize: 13.5,
@@ -1098,7 +1098,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                         children: [
                           Text(
                             'أمان الحساب',
-                            textAlign: TextAlign.right,
+                            textAlign: TextAlign.left,
                             style: TextStyle(
                               color: primary,
                               fontSize: 25,
@@ -1108,7 +1108,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                           const SizedBox(height: 4),
                           Text(
                             'إدارة كلمة المرور وحماية حسابك',
-                            textAlign: TextAlign.right,
+                            textAlign: TextAlign.left,
                             style: TextStyle(
                               color: secondary,
                               fontSize: 13,
@@ -1155,7 +1155,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                           children: [
                             Text(
                               'الحساب',
-                              textAlign: TextAlign.right,
+                              textAlign: TextAlign.left,
                               style: TextStyle(
                                 color: primary,
                                 fontSize: 17,
@@ -1165,7 +1165,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                             const SizedBox(height: 5),
                             Text(
                               email,
-                              textAlign: TextAlign.right,
+                              textAlign: TextAlign.left,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -1192,7 +1192,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                     children: [
                       Text(
                         'تغيير كلمة المرور',
-                        textAlign: TextAlign.right,
+                        textAlign: TextAlign.left,
                         style: TextStyle(
                           color: primary,
                           fontSize: 18,
@@ -1202,7 +1202,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                       const SizedBox(height: 7),
                       Text(
                         'اختر كلمة مرور جديدة لحماية حسابك.',
-                        textAlign: TextAlign.right,
+                        textAlign: TextAlign.left,
                         style: TextStyle(
                           color: secondary,
                           fontSize: 12.5,
@@ -1235,7 +1235,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                       const SizedBox(height: 10),
                       Text(
                         'يجب أن تحتوي كلمة المرور على 6 أحرف أو أكثر.',
-                        textAlign: TextAlign.right,
+                        textAlign: TextAlign.left,
                         style: TextStyle(
                           color: secondary,
                           fontSize: 13,
@@ -1314,7 +1314,7 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                       Expanded(
                         child: Text(
                           'حسابك محمي. لا تشارك كلمة المرور مع أي شخص.',
-                          textAlign: TextAlign.right,
+                          textAlign: TextAlign.left,
                           style: TextStyle(
                             color: primary,
                             fontSize: 12.5,
@@ -1658,7 +1658,7 @@ class _AccountDataScreenState extends State<AccountDataScreen> {
                               children: [
                                 Text(
                                   'بيانات الحساب',
-                                  textAlign: TextAlign.right,
+                                  textAlign: TextAlign.left,
                                   style: TextStyle(
                                     color: primary,
                                     fontSize: 25,
@@ -1668,7 +1668,7 @@ class _AccountDataScreenState extends State<AccountDataScreen> {
                                 const SizedBox(height: 4),
                                 Text(
                                   'عرض وإدارة بياناتك الشخصية',
-                                  textAlign: TextAlign.right,
+                                  textAlign: TextAlign.left,
                                   style: TextStyle(
                                     color: secondary,
                                     fontSize: 13,
@@ -1806,7 +1806,7 @@ class _AccountDataScreenState extends State<AccountDataScreen> {
                             Expanded(
                               child: Text(
                                 'هذه البيانات تخص حسابك الحالي ويتم تحميلها مباشرة من حسابك في FLUMEA.',
-                                textAlign: TextAlign.right,
+                                textAlign: TextAlign.left,
                                 style: TextStyle(
                                   color: primary,
                                   fontSize: 12.5,
@@ -1904,7 +1904,7 @@ class _AccountDataItem extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.left,
                   style: TextStyle(
                     color: secondary,
                     fontSize: 12.5,
@@ -1914,7 +1914,7 @@ class _AccountDataItem extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.left,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
