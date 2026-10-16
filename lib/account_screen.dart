@@ -2693,7 +2693,34 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                   children: [
                                     Container(width: 42, height: 42, decoration: BoxDecoration(color: const Color(0xFF42A5F5).withValues(alpha: 0.13), shape: BoxShape.circle), child: const Icon(Icons.water_drop_outlined, color: Color(0xFF42A5F5))),
                                     const SizedBox(width: 10),
-                                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [Text('حان وقت شرب الماء', textAlign: TextAlign.right, style: TextStyle(color: primary, fontSize: 14, fontWeight: FontWeight.w800)), const SizedBox(height: 3), Text('أضف أوقاتاً متعددة للتذكير يومياً.', textAlign: TextAlign.right, style: TextStyle(color: secondary, fontSize: 11.5))])),
+                                    Expanded(
+                                      child: Directionality(
+                                        textDirection: TextDirection.rtl,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'حان وقت شرب الماء',
+                                              textAlign: TextAlign.right,
+                                              style: TextStyle(
+                                                color: primary,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 3),
+                                            Text(
+                                              'أضف أوقاتاً متعددة للتذكير يومياً.',
+                                              textAlign: TextAlign.right,
+                                              style: TextStyle(
+                                                color: secondary,
+                                                fontSize: 11.5,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                     Switch.adaptive(value: _water, activeTrackColor: _mint, onChanged: (v) async { setState(() => _water = v); await _setOption('flumea_notify_water', v); }),
                                   ],
                                 ),
