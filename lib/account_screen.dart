@@ -2627,6 +2627,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           ),
                           const SizedBox(height: 12),
                           Row(
+                            textDirection: TextDirection.ltr,
                             children: [
                               Container(
                                 width: 52,
@@ -2642,9 +2643,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text('الإشعارات', textAlign: TextAlign.right, style: TextStyle(color: primary, fontSize: 25, fontWeight: FontWeight.w800)),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: Text('الإشعارات', textAlign: TextAlign.right, style: TextStyle(color: primary, fontSize: 25, fontWeight: FontWeight.w800))),
                                     const SizedBox(height: 4),
-                                    Text('اختر التنبيهات التي تساعدك دون إزعاج.', textAlign: TextAlign.right, style: TextStyle(color: secondary, fontSize: 13, height: 1.4)),
+                                    SizedBox(width: double.infinity, child: Text('اختر التنبيهات التي تساعدك دون إزعاج.', textAlign: TextAlign.right, style: TextStyle(color: secondary, fontSize: 13, height: 1.4))),
                                   ],
                                 ),
                               ),
@@ -2784,7 +2787,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               children: [
                 Container(width: 40, height: 40, decoration: BoxDecoration(color: color.withValues(alpha: 0.13), shape: BoxShape.circle), child: Icon(icon, color: color, size: 21)),
                 const SizedBox(width: 10),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [Text(title, textAlign: TextAlign.right, style: TextStyle(color: primary, fontSize: 13.5, fontWeight: FontWeight.w800)), const SizedBox(height: 3), Text(subtitle, textAlign: TextAlign.right, style: TextStyle(color: secondary, fontSize: 11.5, height: 1.35))])),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [SizedBox(width: double.infinity, child: Text(title, textAlign: TextAlign.right, style: TextStyle(color: primary, fontSize: 13.5, fontWeight: FontWeight.w800))), const SizedBox(height: 3), SizedBox(width: double.infinity, child: Text(subtitle, textAlign: TextAlign.right, style: TextStyle(color: secondary, fontSize: 11.5, height: 1.35)))])),
               ],
             ),
           ),
