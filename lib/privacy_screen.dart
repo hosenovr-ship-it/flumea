@@ -58,7 +58,9 @@ class PrivacyScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 22),
+                // اجعل الأيقونة على اليسار والعنوان والوصف على اليمين بشكل صريح.
                 Row(
+                  textDirection: TextDirection.ltr,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
@@ -76,29 +78,32 @@ class PrivacyScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 14),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'الخصوصية',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              color: primary,
-                              fontSize: 25,
-                              fontWeight: FontWeight.w800,
+                      child: Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'الخصوصية',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: primary,
+                                fontSize: 25,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'تحكم في بياناتك وأمان حسابك وخصوصيتك',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              color: secondary,
-                              fontSize: 13,
-                              height: 1.4,
+                            const SizedBox(height: 4),
+                            Text(
+                              'تحكم في بياناتك وأمان حسابك وخصوصيتك',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: secondary,
+                                fontSize: 13,
+                                height: 1.4,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -1190,23 +1195,35 @@ class _AccountSecurityScreenState extends State<AccountSecurityScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        'تغيير كلمة المرور',
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          color: primary,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Directionality(
+                          textDirection: TextDirection.rtl,
+                          child: Text(
+                            'تغيير كلمة المرور',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: primary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 7),
-                      Text(
-                        'اختر كلمة مرور جديدة لحماية حسابك.',
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          color: secondary,
-                          fontSize: 12.5,
-                          height: 1.4,
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Directionality(
+                          textDirection: TextDirection.rtl,
+                          child: Text(
+                            'اختر كلمة مرور جديدة لحماية حسابك.',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: secondary,
+                              fontSize: 12.5,
+                              height: 1.4,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 20),
