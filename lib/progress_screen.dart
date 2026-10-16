@@ -89,19 +89,19 @@ class _ProgressScreenState extends State<ProgressScreen> {
             }
           }
         }
-        if (!localValue) continue;
-
         final localIdentity = '${habitId}_$dateKey';
-        final alreadyPresent = habitLogs.any((log) {
+        // حالة اليوم المحفوظة محليًا هي الأحدث، سواء كانت مكتملة أو غير مكتملة.
+        // نزيل أي سجل قديم لنفس العادة/اليوم ثم نضيفه فقط إذا كانت الحالة true؛
+        // هذا يمنع ظهور العادة مكتملة في التقدم بعد إلغاء تحديدها في الخطة.
+        habitLogs.removeWhere((log) {
           final logHabitId = log['habit_id']?.toString();
           final logDate = _readDate(log['completed_date']) ??
               _readDate(log['created_at']);
           return logHabitId == habitId &&
               logDate != null &&
-              _dateKey(logDate) == dateKey &&
-              _asBool(log['completed']);
+              _dateKey(logDate) == dateKey;
         });
-        if (!alreadyPresent) {
+        if (localValue) {
           habitLogs.add({
             'id': 'local_$localIdentity',
             'habit_id': habitId,
@@ -248,21 +248,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
       }
     }
 
-    final completedTodayFromHabits = <String>{};
-    for (final habit in habits) {
-      final id = habit['id']?.toString();
-      if (id != null && _asBool(habit['completed'])) {
-        final created = _readDate(habit['created_at']);
-        if (created == null || !created.isAfter(today)) {
-          completedTodayFromHabits.add(id);
-        }
-      }
-    }
-
-    final completedTodayIds = <String>{
-      ...completedTodayFromLogs,
-      ...completedTodayFromHabits,
-    };
+    // لا نستخدم habits.completed كبديل لحالة اليوم؛ هذا العمود قديم ودائم،
+    // بينما شاشة الخطة تعتمد حالة مستقلة لكل يوم. نستخدم سجلات اليوم الفعلية فقط.
+    final completedTodayIds = <String>{...completedTodayFromLogs};
 
     final availableHabitsToday = habits.where((habit) {
       final created = _readDate(habit['created_at']);
@@ -287,18 +275,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
         }
       }
 
-      // إذا كانت العادة مكتملة اليوم ولكن لم يُحفظ سجلها التاريخي بعد،
-      // نستخدم حالة habits.completed حتى لا تظهر الإحصائيات الأسبوعية/الشهرية
-      // بصفر بينما الصفحة الرئيسية تعرض العادة مكتملة.
-      for (final habit in habits) {
-        final id = habit['id']?.toString();
-        if (id != null &&
-            _asBool(habit['completed']) &&
-            !today.isBefore(range.start) &&
-            !today.isAfter(range.end)) {
-          uniqueHabitDays.add('${id}_${_dateKey(today)}');
-        }
-      }
       completedHabitCount = uniqueHabitDays.length;
     }
 
@@ -1701,6 +1677,15 @@ class _Legend extends StatelessWidget {
   }
 }
 
+double _sqrt(double value) {
+  if (value <= 0) return 0;
+  var x = value;
+  for (var i = 0; i < 8; i++) {
+    x = (x + value / x) / 2;
+  }
+  return x;
+}
+
 class _LineChartPainter extends CustomPainter {
   final List<double> values;
   final List<String> labels;
@@ -1747,14 +1732,22 @@ class _LineChartPainter extends CustomPainter {
       points.add(Offset(x, y));
     }
 
+    // منحنى ناعم بدل الخطوط الحادة، مع إبقاء كل نقطة مرتبطة بسجل يوم حقيقي.
     final path = Path()..moveTo(points.first.dx, points.first.dy);
     for (int i = 1; i < points.length; i++) {
-      path.lineTo(points[i].dx, points[i].dy);
+      final previous = points[i - 1];
+      final current = points[i];
+      final midX = (previous.dx + current.dx) / 2;
+      final midY = (previous.dy + current.dy) / 2;
+      path.quadraticBezierTo(previous.dx, previous.dy, midX, midY);
+      if (i == points.length - 1) {
+        path.quadraticBezierTo(current.dx, current.dy, current.dx, current.dy);
+      }
     }
 
     final fillPath = Path.from(path)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
+      ..lineTo(points.last.dx, size.height)
+      ..lineTo(points.first.dx, size.height)
       ..close();
 
     canvas.drawPath(fillPath, fillPaint);
@@ -1766,9 +1759,33 @@ class _LineChartPainter extends CustomPainter {
 
     for (final point in points) {
       canvas.drawCircle(point, 5, dotPaint);
-      canvas.drawCircle(point, 7, Paint()
+      canvas.drawCircle(point, 8, Paint()
         ..color = const Color(0xFF1976D2).withValues(alpha: 0.10)
         ..style = PaintingStyle.fill);
+    }
+
+    // سهم صغير عند أحدث نقطة لتوضيح اتجاه المنحنى دون ادعاء تحسن غير موجود.
+    if (points.length > 1) {
+      final end = points.last;
+      final previous = points[points.length - 2];
+      final dx = end.dx - previous.dx;
+      final dy = end.dy - previous.dy;
+      final length = (dx * dx + dy * dy).toDouble().abs();
+      final distance = length == 0 ? 0.0 : _sqrt(length);
+      if (distance > 0.1) {
+        final ux = dx / distance;
+        final uy = dy / distance;
+        const arrowLength = 10.0;
+        const arrowWidth = 5.5;
+        final base = Offset(end.dx - ux * arrowLength, end.dy - uy * arrowLength);
+        final perp = Offset(-uy * arrowWidth, ux * arrowWidth);
+        final arrow = Path()
+          ..moveTo(end.dx, end.dy)
+          ..lineTo(base.dx + perp.dx, base.dy + perp.dy)
+          ..lineTo(base.dx - perp.dx, base.dy - perp.dy)
+          ..close();
+        canvas.drawPath(arrow, Paint()..color = const Color(0xFF1976D2));
+      }
     }
 
     final labelStyle = TextStyle(
