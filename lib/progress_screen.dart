@@ -24,8 +24,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
   bool _loading = true;
   String? _error;
   _ProgressData _data = _ProgressData.empty();
+  List<double> _weekTrendValues = const <double>[];
+  List<String> _weekTrendLabels = const <String>[];
   List<double> _monthTrendValues = const <double>[];
   List<String> _monthTrendLabels = const <String>[];
+  List<double> _weekTaskValues = const <double>[];
+  List<String> _weekTaskLabels = const <String>[];
+  List<double> _monthTaskValues = const <double>[];
+  List<String> _monthTaskLabels = const <String>[];
 
   @override
   void initState() {
@@ -170,21 +176,44 @@ class _ProgressScreenState extends State<ProgressScreen> {
       final todayForMonth = _dateOnly(DateTime.now());
       final monthStart = DateTime(todayForMonth.year, todayForMonth.month, 1);
       final monthEnd = DateTime(todayForMonth.year, todayForMonth.month + 1, 0);
+      final todayForTrend = _dateOnly(DateTime.now());
+      final weekStart = todayForTrend.subtract(const Duration(days: 6));
+      final todayFallbackIds = todayLocalStates.entries
+          .where((entry) => entry.value)
+          .map((entry) => entry.key)
+          .toSet();
+      final weekTrend = _buildTrendData(
+        habits: habits,
+        habitLogs: habitLogs,
+        range: _DateRange(weekStart, todayForTrend),
+        fallbackTodayIds: todayFallbackIds,
+      );
       final monthTrend = _buildTrendData(
         habits: habits,
         habitLogs: habitLogs,
         range: _DateRange(monthStart, monthEnd),
-        fallbackTodayIds: todayLocalStates.entries
-            .where((entry) => entry.value)
-            .map((entry) => entry.key)
-            .toSet(),
+        fallbackTodayIds: todayFallbackIds,
+      );
+      final weekTasksTrend = _buildTaskTrendData(
+        tasks,
+        _DateRange(weekStart, todayForTrend),
+      );
+      final monthTasksTrend = _buildTaskTrendData(
+        tasks,
+        _DateRange(monthStart, monthEnd),
       );
 
       if (!mounted) return;
       setState(() {
         _data = data;
+        _weekTrendValues = weekTrend.values;
+        _weekTrendLabels = weekTrend.labels;
         _monthTrendValues = monthTrend.values;
         _monthTrendLabels = monthTrend.labels;
+        _weekTaskValues = weekTasksTrend.values;
+        _weekTaskLabels = weekTasksTrend.labels;
+        _monthTaskValues = monthTasksTrend.values;
+        _monthTaskLabels = monthTasksTrend.labels;
         _loading = false;
       });
 
@@ -491,12 +520,42 @@ class _ProgressScreenState extends State<ProgressScreen> {
             : const <String>{},
       );
       values.add(value);
-      labels.add(_shortArabicDate(date));
+      labels.add(totalDays > 7 ? '${date.day}' : _shortArabicDate(date));
     }
 
     if (values.isEmpty) {
       values.add(0);
       labels.add(_shortArabicDate(range.start));
+    }
+
+    return _TrendData(values: values, labels: labels);
+  }
+
+  _TrendData _buildTaskTrendData(
+    List<Map<String, dynamic>> tasks,
+    _DateRange range,
+  ) {
+    final totalDays = _daysBetween(range.start, range.end);
+    final values = List<double>.filled(totalDays, 0.0);
+    final labels = <String>[];
+    final dayIndexes = <String, int>{};
+
+    for (int i = 0; i < totalDays; i++) {
+      final date = range.start.add(Duration(days: i));
+      final key = _dateKey(date);
+      dayIndexes[key] = i;
+      labels.add(totalDays > 7 ? '${date.day}' : _shortArabicDate(date));
+    }
+
+    // The current task schema exposes due_date and created_at, but not a
+    // completion timestamp. Completed tasks are grouped by due_date, falling
+    // back to created_at, so the chart never invents a completion date.
+    for (final task in tasks) {
+      if (!_asBool(task['completed'])) continue;
+      final date = _readDate(task['due_date']) ?? _readDate(task['created_at']);
+      if (date == null) continue;
+      final index = dayIndexes[_dateKey(date)];
+      if (index != null) values[index] += 1;
     }
 
     return _TrendData(values: values, labels: labels);
@@ -1528,9 +1587,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _improvementCard() {
-    final values = _data.trendValues;
-    final labels = _data.trendLabels;
-
     return Container(
       height: 310,
       padding: const EdgeInsets.all(14),
@@ -1542,43 +1598,86 @@ class _ProgressScreenState extends State<ProgressScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Text(
+            'تحسنك عبر الوقت',
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: _primaryText,
+              fontSize: 16.2,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
-                child: Text(
-                  'تحسنك عبر الوقت',
-                  style: TextStyle(
-                    color: _primaryText,
-                    fontSize: 16.2,
-                    fontWeight: FontWeight.w800,
+                child: OutlinedButton.icon(
+                  onPressed: _openWeeklyTrend,
+                  icon: const Icon(Icons.calendar_view_week_rounded, size: 15),
+                  label: const Text('عرض الكل', maxLines: 1, overflow: TextOverflow.ellipsis),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: blue,
+                    side: BorderSide(color: blue.withValues(alpha: 0.25)),
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+                    textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
               ),
-              TextButton(
-                onPressed: _openFullMonthTrend,
-                style: TextButton.styleFrom(
-                  foregroundColor: blue,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text(
-                  'عرض الكل',
-                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
+              const SizedBox(width: 6),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _openFullMonthTrend,
+                  icon: const Icon(Icons.calendar_month_rounded, size: 15),
+                  label: const Text('عرض الشهر', maxLines: 1, overflow: TextOverflow.ellipsis),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: green,
+                    side: BorderSide(color: green.withValues(alpha: 0.28)),
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+                    textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                 ),
               ),
-              const SizedBox(width: 3),
-              // نحافظ على شكل السهم الهابط الموجود في التصميم ونغيّر لونه فقط.
-              Icon(Icons.trending_down_rounded, color: blue, size: 23),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Expanded(
-            child: _TrendBarChart(
-              values: values,
-              labels: labels,
-              isDark: _isDark,
-              compact: true,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: _isDark ? const Color(0xFF121D29) : const Color(0xFFF7FAFD),
+                borderRadius: BorderRadius.circular(17),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: green.withValues(alpha: _isDark ? 0.18 : 0.10),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.insights_rounded, color: _isDark ? const Color(0xFF55D6A3) : green, size: 26),
+                  ),
+                  const SizedBox(height: 9),
+                  Text(
+                    'كل يوم فرصة لتتقدم',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: _primaryText, fontSize: 12.2, fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'افتح التقارير لمراجعة إنجازات عاداتك ومهامك',
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: _secondaryText, fontSize: 10.2, height: 1.35),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -1586,19 +1685,36 @@ class _ProgressScreenState extends State<ProgressScreen> {
     );
   }
 
+  Future<void> _openWeeklyTrend() async {
+    await _openTrendHistory(isMonth: false);
+  }
+
   Future<void> _openFullMonthTrend() async {
+    await _openTrendHistory(isMonth: true);
+  }
+
+  Future<void> _openTrendHistory({required bool isMonth}) async {
     final now = DateTime.now();
     const months = [
       'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
       'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
     ];
+    final habitValues = isMonth ? _monthTrendValues : _weekTrendValues;
+    final habitLabels = isMonth ? _monthTrendLabels : _weekTrendLabels;
+    final taskValues = isMonth ? _monthTaskValues : _weekTaskValues;
+    final taskLabels = isMonth ? _monthTaskLabels : _weekTaskLabels;
 
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => _FullMonthTrendScreen(
+        builder: (context) => _TrendHistoryScreen(
+          title: isMonth ? 'تقدم الشهر' : 'تقدم آخر 7 أيام',
           monthTitle: '${months[now.month - 1]} ${now.year}',
-          values: _monthTrendValues,
-          labels: _monthTrendLabels,
+          periodLabel: isMonth ? 'الشهر كاملًا' : 'آخر 7 أيام',
+          habitValues: habitValues,
+          habitLabels: habitLabels,
+          taskValues: taskValues,
+          taskLabels: taskLabels,
+          isMonth: isMonth,
           isDark: _isDark,
           navy: navy,
           blue: blue,
@@ -1610,19 +1726,29 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
 }
 
-class _FullMonthTrendScreen extends StatelessWidget {
+class _TrendHistoryScreen extends StatelessWidget {
+  final String title;
   final String monthTitle;
-  final List<double> values;
-  final List<String> labels;
+  final String periodLabel;
+  final List<double> habitValues;
+  final List<String> habitLabels;
+  final List<double> taskValues;
+  final List<String> taskLabels;
+  final bool isMonth;
   final bool isDark;
   final Color navy;
   final Color blue;
   final Color green;
 
-  const _FullMonthTrendScreen({
+  const _TrendHistoryScreen({
+    required this.title,
     required this.monthTitle,
-    required this.values,
-    required this.labels,
+    required this.periodLabel,
+    required this.habitValues,
+    required this.habitLabels,
+    required this.taskValues,
+    required this.taskLabels,
+    required this.isMonth,
     required this.isDark,
     required this.navy,
     required this.blue,
@@ -1632,13 +1758,59 @@ class _FullMonthTrendScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final background = isDark ? const Color(0xFF08111A) : const Color(0xFFF7FAFD);
-    final card = isDark ? const Color(0xFF101116) : Colors.white;
+    final card = isDark ? const Color(0xFF101923) : Colors.white;
     final primary = isDark ? const Color(0xFFF2F5F7) : navy;
-    final secondary = isDark ? const Color(0xFF9AA7B8) : const Color(0xFF7B8798);
+    final secondary = isDark ? const Color(0xFFADB9C8) : const Color(0xFF7B8798);
     final border = isDark ? const Color(0xFF2B3542) : const Color(0xFFE5EBF1);
-    final average = values.isEmpty
+    final average = habitValues.isEmpty
         ? 0.0
-        : values.reduce((a, b) => a + b) / values.length;
+        : habitValues.reduce((a, b) => a + b) / habitValues.length;
+    final daysShown = habitValues.length;
+
+    Widget chartCard({
+      required String heading,
+      required IconData icon,
+      required List<double> values,
+      required List<String> labels,
+      required Color barColor,
+      required bool countValues,
+      required String legend,
+    }) {
+      return Container(
+        height: isMonth ? 350 : 330,
+        padding: const EdgeInsets.fromLTRB(12, 15, 12, 12),
+        decoration: BoxDecoration(
+          color: card,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: barColor, size: 21),
+                const SizedBox(width: 8),
+                Expanded(child: Text(heading, style: TextStyle(color: primary, fontSize: 15, fontWeight: FontWeight.w800))),
+                Text('${values.length} يوم', style: TextStyle(color: secondary, fontSize: 10.5)),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Expanded(
+              child: _TrendBarChart(
+                values: values,
+                labels: labels,
+                isDark: isDark,
+                compact: false,
+                countValues: countValues,
+                barColor: barColor,
+                legend: legend,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -1648,8 +1820,7 @@ class _FullMonthTrendScreen extends StatelessWidget {
           backgroundColor: background,
           foregroundColor: primary,
           elevation: 0,
-          centerTitle: false,
-          title: const Text('تحسنك عبر الوقت', style: TextStyle(fontWeight: FontWeight.w800)),
+          title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -1657,9 +1828,9 @@ class _FullMonthTrendScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('نظرة كاملة على إنجازاتك خلال الشهر',
-                    style: TextStyle(color: secondary, fontSize: 13)),
-                const SizedBox(height: 16),
+                Text(isMonth ? 'نظرة كاملة على إنجازاتك خلال $monthTitle' : 'ملخص يومي مرتب من الأقدم إلى الأحدث ضمن آخر 7 أيام',
+                    style: TextStyle(color: secondary, fontSize: 13, height: 1.4)),
+                const SizedBox(height: 14),
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -1672,20 +1843,17 @@ class _FullMonthTrendScreen extends StatelessWidget {
                       Container(
                         width: 48,
                         height: 48,
-                        decoration: BoxDecoration(
-                          color: green.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Icon(Icons.calendar_month_rounded, color: green, size: 26),
+                        decoration: BoxDecoration(color: green.withValues(alpha: 0.13), borderRadius: BorderRadius.circular(15)),
+                        child: Icon(isMonth ? Icons.calendar_month_rounded : Icons.calendar_view_week_rounded, color: green, size: 26),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(monthTitle, style: TextStyle(color: primary, fontSize: 17, fontWeight: FontWeight.w800)),
+                            Text(isMonth ? monthTitle : periodLabel, style: TextStyle(color: primary, fontSize: 16, fontWeight: FontWeight.w800)),
                             const SizedBox(height: 3),
-                            Text('${values.length} يومًا معروضًا', style: TextStyle(color: secondary, fontSize: 12)),
+                            Text('$daysShown يومًا معروضًا', style: TextStyle(color: secondary, fontSize: 12)),
                           ],
                         ),
                       ),
@@ -1693,45 +1861,45 @@ class _FullMonthTrendScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text('${(average * 100).round()}%', style: TextStyle(color: green, fontSize: 22, fontWeight: FontWeight.w900)),
-                          Text('المعدل اليومي', style: TextStyle(color: secondary, fontSize: 10.5)),
+                          Text('معدل إكمال العادات', style: TextStyle(color: secondary, fontSize: 10)),
                         ],
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 14),
-                Container(
-                  height: 440,
-                  padding: const EdgeInsets.fromLTRB(12, 18, 12, 14),
-                  decoration: BoxDecoration(
-                    color: card,
-                    borderRadius: BorderRadius.circular(22),
-                    border: Border.all(color: border),
-                  ),
-                  child: _TrendBarChart(
-                    values: values,
-                    labels: labels,
-                    isDark: isDark,
-                    compact: false,
-                  ),
+                chartCard(
+                  heading: 'إكمال العادات',
+                  icon: Icons.check_circle_outline_rounded,
+                  values: habitValues,
+                  labels: habitLabels,
+                  barColor: isDark ? const Color(0xFF60A5FA) : const Color(0xFF193B57),
+                  countValues: false,
+                  legend: 'نسبة إكمال العادات يوميًا',
                 ),
                 const SizedBox(height: 14),
+                chartCard(
+                  heading: 'إنجاز المهام',
+                  icon: Icons.task_alt_rounded,
+                  values: taskValues,
+                  labels: taskLabels,
+                  barColor: isDark ? const Color(0xFF34D399) : const Color(0xFF18A875),
+                  countValues: true,
+                  legend: 'عدد المهام المكتملة حسب تاريخ الاستحقاق',
+                ),
+                const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: card,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: border),
-                  ),
+                  padding: const EdgeInsets.all(13),
+                  decoration: BoxDecoration(color: card, borderRadius: BorderRadius.circular(18), border: Border.all(color: border)),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.info_outline_rounded, color: blue, size: 21),
-                      const SizedBox(width: 9),
+                      Icon(Icons.info_outline_rounded, color: blue, size: 20),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'كل عمود يعبّر عن نسبة العادات المكتملة في ذلك اليوم وفق البيانات المسجلة. الأيام التي لم تُسجّل فيها إنجازات تظهر بقيمة 0%.',
-                          style: TextStyle(color: secondary, fontSize: 12, height: 1.5),
+                          'أعمدة العادات تعرض نسبة الإكمال لكل يوم. أعمدة المهام تعرض عدد المهام المكتملة بحسب تاريخ الاستحقاق، أو تاريخ الإنشاء إذا لم يوجد موعد استحقاق.',
+                          style: TextStyle(color: secondary, fontSize: 11.5, height: 1.5),
                         ),
                       ),
                     ],
@@ -1751,12 +1919,18 @@ class _TrendBarChart extends StatelessWidget {
   final List<String> labels;
   final bool isDark;
   final bool compact;
+  final bool countValues;
+  final Color? barColor;
+  final String legend;
 
   const _TrendBarChart({
     required this.values,
     required this.labels,
     required this.isDark,
     required this.compact,
+    this.countValues = false,
+    this.barColor,
+    this.legend = 'نسبة إكمال العادات يوميًا',
   });
 
   @override
@@ -1768,7 +1942,10 @@ class _TrendBarChart extends StatelessWidget {
     final primary = isDark ? const Color(0xFFF2F5F7) : const Color(0xFF102A4C);
     final secondary = isDark ? const Color(0xFF9AA7B8) : const Color(0xFF7B8798);
     final grid = isDark ? const Color(0xFF27313B) : const Color(0xFFE8EEF4);
-    final bar = const Color(0xFF193B57);
+    final bar = barColor ?? (isDark ? const Color(0xFF60A5FA) : const Color(0xFF193B57));
+    final scaleMax = countValues
+        ? safeValues.fold<double>(0.0, (maxValue, value) => value > maxValue ? value : maxValue).clamp(1.0, double.infinity).toDouble()
+        : 1.0;
     final visibleLabelStep = compact
         ? (safeValues.length > 7 ? (safeValues.length / 5).ceil() : 1)
         : (safeValues.length > 12 ? (safeValues.length / 8).ceil() : 1);
@@ -1784,9 +1961,9 @@ class _TrendBarChart extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('100%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
-                    Text('50%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
-                    Text('0%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
+                    Text(countValues ? '${scaleMax.round()}' : '100%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
+                    Text(countValues ? '${(scaleMax / 2).toStringAsFixed(scaleMax % 2 == 0 ? 0 : 1)}' : '50%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
+                    Text(countValues ? '0' : '0%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
                   ],
                 ),
               ),
@@ -1804,7 +1981,8 @@ class _TrendBarChart extends StatelessWidget {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: List.generate(safeValues.length, (index) {
-                            final value = safeValues[index].clamp(0.0, 1.0).toDouble();
+                            final rawValue = safeValues[index].clamp(0.0, countValues ? scaleMax : 1.0).toDouble();
+                            final value = countValues ? rawValue / scaleMax : rawValue;
                             final barHeight = (constraints.maxHeight - 2) * value;
                             return Expanded(
                               child: Padding(
@@ -1849,7 +2027,7 @@ class _TrendBarChart extends StatelessWidget {
                       ? Text(
                           safeLabels[index],
                           maxLines: 1,
-                          overflow: TextOverflow.visible,
+                          overflow: TextOverflow.clip,
                           style: TextStyle(color: secondary, fontSize: compact ? 8 : 9),
                         )
                       : const SizedBox.shrink(),
@@ -1865,7 +2043,7 @@ class _TrendBarChart extends StatelessWidget {
             children: [
               Container(width: 9, height: 9, decoration: BoxDecoration(color: bar, borderRadius: BorderRadius.circular(2))),
               const SizedBox(width: 6),
-              Text('نسبة إكمال العادات يوميًا', style: TextStyle(color: primary, fontSize: 11, fontWeight: FontWeight.w600)),
+              Text(legend, style: TextStyle(color: primary, fontSize: 11, fontWeight: FontWeight.w600)),
             ],
           ),
         ],
