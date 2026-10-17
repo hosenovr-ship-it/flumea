@@ -1513,7 +1513,6 @@ class _PrivacyOption extends StatelessWidget {
                   ],
                 ),
               ),
-              const Spacer(),
               Icon(
                 Icons.chevron_left_rounded,
                 color: secondary,
