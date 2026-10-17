@@ -24,6 +24,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
   bool _loading = true;
   String? _error;
   _ProgressData _data = _ProgressData.empty();
+  List<double> _monthTrendValues = const <double>[];
+  List<String> _monthTrendLabels = const <String>[];
 
   @override
   void initState() {
@@ -163,9 +165,26 @@ class _ProgressScreenState extends State<ProgressScreen> {
         goals: goals,
       );
 
+      // احفظ بيانات الشهر كاملة بشكل مستقل عن محدد اليوم/الأسبوع/الشهر.
+      // تبقى كل نقطة مبنية على سجلات العادات الفعلية، مع إظهار كل أيام الشهر.
+      final todayForMonth = _dateOnly(DateTime.now());
+      final monthStart = DateTime(todayForMonth.year, todayForMonth.month, 1);
+      final monthEnd = DateTime(todayForMonth.year, todayForMonth.month + 1, 0);
+      final monthTrend = _buildTrendData(
+        habits: habits,
+        habitLogs: habitLogs,
+        range: _DateRange(monthStart, monthEnd),
+        fallbackTodayIds: todayLocalStates.entries
+            .where((entry) => entry.value)
+            .map((entry) => entry.key)
+            .toSet(),
+      );
+
       if (!mounted) return;
       setState(() {
         _data = data;
+        _monthTrendValues = monthTrend.values;
+        _monthTrendLabels = monthTrend.labels;
         _loading = false;
       });
 
@@ -1509,6 +1528,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _improvementCard() {
+    final values = _data.trendValues;
+    final labels = _data.trendLabels;
+
     return Container(
       height: 310,
       padding: const EdgeInsets.all(14),
@@ -1532,17 +1554,31 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   ),
                 ),
               ),
-              Icon(Icons.trending_up_rounded, color: _primaryText),
+              TextButton(
+                onPressed: _openFullMonthTrend,
+                style: TextButton.styleFrom(
+                  foregroundColor: blue,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text(
+                  'عرض الكل',
+                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
+                ),
+              ),
+              const SizedBox(width: 3),
+              // نحافظ على شكل السهم الهابط الموجود في التصميم ونغيّر لونه فقط.
+              Icon(Icons.trending_down_rounded, color: blue, size: 23),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 8),
           Expanded(
-            child: CustomPaint(
-              painter: _LineChartPainter(
-                values: _data.trendValues,
-                labels: _data.trendLabels,
-                isDark: _isDark,
-              ),
+            child: _TrendBarChart(
+              values: values,
+              labels: labels,
+              isDark: _isDark,
+              compact: true,
             ),
           ),
         ],
@@ -1550,6 +1586,292 @@ class _ProgressScreenState extends State<ProgressScreen> {
     );
   }
 
+  Future<void> _openFullMonthTrend() async {
+    final now = DateTime.now();
+    const months = [
+      'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+      'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+    ];
+
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => _FullMonthTrendScreen(
+          monthTitle: '${months[now.month - 1]} ${now.year}',
+          values: _monthTrendValues,
+          labels: _monthTrendLabels,
+          isDark: _isDark,
+          navy: navy,
+          blue: blue,
+          green: green,
+        ),
+      ),
+    );
+  }
+
+}
+
+class _FullMonthTrendScreen extends StatelessWidget {
+  final String monthTitle;
+  final List<double> values;
+  final List<String> labels;
+  final bool isDark;
+  final Color navy;
+  final Color blue;
+  final Color green;
+
+  const _FullMonthTrendScreen({
+    required this.monthTitle,
+    required this.values,
+    required this.labels,
+    required this.isDark,
+    required this.navy,
+    required this.blue,
+    required this.green,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final background = isDark ? const Color(0xFF08111A) : const Color(0xFFF7FAFD);
+    final card = isDark ? const Color(0xFF101116) : Colors.white;
+    final primary = isDark ? const Color(0xFFF2F5F7) : navy;
+    final secondary = isDark ? const Color(0xFF9AA7B8) : const Color(0xFF7B8798);
+    final border = isDark ? const Color(0xFF2B3542) : const Color(0xFFE5EBF1);
+    final average = values.isEmpty
+        ? 0.0
+        : values.reduce((a, b) => a + b) / values.length;
+
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: background,
+        appBar: AppBar(
+          backgroundColor: background,
+          foregroundColor: primary,
+          elevation: 0,
+          centerTitle: false,
+          title: const Text('تحسنك عبر الوقت', style: TextStyle(fontWeight: FontWeight.w800)),
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('نظرة كاملة على إنجازاتك خلال الشهر',
+                    style: TextStyle(color: secondary, fontSize: 13)),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: card,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: border),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: green.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Icon(Icons.calendar_month_rounded, color: green, size: 26),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(monthTitle, style: TextStyle(color: primary, fontSize: 17, fontWeight: FontWeight.w800)),
+                            const SizedBox(height: 3),
+                            Text('${values.length} يومًا معروضًا', style: TextStyle(color: secondary, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text('${(average * 100).round()}%', style: TextStyle(color: green, fontSize: 22, fontWeight: FontWeight.w900)),
+                          Text('المعدل اليومي', style: TextStyle(color: secondary, fontSize: 10.5)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  height: 440,
+                  padding: const EdgeInsets.fromLTRB(12, 18, 12, 14),
+                  decoration: BoxDecoration(
+                    color: card,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: border),
+                  ),
+                  child: _TrendBarChart(
+                    values: values,
+                    labels: labels,
+                    isDark: isDark,
+                    compact: false,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: card,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: border),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.info_outline_rounded, color: blue, size: 21),
+                      const SizedBox(width: 9),
+                      Expanded(
+                        child: Text(
+                          'كل عمود يعبّر عن نسبة العادات المكتملة في ذلك اليوم وفق البيانات المسجلة. الأيام التي لم تُسجّل فيها إنجازات تظهر بقيمة 0%.',
+                          style: TextStyle(color: secondary, fontSize: 12, height: 1.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TrendBarChart extends StatelessWidget {
+  final List<double> values;
+  final List<String> labels;
+  final bool isDark;
+  final bool compact;
+
+  const _TrendBarChart({
+    required this.values,
+    required this.labels,
+    required this.isDark,
+    required this.compact,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final safeValues = values.isEmpty ? const <double>[0] : values;
+    final safeLabels = labels.length == safeValues.length
+        ? labels
+        : List<String>.generate(safeValues.length, (i) => '${i + 1}');
+    final primary = isDark ? const Color(0xFFF2F5F7) : const Color(0xFF102A4C);
+    final secondary = isDark ? const Color(0xFF9AA7B8) : const Color(0xFF7B8798);
+    final grid = isDark ? const Color(0xFF27313B) : const Color(0xFFE8EEF4);
+    final bar = const Color(0xFF193B57);
+    final visibleLabelStep = compact
+        ? (safeValues.length > 7 ? (safeValues.length / 5).ceil() : 1)
+        : (safeValues.length > 12 ? (safeValues.length / 8).ceil() : 1);
+
+    return Column(
+      children: [
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: compact ? 18 : 26,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('100%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
+                    Text('50%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
+                    Text('0%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: List.generate(3, (_) => Container(height: 1, color: grid)),
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: List.generate(safeValues.length, (index) {
+                            final value = safeValues[index].clamp(0.0, 1.0).toDouble();
+                            final barHeight = (constraints.maxHeight - 2) * value;
+                            return Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: compact ? 1.5 : 2.0),
+                                child: Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 250),
+                                    width: double.infinity,
+                                    height: barHeight,
+                                    constraints: BoxConstraints(minHeight: value > 0 ? 4 : 0),
+                                    decoration: BoxDecoration(
+                                      color: bar,
+                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                                      boxShadow: value > 0 ? [
+                                        BoxShadow(color: bar.withValues(alpha: 0.12), blurRadius: 5, offset: const Offset(0, 2)),
+                                      ] : null,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: compact ? 8 : 12),
+        SizedBox(
+          height: compact ? 18 : 24,
+          child: Row(
+            children: List.generate(safeLabels.length, (index) {
+              final show = index == 0 || index == safeLabels.length - 1 || index % visibleLabelStep == 0;
+              return Expanded(
+                child: Center(
+                  child: show
+                      ? Text(
+                          safeLabels[index],
+                          maxLines: 1,
+                          overflow: TextOverflow.visible,
+                          style: TextStyle(color: secondary, fontSize: compact ? 8 : 9),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              );
+            }),
+          ),
+        ),
+        if (!compact) ...[
+          const SizedBox(height: 6),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(width: 9, height: 9, decoration: BoxDecoration(color: bar, borderRadius: BorderRadius.circular(2))),
+              const SizedBox(width: 6),
+              Text('نسبة إكمال العادات يوميًا', style: TextStyle(color: primary, fontSize: 11, fontWeight: FontWeight.w600)),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
 }
 
 class _ProgressData {
