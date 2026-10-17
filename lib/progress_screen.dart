@@ -1961,8 +1961,8 @@ class _TrendBarChart extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(countValues ? '${scaleMax.round()}' : '100%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
-                    Text(countValues ? '${(scaleMax / 2).toStringAsFixed(scaleMax % 2 == 0 ? 0 : 1)}' : '50%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
+                    Text(countValues ? scaleMax.round().toString() : '100%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
+                    Text(countValues ? (scaleMax / 2).toStringAsFixed(scaleMax % 2 == 0 ? 0 : 1) : '50%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
                     Text(countValues ? '0' : '0%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
                   ],
                 ),
