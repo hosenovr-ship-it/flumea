@@ -60,39 +60,10 @@ class PrivacyScreen extends StatelessWidget {
                 const SizedBox(height: 22),
                 // اجعل الأيقونة على اليسار والعنوان والوصف على اليمين بشكل صريح.
                 Row(
-                  // ترتيب RTL صريح: العنوان في أقصى اليمين والأيقونة في أقصى اليسار.
-                  textDirection: TextDirection.rtl,
+                  // ترتيب مادي ثابت: أيقونة الخصوصية يسار الشاشة والعنوان في أقصى اليمين.
+                  textDirection: TextDirection.ltr,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'الخصوصية',
-                            textDirection: TextDirection.rtl,
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              color: primary,
-                              fontSize: 25,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'تحكم في بياناتك وأمان حسابك وخصوصيتك',
-                            textDirection: TextDirection.rtl,
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              color: secondary,
-                              fontSize: 13,
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 14),
                     Container(
                       width: 58,
                       height: 58,
@@ -104,6 +75,44 @@ class PrivacyScreen extends StatelessWidget {
                         Icons.lock_rounded,
                         color: blue,
                         size: 31,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              child: Text(
+                                'الخصوصية',
+                                textDirection: TextDirection.rtl,
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  color: primary,
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            SizedBox(
+                              width: double.infinity,
+                              child: Text(
+                                'تحكم في بياناتك وأمان حسابك وخصوصيتك',
+                                textDirection: TextDirection.rtl,
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  color: secondary,
+                                  fontSize: 13,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -1468,9 +1477,50 @@ class _PrivacyOption extends StatelessWidget {
             border: Border.all(color: borderColor),
           ),
           child: Row(
-            // ترتيب RTL صريح: أيقونة البطاقة يمينًا، العنوان والوصف بمحاذاة اليمين، والسهم يسارًا.
-            textDirection: TextDirection.rtl,
+            // ترتيب مادي ثابت: السهم يسارًا، النص في الوسط ومحاذى لليمين، والأيقونة يمينًا.
+            textDirection: TextDirection.ltr,
             children: [
+              Icon(
+                Icons.chevron_left_rounded,
+                color: secondary,
+                size: 30,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        title,
+                        textDirection: TextDirection.rtl,
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: primary,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        subtitle,
+                        textDirection: TextDirection.rtl,
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: secondary,
+                          fontSize: 12.5,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 14),
               Container(
                 width: 58,
                 height: 58,
@@ -1483,40 +1533,6 @@ class _PrivacyOption extends StatelessWidget {
                   color: iconColor,
                   size: 30,
                 ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      title,
-                      textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: primary,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      subtitle,
-                      textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: secondary,
-                        fontSize: 12.5,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_left_rounded,
-                color: secondary,
-                size: 30,
               ),
             ],
           ),
