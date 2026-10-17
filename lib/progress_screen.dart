@@ -79,7 +79,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
       for (final habit in habits) {
         final habitId = habit['id']?.toString();
         if (habitId == null || habitId.isEmpty) continue;
-        final key = '${localPrefix}${habitId}_$todayKey';
+        final key = '$localPrefix${habitId}_$todayKey';
         final localValue = prefs.getBool(key) ?? false;
         todayLocalStates[habitId] = localValue;
         habit['completed'] = localValue;
@@ -1706,15 +1706,6 @@ class _Legend extends StatelessWidget {
       ),
     );
   }
-}
-
-double _sqrt(double value) {
-  if (value <= 0) return 0;
-  var x = value;
-  for (var i = 0; i < 8; i++) {
-    x = (x + value / x) / 2;
-  }
-  return x;
 }
 
 class _LineChartPainter extends CustomPainter {
