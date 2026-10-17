@@ -69,7 +69,48 @@ class _ProgressScreenState extends State<ProgressScreen> {
       // reflect completed habits even when a habit_logs write was unavailable.
       final prefs = await SharedPreferences.getInstance();
       final localPrefix = 'flumea_habit_done_${user.id}_';
-      final todayKey = _dateKey(_dateOnly(DateTime.now()));
+      final todayDate = _dateOnly(DateTime.now());
+      final todayKey = _dateKey(todayDate);
+
+      // حالة اليوم في الخطة محفوظة محليًا لكل عادة. اعتبرها المصدر
+      // النهائي لليوم الحالي حتى لا تُظهر سجلات Supabase القديمة عادةً
+      // مكتملة بعد أن ألغى المستخدم تحديدها في صفحة الخطة.
+      final todayLocalStates = <String, bool>{};
+      for (final habit in habits) {
+        final habitId = habit['id']?.toString();
+        if (habitId == null || habitId.isEmpty) continue;
+        final key = '${localPrefix}${habitId}_$todayKey';
+        final localValue = prefs.getBool(key) ?? false;
+        todayLocalStates[habitId] = localValue;
+        habit['completed'] = localValue;
+      }
+
+      // احتفظ بسجلات الأيام السابقة، لكن أعد بناء سجلات اليوم من الحالة
+      // نفسها التي تعرضها الخطة. هذا يمنع اختلاف العدادات والرسم بين الصفحتين.
+      habitLogs.removeWhere((log) {
+        final habitId = log['habit_id']?.toString();
+        final logDate = _readDate(log['completed_date']) ??
+            _readDate(log['created_at']);
+        return habitId != null &&
+            todayLocalStates.containsKey(habitId) &&
+            logDate != null &&
+            _dateKey(logDate) == todayKey;
+      });
+
+      for (final entry in todayLocalStates.entries) {
+        if (!entry.value) continue;
+        habitLogs.add({
+          'id': 'local_${entry.key}_$todayKey',
+          'habit_id': entry.key,
+          'completed_date': todayKey,
+          'completed': true,
+          'created_at': todayKey,
+          'user_id': user.id,
+        });
+      }
+
+      // أضف السجلات المحلية التاريخية أيضًا؛ وهي مفيدة إذا تعذر حفظ سجل
+      // اليوم في Supabase، مع احترام قيمة false عند إلغاء عادة في أي يوم.
       for (final key in prefs.getKeys()) {
         if (!key.startsWith(localPrefix)) continue;
         final localValue = prefs.getBool(key);
@@ -80,19 +121,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
         if (match == null) continue;
         final habitId = match.group(1)!;
         final dateKey = match.group(2)!;
+        if (dateKey == todayKey) continue;
 
-        // Today's local checkbox state is the most recent state shown in Home/Plan.
-        if (dateKey == todayKey) {
-          for (final habit in habits) {
-            if (habit['id']?.toString() == habitId) {
-              habit['completed'] = localValue;
-            }
-          }
-        }
         final localIdentity = '${habitId}_$dateKey';
-        // حالة اليوم المحفوظة محليًا هي الأحدث، سواء كانت مكتملة أو غير مكتملة.
-        // نزيل أي سجل قديم لنفس العادة/اليوم ثم نضيفه فقط إذا كانت الحالة true؛
-        // هذا يمنع ظهور العادة مكتملة في التقدم بعد إلغاء تحديدها في الخطة.
         habitLogs.removeWhere((log) {
           final logHabitId = log['habit_id']?.toString();
           final logDate = _readDate(log['completed_date']) ??
@@ -1732,17 +1763,20 @@ class _LineChartPainter extends CustomPainter {
       points.add(Offset(x, y));
     }
 
-    // منحنى ناعم بدل الخطوط الحادة، مع إبقاء كل نقطة مرتبطة بسجل يوم حقيقي.
+    // منحنى Bezier ناعم وأنيق، مع إبقاء كل نقطة في موضعها الحقيقي.
     final path = Path()..moveTo(points.first.dx, points.first.dy);
     for (int i = 1; i < points.length; i++) {
       final previous = points[i - 1];
       final current = points[i];
-      final midX = (previous.dx + current.dx) / 2;
-      final midY = (previous.dy + current.dy) / 2;
-      path.quadraticBezierTo(previous.dx, previous.dy, midX, midY);
-      if (i == points.length - 1) {
-        path.quadraticBezierTo(current.dx, current.dy, current.dx, current.dy);
-      }
+      final deltaX = current.dx - previous.dx;
+      path.cubicTo(
+        previous.dx + deltaX * 0.42,
+        previous.dy,
+        current.dx - deltaX * 0.42,
+        current.dy,
+        current.dx,
+        current.dy,
+      );
     }
 
     final fillPath = Path.from(path)
@@ -1764,29 +1798,8 @@ class _LineChartPainter extends CustomPainter {
         ..style = PaintingStyle.fill);
     }
 
-    // سهم صغير عند أحدث نقطة لتوضيح اتجاه المنحنى دون ادعاء تحسن غير موجود.
-    if (points.length > 1) {
-      final end = points.last;
-      final previous = points[points.length - 2];
-      final dx = end.dx - previous.dx;
-      final dy = end.dy - previous.dy;
-      final length = (dx * dx + dy * dy).toDouble().abs();
-      final distance = length == 0 ? 0.0 : _sqrt(length);
-      if (distance > 0.1) {
-        final ux = dx / distance;
-        final uy = dy / distance;
-        const arrowLength = 10.0;
-        const arrowWidth = 5.5;
-        final base = Offset(end.dx - ux * arrowLength, end.dy - uy * arrowLength);
-        final perp = Offset(-uy * arrowWidth, ux * arrowWidth);
-        final arrow = Path()
-          ..moveTo(end.dx, end.dy)
-          ..lineTo(base.dx + perp.dx, base.dy + perp.dy)
-          ..lineTo(base.dx - perp.dx, base.dy - perp.dy)
-          ..close();
-        canvas.drawPath(arrow, Paint()..color = const Color(0xFF1976D2));
-      }
-    }
+    // لا نرسم سهمًا عند نهاية الخط؛ النقاط والاتجاه الفعلي للمنحنى
+    // أوضح بصريًا ولا يوحيان بتحسن غير موجود في البيانات.
 
     final labelStyle = TextStyle(
       color: isDark ? const Color(0xFF9AA7B8) : const Color(0xFF7B8798),
