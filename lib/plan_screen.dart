@@ -747,13 +747,14 @@ class _PlanScreenState extends State<PlanScreen> {
             ),
           ),
           child: SafeArea(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-              18,
-              12,
-              18,
-              24,
-            ),
+            bottom: false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                18,
+                12,
+                18,
+                0,
+              ),
             child: Column(
               crossAxisAlignment:
                   CrossAxisAlignment.stretch,
