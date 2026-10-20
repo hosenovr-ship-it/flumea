@@ -536,28 +536,32 @@ class _ProgressScreenState extends State<ProgressScreen> {
     _DateRange range,
   ) {
     final totalDays = _daysBetween(range.start, range.end);
-    final values = List<double>.filled(totalDays, 0.0);
+    final completedByDay = List<int>.filled(totalDays, 0);
+    final totalByDay = List<int>.filled(totalDays, 0);
     final labels = <String>[];
     final dayIndexes = <String, int>{};
 
     for (int i = 0; i < totalDays; i++) {
       final date = range.start.add(Duration(days: i));
-      final key = _dateKey(date);
-      dayIndexes[key] = i;
+      dayIndexes[_dateKey(date)] = i;
       labels.add(totalDays > 7 ? '${date.day}' : _shortArabicDate(date));
     }
 
-    // The current task schema exposes due_date and created_at, but not a
-    // completion timestamp. Completed tasks are grouped by due_date, falling
-    // back to created_at, so the chart never invents a completion date.
+    // The schema has no completion timestamp, so group each task by due_date,
+    // falling back to created_at. Show a daily completion rate, not raw counts.
     for (final task in tasks) {
-      if (!_asBool(task['completed'])) continue;
       final date = _readDate(task['due_date']) ?? _readDate(task['created_at']);
       if (date == null) continue;
       final index = dayIndexes[_dateKey(date)];
-      if (index != null) values[index] += 1;
+      if (index == null) continue;
+      totalByDay[index] += 1;
+      if (_asBool(task['completed'])) completedByDay[index] += 1;
     }
 
+    final values = List<double>.generate(totalDays, (index) {
+      if (totalByDay[index] == 0) return 0.0;
+      return completedByDay[index] / totalByDay[index];
+    });
     return _TrendData(values: values, labels: labels);
   }
 
@@ -1757,6 +1761,8 @@ class _TrendHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isPhone = screenWidth < 600;
     final background = isDark ? const Color(0xFF08111A) : const Color(0xFFF7FAFD);
     final card = isDark ? const Color(0xFF101923) : Colors.white;
     final primary = isDark ? const Color(0xFFF2F5F7) : navy;
@@ -1773,12 +1779,11 @@ class _TrendHistoryScreen extends StatelessWidget {
       required List<double> values,
       required List<String> labels,
       required Color barColor,
-      required bool countValues,
       required String legend,
     }) {
       return Container(
-        height: isMonth ? 350 : 330,
-        padding: const EdgeInsets.fromLTRB(12, 15, 12, 12),
+        height: isPhone ? (isMonth ? 285 : 265) : (isMonth ? 330 : 310),
+        padding: EdgeInsets.fromLTRB(isPhone ? 10 : 12, isPhone ? 11 : 15, isPhone ? 10 : 12, isPhone ? 9 : 12),
         decoration: BoxDecoration(
           color: card,
           borderRadius: BorderRadius.circular(22),
@@ -1789,20 +1794,19 @@ class _TrendHistoryScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, color: barColor, size: 21),
-                const SizedBox(width: 8),
-                Expanded(child: Text(heading, style: TextStyle(color: primary, fontSize: 15, fontWeight: FontWeight.w800))),
-                Text('${values.length} يوم', style: TextStyle(color: secondary, fontSize: 10.5)),
+                Icon(icon, color: barColor, size: isPhone ? 18 : 21),
+                SizedBox(width: isPhone ? 6 : 8),
+                Expanded(child: Text(heading, style: TextStyle(color: primary, fontSize: isPhone ? 13 : 15, fontWeight: FontWeight.w800))),
+                Text('${values.length} يوم', style: TextStyle(color: secondary, fontSize: isPhone ? 9 : 10.5)),
               ],
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: isPhone ? 8 : 14),
             Expanded(
               child: _TrendBarChart(
                 values: values,
                 labels: labels,
                 isDark: isDark,
                 compact: false,
-                countValues: countValues,
                 barColor: barColor,
                 legend: legend,
               ),
@@ -1824,15 +1828,15 @@ class _TrendHistoryScreen extends StatelessWidget {
         ),
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            padding: EdgeInsets.fromLTRB(isPhone ? 11 : 16, isPhone ? 5 : 8, isPhone ? 11 : 16, isPhone ? 16 : 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(isMonth ? 'نظرة كاملة على إنجازاتك خلال $monthTitle' : 'ملخص يومي مرتب من الأقدم إلى الأحدث ضمن آخر 7 أيام',
-                    style: TextStyle(color: secondary, fontSize: 13, height: 1.4)),
-                const SizedBox(height: 14),
+                    style: TextStyle(color: secondary, fontSize: isPhone ? 11.5 : 13, height: 1.35)),
+                SizedBox(height: isPhone ? 9 : 14),
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(isPhone ? 12 : 16),
                   decoration: BoxDecoration(
                     color: card,
                     borderRadius: BorderRadius.circular(22),
@@ -1851,45 +1855,43 @@ class _TrendHistoryScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(isMonth ? monthTitle : periodLabel, style: TextStyle(color: primary, fontSize: 16, fontWeight: FontWeight.w800)),
+                            Text(isMonth ? monthTitle : periodLabel, style: TextStyle(color: primary, fontSize: isPhone ? 14 : 16, fontWeight: FontWeight.w800)),
                             const SizedBox(height: 3),
-                            Text('$daysShown يومًا معروضًا', style: TextStyle(color: secondary, fontSize: 12)),
+                            Text('$daysShown يومًا معروضًا', style: TextStyle(color: secondary, fontSize: isPhone ? 10 : 12)),
                           ],
                         ),
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('${(average * 100).round()}%', style: TextStyle(color: green, fontSize: 22, fontWeight: FontWeight.w900)),
-                          Text('معدل إكمال العادات', style: TextStyle(color: secondary, fontSize: 10)),
+                          Text('${(average * 100).round()}%', style: TextStyle(color: green, fontSize: isPhone ? 19 : 22, fontWeight: FontWeight.w900)),
+                          Text('معدل إكمال العادات', style: TextStyle(color: secondary, fontSize: isPhone ? 8.5 : 10)),
                         ],
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: isPhone ? 9 : 14),
                 chartCard(
                   heading: 'إكمال العادات',
                   icon: Icons.check_circle_outline_rounded,
                   values: habitValues,
                   labels: habitLabels,
                   barColor: isDark ? const Color(0xFF60A5FA) : const Color(0xFF193B57),
-                  countValues: false,
                   legend: 'نسبة إكمال العادات يوميًا',
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: isPhone ? 9 : 14),
                 chartCard(
                   heading: 'إنجاز المهام',
                   icon: Icons.task_alt_rounded,
                   values: taskValues,
                   labels: taskLabels,
                   barColor: isDark ? const Color(0xFF34D399) : const Color(0xFF18A875),
-                  countValues: true,
-                  legend: 'عدد المهام المكتملة حسب تاريخ الاستحقاق',
+                  legend: 'نسبة إكمال المهام يوميًا',
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: isPhone ? 8 : 12),
                 Container(
-                  padding: const EdgeInsets.all(13),
+                  padding: EdgeInsets.all(isPhone ? 10 : 13),
                   decoration: BoxDecoration(color: card, borderRadius: BorderRadius.circular(18), border: Border.all(color: border)),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1898,8 +1900,8 @@ class _TrendHistoryScreen extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'أعمدة العادات تعرض نسبة الإكمال لكل يوم. أعمدة المهام تعرض عدد المهام المكتملة بحسب تاريخ الاستحقاق، أو تاريخ الإنشاء إذا لم يوجد موعد استحقاق.',
-                          style: TextStyle(color: secondary, fontSize: 11.5, height: 1.5),
+                          'يعرض المخططان نسبة إكمال العادات والمهام يوميًا. تُحتسب المهام حسب تاريخ الاستحقاق، أو تاريخ الإنشاء إذا لم يوجد موعد استحقاق.',
+                          style: TextStyle(color: secondary, fontSize: isPhone ? 10 : 11.5, height: 1.45),
                         ),
                       ),
                     ],
@@ -1919,7 +1921,6 @@ class _TrendBarChart extends StatelessWidget {
   final List<String> labels;
   final bool isDark;
   final bool compact;
-  final bool countValues;
   final Color? barColor;
   final String legend;
 
@@ -1928,7 +1929,6 @@ class _TrendBarChart extends StatelessWidget {
     required this.labels,
     required this.isDark,
     required this.compact,
-    this.countValues = false,
     this.barColor,
     this.legend = 'نسبة إكمال العادات يوميًا',
   });
@@ -1940,15 +1940,12 @@ class _TrendBarChart extends StatelessWidget {
         ? labels
         : List<String>.generate(safeValues.length, (i) => '${i + 1}');
     final primary = isDark ? const Color(0xFFF2F5F7) : const Color(0xFF102A4C);
-    final secondary = isDark ? const Color(0xFF9AA7B8) : const Color(0xFF7B8798);
-    final grid = isDark ? const Color(0xFF27313B) : const Color(0xFFE8EEF4);
+    final secondary = isDark ? const Color(0xFFB8C5D4) : const Color(0xFF7B8798);
+    final grid = isDark ? const Color(0xFF344252) : const Color(0xFFE8EEF4);
     final bar = barColor ?? (isDark ? const Color(0xFF60A5FA) : const Color(0xFF193B57));
-    final scaleMax = countValues
-        ? safeValues.fold<double>(0.0, (maxValue, value) => value > maxValue ? value : maxValue).clamp(1.0, double.infinity).toDouble()
-        : 1.0;
-    final visibleLabelStep = compact
-        ? (safeValues.length > 7 ? (safeValues.length / 5).ceil() : 1)
-        : (safeValues.length > 12 ? (safeValues.length / 8).ceil() : 1);
+    final isLongPeriod = safeValues.length > 14;
+    final axisFontSize = compact ? 7.5 : (isLongPeriod ? 8.0 : 9.0);
+    final labelFontSize = compact ? 7.5 : (isLongPeriod ? 7.0 : 9.0);
 
     return Column(
       children: [
@@ -1957,57 +1954,98 @@ class _TrendBarChart extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(
-                width: compact ? 18 : 26,
+                width: compact ? 22 : 29,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(countValues ? scaleMax.round().toString() : '100%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
-                    Text(countValues ? (scaleMax / 2).toStringAsFixed(scaleMax % 2 == 0 ? 0 : 1) : '50%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
-                    Text(countValues ? '0' : '0%', style: TextStyle(color: secondary, fontSize: compact ? 8 : 9)),
+                    Text('100%', style: TextStyle(color: secondary, fontSize: axisFontSize)),
+                    Text('75%', style: TextStyle(color: secondary, fontSize: axisFontSize)),
+                    Text('50%', style: TextStyle(color: secondary, fontSize: axisFontSize)),
+                    Text('25%', style: TextStyle(color: secondary, fontSize: axisFontSize)),
+                    Text('0%', style: TextStyle(color: secondary, fontSize: axisFontSize)),
                   ],
                 ),
               ),
               const SizedBox(width: 5),
               Expanded(
                 child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: List.generate(3, (_) => Container(height: 1, color: grid)),
-                        ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: List.generate(safeValues.length, (index) {
-                            final rawValue = safeValues[index].clamp(0.0, countValues ? scaleMax : 1.0).toDouble();
-                            final value = countValues ? rawValue / scaleMax : rawValue;
-                            final barHeight = (constraints.maxHeight - 2) * value;
-                            return Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: compact ? 1.5 : 2.0),
-                                child: Align(
-                                  alignment: Alignment.bottomCenter,
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 250),
-                                    width: double.infinity,
-                                    height: barHeight,
-                                    constraints: BoxConstraints(minHeight: value > 0 ? 4 : 0),
-                                    decoration: BoxDecoration(
-                                      color: bar,
-                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-                                      boxShadow: value > 0 ? [
-                                        BoxShadow(color: bar.withValues(alpha: 0.12), blurRadius: 5, offset: const Offset(0, 2)),
-                                      ] : null,
-                                    ),
-                                  ),
-                                ),
+                  builder: (context, viewport) {
+                    final pointWidth = compact ? 13.0 : (isLongPeriod ? 17.0 : 24.0);
+                    final chartWidth = isLongPeriod
+                        ? (safeValues.length * pointWidth).clamp(viewport.maxWidth, 100000.0).toDouble()
+                        : viewport.maxWidth;
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SizedBox(
+                        width: chartWidth,
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: LayoutBuilder(
+                                builder: (context, plotConstraints) {
+                                  return Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      Column(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: List.generate(5, (_) => Container(height: 1, color: grid)),
+                                      ),
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        children: List.generate(safeValues.length, (index) {
+                                          final value = safeValues[index].clamp(0.0, 1.0).toDouble();
+                                          final barHeight = (plotConstraints.maxHeight - 2).clamp(0.0, double.infinity) * value;
+                                          return Expanded(
+                                            child: Padding(
+                                              padding: EdgeInsets.symmetric(horizontal: isLongPeriod ? 1.0 : 2.0),
+                                              child: Align(
+                                                alignment: Alignment.bottomCenter,
+                                                child: AnimatedContainer(
+                                                  duration: const Duration(milliseconds: 250),
+                                                  width: double.infinity,
+                                                  height: barHeight,
+                                                  constraints: BoxConstraints(minHeight: value > 0 ? 3 : 0),
+                                                  decoration: BoxDecoration(
+                                                    color: bar,
+                                                    borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                                                    boxShadow: value > 0
+                                                        ? [BoxShadow(color: bar.withValues(alpha: isDark ? 0.24 : 0.12), blurRadius: 5, offset: const Offset(0, 2))]
+                                                        : null,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }),
+                                      ),
+                                    ],
+                                  );
+                                },
                               ),
-                            );
-                          }),
+                            ),
+                            SizedBox(height: compact ? 6 : 8),
+                            SizedBox(
+                              height: compact ? 15 : 19,
+                              child: Row(
+                                children: List.generate(safeLabels.length, (index) {
+                                  return Expanded(
+                                    child: Center(
+                                      child: Text(
+                                        safeLabels[index],
+                                        maxLines: 1,
+                                        softWrap: false,
+                                        overflow: TextOverflow.visible,
+                                        style: TextStyle(color: secondary, fontSize: labelFontSize),
+                                      ),
+                                    ),
+                                  );
+                                }),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     );
                   },
                 ),
@@ -2015,35 +2053,14 @@ class _TrendBarChart extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: compact ? 8 : 12),
-        SizedBox(
-          height: compact ? 18 : 24,
-          child: Row(
-            children: List.generate(safeLabels.length, (index) {
-              final show = index == 0 || index == safeLabels.length - 1 || index % visibleLabelStep == 0;
-              return Expanded(
-                child: Center(
-                  child: show
-                      ? Text(
-                          safeLabels[index],
-                          maxLines: 1,
-                          overflow: TextOverflow.clip,
-                          style: TextStyle(color: secondary, fontSize: compact ? 8 : 9),
-                        )
-                      : const SizedBox.shrink(),
-                ),
-              );
-            }),
-          ),
-        ),
         if (!compact) ...[
-          const SizedBox(height: 6),
+          const SizedBox(height: 5),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(width: 9, height: 9, decoration: BoxDecoration(color: bar, borderRadius: BorderRadius.circular(2))),
               const SizedBox(width: 6),
-              Text(legend, style: TextStyle(color: primary, fontSize: 11, fontWeight: FontWeight.w600)),
+              Flexible(child: Text(legend, textAlign: TextAlign.center, style: TextStyle(color: primary, fontSize: 10.5, fontWeight: FontWeight.w600))),
             ],
           ),
         ],
