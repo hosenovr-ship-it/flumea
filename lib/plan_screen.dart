@@ -1960,6 +1960,75 @@ class _PlanScreenState extends State<PlanScreen> {
   // نافذة إضافة مهمة جديدة
   // ============================================================
 
+  // يحاول حفظ المهمة مرة إضافية عند فشل اتصال مؤقت فقط.
+  // قبل إعادة الإرسال، يفحص وجود المهمة لتقليل احتمال تكرارها إذا
+  // كان الخادم قد حفظها لكن الرد لم يصل إلى التطبيق.
+  bool _isTemporaryConnectionError(Object error) {
+    final text = error.toString().toLowerCase();
+    return text.contains('connection reset') ||
+        text.contains('socketexception') ||
+        text.contains('failed host lookup') ||
+        text.contains('connection closed') ||
+        text.contains('connection aborted') ||
+        text.contains('clientexception') ||
+        text.contains('network is unreachable') ||
+        text.contains('timed out');
+  }
+
+  Future<Map<String, dynamic>> _insertTaskWithRetry({
+    required String userId,
+    required Map<String, dynamic> values,
+    required DateTime dueDate,
+  }) async {
+    final payload = <String, dynamic>{
+      'user_id': userId,
+      ...values,
+      'color': '#1478D4',
+      'due_date': _dateKey(dueDate),
+    };
+
+    Future<Map<String, dynamic>> insert() async {
+      final response = await _supabase
+          .from('tasks')
+          .insert(payload)
+          .select()
+          .single();
+      return Map<String, dynamic>.from(response);
+    }
+
+    try {
+      return await insert();
+    } catch (error) {
+      if (!_isTemporaryConnectionError(error)) rethrow;
+
+      // امنح الاتصال فرصة قصيرة للتعافي قبل التحقق وإعادة المحاولة.
+      await Future<void>.delayed(const Duration(milliseconds: 700));
+
+      try {
+        final existingRows = await _supabase
+            .from('tasks')
+            .select()
+            .eq('user_id', userId)
+            .eq('title', values['title'] as String)
+            .eq('time', values['time'] as String)
+            .eq('tag', values['tag'] as String)
+            .eq('due_date', _dateKey(dueDate))
+            .eq('completed', false)
+            .limit(1);
+
+        if (existingRows.isNotEmpty) {
+          return Map<String, dynamic>.from(existingRows.first);
+        }
+      } catch (_) {
+        // إذا تعذر الفحص بسبب انقطاع الاتصال، ستحدد إعادة المحاولة
+        // إن كان الخادم متاحاً؛ لا نغيّر بيانات المستخدم محلياً هنا.
+      }
+
+      // محاولة واحدة فقط؛ لا ندخل في تكرار لا نهائي.
+      return await insert();
+    }
+  }
+
   void _showAddTaskDialog({
     Map<String, dynamic>? initialTask,
     int? taskIndex,
@@ -2407,19 +2476,11 @@ class _PlanScreenState extends State<PlanScreen> {
                                                 'تم تحديث المهمة وإعادتها بنجاح ✅',
                                               );
                                             } else {
-                                              final response = await _supabase
-                                                  .from('tasks')
-                                                  .insert({
-                                                'user_id': userId,
-                                                ...values,
-                                                'color': '#1478D4',
-                                                'due_date': _dateKey(_selectedDate),
-                                              })
-                                                  .select()
-                                                  .single();
-
-                                              final newTask =
-                                                  Map<String, dynamic>.from(response);
+                                              final newTask = await _insertTaskWithRetry(
+                                                userId: userId,
+                                                values: values,
+                                                dueDate: _selectedDate,
+                                              );
 
                                               if (!mounted) return;
 
@@ -2453,9 +2514,8 @@ class _PlanScreenState extends State<PlanScreen> {
                                               _isSavingTask = false;
                                             });
 
-                                            final errorText = error.toString().toLowerCase();
-                                            final message = errorText.contains('connection reset') || errorText.contains('socketexception') || errorText.contains('failed host lookup')
-                                                ? 'تعذر الاتصال بالخادم. تحقق من الإنترنت ثم حاول مجدداً.'
+                                            final message = _isTemporaryConnectionError(error)
+                                                ? 'تعذر الاتصال بالخادم مؤقتاً. لم تُحفظ المهمة بعد؛ تحقق من الاتصال وحاول مجدداً.'
                                                 : 'تعذر حفظ المهمة. تحقق من بيانات المهمة وحاول مرة أخرى.';
                                             FlumeaNotificationService.showTopMessage(context, message);
                                           }
